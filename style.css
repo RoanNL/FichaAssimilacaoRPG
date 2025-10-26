@@ -82,7 +82,7 @@ h2 {
 .navbar li a:hover { 
     color: #000; 
 }
-.navbar li a:active {
+.navbar li a.active {
     color: var(--color-det-red);
     border-bottom: 3px solid var(--color-det-red);
 }
