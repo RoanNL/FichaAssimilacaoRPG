@@ -2,10 +2,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 1. Mapeamento de Ícones
     const iconFiles = {
-        sucesso: '../assets/Sucesso.png',
-        pressao: '../assets/pressao.png',
-        adaptacao: '../assets/Adaptacao.png',
-        nada: '../assets/nada.png'
+        sucesso: 'assets/sucesso.png',
+        pressao: 'assets/pressao.png',
+        adaptacao: 'assets/Adaptacao.png',
+        nada: 'assets/nada.png'
     };
 
     // 2. Tabela de Resultados

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ficha - Assimilação RPG</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="shortcut icon" href="assets/icon.jpg" type="image/x-icon">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <ul>
+            <li><a href="rolador.html">Rolador de Dados</a></li>
+            <li><a href="ficha.html" class="active">Ficha de Personagem</a></li>
+            <li><a href="detalhes.html">Detalhes</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <section class="character-manager paper">
+            <h2>Gerenciar Personagens</h2>
+            <div class="manager-controls">
+                <label for="char-select">Carregar Personagem:</label>
+                <select id="char-select">
+                    <option value="">-- Nenhum --</option>
+                </select>
+                <button type="button" id="btn-load-char">Carregar</button>
+                <button type="button" id="btn-save-char">Salvar</button>
+                <button type="button" id="btn-delete-char">Excluir Selecionado</button>
+                
+                <button type="button" id="btn-export-char">Exportar Selecionado</button>
+                <label for="btn-import-char" class="btn-import">Importar Ficha</label>
+                <input type="file" id="btn-import-char" style="display: none;" accept=".json">
+            </div>
+        </section>
+    </div>
+
+    <main class="container">
+        
+        <form class="ficha-container">
+
+            <section class="ficha-aptidoes">
+                <h2>APTIDÕES</h2>
+                
+                <div class="grupo-aptidoes">
+                    <h3>INSTINTOS</h3>
+                    <div class="aptidoes-grid">
+                        <div class="aptidao-box">
+                            <label>Influência</label>
+                            <div class="dots-track"><input type="checkbox" id="inf-1" checked><input type="checkbox" id="inf-2"><input type="checkbox" id="inf-3"><input type="checkbox" id="inf-4"><input type="checkbox" id="inf-5"></div>
+                        </div>
+                        <div class="aptidao-box">
+                            <label>Percepção</label>
+                            <div class="dots-track"><input type="checkbox" id="per-1" checked><input type="checkbox" id="per-2"><input type="checkbox" id="per-3"><input type="checkbox" id="per-4"><input type="checkbox" id="per-5"></div>
+                        </div>
+                        <div class="aptidao-box">
+                            <label>Potência</label>
+                            <div class="dots-track"><input type="checkbox" id="pot-1" checked><input type="checkbox" id="pot-2"><input type="checkbox" id="pot-3"><input type="checkbox" id="pot-4"><input type="checkbox" id="pot-5"></div>
+                        </div>
+                        <div class="aptidao-box">
+                            <label>Reação</label>
+                            <div class="dots-track"><input type="checkbox" id="rea-1" checked><input type="checkbox" id="rea-2"><input type="checkbox" id="rea-3"><input type="checkbox" id="rea-4"><input type="checkbox" id="rea-5"></div>
+                        </div>
+                        <div class="aptidao-box">
+                            <label>Resolução</label>
+                            <div class="dots-track"><input type="checkbox" id="res-1" checked><input type="checkbox" id="res-2"><input type="checkbox" id="res-3"><input type="checkbox" id="res-4"><input type="checkbox" id="res-5"></div>
+                        </div>
+                        <div class="aptidao-box">
+                            <label>Sagacidade</label>
+                            <div class="dots-track"><input type="checkbox" id="sag-1" checked><input type="checkbox" id="sag-2"><input type="checkbox" id="sag-3"><input type="checkbox" id="sag-4"><input type="checkbox" id="sag-5"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grupo-aptidoes">
+                    <h3>CONHECIMENTOS</h3>
+                    <div class="aptidoes-grid">
+                        <div class="aptidao-box"><label>Biologia</label><div class="dots-track"><input type="checkbox" id="bio-1"><input type="checkbox" id="bio-2"><input type="checkbox" id="bio-3"><input type="checkbox" id="bio-4"><input type="checkbox" id="bio-5"></div></div>
+                        <div class="aptidao-box"><label>Erudição</label><div class="dots-track"><input type="checkbox" id="eru-1"><input type="checkbox" id="eru-2"><input type="checkbox" id="eru-3"><input type="checkbox" id="eru-4"><input type="checkbox" id="eru-5"></div></div>
+                        <div class="aptidao-box"><label>Engenharia</label><div class="dots-track"><input type="checkbox" id="eng-1"><input type="checkbox" id="eng-2"><input type="checkbox" id="eng-3"><input type="checkbox" id="eng-4"><input type="checkbox" id="eng-5"></div></div>
+                        <div class="aptidao-box"><label>Geografia</label><div class="dots-track"><input type="checkbox" id="geo-1"><input type="checkbox" id="geo-2"><input type="checkbox" id="geo-3"><input type="checkbox" id="geo-4"><input type="checkbox" id="geo-5"></div></div>
+                        <div class="aptidao-box"><label>Medicina</label><div class="dots-track"><input type="checkbox" id="med-1"><input type="checkbox" id="med-2"><input type="checkbox" id="med-3"><input type="checkbox" id="med-4"><input type="checkbox" id="med-5"></div></div>
+                        <div class="aptidao-box"><label>Segurança</label><div class="dots-track"><input type="checkbox" id="seg-1"><input type="checkbox" id="seg-2"><input type="checkbox" id="seg-3"><input type="checkbox" id="seg-4"><input type="checkbox" id="seg-5"></div></div>
+                    </div>
+                </div>
+
+                <div class="grupo-aptidoes">
+                    <h3>PRÁTICAS</h3>
+                    <div class="aptidoes-grid">
+                        <div class="aptidao-box"><label>Armas</label><div class="dots-track"><input type="checkbox" id="arm-1"><input type="checkbox" id="arm-2"><input type="checkbox" id="arm-3"><input type="checkbox" id="arm-4"><input type="checkbox" id="arm-5"></div></div>
+                        <div class="aptidao-box"><label>Atletismo</label><div class="dots-track"><input type="checkbox" id="atl-1"><input type="checkbox" id="atl-2"><input type="checkbox" id="atl-3"><input type="checkbox" id="atl-4"><input type="checkbox" id="atl-5"></div></div>
+                        <div class="aptidao-box"><label>Expressão</label><div class="dots-track"><input type="checkbox" id="exp-1"><input type="checkbox" id="exp-2"><input type="checkbox" id="exp-3"><input type="checkbox" id="exp-4"><input type="checkbox" id="exp-5"></div></div>
+                        <div class="aptidao-box"><label>Furtividade</label><div class="dots-track"><input type="checkbox" id="fur-1"><input type="checkbox" id="fur-2"><input type="checkbox" id="fur-3"><input type="checkbox" id="fur-4"><input type="checkbox" id="fur-5"></div></div>
+                        <div class="aptidao-box"><label>Manufaturas</label><div class="dots-track"><input type="checkbox" id="man-1"><input type="checkbox" id="man-2"><input type="checkbox" id="man-3"><input type="checkbox" id="man-4"><input type="checkbox" id="man-5"></div></div>
+                        <div class="aptidao-box"><label>Sobrevivência</label><div class="dots-track"><input type="checkbox" id="sob-1"><input type="checkbox" id="sob-2"><input type="checkbox" id="sob-3"><input type="checkbox" id="sob-4"><input type="checkbox" id="sob-5"></div></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="ficha-saude">
+                <div class="saude-header">
+                    <input type="number" class="saude-num-input" value="24" id="saude-max">
+                    <h2>SAÚDE</h2>
+                    <span class="saude-formula">1+Potência+Resolução</span>
+                </div>
+                
+                <div class="saude-legenda">Ativa Recuperação após cada repouso completo</div> 
+                <div class="saude-grid">
+                    <div class="saude-box-container">
+                        <div class="saude-box" style="--cor-saude: #6c7a6b;"><span>6</span> Saudável</div>
+                        <div class="saude-drops-track"><input type="checkbox" id="saude-6-1"><input type="checkbox" id="saude-6-2"><input type="checkbox" id="saude-6-3"><input type="checkbox" id="saude-6-4"><input type="checkbox" id="saude-6-5"><input type="checkbox" id="saude-6-6"><input type="checkbox" id="saude-6-7"><input type="checkbox" id="saude-6-8"><input type="checkbox" id="saude-6-9"><input type="checkbox" id="saude-6-10"><input type="checkbox" id="saude-6-11"></div>
+                    </div>
+                    <div class="saude-box-container">
+                        <div class="saude-box" style="--cor-saude: #6c7a6b;"><span>5</span> Escoriado</div>
+                        <div class="saude-drops-track"><input type="checkbox" id="saude-5-1"><input type="checkbox" id="saude-5-2"><input type="checkbox" id="saude-5-3"><input type="checkbox" id="saude-5-4"><input type="checkbox" id="saude-5-5"><input type="checkbox" id="saude-5-6"><input type="checkbox" id="saude-5-7"><input type="checkbox" id="saude-5-8"><input type="checkbox" id="saude-5-9"><input type="checkbox" id="saude-5-10"><input type="checkbox" id="saude-5-10"></div>
+                    </div>
+                </div>
+
+                <div class="saude-legenda">Ativa a Recuperação após uma semana</div> 
+                <div class="saude-grid">
+                    <div class="saude-box-container">
+                        <div class="saude-box" style="--cor-saude: #a97b53;"><span>4</span> Lacerado</div>
+                        <div class="saude-drops-track"><input type="checkbox" id="saude-4-1"><input type="checkbox" id="saude-4-2"><input type="checkbox" id="saude-4-3"><input type="checkbox" id="saude-4-4"><input type="checkbox" id="saude-4-5"><input type="checkbox" id="saude-4-6"><input type="checkbox" id="saude-4-7"><input type="checkbox" id="saude-4-8"><input type="checkbox" id="saude-4-9"><input type="checkbox" id="saude-4-10"><input type="checkbox" id="saude-4-11"></div>
+                    </div>
+                    <div class="saude-box-container">
+                        <div class="saude-box" style="--cor-saude: #a97b53;"><span>3</span> Ferido</div>
+                        <div class="saude-drops-track"><input type="checkbox" id="saude-3-1"><input type="checkbox" id="saude-3-2"><input type="checkbox" id="saude-3-3"><input type="checkbox" id="saude-3-4"><input type="checkbox" id="saude-3-5"><input type="checkbox" id="saude-3-6"><input type="checkbox" id="saude-3-7"><input type="checkbox" id="saude-3-8"><input type="checkbox" id="saude-3-9"><input type="checkbox" id="saude-3-10"><input type="checkbox" id="saude-3-11"></div>
+                    </div>
+                </div>
+                <div class="saude-legenda-detalhes-1">
+                    <div>Menos <img src="assets/Sucesso.png" alt="" width="20px" height="20px" justify-itens="center"> em todos os testes</div> 
+                </div>
+                
+                <div class="saude-legenda">Dano dessa gravidade não regenera naturalmente. Será necessário tratamento médico</div> 
+
+                <div class="saude-grid">
+                    <div class="saude-box-container">
+                        <div class="saude-box" style="--cor-saude: #8c3a3a;"><span>2</span> Arrebentado</div>
+                        <div class="saude-drops-track"><input type="checkbox" id="saude-2-1"><input type="checkbox" id="saude-2-2"><input type="checkbox" id="saude-2-3"><input type="checkbox" id="saude-2-4"><input type="checkbox" id="saude-2-5"><input type="checkbox" id="saude-2-6"><input type="checkbox" id="saude-2-7"><input type="checkbox" id="saude-2-8"><input type="checkbox" id="saude-2-9"><input type="checkbox" id="saude-2-10"><input type="checkbox" id="saude-2-11"></div>
+                    </div>
+                    <div class="saude-box-container">
+                        <div class="saude-box" style="--cor-saude: #8c3a3a;"><span>1</span> Incapacitado</div>
+                        <div class="saude-drops-track"><input type="checkbox" id="saude-1-1"><input type="checkbox" id="saude-1-2"><input type="checkbox" id="saude-1-3"><input type="checkbox" id="saude-1-4"><input type="checkbox" id="saude-1-5"><input type="checkbox" id="saude-1-6"><input type="checkbox" id="saude-1-7"><input type="checkbox" id="saude-1-8"><input type="checkbox" id="saude-1-9"><input type="checkbox" id="saude-1-10"><input type="checkbox" id="saude-1-11"></div>
+                    </div>
+                </div>
+                <div class="saude-legenda-detalhes">
+                    <div>Incapaz de agir, mas mantém a consciência.<br>Menos <img src="assets/Sucesso.png" alt="" width="20px" height="20px" justify-itens="center"><img src="assets/Sucesso.png" alt="" width="20px" height="20px" justify-itens="center">  em todos os testes.</div> 
+                    <div>Inconsciente.<br>Qualquer Ação com teste exige <img src="assets/Adaptacao.png" alt="" width="20px" height="20px" justify-itens="center"> <img src="assets/Adaptacao.png" alt="" width="20px" height="20px" justify-itens="center">  para ativar.</div> 
+                </div>
+
+            </section>
+
+            <section class="ficha-determinacao">
+                <h3 class="det-label-left">Determinação <input type="number" class="det-num-input" value="9" id="det-num"></h3>
+                <div class="determinacao-track">
+                    <input type="checkbox" class="determ-check" id="det-1"><input type="checkbox" class="assim-check" id="assim-1">
+                    <input type="checkbox" class="determ-check" id="det-2"><input type="checkbox" class="assim-check" id="assim-2">
+                    <input type="checkbox" class="determ-check" id="det-3"><input type="checkbox" class="assim-check" id="assim-3">
+                    <input type="checkbox" class="determ-check" id="det-4"><input type="checkbox" class="assim-check" id="assim-4">
+                    <input type="checkbox" class="determ-check" id="det-5"><input type="checkbox" class="assim-check" id="assim-5">
+                    <input type="checkbox" class="determ-check" id="det-6"><input type="checkbox" class="assim-check" id="assim-6">
+                    <input type="checkbox" class="determ-check" id="det-7"><input type="checkbox" class="assim-check" id="assim-7">
+                    <input type="checkbox" class="determ-check" id="det-8"><input type="checkbox" class="assim-check" id="assim-8">
+                    <input type="checkbox" class="determ-check" id="det-9"><input type="checkbox" class="assim-check" id="assim-9">
+                    <input type="checkbox" class="determ-check" id="det-10"><input type="checkbox" class="assim-check" id="assim-10">
+                </div>
+                <h3 class="det-label-right"><input type="number" class="det-num-input" value="1" id="assim-num"> Assimilação</h3>
+            </section>
+
+        </form>
+    </main>
+
+    <script src="ficha-script.js"></script>
+</body>
+</html>

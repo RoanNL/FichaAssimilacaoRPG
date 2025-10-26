@@ -1,48 +1,104 @@
-/* Importa a fonte */
+/* ========================================
+   CSS UNIFICADO - ASSIMILAÇÃO RPG
+   ========================================
+*/
+
+/* --- Cores e Fontes Globais --- */
 :root {
     --font-theme: 'Special Elite', monospace;
-    --color-bg: #e45353; /* Cor de pergaminho/fundo */
-    --color-paper: #fefcf5;
-    --color-red: #044c75; /* Cor do "papel" */
-    --color-text: #000000; /* Cor do texto (marrom escuro) */
-    --color-header: #1a1a1a;
-    --color-border: #dcd0b9;
-    --color-button: #795548; /* Marrom para botões */
-    --color-button-hover: #5d4037;
-    --color-clear-button: #a04040;
-    --color-clear-button-hover: #c05050;
+    --color-bg-light: #f7f4f0;
+    --color-text-dark: #333;
+    --color-text-medium: #555;
+    --color-border-light: #ddd;
+    --color-border-medium: #ccc;
+    --color-paper: #ffffff;
+    
+    /* Cores do RPG */
+    --color-det-red: #8c3a3a; /* Vermelho Determinação */
+    --color-assim-blue: #3a7c8c; /* Azul Assimilação */
 }
 
-/* Estilo geral da página */
+/* --- Estilos Gerais --- */
 body {
     font-family: var(--font-theme);
-    background: linear-gradient(180deg, var(--color-bg) 0%, var(--color-red) 100%);
-    color: var(--color-text);
-    padding: 176px;
+    background-color: var(--color-bg-light); 
+    color: var(--color-text-dark);
+    padding: 0;
     margin: 0;
-    line-height: 1.6;
 }
 
 .container {
-    max-width: 50vw;
-    margin: 0 auto;
-    
+    max-width: 1100px;
+    margin: 20px auto;
+    padding: 0 20px;
 }
 
-h1, h2 {
-    text-align: center;
-    color: var(--color-header);
+h1, h2, h3 {
     text-transform: uppercase;
-    border-bottom: 2px solid var(--color-border);
+    font-weight: 900;
+    color: var(--color-text-dark);
+}
+
+h1 {
+    font-size: 2.2em;
+    text-align: center;
+    border-bottom: 2px solid var(--color-border-light);
     padding-bottom: 10px;
     margin-bottom: 20px;
 }
 
-/* Estilo de "folha de papel" para os containers */
+h2 {
+    font-size: 2em;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+/* --- Menu de Navegação --- */
+.navbar {
+    width: 100%;
+    background-color: var(--color-paper);
+    border-bottom: 1px solid var(--color-border-light);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.navbar ul {
+    display: flex;
+    list-style-type: none;
+    margin: 0 auto;
+    padding: 0;
+    justify-content: center;
+    max-width: 1100px;
+}
+.navbar li a {
+    display: block;
+    color: var(--color-text-medium);
+    text-decoration: none;
+    padding: 16px 22px;
+    font-size: 1em;
+    font-weight: 700;
+    text-transform: uppercase;
+    transition: all 0.3s;
+    border-bottom: 3px solid transparent;
+}
+.navbar li a:hover { 
+    color: #000; 
+}
+.navbar li a:active {
+    color: var(--color-det-red);
+    border-bottom: 3px solid var(--color-det-red);
+}
+
+
+
+/* ========================================
+   ESTILOS DO ROLADOR (index.html)
+   ========================================
+*/
+
+/* Estilo "folha de papel" adaptado para o novo design */
 .paper {
     background-color: var(--color-paper);
-    border: 1px solid var(--color-border);
-    border-radius: 3px;
+    border: 1px solid var(--color-border-light);
+    border-radius: 5px;
     padding: 20px;
     margin-bottom: 25px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
@@ -50,41 +106,37 @@ h1, h2 {
 
 /* Container dos controles */
 .controles-container {
-    background-color: transparent; /* Sem fundo de papel */
     padding: 15px;
     margin-bottom: 20px;
-    border: 2px dashed var(--color-text);
+    border: 2px dashed var(--color-border-medium);
     border-radius: 5px;
 }
-
 .controles {
     display: flex;
-    flex-wrap: wrap; /* Permite quebrar linha em telas menores */
+    flex-wrap: wrap;
     justify-content: center;
     align-items: center;
     gap: 15px;
 }
-
 .controles label {
     font-size: 1.1em;
-    font-weight: bold;
+    font-weight: 700;
+    color: var(--color-text-medium);
 }
-
-/* Campo de input */
 #input-dados {
     font-family: var(--font-theme);
     font-size: 1.2em;
     padding: 10px;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-border-medium);
     background-color: #fff;
     border-radius: 3px;
     text-align: center;
-    color: var(--color-text);
-    flex-grow: 1; /* Faz ocupar o espaço disponível */
+    color: var(--color-text-dark);
+    flex-grow: 1;
     min-width: 200px;
 }
 
-/* Estilo geral dos botões */
+/* Botões do Rolador */
 button {
     font-family: var(--font-theme);
     padding: 12px 20px;
@@ -95,136 +147,777 @@ button {
     transition: background-color 0.3s;
     color: white;
     text-transform: uppercase;
+    font-weight: 700;
 }
-
 #btn-rolar {
-    background-color: var(--color-button);
+    background-color: var(--color-assim-blue); /* Azul */
 }
 #btn-rolar:hover {
-    background-color: var(--color-button-hover);
+    background-color: #4a9cb0; /* Azul mais claro */
 }
-
 #btn-limpar {
-    background-color: var(--color-clear-button);
+    background-color: var(--color-det-red); /* Vermelho */
 }
 #btn-limpar:hover {
-    background-color: var(--color-clear-button-hover);
+    background-color: #a85252; /* Vermelho mais claro */
 }
 
-/* Container de um grupo de rolagem (para resultados e histórico) */
+/* Grupos de Rolagem e Histórico */
 .roll-group {
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border-light);
     padding-bottom: 15px;
     margin-bottom: 15px;
 }
-
-/* Último item do histórico sem borda */
 #historico-rolagens .roll-group:last-child {
     border-bottom: none;
     margin-bottom: 0;
 }
-
 .roll-group h3 {
     font-size: 1.2em;
-    color: var(--color-header);
+    color: var(--color-text-dark);
     margin-top: 0;
+    text-align: left;
 }
 
-.roll-group .icons-container {
+/* Card de dado individual */
+.sub-rolls-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    align-items: center;
-    margin-top: 10px;
-    min-height: 50px;
-}
-
-.roll-group .summary {
-    font-size: 1.1em;
-    font-weight: bold;
-    margin-top: 15px;
-    background-color: var(--color-bg);
-    padding: 8px;
-    border-radius: 3px;
-}
-
-/* Estilo para as imagens de resultado */
-.icons-container img {
-    height: 45px;
-    width: 45px;
-    /* Adiciona fundo claro para 'nada.png' ser visível */
-    background-color: #f0f0f0; 
-    border: 1px solid var(--color-border);
-    border-radius: 5px;
-    padding: 2px;
-}
-
-/* Container para todos os cards de dado (ex: d10 #1, d12 #1, d12 #2) */
-.sub-rolls-container {
-    display: flex;       /* Coloca os cards lado a lado */
-    flex-wrap: wrap;     /* Permite quebrar linha */
-    gap: 15px;           /* Espaço entre os cards */
+    gap: 15px;
     margin-top: 15px;
     margin-bottom: 15px;
-    /* Centraliza os cards se não preencherem a linha */
     justify-content: center; 
 }
-
-/* Estilo do "card" de um ÚNICO dado (como na imagem) */
 .sub-roll {
-    flex-basis: 140px; /* Largura base de cada card */
-    flex-grow: 1;      /* Permite crescer se houver espaço */
-    max-width: 180px;  /* Largura máxima */
-    
-    background-color: #ffffff; /* Fundo branco limpo */
-    border: 1px solid #ddd;
+    flex-basis: 140px;
+    flex-grow: 1;
+    max-width: 180px;
+    background-color: var(--color-paper);
+    border: 1px solid var(--color-border-light);
     border-radius: 8px;
     padding: 10px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.06);
-    text-align: center; /* Centraliza o header */
+    text-align: center;
 }
-
-/* Header do card (ex: "d10 #1 (rolou 2)") */
 .sub-roll h4 {
     margin-top: 0;
     margin-bottom: 10px;
-    font-size: 1em; /* Tamanho de fonte menor e mais limpo */
-    color: #555; /* Cor cinza, como na imagem */
-    font-weight: bold;
-    /* Usar uma fonte mais limpa para o card fica bom */
-    font-family: Arial, sans-serif; 
+    font-size: 1em;
+    color: var(--color-text-medium);
+    font-weight: 700;
+    font-family: var(--font-theme); /* Padronizado */
     border-bottom: 1px solid #eee;
     padding-bottom: 8px;
 }
-
-/* Container de ícones dentro de um card */
 .sub-roll .icons-container {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
     align-items: center;
-    justify-content: center; /* Centraliza os ícones */
-    min-height: 45px; /* Altura mínima para alinhar */
+    justify-content: center;
+    min-height: 45px;
 }
-
-/* Ícones dentro de um card */
+/* Ícones de resultado no card */
 .sub-roll .icons-container img {
-    height: 60px; 
-    width: 60px;
-    /* O fundo branco do .sub-roll já faz o trabalho */
+    height: 60px; /* Padronizado */
+    width: 60px; /* Padronizado */
     background-color: transparent; 
     border: none;
     padding: 0;
 }
-
-/* Sumário total da rolagem */
 .roll-group .summary {
     font-size: 1.2em;
-    font-weight: bold;
+    font-weight: 700;
     margin-top: 15px;
-    background-color: var(--color-bg);
+    background-color: #eee;
     padding: 10px;
     border-radius: 3px;
-    border-top: 2px solid var(--color-text);
+    border-top: 2px solid var(--color-text-medium);
     text-align: center;
+}
+
+
+/* ========================================
+   ESTILOS DA FICHA (ficha.html)
+   ========================================
+*/
+
+/* --- Layout da Ficha (Grid) --- */
+.ficha-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr; /* Define as duas colunas (2/3 e 1/3) */
+    grid-template-rows: auto auto auto; /* As alturas das linhas serão automáticas */
+    grid-template-areas:
+        "origens origens"
+        "aptidoes saude"
+        "determinacao determinacao";
+    gap: 20px;
+    
+    align-items: start;
+}
+
+/* --- Seção Origens (Topo) --- */
+.ficha-origens {
+    grid-area: origens;
+    background: var(--color-paper);
+    padding: 20px 30px;
+    border-radius: 5px;
+    border: 1px solid var(--color-border-light);
+}
+.logo-placeholder {
+    font-size: 1.5em;
+    font-weight: 900;
+    color: #000;
+    text-align: left;
+    margin-bottom: 20px;
+}
+.ficha-origens .form-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--color-border-medium);
+    padding-bottom: 8px;
+}
+.ficha-origens .form-group label {
+    font-size: 1.1em;
+    font-weight: 700;
+    color: var(--color-text-medium);
+    min-width: 180px; 
+}
+.ficha-origens .form-group input[type="text"] {
+    flex-grow: 1;
+    border: none;
+    background: transparent;
+    font-family: var(--font-theme);
+    font-size: 1.1em;
+    padding: 5px;
+    color: var(--color-text-dark);
+}
+.ficha-origens .form-group input[type="text"]:focus {
+    outline: none;
+    background-color: var(--color-bg-light);
+}
+
+/* --- Seção Aptidões (Esquerda) --- */
+.ficha-aptidoes {
+    grid-area: aptidoes;
+    padding: 0;
+    align-self: start;
+}
+.ficha-aptidoes > h2 {
+    font-size: 2em;
+    text-align: left; /* Alinhado à esquerda como na imagem */
+    margin-bottom: 15px;
+}
+.grupo-aptidoes {
+    margin-bottom: 20px;
+}
+.grupo-aptidoes h3 {
+    color: var(--color-det-red); 
+    border-bottom: 2px solid var(--color-det-red);
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+    font-size: 1.4em;
+    text-align: left; /* Alinhado à esquerda */
+}
+
+/* Novo Grid para os atributos */
+.aptidoes-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+/* Caixa de cada atributo */
+.aptidao-box {
+    border: 1px solid var(--color-border-medium);
+    border-radius: 4px;
+    background: var(--color-paper);
+    overflow: hidden; /* Garante que os cantos arredondados funcionem */
+}
+.aptidao-box label {
+    display: block;
+    font-size: 1.1em;
+    font-weight: 700;
+    padding: 8px 10px;
+    background: #a97b53; /* Cor de fundo marrom/laranja */
+    color: white;
+}
+/* Cor especial para Instintos */
+.grupo-aptidoes:first-child .aptidao-box label {
+    background: #8c3a3a; /* Cor de fundo vermelha */
+}
+
+.dots-track {
+    display: flex;
+    gap: 6px;
+    padding: 10px;
+}
+.dots-track input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    margin: 0;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 18px;
+    height: 18px;
+}
+
+/* --- Regra 1: Instintos (o 1º grupo) --- */
+.grupo-aptidoes:first-child .dots-track input[type="checkbox"] {
+    /* Define como QUADRADO */
+    background-color: #fff;
+    border: 2px solid #aaa;
+    border-radius: 2px;
+    width: 16px; /* Tamanho do quadrado */
+    height: 16px;
+}
+.grupo-aptidoes:first-child .dots-track input[type="checkbox"]:checked {
+    /* Fica PRETO quando marcado */
+    background-color: var(--color-text-dark);
+    border-color: var(--color-text-dark);
+}
+
+
+/* --- Regra 2: Conhecimentos e Práticas (os outros grupos) --- */
+.grupo-aptidoes:not(:first-child) .dots-track input[type="checkbox"] {
+    /* Define como LOSANGO */
+    background-color: #eee; /* Cor do losango vazio */
+    border: 1px solid #aaa;
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    border-radius: 0;
+}
+.grupo-aptidoes:not(:first-child) .dots-track input[type="checkbox"]:checked {
+    /* Fica VERMELHO quando marcado */
+    background-color: var(--color-det-red);
+    border-color: var(--color-det-red);
+}
+
+/* --- Seção Saúde (Direita) --- */
+.ficha-saude {
+    grid-area: saude;
+    align-self: start;
+}
+.saude-header {
+    text-align: center;
+    margin-bottom: 15px;
+}
+.saude-num-input {
+    font-family: var(--font-theme);
+    font-size: 1.5em;
+    font-weight: 700;
+    color: #fff;
+    background-color: var(--color-text-medium);
+    border-radius: 50%;
+    width: 45px; 
+    height: 45px;
+    line-height: 45px;
+    text-align: center;
+    border: none;
+    -moz-appearance: textfield;
+}
+.saude-num-input::-webkit-outer-spin-button,
+.saude-num-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.saude-header h2 {
+    font-size: 2em;
+    margin: 0;
+    display: inline-block;
+    padding: 0 10px;
+}
+.saude-header .saude-formula {
+    display: block;
+    font-size: 0.9em;
+    font-weight: 700;
+    color: #777;
+    margin-top: 5px;
+}
+
+/* Novo Grid de Saúde com 2 colunas */
+.saude-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; 
+    gap: 15px;
+}
+/* Legendas de texto */
+.saude-legenda {
+    font-size: 0.9em;
+    font-weight: 700;
+    color: var(--color-text-medium);
+    text-align: center;
+    padding: 8px;
+    background: var(--color-border-light);
+    border-radius: 3px;
+    margin-top: 15px;
+    margin-bottom: 5px;
+}
+.saude-legenda:first-of-type {
+    margin-top: 0;
+}
+.saude-legenda-detalhes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    font-size: 0.9em;
+    color: var(--color-text-medium);
+    text-align: center;
+    margin-top: 5px;
+    padding: 0 5px;
+}
+.saude-legenda-detalhes strong {
+    color: var(--color-det-red);
+}
+
+.saude-legenda-detalhes-1 {
+    margin-left: 70px;
+    background-color: var();
+}
+
+.saude-box-container {
+    background: var(--color-paper);
+    border: 1px solid var(--color-border-light);
+    border-radius: 5px;
+}
+.saude-box {
+    background-color: var(--cor-saude); 
+    color: white;
+    font-size: 1.2em;
+    font-weight: 700;
+    text-transform: uppercase;
+    border-radius: 5px 5px 0 0;
+    padding: 10px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.saude-box span {
+    display: block;
+    font-size: 1.5em;
+    font-weight: 900;
+    margin-bottom: 5px;
+}
+.saude-drops-track {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    padding: 12px 10px;
+    justify-content: center;
+    align-items: center;
+    min-height: 50px;
+}
+.saude-drops-track input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    margin: 0;
+    width: 18px;
+    height: 18px;
+    background-color: transparent; /* Removemos o fundo antigo */
+    cursor: pointer;
+    clip-path: none; /* Removemos a forma antiga */
+    position: relative; /* Posição para o ícone */
+    transform: scale(0.8); /* Mantemos o scale da regra anterior */
+}
+
+/* Ícone da gota (estado VAZIO) */
+.saude-drops-track input[type="checkbox"]::before {
+    content: "🌢"; /* Código do ícone 'fa-tint' (gota) */
+    font-family: "Font Awesome 6 Free";
+    font-weight: 400; /* 400 = Regular (contorno) */
+    color: #b0b0b0; /* Cor da gota vazia (cinza claro) */
+    font-size: 25px; /* Tamanho do ícone */
+    position: absolute;
+    top: 0;
+    left: 0;
+    transition: all 0.2s;
+}
+
+/* Ícone da gota (estado CHEIO) */
+.saude-drops-track input[type="checkbox"]:checked::before {
+    font-weight: 900; /* 900 = Solid (cheio) */
+    color: #1a1919; /* Cor da gota cheia (cinza escuro) */
+}
+
+/* Gota grande */
+.saude-drops-track input[type="checkbox"]:first-child {
+    transform: scale(1.1);
+}
+/* Posição alternada */
+.saude-drops-track input[type="checkbox"]:not(:first-child):nth-child(even) {
+    transform: scale(0.8) translateY(-4px);
+}
+.saude-drops-track input[type="checkbox"]:not(:first-child):nth-child(odd) {
+    transform: scale(0.8) translateY(4px);
+}
+/* --- Seção Determinação (Baixo) --- */
+.ficha-determinacao {
+    grid-area: determinacao;
+    background: var(--color-paper);
+    border: 1px solid var(--color-border-light);
+    border-radius: 5px;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+.ficha-determinacao h3 {
+    margin: 10px 0;
+    font-size: 1.4em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+.ficha-determinacao h3.det-label-right {
+    color: var(--color-assim-blue);
+}
+.ficha-determinacao h3.det-label-left {
+    color: var(--color-det-red);
+}
+.det-num-input {
+    font-family: var(--font-theme);
+    font-size: 1.5em;
+    font-weight: 900;
+    color: var(--color-text-dark);
+    background-color: transparent;
+    border: 2px solid var(--color-text-dark);
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    line-height: 38px;
+    text-align: center;
+    -moz-appearance: textfield;
+    outline: none;
+    transition: all 0.2s;
+}
+.det-num-input::-webkit-outer-spin-button,
+.det-num-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.det-label-left .det-num-input {
+    color: var(--color-det-red);
+    border-color: var(--color-det-red);
+    order: -1; 
+}
+.det-label-right .det-num-input {
+    color: var(--color-assim-blue);
+    border-color: var(--color-assim-blue);
+}
+.determinacao-track {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1; 
+    gap: 0;
+    height: 30px;
+    overflow-x: auto; /* Permite rolar em telas pequenas */
+    padding: 0 5px;
+}
+.determinacao-track input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    margin: 0;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    position: relative;
+    cursor: pointer;
+    outline: none;
+}
+.determ-check {
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+    background-color: #eee;
+    border: 1px solid var(--color-border-medium);
+    border-left: none;
+    transform: translateX(1px);
+    z-index: 1;
+}
+.determ-check:checked {
+    background-color: var(--color-det-red);
+    border-color: var(--color-det-red);
+}
+.assim-check {
+    clip-path: polygon(100% 0, 0 50%, 100% 100%);
+    background-color: #eee;
+    border: 1px solid var(--color-border-medium);
+    border-right: none;
+    transform: translateX(-1px);
+}
+.assim-check:checked {
+    background-color: var(--color-assim-blue);
+    border-color: var(--color-assim-blue);
+}
+
+/* ========================================
+   ESTILOS DO GERENCIADOR DE PERSONAGENS
+   ========================================
+*/
+
+.character-manager {
+    padding: 15px 25px;
+}
+
+.character-manager h2 {
+    text-align: left;
+    margin-top: 0;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--color-border-light);
+}
+
+.manager-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 15px;
+}
+
+.manager-controls label {
+    font-size: 1.1em;
+    font-weight: 700;
+    color: var(--color-text-medium);
+}
+
+.manager-controls select,
+.manager-controls button {
+    font-family: var(--font-theme);
+    font-size: 1em;
+    padding: 10px 15px;
+    border-radius: 3px;
+    border: 1px solid var(--color-border-medium);
+}
+
+.manager-controls select {
+    flex-grow: 1;
+    min-width: 200px;
+    background-color: #fff;
+}
+
+/* Botões do gerenciador */
+#btn-load-char {
+    background-color: var(--color-assim-blue);
+    color: white;
+    font-weight: 700;
+}
+#btn-load-char:hover {
+    background-color: #4a9cb0;
+}
+
+#btn-save-char {
+    background-color: #3e9c35; /* Um verde para salvar */
+    color: white;
+    font-weight: 700;
+    border-color: #3e9c35;
+}
+#btn-save-char:hover {
+    background-color: #50b848;
+}
+
+#btn-delete-char {
+    background-color: var(--color-det-red);
+    color: white;
+    font-weight: 700;
+}
+#btn-delete-char:hover {
+    background-color: #a85252;
+}
+
+/* Ajuste no container do body para o novo padding */
+body > .container {
+    padding: 0 20px;
+}
+
+main.container {
+    margin-top: 0; /* Remove espaço extra acima da ficha */
+}
+
+/* ========================================
+   ESTILOS DA PÁGINA DE DETALHES
+   ========================================
+*/
+
+.detalhes-container {
+    display: grid;
+    grid-template-columns: 1fr 2fr; /* Coluna da foto | Coluna do texto */
+    gap: 25px;
+}
+
+.detalhes-foto {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#char-photo-preview {
+    width: 100%;
+    min-height: 250px;
+    background-color: #eee;
+    border: 1px solid var(--color-border-medium);
+    border-radius: 5px;
+    object-fit: cover; /* Garante que a imagem cubra a área */
+    margin-bottom: 15px;
+}
+
+#char-photo-input {
+    font-family: var(--font-theme);
+    border: 1px solid var(--color-border-medium);
+    border-radius: 3px;
+    padding: 8px;
+    width: 100%;
+}
+
+.detalhes-texto h2 {
+    text-align: left;
+    color: var(--color-det-red);
+    border-bottom: 2px solid var(--color-det-red);
+    padding-bottom: 5px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-size: 1.4em;
+}
+
+.detalhes-texto h2:first-child {
+    margin-top: 0;
+}
+
+.detalhes-texto textarea {
+    width: 100%;
+    box-sizing: border-box; /* Garante que o padding não estoure a largura */
+    font-family: var(--font-theme);
+    font-size: 1.1em;
+    line-height: 1.6;
+    padding: 10px;
+    border: 1px solid var(--color-border-light);
+    border-radius: 5px;
+    resize: vertical; /* Permite redimensionar só na vertical */
+}
+/* ========================================
+   ESTILOS DOS BOTÕES DE IMPORT/EXPORT
+   ========================================
+*/
+
+/* Botão de Exportar */
+#btn-export-char {
+    background-color: #555; /* Cinza escuro */
+    color: white;
+    font-weight: 700;
+}
+#btn-export-char:hover {
+    background-color: #777;
+}
+
+/* Label que parece um botão de Importar */
+.btn-import {
+    font-family: var(--font-theme);
+    padding: 10px 15px; /* Ajuste para alinhar com o select */
+    font-size: 1em;
+    border: 1px solid var(--color-border-medium);
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    color: white;
+    text-transform: uppercase;
+    font-weight: 700;
+    background-color: #3e9c35; /* Verde (mesmo do Salvar) */
+    display: inline-block; /* Para a label se comportar como botão */
+}
+.btn-import:hover {
+    background-color: #50b848;
+}
+
+/* Alinha o botão "Salvar" de 'detalhes' com os outros */
+#btn-save-char {
+    border: 1px solid transparent;
+}
+
+/* Ajuste para telas menores */
+@media (max-width: 768px) {
+    .detalhes-container {
+        grid-template-columns: 1fr; /* Coluna única */
+    }
+}
+
+/* --- Ajustes para telas menores --- */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 10px;
+        margin-top: 10px;
+    }
+    
+    .ficha-container {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "origens"
+            "aptidoes"
+            "saude"
+            "determinacao";
+    }
+    .ficha-determinacao {
+        flex-direction: column;
+        text-align: center;
+    }
+    .ficha-determinacao h3 {
+        flex-direction: column;
+        gap: 0;
+    }
+    .det-label-left .det-num-input {
+        order: 0;
+    }
+    .determinacao-track {
+        padding: 10px 0;
+    }
+}
+
+/* ========================================
+   REQUISIÇÃO 1 & 2: LOSANGOS VERMELHOS
+   ========================================
+*/
+
+/* Seleciona APENAS os grupos de aptidões que NÃO são o primeiro (Instintos) */
+.grupo-aptidoes:not(:first-child) .dots-track input[type="checkbox"] {
+    /* 1. Transforma em losango */
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    border-radius: 0; /* Remove cantos arredondados do quadrado */
+    width: 18px;
+    height: 18px;
+}
+
+/* 2. Muda a cor do losango MARCADO para vermelho */
+.grupo-aptidoes:not(:first-child) .dots-track input[type="checkbox"]:checked {
+    background-color: var(--color-det-red);
+    border-color: var(--color-det-red);
+}
+.dots-track input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    margin: 0;
+    width: 16px;
+    height: 16px;
+    background-color: #fff;
+    border: 2px solid #aaa;
+    border-radius: 2px; /* Quadrado */
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.dots-track input[type="checkbox"]:checked {
+    background-color: var(--color-text-dark); /* Preto */
+    border-color: var(--color-text-dark);
+}
+
+
+/* Seleciona APENAS os grupos de aptidões que NÃO são o primeiro (Instintos) */
+.grupo-aptidoes:not(:first-child) .dots-track input[type="checkbox"] {
+    /* Transforma em LOSANGO */
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    border-radius: 0; 
+    width: 18px;
+    height: 18px;
+}
+
+/* Muda a cor do losango MARCADO para VERMELHO */
+.grupo-aptidoes:not(:first-child) .dots-track input[type="checkbox"]:checked {
+    background-color: var(--color-det-red);
+    border-color: var(--color-det-red);
 }
