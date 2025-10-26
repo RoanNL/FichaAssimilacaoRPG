@@ -1,0 +1,230 @@
+/* Importa a fonte */
+:root {
+    --font-theme: 'Special Elite', monospace;
+    --color-bg: #e45353; /* Cor de pergaminho/fundo */
+    --color-paper: #fefcf5;
+    --color-red: #044c75; /* Cor do "papel" */
+    --color-text: #000000; /* Cor do texto (marrom escuro) */
+    --color-header: #1a1a1a;
+    --color-border: #dcd0b9;
+    --color-button: #795548; /* Marrom para botões */
+    --color-button-hover: #5d4037;
+    --color-clear-button: #a04040;
+    --color-clear-button-hover: #c05050;
+}
+
+/* Estilo geral da página */
+body {
+    font-family: var(--font-theme);
+    background: linear-gradient(180deg, var(--color-bg) 0%, var(--color-red) 100%);
+    color: var(--color-text);
+    padding: 176px;
+    margin: 0;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 50vw;
+    margin: 0 auto;
+    
+}
+
+h1, h2 {
+    text-align: center;
+    color: var(--color-header);
+    text-transform: uppercase;
+    border-bottom: 2px solid var(--color-border);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+/* Estilo de "folha de papel" para os containers */
+.paper {
+    background-color: var(--color-paper);
+    border: 1px solid var(--color-border);
+    border-radius: 3px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+/* Container dos controles */
+.controles-container {
+    background-color: transparent; /* Sem fundo de papel */
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 2px dashed var(--color-text);
+    border-radius: 5px;
+}
+
+.controles {
+    display: flex;
+    flex-wrap: wrap; /* Permite quebrar linha em telas menores */
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+}
+
+.controles label {
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+/* Campo de input */
+#input-dados {
+    font-family: var(--font-theme);
+    font-size: 1.2em;
+    padding: 10px;
+    border: 1px solid var(--color-border);
+    background-color: #fff;
+    border-radius: 3px;
+    text-align: center;
+    color: var(--color-text);
+    flex-grow: 1; /* Faz ocupar o espaço disponível */
+    min-width: 200px;
+}
+
+/* Estilo geral dos botões */
+button {
+    font-family: var(--font-theme);
+    padding: 12px 20px;
+    font-size: 1.1em;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    color: white;
+    text-transform: uppercase;
+}
+
+#btn-rolar {
+    background-color: var(--color-button);
+}
+#btn-rolar:hover {
+    background-color: var(--color-button-hover);
+}
+
+#btn-limpar {
+    background-color: var(--color-clear-button);
+}
+#btn-limpar:hover {
+    background-color: var(--color-clear-button-hover);
+}
+
+/* Container de um grupo de rolagem (para resultados e histórico) */
+.roll-group {
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+}
+
+/* Último item do histórico sem borda */
+#historico-rolagens .roll-group:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.roll-group h3 {
+    font-size: 1.2em;
+    color: var(--color-header);
+    margin-top: 0;
+}
+
+.roll-group .icons-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-top: 10px;
+    min-height: 50px;
+}
+
+.roll-group .summary {
+    font-size: 1.1em;
+    font-weight: bold;
+    margin-top: 15px;
+    background-color: var(--color-bg);
+    padding: 8px;
+    border-radius: 3px;
+}
+
+/* Estilo para as imagens de resultado */
+.icons-container img {
+    height: 45px;
+    width: 45px;
+    /* Adiciona fundo claro para 'nada.png' ser visível */
+    background-color: #f0f0f0; 
+    border: 1px solid var(--color-border);
+    border-radius: 5px;
+    padding: 2px;
+}
+
+/* Container para todos os cards de dado (ex: d10 #1, d12 #1, d12 #2) */
+.sub-rolls-container {
+    display: flex;       /* Coloca os cards lado a lado */
+    flex-wrap: wrap;     /* Permite quebrar linha */
+    gap: 15px;           /* Espaço entre os cards */
+    margin-top: 15px;
+    margin-bottom: 15px;
+    /* Centraliza os cards se não preencherem a linha */
+    justify-content: center; 
+}
+
+/* Estilo do "card" de um ÚNICO dado (como na imagem) */
+.sub-roll {
+    flex-basis: 140px; /* Largura base de cada card */
+    flex-grow: 1;      /* Permite crescer se houver espaço */
+    max-width: 180px;  /* Largura máxima */
+    
+    background-color: #ffffff; /* Fundo branco limpo */
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+    text-align: center; /* Centraliza o header */
+}
+
+/* Header do card (ex: "d10 #1 (rolou 2)") */
+.sub-roll h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1em; /* Tamanho de fonte menor e mais limpo */
+    color: #555; /* Cor cinza, como na imagem */
+    font-weight: bold;
+    /* Usar uma fonte mais limpa para o card fica bom */
+    font-family: Arial, sans-serif; 
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+}
+
+/* Container de ícones dentro de um card */
+.sub-roll .icons-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    justify-content: center; /* Centraliza os ícones */
+    min-height: 45px; /* Altura mínima para alinhar */
+}
+
+/* Ícones dentro de um card */
+.sub-roll .icons-container img {
+    height: 60px; 
+    width: 60px;
+    /* O fundo branco do .sub-roll já faz o trabalho */
+    background-color: transparent; 
+    border: none;
+    padding: 0;
+}
+
+/* Sumário total da rolagem */
+.roll-group .summary {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-top: 15px;
+    background-color: var(--color-bg);
+    padding: 10px;
+    border-radius: 3px;
+    border-top: 2px solid var(--color-text);
+    text-align: center;
+}
