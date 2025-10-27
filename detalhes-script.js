@@ -1,12 +1,24 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+    // --- 0. Helper: Debounce Function ---
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
     // --- 1. Seleção dos Elementos ---
+    const detalhesForm = document.querySelector('.detalhes-container'); // O formulário desta página
     const saveButton = document.getElementById('btn-save-char');
     const loadButton = document.getElementById('btn-load-char');
     const deleteButton = document.getElementById('btn-delete-char');
     const charSelect = document.getElementById('char-select');
-
-    // NOVOS ELEMENTOS
     const exportButton = document.getElementById('btn-export-char');
     const importInput = document.getElementById('btn-import-char');
 
@@ -18,11 +30,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const charHistoria = document.getElementById('char-historia');
 
     const STORAGE_KEY = 'assim-rpg-chars'; 
-    let currentPhotoData = null;
+    let currentPhotoData = null; 
 
-    // --- 2. Funções Principais ---
-
-    function populateCharacterList() {
+    // --- 2. Funções Principais (Salvar Manual, Carregar, Excluir, Popular Lista) ---
+    // (Estas funções permanecem IGUAIS às da sua versão anterior)
+    function populateCharacterList() { /* ...código igual ... */ 
         const allChars = getSavedCharacters();
         charSelect.options.length = 1; 
         for (const charName in allChars) {
@@ -32,139 +44,97 @@ document.addEventListener('DOMContentLoaded', () => {
             charSelect.appendChild(option);
         }
     }
-
-    function saveCharacter() {
+    function saveCharacter() { /* ...código igual ... */ 
         const charName = charSelect.value;
-        if (!charName) {
-            alert('Por favor, selecione um personagem para salvar os detalhes.');
-            return;
-        }
+        if (!charName) { alert('Selecione um personagem para salvar.'); return; }
         const allChars = getSavedCharacters();
         const charData = allChars[charName] || {};
-
-        // Adiciona/atualiza os dados DESTA página
         charData['char-descricao'] = charDescricao.value;
         charData['char-habilidades'] = charHabilidades.value;
         charData['char-historia'] = charHistoria.value;
-        
-        if (currentPhotoData) {
-            charData['char-photo'] = currentPhotoData;
-        }
-        
+        if (currentPhotoData) charData['char-photo'] = currentPhotoData;
         allChars[charName] = charData;
         localStorage.setItem(STORAGE_KEY, JSON.stringify(allChars));
-        alert(`Detalhes de "${charName}" salvos com sucesso!`);
+        alert(`Detalhes de "${charName}" salvos!`); // Feedback no save manual
     }
-
-    function loadCharacter() {
+    function loadCharacter() { /* ...código igual ... */ 
         const charName = charSelect.value;
         if (!charName) {
             charDescricao.value = '';
             charHabilidades.value = '';
             charHistoria.value = '';
-            photoPreview.src = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+            photoPreview.src = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='; 
             currentPhotoData = null;
             return;
         }
-
         const allChars = getSavedCharacters();
         const charData = allChars[charName];
-
-        if (!charData) {
-            alert('Erro: Personagem não encontrado.');
-            return;
-        }
-
+        if (!charData) { alert('Erro: Personagem não encontrado.'); return; }
         charDescricao.value = charData['char-descricao'] || '';
         charHabilidades.value = charData['char-habilidades'] || '';
         charHistoria.value = charData['char-historia'] || '';
-        
         if (charData['char-photo']) {
             photoPreview.src = charData['char-photo'];
-            currentPhotoData = charData['char-photo'];
+            currentPhotoData = charData['char-photo']; 
         } else {
             photoPreview.src = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
             currentPhotoData = null;
         }
     }
-
-    function deleteCharacter() {
+    function deleteCharacter() { /* ...código igual ... */ 
         const charName = charSelect.value;
-        if (!charName) {
-            alert('Selecione um personagem para excluir.');
-            return;
-        }
-        if (!confirm(`Tem certeza que deseja excluir o personagem "${charName}"? Esta ação não pode ser desfeita.`)) {
-            return;
-        }
+        if (!charName) { alert('Selecione um personagem para excluir.'); return; }
+        if (!confirm(`Tem certeza que deseja excluir "${charName}"?`)) return;
         const allChars = getSavedCharacters();
         delete allChars[charName];
         localStorage.setItem(STORAGE_KEY, JSON.stringify(allChars));
-        alert(`Personagem "${charName}" excluído.`);
+        alert(`"${charName}" excluído.`);
         populateCharacterList();
-        loadCharacter(); // Limpa os campos
+        loadCharacter(); 
     }
 
-    // --- 3. NOVAS FUNÇÕES: EXPORTAR E IMPORTAR (IDÊNTICAS AO 'ficha-script.js') ---
-
-    function exportCharacter() {
+    // --- 3. Funções Exportar/Importar ---
+    // (Estas funções permanecem IGUAIS às da sua versão anterior)
+    function exportCharacter() { /* ...código igual ... */ 
         const charName = charSelect.value;
-        if (!charName) {
-            alert('Selecione um personagem para exportar.');
-            return;
-        }
+        if (!charName) { alert('Selecione um personagem para exportar.'); return; }
         const allChars = getSavedCharacters();
         const charData = allChars[charName];
-        if (!charData) {
-            alert('Erro: Personagem não encontrado para exportar.');
-            return;
-        }
+        if (!charData) { alert('Erro: Personagem não encontrado.'); return; }
         const exportData = { name: charName, data: charData };
         const jsonString = JSON.stringify(exportData, null, 2);
         const blob = new Blob([jsonString], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${charName}.json`;
+        a.download = `${charName}.json`; 
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
     }
-
-    function importCharacter(event) {
+    function importCharacter(event) { /* ...código igual ... */ 
         const file = event.target.files[0];
         if (!file) return;
-        if (file.type !== 'application/json') {
-            alert('Tipo de arquivo inválido. Por favor, selecione um arquivo .json');
-            return;
-        }
+        if (file.type !== 'application/json') { alert('Arquivo inválido. Selecione um .json'); return; }
         const reader = new FileReader();
         reader.onload = (e) => {
             try {
-                const jsonString = e.target.result;
-                const importData = JSON.parse(jsonString);
-                if (!importData.name || !importData.data) {
-                    throw new Error('Formato de arquivo inválido. O JSON deve conter "name" e "data".');
-                }
+                const importData = JSON.parse(e.target.result);
+                if (!importData.name || !importData.data) throw new Error('Formato inválido.');
                 const charName = importData.name;
                 const charData = importData.data;
                 const allChars = getSavedCharacters();
-                if (allChars[charName]) {
-                    if (!confirm(`Um personagem com o nome "${charName}" já existe. Deseja sobrescrevê-lo?`)) {
-                        event.target.value = null;
-                        return;
-                    }
+                if (allChars[charName] && !confirm(`"${charName}" já existe. Sobrescrever?`)) {
+                    event.target.value = null; return;
                 }
                 allChars[charName] = charData;
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(allChars));
-                alert(`Personagem "${charName}" importado com sucesso!`);
-                populateCharacterList();
+                alert(`"${charName}" importado!`);
+                populateCharacterList(); 
                 charSelect.value = charName;
-                loadCharacter(); // Carrega os detalhes do personagem importado
-            } catch (error) {
-                alert(`Erro ao importar o arquivo: ${error.message}`);
-            }
+                loadCharacter();
+            } catch (error) { alert(`Erro ao importar: ${error.message}`); }
             event.target.value = null; 
         };
         reader.readAsText(file);
@@ -175,57 +145,88 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = localStorage.getItem(STORAGE_KEY);
         return data ? JSON.parse(data) : {};
     }
-
     function handlePhotoUpload(event) {
         const file = event.target.files[0];
         if (!file) return;
         const reader = new FileReader();
         reader.onload = (e) => {
-            const base64String = e.target.result;
-            photoPreview.src = base64String;
-            currentPhotoData = base64String;
+            currentPhotoData = e.target.result; // Armazena ANTES de mostrar
+            photoPreview.src = currentPhotoData;
+            debouncedAutoSave(); // CHAMA O AUTO-SAVE APÓS CARREGAR A FOTO
         };
         reader.readAsDataURL(file);
     }
 
-    // --- 5. Inicialização ---
+     // --- 5. LÓGICA DO AUTO-SAVE (PARA DETALHES) ---
+
+    function autoSaveCharacter() {
+        const charName = charSelect.value;
+        if (!charName) { 
+             console.log("Auto-save skipped: No character selected.");
+            return; 
+        }
+
+        console.log(`Auto-saving details for: ${charName}`); // Log para debug
+
+        const allChars = getSavedCharacters();
+        const charData = allChars[charName] || {}; 
+
+        // Salva os campos específicos desta página
+        charData['char-descricao'] = charDescricao.value;
+        charData['char-habilidades'] = charHabilidades.value;
+        charData['char-historia'] = charHistoria.value;
+        // A foto é salva no 'currentPhotoData' pelo handlePhotoUpload e pega aqui
+        if (currentPhotoData) {
+            charData['char-photo'] = currentPhotoData;
+        }
+        
+        allChars[charName] = charData;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(allChars));
+        // console.log(`Auto-saved details for ${charName} at ${new Date().toLocaleTimeString()}`);
+    }
+
+    // Cria a versão "debounced"
+    const debouncedAutoSave = debounce(autoSaveCharacter, 1500);
+
+
+    // --- 6. Inicialização e Event Listeners ---
     saveButton.addEventListener('click', saveCharacter);
     loadButton.addEventListener('click', loadCharacter);
     deleteButton.addEventListener('click', deleteCharacter);
-    photoInput.addEventListener('change', handlePhotoUpload);
-    charSelect.addEventListener('change', loadCharacter);
-
-    // NOVOS EVENTOS
+    charSelect.addEventListener('change', loadCharacter); 
     exportButton.addEventListener('click', exportCharacter);
     importInput.addEventListener('change', importCharacter);
 
+    // Listener para o upload da foto (chama o auto-save internamente)
+    photoInput.addEventListener('change', handlePhotoUpload); 
+
+    // Listener para o AUTO-SAVE (escuta por digitação nos textareas)
+    detalhesForm.addEventListener('input', (event) => {
+        if (event.target.matches('textarea')) {
+            debouncedAutoSave();
+        }
+    });
+
     populateCharacterList();
-    // --- 5. LÓGICA DO MODAL DA FOTO ---
-    
+
+    // --- Lógica do Modal da Foto (sem alterações) ---
     const modal = document.getElementById('photo-modal');
     const modalImg = document.getElementById('modal-image');
     const previewImg = document.getElementById('char-photo-preview');
     const closeBtn = document.getElementById('modal-close-button');
-
-    // Abre o modal quando a imagem de preview é clicada
-    previewImg.onclick = function() {
-        // Só abre se a imagem não for a padrão (vazia)
-        if (previewImg.src && !previewImg.src.startsWith('data:image/gif')) { 
-            modal.classList.add('show');
-            modalImg.src = this.src;
+    if (modal && modalImg && previewImg && closeBtn) { // Verifica se elementos existem
+        previewImg.onclick = function() {
+            if (previewImg.src && !previewImg.src.startsWith('data:image/gif')) { 
+                modal.classList.add('show');
+                modalImg.src = this.src;
+            }
         }
-    }
-
-    // Fecha o modal quando o botão (X) é clicado
-    closeBtn.onclick = function() {
-        modal.classList.remove('show');
-    }
-
-    // Fecha o modal quando se clica fora da imagem (no overlay)
-    modal.onclick = function(event) {
-        if (event.target === modal) { // Verifica se o clique foi no fundo
-            modal.classList.remove('show');
+        closeBtn.onclick = function() { modal.classList.remove('show'); }
+        modal.onclick = function(event) {
+            if (event.target === modal) { modal.classList.remove('show'); }
         }
+    } else {
+        console.error("Elementos do modal não encontrados!");
     }
 
 }); // Fim do 'DOMContentLoaded'
