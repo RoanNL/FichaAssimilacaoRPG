@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
+    <div id="leaves-container"></div>
     <nav class="navbar">
         <ul>
             <li><a href="rolador.html">Rolador de Dados</a></li>
@@ -43,6 +43,37 @@
     </div>
 
     <main class="container">
+
+        <section class="ficha-origens">
+            <div class="logo-placeholder">
+                <img src="assets/icon.jpg" alt="Logo">
+                <p>Assimilação RPG</p>
+            </div>
+            <div class="form-group">
+                <label for="nome">Nome:</label>
+                <input type="text" id="nome">
+            </div>
+            <div class="form-group">
+                <label for="evento">Evento Marcante:</label>
+                <input type="text" id="evento">
+            </div>
+            <div class="form-group">
+                <label for="ocupacao">Ocupação:</label>
+                <input type="text" id="ocupacao">
+            </div>
+            <div class="form-group">
+                <label for="geracao">Geração:</label>
+                <input type="text" id="geracao">
+            </div>
+            <div class="form-group">
+                <label for="proposito-pessoal">Propósitos Pessoais:</label>
+                <input type="text" id="proposito-pessoal" rows="2">
+            </div>
+            <div class="form-group">
+                <label for="proposito-coletivo">Propósito Coletivo:</label>
+                <input type="text" id="proposito-coletivo" rows="2">
+            </div>
+        </section>
         
         <form class="ficha-container">
 
@@ -50,37 +81,37 @@
                 <h2>APTIDÕES</h2>
                 
                 <div class="grupo-aptidoes">
-                    <h3>INSTINTOS</h3>
+                    <h3>INSTINTOS <span style="filter: grayscale(1); filter:opacity(70%);">⬛</span></h3>
                     <div class="aptidoes-grid">
                         <div class="aptidao-box">
                             <label>Influência</label>
-                            <div class="dots-track"><input type="checkbox" id="inf-1" checked><input type="checkbox" id="inf-2"><input type="checkbox" id="inf-3"><input type="checkbox" id="inf-4"><input type="checkbox" id="inf-5"></div>
+                            <div class="dots-track-1"><input type="checkbox" id="inf-1" checked><input type="checkbox" id="inf-2"><input type="checkbox" id="inf-3"><input type="checkbox" id="inf-4"><input type="checkbox" id="inf-5"></div>
                         </div>
                         <div class="aptidao-box">
                             <label>Percepção</label>
-                            <div class="dots-track"><input type="checkbox" id="per-1" checked><input type="checkbox" id="per-2"><input type="checkbox" id="per-3"><input type="checkbox" id="per-4"><input type="checkbox" id="per-5"></div>
+                            <div class="dots-track-1"><input type="checkbox" id="per-1" checked><input type="checkbox" id="per-2"><input type="checkbox" id="per-3"><input type="checkbox" id="per-4"><input type="checkbox" id="per-5"></div>
                         </div>
                         <div class="aptidao-box">
                             <label>Potência</label>
-                            <div class="dots-track"><input type="checkbox" id="pot-1" checked><input type="checkbox" id="pot-2"><input type="checkbox" id="pot-3"><input type="checkbox" id="pot-4"><input type="checkbox" id="pot-5"></div>
+                            <div class="dots-track-1"><input type="checkbox" id="pot-1" checked><input type="checkbox" id="pot-2"><input type="checkbox" id="pot-3"><input type="checkbox" id="pot-4"><input type="checkbox" id="pot-5"></div>
                         </div>
                         <div class="aptidao-box">
                             <label>Reação</label>
-                            <div class="dots-track"><input type="checkbox" id="rea-1" checked><input type="checkbox" id="rea-2"><input type="checkbox" id="rea-3"><input type="checkbox" id="rea-4"><input type="checkbox" id="rea-5"></div>
+                            <div class="dots-track-1"><input type="checkbox" id="rea-1" checked><input type="checkbox" id="rea-2"><input type="checkbox" id="rea-3"><input type="checkbox" id="rea-4"><input type="checkbox" id="rea-5"></div>
                         </div>
                         <div class="aptidao-box">
                             <label>Resolução</label>
-                            <div class="dots-track"><input type="checkbox" id="res-1" checked><input type="checkbox" id="res-2"><input type="checkbox" id="res-3"><input type="checkbox" id="res-4"><input type="checkbox" id="res-5"></div>
+                            <div class="dots-track-1"><input type="checkbox" id="res-1" checked><input type="checkbox" id="res-2"><input type="checkbox" id="res-3"><input type="checkbox" id="res-4"><input type="checkbox" id="res-5"></div>
                         </div>
                         <div class="aptidao-box">
                             <label>Sagacidade</label>
-                            <div class="dots-track"><input type="checkbox" id="sag-1" checked><input type="checkbox" id="sag-2"><input type="checkbox" id="sag-3"><input type="checkbox" id="sag-4"><input type="checkbox" id="sag-5"></div>
+                            <div class="dots-track-1"><input type="checkbox" id="sag-1" checked><input type="checkbox" id="sag-2"><input type="checkbox" id="sag-3"><input type="checkbox" id="sag-4"><input type="checkbox" id="sag-5"></div>
                         </div>
                     </div>
                 </div>
 
                 <div class="grupo-aptidoes">
-                    <h3>CONHECIMENTOS</h3>
+                    <h3>CONHECIMENTOS <span style="filter: grayscale(1)">🔷</span></h3>
                     <div class="aptidoes-grid">
                         <div class="aptidao-box"><label>Biologia</label><div class="dots-track"><input type="checkbox" id="bio-1"><input type="checkbox" id="bio-2"><input type="checkbox" id="bio-3"><input type="checkbox" id="bio-4"><input type="checkbox" id="bio-5"></div></div>
                         <div class="aptidao-box"><label>Erudição</label><div class="dots-track"><input type="checkbox" id="eru-1"><input type="checkbox" id="eru-2"><input type="checkbox" id="eru-3"><input type="checkbox" id="eru-4"><input type="checkbox" id="eru-5"></div></div>
@@ -92,7 +123,7 @@
                 </div>
 
                 <div class="grupo-aptidoes">
-                    <h3>PRÁTICAS</h3>
+                    <h3>PRÁTICAS <span style="filter: grayscale(1)">🔷</span></h3>
                     <div class="aptidoes-grid">
                         <div class="aptidao-box"><label>Armas</label><div class="dots-track"><input type="checkbox" id="arm-1"><input type="checkbox" id="arm-2"><input type="checkbox" id="arm-3"><input type="checkbox" id="arm-4"><input type="checkbox" id="arm-5"></div></div>
                         <div class="aptidao-box"><label>Atletismo</label><div class="dots-track"><input type="checkbox" id="atl-1"><input type="checkbox" id="atl-2"><input type="checkbox" id="atl-3"><input type="checkbox" id="atl-4"><input type="checkbox" id="atl-5"></div></div>
@@ -111,7 +142,7 @@
                     <span class="saude-formula">1+Potência+Resolução</span>
                 </div>
                 
-                <div class="saude-legenda">Ativa Recuperação após cada repouso completo</div> 
+                <div class="saude-legenda" style="border-left: #6c7a6b 2px solid; border-top: #6c7a6b 2px solid; border-right: #6c7a6b 2px solid;">Ativa Recuperação após cada repouso completo</div> 
                 <div class="saude-grid">
                     <div class="saude-box-container">
                         <div class="saude-box" style="--cor-saude: #6c7a6b;"><span>6</span> Saudável</div>
@@ -123,7 +154,7 @@
                     </div>
                 </div>
 
-                <div class="saude-legenda">Ativa a Recuperação após uma semana</div> 
+                <div class="saude-legenda" style="border-left: #a97b53 2px solid; border-top: #a97b53 2px solid; border-right: #a97b53 2px solid;">Ativa a Recuperação após uma semana</div> 
                 <div class="saude-grid">
                     <div class="saude-box-container">
                         <div class="saude-box" style="--cor-saude: #a97b53;"><span>4</span> Lacerado</div>
@@ -138,7 +169,7 @@
                     <div>Menos <img src="assets/Sucesso.png" alt="" width="20px" height="20px" justify-itens="center"> em todos os testes</div> 
                 </div>
                 
-                <div class="saude-legenda">Dano dessa gravidade não regenera naturalmente. Será necessário tratamento médico</div> 
+                <div class="saude-legenda" style="border-left: #8c3a3a 2px solid; border-top: #8c3a3a 2px solid; border-right: #8c3a3a 2px solid;">Dano dessa gravidade não regenera naturalmente. Será necessário tratamento médico</div> 
 
                 <div class="saude-grid">
                     <div class="saude-box-container">
@@ -176,7 +207,8 @@
 
         </form>
     </main>
-
+    
     <script src="ficha-script.js"></script>
+    <script src="leaves.js"></script>
 </body>
 </html>

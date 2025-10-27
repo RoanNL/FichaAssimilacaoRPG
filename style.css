@@ -265,18 +265,26 @@ button {
     border: 1px solid var(--color-border-light);
 }
 .logo-placeholder {
-    font-size: 1.5em;
+    display: flex;
+    font-size: 50px;
+    gap: 15px;
     font-weight: 900;
-    color: #000;
+    color: var(--color-text-dark);
     text-align: left;
     margin-bottom: 20px;
 }
+
+.logo-placeholder img {
+    max-width: 150px;
+    height: auto;
+    border-radius: 10px;
+}
+/* Removemos a borda de baixo do 'grupo' */
 .ficha-origens .form-group {
     display: flex;
     align-items: center;
     margin-bottom: 10px;
-    border-bottom: 1px solid var(--color-border-medium);
-    padding-bottom: 8px;
+    /* border-bottom e padding-bottom removidos daqui */
 }
 .ficha-origens .form-group label {
     font-size: 1.1em;
@@ -284,18 +292,25 @@ button {
     color: var(--color-text-medium);
     min-width: 180px; 
 }
+
 .ficha-origens .form-group input[type="text"] {
     flex-grow: 1;
-    border: none;
-    background: transparent;
     font-family: var(--font-theme);
     font-size: 1.1em;
-    padding: 5px;
+    padding: 5px 8px; /* Adiciona um leve padding */
     color: var(--color-text-dark);
+    
+    /* Remove a transparência e adiciona a cor da barra */
+    background-color: #f0f3f5; /* Cor cinza-azulada da barra (da imagem) */
+    
+    border: none; /* Remove todas as bordas */
+    /* Adiciona a linha marrom de baixo */
+    border-bottom: 1px solid #a97b53; 
+    border-radius: 0; /* Garante que não seja arredondado */
 }
 .ficha-origens .form-group input[type="text"]:focus {
     outline: none;
-    background-color: var(--color-bg-light);
+    background-color: #e8eef1; /* Fundo levemente mais escuro ao focar */
 }
 
 /* --- Seção Aptidões (Esquerda) --- */
@@ -306,7 +321,7 @@ button {
 }
 .ficha-aptidoes > h2 {
     font-size: 2em;
-    text-align: left; /* Alinhado à esquerda como na imagem */
+    text-align: center; /* Alinhado à esquerda como na imagem */
     margin-bottom: 15px;
 }
 .grupo-aptidoes {
@@ -318,7 +333,7 @@ button {
     padding-bottom: 5px;
     margin-bottom: 10px;
     font-size: 1.4em;
-    text-align: left; /* Alinhado à esquerda */
+    text-align: center; /* Alinhado à esquerda */
 }
 
 /* Novo Grid para os atributos */
@@ -339,6 +354,7 @@ button {
     display: block;
     font-size: 1.1em;
     font-weight: 700;
+    text-align: center;
     padding: 8px 10px;
     background: #a97b53; /* Cor de fundo marrom/laranja */
     color: white;
@@ -350,10 +366,27 @@ button {
 
 .dots-track {
     display: flex;
-    gap: 6px;
+    gap: 10px;
     padding: 10px;
+    margin-left: 40px;
 }
 .dots-track input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    margin: 0;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 20px;
+    height: 20px;
+}
+
+.dots-track-1 {
+    display: flex;
+    gap: 6px;
+    padding: 10px;
+    margin-left: 40px;
+}
+.dots-track-1 input[type="checkbox"] {
     appearance: none;
     -webkit-appearance: none;
     margin: 0;
@@ -388,6 +421,34 @@ button {
     border-radius: 0;
 }
 .grupo-aptidoes:not(:first-child) .dots-track input[type="checkbox"]:checked {
+    /* Fica VERMELHO quando marcado */
+    background-color: var(--color-det-red);
+    border-color: var(--color-det-red);
+}
+
+.grupo-aptidoes:first-child .dots-track-1 input[type="checkbox"] {
+    /* Define como QUADRADO */
+    background-color: #fff;
+    border: 2px solid #aaa;
+    border-radius: 2px;
+    width: 16px; /* Tamanho do quadrado */
+    height: 16px;
+}
+.grupo-aptidoes:first-child .dots-track-1 input[type="checkbox"]:checked {
+    /* Fica PRETO quando marcado */
+    background-color: var(--color-text-dark);
+    border-color: var(--color-text-dark);
+}
+
+
+/* --- Regra 2: Conhecimentos e Práticas (os outros grupos) --- */
+.grupo-aptidoes:not(:first-child) .dots-track-1 input[type="checkbox"] {
+    /* Define como LOSANGO */
+    background-color: #eee; /* Cor do losango vazio */
+    border: 1px solid #aaa;
+    border-radius: 0;
+}
+.grupo-aptidoes:not(:first-child) .dots-track-1 input[type="checkbox"]:checked {
     /* Fica VERMELHO quando marcado */
     background-color: var(--color-det-red);
     border-color: var(--color-det-red);
@@ -448,7 +509,6 @@ button {
     color: var(--color-text-medium);
     text-align: center;
     padding: 8px;
-    background: var(--color-border-light);
     border-radius: 3px;
     margin-top: 15px;
     margin-bottom: 5px;
@@ -554,6 +614,8 @@ button {
     grid-area: determinacao;
     background: var(--color-paper);
     border: 1px solid var(--color-border-light);
+    border-top: 3px solid var(--color-assim-blue);
+    border-bottom: 3px solid var(--color-det-red);
     border-radius: 5px;
     padding: 15px 30px;
     display: flex;
@@ -921,3 +983,255 @@ main.container {
     background-color: var(--color-det-red);
     border-color: var(--color-det-red);
 }
+
+/* ========================================
+   ESTILOS DO SPINNER (DENTRO DO CARD) - FADE CORRIGIDO v2
+   ========================================
+*/
+
+/* A animação de rotação */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  
+  /* Ajuste no card para conter elementos posicionados */
+  .sub-roll {
+      /* ... (seus estilos existentes para .sub-roll) ... */
+      position: relative; /* NECESSÁRIO para conter .hidden com position: absolute */
+      min-height: 100px; /* Garante uma altura mínima para o card não pular */
+  }
+  
+  /* Estilo do spinner */
+  .card-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Define uma altura explícita igual à dos ícones para alinhamento */
+    height: 65px; /* Ajuste este valor se necessário (45px icon + 2*10px padding) */
+    padding: 10px 0; /* Mantém o padding vertical */
+    transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
+    opacity: 1;
+    visibility: visible;
+    width: 100%; /* Garante que o flex container ocupe a largura */
+  }
+  .card-spinner img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  /* Estilo dos ícones */
+  .sub-roll .icons-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    /* height: 65px; <-- REMOVA ESTA LINHA */
+    min-height: 70px; /* Mantém uma altura mínima */
+    padding: 10px 0; /* Mantém o padding vertical */
+    transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out, max-height 0.5s ease-in-out, padding 0.5s ease-in-out; /* Adicionado max-height/padding */
+    opacity: 1;
+    visibility: visible;
+    width: 100%; /* Garante que o flex container ocupe a largura */
+  }
+  .sub-roll .icons-container img {
+      height: 60px;
+      width: 60px;
+      background-color: transparent;
+      border: none;
+      padding: 0;
+  }
+  
+  /* Classe .hidden revisada */
+  .hidden {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    max-height: 0 !important; /* Usa max-height para animar o colapso */
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    overflow: hidden !important;
+    /* position: absolute removido */
+    transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out, max-height 0.5s ease-in-out, padding 0.5s ease-in-out; /* Adiciona max-height/padding à transição */
+  }
+
+  /* ========================================
+   ANIMAÇÃO DE FOLHAS CAINDO
+   ========================================
+*/
+
+#leaves-container {
+    position: fixed; /* Fica fixo na tela, mesmo rolando */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* Esconde folhas que saem da tela */
+    pointer-events: none; /* Não interfere com cliques */
+    z-index: 0; /* Fica atrás do conteúdo principal */
+  }
+  
+  .leaf {
+    position: absolute;
+    top: -10%; 
+    width: 20px; /* Largura da "base" da folha */
+    height: 15px; /* Altura da "base" da folha */
+    
+    /* REMOVIDO: background-image, background-size, background-repeat */
+    
+    /* Variáveis para randomização */
+    --start-x: 50vw; 
+    --end-x-offset: 0vw;
+    --rotation: 0deg;
+  
+    /* Animação */
+    animation: fall linear infinite;
+    
+    /* Usaremos pseudo-elementos para desenhar a folha */
+    background-color: transparent; /* A base é transparente */
+  }
+  
+  /* Corpo da folha (parte principal) */
+  .leaf::before {
+    content: '';
+    position: absolute;
+    width: 100%; /* Usa a largura do .leaf */
+    height: 100%; /* Usa a altura do .leaf */
+    background-color: var(--color-det-red); /* Cor da folha (verde musgo claro) */
+    border-radius: 5px 50% 5px 50%; /* Forma ovalada/pontiaguda */
+    transform: rotate(-15deg); /* Inclina um pouco */
+    left: -2px; /* Ajuste fino da posição */
+  }
+  
+  /* Detalhe/caule (opcional) */
+  .leaf::after {
+    content: '';
+    position: absolute;
+    width: 3px; /* Largura do caule */
+    height: 8px; /* Comprimento do caule */
+    background-color: var(--color-assim-blue); /* Verde escuro */
+    border-radius: 2px;
+    bottom: -5px; /* Posiciona abaixo da folha */
+    left: 50%; /* Centraliza */
+    transform: translateX(-50%) rotate(10deg); /* Centraliza e inclina */
+  }
+  
+  /* A animação 'fall' (permanece a mesma) */
+  @keyframes fall {
+    0% {
+      transform: translate(var(--start-x), 0) rotate(0deg);
+      opacity: 1;
+    }
+    100% {
+      transform: translate(calc(var(--start-x) + var(--end-x-offset)), 110vh) rotate(var(--rotation));
+      opacity: 0.8; 
+    }
+  }
+  
+  /* A animação 'fall' */
+  @keyframes fall {
+    0% {
+      transform: translate(var(--start-x), 0) rotate(0deg);
+      opacity: 1;
+    }
+    100% {
+      /* Cai até 110% da altura e move horizontalmente */
+      transform: translate(calc(var(--start-x) + var(--end-x-offset)), 110vh) rotate(var(--rotation));
+      opacity: 0.8; /* Leve fade ao cair */
+    }
+  }
+  
+  /* Garante que o conteúdo principal fique na frente */
+  .navbar, .container, main {
+    position: relative; /* Necessário para z-index funcionar */
+    z-index: 1; 
+  }
+
+  /* ========================================
+   ESTILOS DO MODAL DA FOTO (POP-UP)
+   ========================================
+*/
+
+/* Torna a imagem de pré-visualização clicável */
+#char-photo-preview {
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+  }
+  #char-photo-preview:hover {
+      transform: scale(1.03); /* Leve zoom ao passar o mouse */
+  }
+  
+  /* O fundo escuro (overlay) do modal */
+  .modal {
+    display: none; /* Escondido por padrão */
+    position: fixed; /* Fica fixo na tela */
+    z-index: 1000; /* Fica na frente de tudo */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto; /* Permite rolar se a imagem for muito grande */
+    background-color: rgba(0, 0, 0, 0.8); /* Preto com 80% de opacidade */
+    
+    /* Animação de fade-in */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+  }
+  
+  /* Classe para mostrar o modal */
+  .modal.show {
+      display: block; /* Garante que o elemento ocupe espaço */
+      opacity: 1;
+      visibility: visible;
+  }
+  
+  /* A imagem dentro do modal */
+  .modal-content {
+    margin: auto;
+    display: block;
+    width: 80%;
+    max-width: 700px; /* Largura máxima da imagem */
+    position: absolute; /* Para centralização precisa */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.8); /* Começa menor */
+    transition: transform 0.4s ease; /* Animação de zoom */
+  }
+  .modal.show .modal-content {
+      transform: translate(-50%, -50%) scale(1); /* Zoom para tamanho normal */
+  }
+  
+  
+  /* O botão de fechar (X) */
+  .modal-close {
+    position: absolute;
+    top: 15px;
+    right: 35px;
+    color: #f1f1f1;
+    font-size: 40px;
+    font-weight: bold;
+    transition: 0.3s;
+    cursor: pointer;
+  }
+  
+  .modal-close:hover,
+  .modal-close:focus {
+    color: #bbb;
+    text-decoration: none;
+  }
+  
+  /* Adiciona animação de zoom na imagem ao abrir/fechar */
+  @keyframes zoom {
+    from {transform: scale(0)} 
+    to {transform: scale(1)}
+  }
+  
+  /* Ajuste para telas menores */
+  @media (max-width: 700px){
+    .modal-content {
+      width: 95%; /* Imagem ocupa quase toda a largura */
+    }
+  }

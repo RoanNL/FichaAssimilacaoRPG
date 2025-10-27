@@ -200,4 +200,32 @@ document.addEventListener('DOMContentLoaded', () => {
     importInput.addEventListener('change', importCharacter);
 
     populateCharacterList();
-});
+    // --- 5. LÓGICA DO MODAL DA FOTO ---
+    
+    const modal = document.getElementById('photo-modal');
+    const modalImg = document.getElementById('modal-image');
+    const previewImg = document.getElementById('char-photo-preview');
+    const closeBtn = document.getElementById('modal-close-button');
+
+    // Abre o modal quando a imagem de preview é clicada
+    previewImg.onclick = function() {
+        // Só abre se a imagem não for a padrão (vazia)
+        if (previewImg.src && !previewImg.src.startsWith('data:image/gif')) { 
+            modal.classList.add('show');
+            modalImg.src = this.src;
+        }
+    }
+
+    // Fecha o modal quando o botão (X) é clicado
+    closeBtn.onclick = function() {
+        modal.classList.remove('show');
+    }
+
+    // Fecha o modal quando se clica fora da imagem (no overlay)
+    modal.onclick = function(event) {
+        if (event.target === modal) { // Verifica se o clique foi no fundo
+            modal.classList.remove('show');
+        }
+    }
+
+}); // Fim do 'DOMContentLoaded'
