@@ -1,8 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
     const API_URL = 'http://localhost:3000';
     
-    // Variável que guarda o ID do usuário apenas na memória RAM (sem localStorage)
-    let usuarioLogadoId = null; 
+    // Variável que guarda o ID do usuário apenas na memória RAM 
+    let token = sessionStorage.getItem('token')
+    let usuarioLogadoId = sessionStorage.getItem('usuarioId');
+    let nomeOperador = sessionStorage.getItem('nomeUsuario'); 
     let isLoginMode = true;
 
     // Elementos de Autenticação
@@ -27,6 +29,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let personagensCarregados = []; 
     let idPersonagemAtual = null;
+
+    //Função de verificação de sessão
+    function verificarSessao() {
+        if (token && usuarioLogadoId) {
+            // Esconde login e mostra a ficha imediatamente
+            authContainer.style.display = 'none';
+            appContainer.style.display = 'block';
+            
+            // Atualiza o nome na navbar
+            const nomeUsuarioLogado = document.getElementById('nome-usuario-logado');
+            if (nomeUsuarioLogado) nomeUsuarioLogado.textContent = `Bem-vindo, ${nomeOperador}`;
+            
+            // Carrega os personagens
+            carregarListaPersonagens();
+        }
+    }
+    verificarSessao();
 
     // ==========================================
     // SISTEMA DE LOGIN E CRIAÇÃO DE CONTA
@@ -75,17 +94,27 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 if (isLoginMode) {
                     // SUCESSO NO LOGIN!
-                    usuarioLogadoId = dados.usuarioId;
                     
-                    // Esconde a tela de login e mostra a ficha
+                    // Salva os dados no SessionStorage
+                    sessionStorage.setItem('token', dados.token);
+                    sessionStorage.setItem('usuarioId', dados.usuarioId);
+                    sessionStorage.setItem('nomeUsuario', dados.nome_usuario);
+                    
+                    // Atualiza as variáveis do script
+                    token = dados.token;
+                    usuarioLogadoId = dados.usuarioId;
+                    nomeOperador = dados.nome_usuario;
+                    
+                    // Atualiza a tela
                     authContainer.style.display = 'none';
                     appContainer.style.display = 'block';
                     
-                    // Limpa os campos de senha
+                    const nomeUsuarioLogado = document.getElementById('nome-usuario-logado');
+                    if (nomeUsuarioLogado) nomeUsuarioLogado.textContent = `Bem-vindo, ${nomeOperador}`;
+                    
                     usernameInput.value = '';
                     passwordInput.value = '';
 
-                    // AGORA SIM carregamos os personagens DESTE jogador específico!
                     carregarListaPersonagens();
                 } else {
                     // SUCESSO NO CADASTRO!
@@ -105,9 +134,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // Desconectar (Limpar memória)
     btnSair.addEventListener('click', (e) => {
         e.preventDefault();
+
+        sessionStorage.clear();
+
+        token = null;
         usuarioLogadoId = null;
+        nomeOperador = null;
         idPersonagemAtual = null;
-        document.querySelector('.ficha-container').reset();
+
+        document.querySelectorAll('form').forEach(f => {
+            if(f.id !== 'auth-form') f.reset();
+        });
+
+        if (photoPreview) photoPreview.src = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
         
         appContainer.style.display = 'none';
         authContainer.style.display = 'block';
@@ -135,15 +174,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 2. Coletar todos os dados (agora inclui textareas e a imagem)
+    // Coletar todos os dados (agora inclui textareas e a imagem)
     function coletarDadosFicha() {
         const dados = {};
         
-        // Pega inputs e textareas de toda a área principal (ignora o login)
-        const elementos = document.querySelectorAll('main.container input, main.container textarea');
+        // Pega TODOS os inputs e textareas de dentro do <main> inteiro!
+        const elementos = document.querySelectorAll('.ficha-container input, .detalhes-container input, .detalhes-container textarea');
         
         elementos.forEach(el => {
-            if (!el.id || el.type === 'file') return; // Ignora o input de arquivo, vamos pegar o Base64 da imagem
+            if (!el.id || el.type === 'file') return; // Ignora o input de arquivo
 
             if (el.type === 'checkbox') {
                 dados[el.id] = el.checked;
@@ -152,22 +191,24 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Salva a foto em Base64, se houver uma carregada
-        if (photoPreview && photoPreview.src) {
+        // Salva a foto em Base64, se houver uma carregada (ignora o pixel transparente padrão)
+        const photoPreview = document.getElementById('char-photo-preview');
+        if (photoPreview && photoPreview.src && !photoPreview.src.includes('R0lGODlhAQABAAD')) {
             dados['char-photo'] = photoPreview.src;
         }
 
         return dados;
     }
 
-    // 3. Preencher a ficha ao carregar do banco
+    // Preencher a ficha ao carregar do banco
     function preencherFicha(dados) {
-        // Limpa os formulários da ficha e dos detalhes
+        // Limpa TODOS os formulários (exceto o de login)
         document.querySelectorAll('form').forEach(f => {
             if (f.id !== 'auth-form') f.reset();
         });
 
         // Reseta a imagem para o pixel transparente padrão
+        const photoPreview = document.getElementById('char-photo-preview');
         if (photoPreview) {
             photoPreview.src = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
         }
@@ -179,6 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 continue;
             }
 
+            // Para todos os outros inputs e textareas
             const el = document.getElementById(key);
             if (el) {
                 if (el.type === 'checkbox') {
@@ -190,38 +232,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-
-    // ==========================================
-    // SISTEMA DA FICHA (O RESTO CONTINUA IGUAL)
-    // ==========================================
-
-    function coletarDadosFicha() {
-        const dados = {};
-        const inputs = document.querySelectorAll('.ficha-container input');
-        inputs.forEach(input => {
-            if (!input.id) return;
-            if (input.type === 'checkbox') {
-                dados[input.id] = input.checked;
-            } else {
-                dados[input.id] = input.value;
-            }
-        });
-        return dados;
-    }
-
-    function preencherFicha(dados) {
-        document.querySelector('.ficha-container').reset();
-        for (const key in dados) {
-            const input = document.getElementById(key);
-            if (input) {
-                if (input.type === 'checkbox') {
-                    input.checked = dados[key];
-                } else {
-                    input.value = dados[key];
-                }
-            }
-        }
-    }
 
     async function carregarListaPersonagens() {
         if (!usuarioLogadoId) return; // Proteção extra
