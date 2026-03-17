@@ -1,5 +1,29 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Controle do Modal (Abrir e Fechar)
+    
+    // === 1. CONEXÃO MULTIPLAYER (SOCKET.IO) ===
+    const socket = io('https://assimilacao-backend-api.onrender.com');
+    // Pegamos o nome do jogador que está logado para avisar os outros!
+    const nomeOperador = sessionStorage.getItem('nomeUsuario') || 'Operador Desconhecido';
+
+    socket.on('connect', () => {
+        console.log('Conectado ao Servidor Multiplayer!');
+    });
+
+    // Quando receber um pacote de dados de outro jogador, desenha na tela!
+    socket.on('nova-rolagem', (pacoteDeDados) => {
+        // 1. Descobre quem está logado NESTA aba do navegador
+        const meuNome = sessionStorage.getItem('nomeUsuario');
+
+        // 2. O Escudo do Mestre: Só desenha se a minha conta se chamar "Mestre"
+        if (meuNome && meuNome.toLowerCase() === 'mestre') {
+            renderizarRolagem(pacoteDeDados);
+            // Opcional: Abre a janela do rolador automaticamente para o Mestre
+            document.getElementById('rolador-modal').classList.add('show');
+        }
+    });
+    // ==========================================
+
+    // 2. Controle do Modal (Abrir e Fechar)
     const btnAbrirModal = document.getElementById('nav-btn-rolador');
     const modalRolador = document.getElementById('rolador-modal');
     const btnFecharModal = document.getElementById('fechar-rolador');
@@ -7,26 +31,23 @@ document.addEventListener('DOMContentLoaded', () => {
     if(btnAbrirModal) {
         btnAbrirModal.addEventListener('click', (e) => {
             e.preventDefault();
-            // A MÁGICA: Adiciona a classe que tira a invisibilidade!
             modalRolador.classList.add('show'); 
         });
     }
 
     if(btnFecharModal) {
         btnFecharModal.addEventListener('click', () => {
-            // Remove a classe para esconder suavemente
             modalRolador.classList.remove('show');
         });
     }
 
-    // Fechar clicando na área escura fora da janela
     window.addEventListener('click', (event) => {
         if (event.target == modalRolador) {
             modalRolador.classList.remove('show');
         }
     });
 
-    // 2. Lógica dos Dados
+    // 3. Lógica dos Dados
     const iconFiles = {
         sucesso: '../assets/Sucesso.png',
         pressao: '../assets/pressao.png',
@@ -86,12 +107,53 @@ document.addEventListener('DOMContentLoaded', () => {
         return diceRequests;
     }
 
+    // === A MATEMÁTICA: Só calcula e monta o pacote ===
     function handleRoll() {
         const inputString = inputDados.value;
         const parsedDice = parseInput(inputString);
         if (!parsedDice || parsedDice.length === 0) return;
 
-        resultsDiv.innerHTML = '';
+        // A CORREÇÃO: Pega o nome atualizado na memória no instante exato da rolagem!
+        const jogadorAtual = sessionStorage.getItem('nomeUsuario') || 'Cobaia Anônima';
+
+        // O pacote que vai trafegar pela internet
+        const pacoteDeDados = {
+            jogador: jogadorAtual,
+            input: inputString,
+            resultados: [],
+            totais: { sucesso: 0, pressao: 0, adaptacao: 0, nada: 0 }
+        };
+
+        let dieCounter = { d6: 0, d10: 0, d12: 0 };
+
+        parsedDice.forEach(die => {
+            const dieType = 'd' + die.size; 
+            for (let i = 0; i < die.quantity; i++) {
+                dieCounter[dieType]++; 
+                const rollNumber = rollDie(die.size);
+                const icons = diceTable[dieType][rollNumber];
+
+                icons.forEach(iconName => pacoteDeDados.totais[iconName]++);
+
+                pacoteDeDados.resultados.push({
+                    tipo: dieType,
+                    numero: dieCounter[dieType],
+                    faceMecanica: rollNumber,
+                    icones: icons
+                });
+            }
+        });
+
+        // 1. Desenha na minha tela
+        renderizarRolagem(pacoteDeDados);
+
+        // 2. Envia para os outros via Socket.IO
+        socket.emit('rolar-dados', pacoteDeDados);
+    }
+
+    // === O DESENHISTA: Só pega um pacote e desenha na tela com animações ===
+    function renderizarRolagem(pacote) {
+        resultsDiv.innerHTML = ''; 
 
         const rollGroup = document.createElement('div');
         rollGroup.style.borderBottom = '1px solid #ccc';
@@ -99,99 +161,82 @@ document.addEventListener('DOMContentLoaded', () => {
         rollGroup.style.marginBottom = '15px';
 
         const header = document.createElement('h3');
-        header.textContent = `Rolando: ${inputString}`;
+        // Adicionamos o nome do jogador no título!
+        header.textContent = `${pacote.jogador} rolou: ${pacote.input}`;
         header.style.marginTop = '0';
+        
+        // Destaca em azul se a rolagem for de outro jogador
+        if(pacote.jogador !== nomeOperador) {
+            header.style.color = 'var(--color-assim-blue)';
+        }
+
         rollGroup.appendChild(header);
 
         const subRollsContainer = document.createElement('div');
         subRollsContainer.className = 'sub-rolls-container';
         
-        const totals = { sucesso: 0, pressao: 0, adaptacao: 0, nada: 0 };
-        let dieCounter = { d6: 0, d10: 0, d12: 0 }; 
-
-        const tempoGiroLogo = 1000; // 1s de giro do logo
-        const delaySuspense = 300;  // 0.3s de suspense
+        const tempoGiroLogo = 1000; 
+        const delaySuspense = 300;  
         const tempoTotalAntesDados = tempoGiroLogo + delaySuspense; 
 
-        parsedDice.forEach(die => {
-            const dieType = 'd' + die.size; 
-            for (let i = 0; i < die.quantity; i++) {
-                dieCounter[dieType]++; 
+        // Lê os resultados do pacote em vez de rolar de novo
+        pacote.resultados.forEach(dado => {
+            const subRollDiv = document.createElement('div');
+            subRollDiv.className = 'sub-roll';
+            subRollDiv.style.position = 'relative'; 
+
+            const subRollHeader = document.createElement('h4');
+            subRollHeader.textContent = `${dado.tipo} #${dado.numero} (rolou ${dado.faceMecanica})`;
+            subRollHeader.style.opacity = '0';
+            subRollHeader.style.transition = 'opacity 0.3s ease';
+
+            const subRollIcons = document.createElement('div');
+            subRollIcons.className = 'icons-container';
+            subRollIcons.style.opacity = '0';
+
+            const logoImg = document.createElement('img');
+            logoImg.src = '../assets/icon.jpg'; 
+            logoImg.className = 'logo-animado';
+            subRollDiv.appendChild(logoImg);
+            
+            dado.icones.forEach((iconName, index) => {
+                const img = document.createElement('img');
+                img.src = iconFiles[iconName];
+                img.alt = iconName;
+                img.className = 'dado-animado'; 
                 
-                const rollNumber = rollDie(die.size); // Sorteia o número antes de criar o texto
-
-                const subRollDiv = document.createElement('div');
-                subRollDiv.className = 'sub-roll';
-                subRollDiv.style.position = 'relative';
-
-                // ===============================================
-                // CORREÇÃO 1: O título (Label) agora começa invisível
-                const subRollHeader = document.createElement('h4');
-                subRollHeader.textContent = `${dieType} #${dieCounter[dieType]} (rolou ${rollNumber})`;
-                subRollHeader.style.opacity = '0';
-                subRollHeader.style.transition = 'opacity 0.3s ease';
-                // ===============================================
-
-                const subRollIcons = document.createElement('div');
-                subRollIcons.className = 'icons-container';
-                subRollIcons.style.opacity = '0';
-
-                // Logo do RPG
-                const logoImg = document.createElement('img');
-                logoImg.src = '../assets/icon.jpg'; 
-                logoImg.className = 'logo-animado';
-                subRollDiv.appendChild(logoImg);
+                const delayDados = tempoTotalAntesDados / 1000; 
+                img.style.animationDelay = `${delayDados + (index * 0.1)}s`; 
                 
-                const icons = diceTable[dieType][rollNumber];
+                subRollIcons.appendChild(img); 
+            });
 
-                icons.forEach((iconName, index) => {
-                    totals[iconName]++; 
-                    const img = document.createElement('img');
-                    img.src = iconFiles[iconName];
-                    img.alt = iconName;
-                    
-                    img.className = 'dado-animado'; 
-                    const delayDados = tempoTotalAntesDados / 1000; 
-                    img.style.animationDelay = `${delayDados + (index * 0.1)}s`; 
-                    
-                    subRollIcons.appendChild(img); 
-                });
+            setTimeout(() => {
+                subRollIcons.style.transition = 'opacity 0.3s ease';
+                subRollIcons.style.opacity = '1';
+                subRollHeader.style.opacity = '1';
+            }, tempoTotalAntesDados);
 
-                // Revela os ícones e o título (Label) ao mesmo tempo após o delay
-                setTimeout(() => {
-                    subRollIcons.style.transition = 'opacity 0.3s ease';
-                    subRollIcons.style.opacity = '1';
-                    subRollHeader.style.opacity = '1'; // Revela o texto!
-                }, tempoTotalAntesDados);
-
-                subRollDiv.appendChild(subRollHeader);
-                subRollDiv.appendChild(subRollIcons);
-                subRollsContainer.appendChild(subRollDiv);
-            }
+            subRollDiv.appendChild(subRollHeader);
+            subRollDiv.appendChild(subRollIcons);
+            subRollsContainer.appendChild(subRollDiv);
         });
 
         rollGroup.appendChild(subRollsContainer);
 
         const summary = document.createElement('p');
         summary.className = 'rolador-summary';
-        summary.textContent = `Total: ${totals.sucesso} Sucesso, ${totals.pressao} Pressão, ${totals.adaptacao} Adaptação.`;
+        summary.textContent = `Total: ${pacote.totais.sucesso} Sucesso, ${pacote.totais.pressao} Pressão, ${pacote.totais.adaptacao} Adaptação.`;
         rollGroup.appendChild(summary);
 
         resultsDiv.appendChild(rollGroup);
         
-        // ===============================================
-        // CORREÇÃO 3: O Histórico espera a animação acabar para não dar spoiler!
         setTimeout(() => {
             const historyEntry = rollGroup.cloneNode(true);
             
-            // Tira a invisibilidade do título e dos contêineres no histórico
             historyEntry.querySelectorAll('h4').forEach(h => h.style.opacity = '1');
             historyEntry.querySelectorAll('.icons-container').forEach(c => c.style.opacity = '1');
-            
-            // Remove os logos giratórios do histórico
             historyEntry.querySelectorAll('.logo-animado').forEach(logo => logo.remove());
-            
-            // Força os dados a aparecerem imediatamente no histórico sem animação
             historyEntry.querySelectorAll('.dado-animado').forEach(die => {
                 die.classList.remove('dado-animado');
                 die.style.opacity = '1';
@@ -201,7 +246,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             historicoDiv.prepend(historyEntry);
         }, tempoTotalAntesDados);
-        // ===============================================
     }
 
     rollButton.addEventListener('click', handleRoll);
