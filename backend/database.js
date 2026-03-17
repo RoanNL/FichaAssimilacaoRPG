@@ -30,6 +30,24 @@ db.serialize(() => {
         utilizador_id INTEGER,
         FOREIGN KEY(utilizador_id) REFERENCES utilizadores(id)
     )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS campanhas (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nome TEXT NOT NULL,
+        codigo_convite TEXT UNIQUE NOT NULL,
+        mestre_id INTEGER NOT NULL,
+        FOREIGN KEY (mestre_id) REFERENCES usuarios(id)
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS membros_campanha (
+        campanha_id INTEGER NOT NULL,
+        usuario_id INTEGER NOT NULL,
+        personagem_id INTEGER, 
+        FOREIGN KEY (campanha_id) REFERENCES campanhas(id),
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+        FOREIGN KEY (personagem_id) REFERENCES personagens(id),
+        PRIMARY KEY (campanha_id, usuario_id)
+    )`);
     
     console.log('Tabelas verificadas/criadas com sucesso.');
 });

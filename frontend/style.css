@@ -1264,3 +1264,90 @@ main.container {
     100% { transform: rotate(0deg) scale(1); opacity: 1; visibility: visible; }
 }
 
+
+/* ========================================
+   GALERIA DE PERSONAGENS (DARK MODE)
+   ========================================
+*/
+.galeria-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+    max-height: 65vh;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+/* Estilizando a barra de rolagem da galeria */
+.galeria-grid::-webkit-scrollbar { width: 8px; }
+.galeria-grid::-webkit-scrollbar-track { background: #1a1a1a; }
+.galeria-grid::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+.galeria-grid::-webkit-scrollbar-thumb:hover { background: #666; }
+
+/* O Card do Personagem */
+.char-card {
+    display: flex;
+    background-color: #242424;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #333;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    height: 130px; /* Altura fixa para todos ficarem iguais */
+}
+
+.char-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.6);
+}
+
+.char-card-img {
+    width: 110px;
+    height: 100%;
+    object-fit: cover;
+    border-right: 1px solid #333;
+    background-color: #111;
+}
+
+.char-card-info {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    flex-grow: 1;
+    font-family: Arial, sans-serif;
+}
+
+.char-card-nome {
+    color: #ffffff;
+    margin: 0 0 4px 0;
+    font-size: 1.2em;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+}
+
+.char-card-detalhe {
+    color: #aaaaaa;
+    font-size: 0.85em;
+    margin: 0;
+}
+
+.btn-acessar-ficha {
+    background-color: #a64dff; /* Roxo brilhante */
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 3px;
+    font-size: 0.85em;
+    cursor: pointer;
+    align-self: flex-end;
+    margin-top: auto; /* Empurra o botão pro final do card */
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.btn-acessar-ficha:hover {
+    background-color: #b366ff;
+}

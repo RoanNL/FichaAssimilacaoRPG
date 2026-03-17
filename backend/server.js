@@ -37,6 +37,11 @@ app.get('/', (req, res) => {
     res.json({ mensagem: 'Servidor online!' });
 });
 
+// Função auxiliar para gerar código de convite (Ex: A7X9P2)
+function gerarCodigoConvite() {
+    return Math.random().toString(36).substring(2, 8).toUpperCase();
+}
+
 // ==========================================
 // ROTA 1: REGISTRO DE USUÁRIO
 // ==========================================
@@ -157,6 +162,65 @@ app.delete('/personagens/:id', (req, res) => {
     db.run(query, [id], function(err) {
         if (err) return res.status(500).json({ erro: 'Erro ao deletar ficha.' });
         res.status(200).json({ mensagem: 'Personagem excluído.' });
+    });
+});
+
+// ==========================================
+// ROTAS DE CAMPANHA (VTT MULTIPLAYER)
+// ==========================================
+
+app.post('/campanhas', (req, res) => {
+    const { nome, mestre_id } = req.body;
+    const codigo = gerarCodigoConvite();
+
+    db.run(`INSERT INTO campanhas (nome, codigo_convite, mestre_id) VALUES (?, ?, ?)`, 
+        [nome, codigo, mestre_id], 
+        function(err) {
+            if (err) return res.status(500).json({ erro: 'Erro ao criar campanha.' });
+            
+            const campanha_id = this.lastID;
+            // O Mestre também é inserido como membro automaticamente (sem personagem)
+            db.run(`INSERT INTO membros_campanha (campanha_id, usuario_id) VALUES (?, ?)`, 
+                [campanha_id, mestre_id], 
+                (err) => {
+                    if (err) console.error("Erro ao vincular mestre à campanha.");
+                    res.json({ mensagem: 'Campanha criada!', id: campanha_id, codigo: codigo });
+                }
+            );
+        }
+    );
+});
+
+// 2. Entrar em uma campanha via código de convite
+app.post('/campanhas/entrar', (req, res) => {
+    const { codigo_convite, usuario_id, personagem_id } = req.body;
+
+    db.get(`SELECT id FROM campanhas WHERE codigo_convite = ?`, [codigo_convite], (err, campanha) => {
+        if (err || !campanha) return res.status(404).json({ erro: 'Código de convite inválido ou não encontrado.' });
+
+        db.run(`INSERT INTO membros_campanha (campanha_id, usuario_id, personagem_id) VALUES (?, ?, ?)`, 
+            [campanha.id, usuario_id, personagem_id], 
+            function(err) {
+                if (err) return res.status(400).json({ erro: 'Você já está nesta campanha ou ocorreu um erro.' });
+                res.json({ mensagem: 'Você entrou na campanha com sucesso!', campanha_id: campanha.id });
+            }
+        );
+    });
+});
+
+// 3. Buscar campanhas de um usuário (como Mestre ou como Jogador)
+app.get('/campanhas/usuario/:usuarioId', (req, res) => {
+    const { usuarioId } = req.params;
+    const sql = `
+        SELECT c.id, c.nome, c.codigo_convite, c.mestre_id, 
+        (c.mestre_id = ?) as is_mestre
+        FROM campanhas c
+        JOIN membros_campanha m ON c.id = m.campanha_id
+        WHERE m.usuario_id = ?
+    `;
+    db.all(sql, [usuarioId, usuarioId], (err, rows) => {
+        if (err) return res.status(500).json({ erro: 'Erro ao buscar campanhas.' });
+        res.json(rows);
     });
 });
 

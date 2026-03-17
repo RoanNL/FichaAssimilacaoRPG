@@ -30,6 +30,44 @@ document.addEventListener('DOMContentLoaded', () => {
     let personagensCarregados = []; 
     let idPersonagemAtual = null;
 
+    // === CONTROLES DA GALERIA ===
+    const btnAbrirGaleria = document.getElementById('btn-abrir-galeria');
+    const modalGaleria = document.getElementById('galeria-modal');
+    const btnFecharGaleria = document.getElementById('fechar-galeria');
+    const inputBuscaGaleria = document.getElementById('busca-personagem');
+
+    if(btnAbrirGaleria) {
+        btnAbrirGaleria.addEventListener('click', (e) => {
+            e.preventDefault();
+            modalGaleria.classList.add('show');
+        });
+    }
+
+    if(btnFecharGaleria) {
+        btnFecharGaleria.addEventListener('click', () => {
+            modalGaleria.classList.remove('show');
+        });
+    }
+
+    // Fechar clicando fora da janela
+    window.addEventListener('click', (event) => {
+        if (event.target == modalGaleria) {
+            modalGaleria.classList.remove('show');
+        }
+    });
+
+    // Filtro de Busca
+    if(inputBuscaGaleria) {
+        inputBuscaGaleria.addEventListener('input', (e) => {
+            const termo = e.target.value.toLowerCase();
+            document.querySelectorAll('.char-card').forEach(card => {
+                if (card.dataset.nome) {
+                    card.style.display = card.dataset.nome.includes(termo) ? 'flex' : 'none';
+                }
+            });
+        });
+    }
+
     //Função de verificação de sessão
     function verificarSessao() {
         if (token && usuarioLogadoId) {
@@ -116,6 +154,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     passwordInput.value = '';
 
                     carregarListaPersonagens();
+
+                    const modalGaleria = document.getElementById('galeria-modal');
+                    if(modalGaleria) modalGaleria.classList.add('show');
                 } else {
                     // SUCESSO NO CADASTRO!
                     authMensagem.textContent = 'Conta criada com sucesso! Faça login.';
@@ -234,19 +275,99 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     async function carregarListaPersonagens() {
-        if (!usuarioLogadoId) return; // Proteção extra
+        if (!usuarioLogadoId) return;
 
         try {
             const resposta = await fetch(`${API_URL}/personagens/usuario/${usuarioLogadoId}`);
             personagensCarregados = await resposta.json();
             
+            // 1. Atualiza o Select antigo (mantemos para segurança/referência)
             charSelect.innerHTML = '<option value="">-- Novo Personagem --</option>';
+            
+            // 2. Prepara a Galeria Visual
+            const gridPersonagens = document.getElementById('grid-personagens');
+            if(gridPersonagens) gridPersonagens.innerHTML = '';
+
+            // Cria o botão gigante de "Novo Personagem" na Galeria
+            if(gridPersonagens) {
+                const cardNovo = document.createElement('div');
+                cardNovo.className = 'char-card';
+                cardNovo.style.cursor = 'pointer';
+                cardNovo.innerHTML = `
+                    <div class="char-card-img" style="display: flex; align-items: center; justify-content: center; font-size: 3em; color: #555;">+</div>
+                    <div class="char-card-info">
+                        <h3 class="char-card-nome" style="color: #4CAF50;">Criar Novo</h3>
+                        <p class="char-card-detalhe">Ficha em branco</p>
+                    </div>
+                `;
+                cardNovo.addEventListener('click', () => {
+                    document.querySelectorAll('form').forEach(f => {
+                        if (f.id !== 'auth-form') f.reset();
+                    });
+                    const photoPreview = document.getElementById('char-photo-preview');
+                    if (photoPreview) photoPreview.src = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
+                    idPersonagemAtual = null;
+                    charSelect.value = "";
+                    modalGaleria.classList.remove('show');
+                });
+                gridPersonagens.appendChild(cardNovo);
+            }
+
+            // 3. Povoa a Galeria com os personagens do banco
             personagensCarregados.forEach(char => {
                 const option = document.createElement('option');
                 option.value = char.id;
                 option.textContent = char.nome_personagem || 'Sem Nome';
                 charSelect.appendChild(option);
+
+                if(gridPersonagens) {
+                    const dados = char.dados_personagem || {};
+                    
+                    // Extrai a foto e a ocupação direto do pacote JSON salvo
+                    const fotoBase64 = dados['char-photo'];
+                    const ocupacao = dados['ocupacao'] || 'Desconhecido';
+                    
+                    // Se não tiver foto, usamos uma imagem neutra (placeholder)
+                    const imgSrc = (fotoBase64 && !fotoBase64.includes('R0lGODlhAQAB')) 
+                                    ? fotoBase64 
+                                    : 'https://via.placeholder.com/110x130/111111/555555?text=?';
+
+                    const card = document.createElement('div');
+                    card.className = 'char-card';
+                    card.dataset.nome = (char.nome_personagem || 'sem nome').toLowerCase(); // Para a busca
+
+                    card.innerHTML = `
+                        <img src="${imgSrc}" class="char-card-img" alt="Foto de ${char.nome_personagem}">
+                        <div class="char-card-info">
+                            <h3 class="char-card-nome">${char.nome_personagem || 'Sem Nome'}</h3>
+                            <p class="char-card-detalhe">${ocupacao}</p>
+                            <button class="btn-acessar-ficha" data-id="${char.id}">Acessar Ficha</button>
+                        </div>
+                    `;
+                    gridPersonagens.appendChild(card);
+                }
             });
+
+            // Adiciona a ação mágica nos botões "Acessar Ficha" recém-criados
+            document.querySelectorAll('.btn-acessar-ficha').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const idSelecionado = e.target.getAttribute('data-id');
+                    
+                    // Sincroniza o select antigo
+                    charSelect.value = idSelecionado;
+                    
+                    // Puxa e preenche a ficha
+                    const personagem = personagensCarregados.find(p => p.id == idSelecionado);
+                    if (personagem && personagem.dados_personagem) {
+                        preencherFicha(personagem.dados_personagem);
+                        idPersonagemAtual = personagem.id;
+                    }
+                    
+                    // Fecha a galeria
+                    modalGaleria.classList.remove('show');
+                });
+            });
+
         } catch (erro) {
             console.error('Erro ao buscar lista:', erro);
         }

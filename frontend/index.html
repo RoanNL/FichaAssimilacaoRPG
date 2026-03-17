@@ -57,15 +57,15 @@
         <section class="character-manager paper">
             <h2>Gerenciar Personagens</h2>
             <div class="manager-controls">
-                <label for="char-select">Carregar Personagem:</label>
-                <select id="char-select">
-                    <option value="">-- Nenhum --</option>
-                </select>
-                <button type="button" id="btn-load-char">Carregar</button>
-                <button type="button" id="btn-save-char">Salvar</button>
-                <button type="button" id="btn-delete-char">Excluir Selecionado</button>
-                <input type="file" id="btn-import-char" style="display: none;" accept=".json">
-            </div>
+        <label>Carregar Personagem:</label>
+        <select id="char-select">
+            <option value="">-- Novo Personagem --</option>
+        </select>
+            <button id="btn-load-char" style="display: none;">Carregar</button> <button id="btn-abrir-galeria" style="background-color: #8a2be2; color: white; border-color: #8a2be2;">Personagens</button>
+        
+            <button id="btn-save-char">Salvar</button>
+        <button id="btn-delete-char">Excluir Selecionado</button>
+    </div>
         </section>
     </div>
 
@@ -73,7 +73,7 @@
         <form class="ficha-container">
             <section class="ficha-origens">
                 <div class="logo-placeholder">
-                    <img src="../assets/icon.jpg" alt="Logo">
+                    <img src="./assets/icon.jpg" alt="Logo">
                     <span id="nome-usuario-logado" style="display: block; color: #351f1f; padding: 14px 16px; font-weight: bold; padding-top: 50px;">
                     </span>
                 </div>
@@ -281,6 +281,19 @@
             
             <h3 style="border-top: 1px dashed var(--color-border-medium); padding-top: 15px;">Histórico da Sessão</h3>
             <div id="rolador-historico"></div>
+        </div>
+    </div>
+
+    <div id="galeria-modal" class="modal">
+        <div class="modal-content" style="background-color: #1a1a1a; border: 1px solid #333; max-width: 900px; padding: 25px;">
+            <span id="fechar-galeria" class="modal-close" style="top: 10px; right: 20px;">&times;</span>
+            
+            <div style="margin-bottom: 25px; margin-top: 10px;">
+                <input type="text" id="busca-personagem" placeholder="🔍 Buscar personagem..." style="width: 100%; padding: 12px 15px; background-color: #242424; border: 1px solid #333; color: white; border-radius: 5px; font-size: 1.1em; font-family: sans-serif; box-sizing: border-box;">
+            </div>
+
+            <div id="grid-personagens" class="galeria-grid">
+                </div>
         </div>
     </div>
 
