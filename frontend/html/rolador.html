@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rolador - Assimilação RPG</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+    <link rel="shortcut icon" href="../../frontend/assets/icon.jpg" type="image/x-icon">
+    
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div id="leaves-container"></div>
+    <nav class="navbar">
+        <ul>
+            <li><a href="./rolador.html" class="active">Rolador de Dados</a></li>
+            <li><a href="./index.html" >Ficha de Personagem</a></li>
+        </ul>
+    </nav>
+
+    <main class="container">
+        <h1>Rolador de Dados - Assimilação</h1>
+
+        <div class="controles-container">
+            <div class="controles">
+                <label for="input-dados">Digite os dados (ex: 2d6 1d10):</label>
+                <input type="text" id="input-dados" placeholder="2d6 1d10 1d12">
+                <button id="btn-rolar">Rolar Dados</button>
+                <button id="btn-limpar">Limpar Histórico</button>
+            </div>
+        </div>
+
+        <div id="resultados-container" class="paper">
+            <h2>Última Rolagem</h2>
+            <div id="resultados-atuais">
+                </div>
+        </div>
+
+        <div id="historico-container" class="paper">
+            <h2>Histórico de Rolagens</h2>
+            <div id="historico-rolagens">
+                </div>
+        </div>
+    </main>
+    
+    <script src="../scripts/script.js"></script>
+    <script src="../scripts/leaves.js"></script>
+</body>
+</html>
