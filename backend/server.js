@@ -19,15 +19,20 @@ const io = new Server(server, {
 });
 
 io.on('connection', (socket) => {
-    console.log('Um jogador sentou na mesa! ID:', socket.id);
+    console.log('Um jogador conectou! ID:', socket.id);
 
-    // Quando o servidor ouve o evento 'rolar-dados' vindo de alguém...
+    // 1. O jogador avisa em qual mesa ele sentou
+    socket.on('entrar-na-campanha', (campanhaId) => {
+        socket.join(campanhaId); // Tranca o jogador na sala da campanha
+        console.log(`Socket ${socket.id} entrou na sala da campanha: ${campanhaId}`);
+    });
+
+    // 2. Quando rolar os dados, manda APENAS para a sala dele
     socket.on('rolar-dados', (pacoteDeDados) => {
-        // Ele retransmite (broadcast) para TODOS os outros jogadores conectados!
-        socket.broadcast.emit('nova-rolagem', pacoteDeDados);
+        // O "socket.to(id)" grita apenas dentro da sala correta!
+        socket.to(pacoteDeDados.campanhaId).emit('nova-rolagem', pacoteDeDados);
     });
 });
-
 app.use(cors());
 app.use(express.json({limit:'50mb'}));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));

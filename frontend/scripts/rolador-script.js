@@ -2,23 +2,31 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // === 1. CONEXÃO MULTIPLAYER (SOCKET.IO) ===
     const socket = io('https://assimilacao-backend-api.onrender.com');
-    // Pegamos o nome do jogador que está logado para avisar os outros!
-    const nomeOperador = sessionStorage.getItem('nomeUsuario') || 'Operador Desconhecido';
+    
+    // Compartilhamos o socket com os outros scripts para eles poderem usar
+    window.meuSocket = socket; 
 
     socket.on('connect', () => {
         console.log('Conectado ao Servidor Multiplayer!');
+        // Se a página recarregar e eu já estiver numa mesa, reconecta automaticamente!
+        const campanhaAtiva = sessionStorage.getItem('campanhaAtiva');
+        if (campanhaAtiva) {
+            socket.emit('entrar-na-campanha', campanhaAtiva);
+        }
     });
 
-    // Quando receber um pacote de dados de outro jogador, desenha na tela!
+    // === O NOVO ESCUDO DO MESTRE INTELIGENTE ===
     socket.on('nova-rolagem', (pacoteDeDados) => {
-        // 1. Descobre quem está logado NESTA aba do navegador
-        const meuNome = sessionStorage.getItem('nomeUsuario');
+        // Agora o script pergunta: "Nesta campanha específica, eu sou o mestre?"
+        const isMestre = sessionStorage.getItem('isMestreAtivo') === 'true';
 
-        // 2. O Escudo do Mestre: Só desenha se a minha conta se chamar "Mestre"
-        if (meuNome && meuNome.toLowerCase() === 'mestre') {
+        if (isMestre) {
             renderizarRolagem(pacoteDeDados);
-            // Opcional: Abre a janela do rolador automaticamente para o Mestre
-            document.getElementById('rolador-modal').classList.add('show');
+            // Mostra um aviso visual que a rolagem chegou na aba do mestre
+            const modalRolador = document.getElementById('rolador-modal');
+            if(modalRolador && !modalRolador.classList.contains('show')){
+                modalRolador.classList.add('show');
+            }
         }
     });
     // ==========================================
@@ -115,11 +123,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // A CORREÇÃO: Pega o nome atualizado na memória no instante exato da rolagem!
         const jogadorAtual = sessionStorage.getItem('nomeUsuario') || 'Cobaia Anônima';
+        const campanhaAtiva = sessionStorage.getItem('campanhaAtiva');
 
         // O pacote que vai trafegar pela internet
         const pacoteDeDados = {
             jogador: jogadorAtual,
             input: inputString,
+            campanhaId: campanhaAtiva,
             resultados: [],
             totais: { sucesso: 0, pressao: 0, adaptacao: 0, nada: 0 }
         };
@@ -147,8 +157,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // 1. Desenha na minha tela
         renderizarRolagem(pacoteDeDados);
 
-        // 2. Envia para os outros via Socket.IO
-        socket.emit('rolar-dados', pacoteDeDados);
+        // 2. Envia para os outros SOMENTE se eu estiver numa mesa
+        if (campanhaAtiva) {
+            socket.emit('rolar-dados', pacoteDeDados);
+        }
     }
 
     // === O DESENHISTA: Só pega um pacote e desenha na tela com animações ===

@@ -62,17 +62,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 listaCampanhas.appendChild(card);
             });
 
-            // ATENÇÃO: Aqui prepararemos a conexão da Sala (Fase 3)
-            document.querySelectorAll('.btn-jogar').forEach(btn => {
+                document.querySelectorAll('.btn-jogar').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const idCampanha = e.target.getAttribute('data-id');
                     const isMestre = e.target.getAttribute('data-mestre') === '1';
                     
-                    // Salva na memória em qual campanha estamos logados agora
+                    // Salva na memória
                     sessionStorage.setItem('campanhaAtiva', idCampanha);
                     sessionStorage.setItem('isMestreAtivo', isMestre);
                     
-                    alert(`Conectando na campanha... Em breve as rolagens serão privadas!`);
+                    // === A MÁGICA DE ENTRAR NA SALA ===
+                    if (window.meuSocket) {
+                        window.meuSocket.emit('entrar-na-campanha', idCampanha);
+                    }
+                    
+                    const papel = isMestre ? 'Mestre' : 'Jogador';
+                    alert(`Conectado como ${papel}! Suas rolagens agora pertencem a esta mesa.`);
                     modalCampanhas.classList.remove('show');
                 });
             });

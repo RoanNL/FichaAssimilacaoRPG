@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes - Assimilação RPG</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+    <link rel="shortcut icon" href="../../assets/icon.jpg" type="image/x-icon">
+    
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div id="leaves-container"></div>
+    <nav class="navbar">
+        <ul>
+            <li><a href="./rolador.html">Rolador de Dados</a></li>
+            <li><a href="./index.html">Ficha de Personagem</a></li>
+            <li><a href="./detalhes.html" class="active">Detalhes</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <section class="character-manager paper">
+            <h2>Gerenciar Personagens</h2>
+            <div class="manager-controls">
+                <label for="char-select">Carregar Personagem:</label>
+                <select id="char-select">
+                    <option value="">-- Nenhum --</option>
+                </select>
+                <button type="button" id="btn-load-char">Carregar</button>
+                <button type="button" id="btn-save-char">Salvar Detalhes</button>
+                <button type="button" id="btn-delete-char">Excluir Selecionado</button>
+                
+                <button type="button" id="btn-export-char">Exportar Selecionado</button>
+                <label for="btn-import-char" class="btn-import">Importar Ficha</label>
+                <input type="file" id="btn-import-char" style="display: none;" accept=".json">
+            </div>
+        </section>
+    </div>
+
+    <main class="container">
+        <form class="detalhes-container paper">
+            
+            <section class="detalhes-foto">
+                <h2>Foto do Personagem</h2>
+                <img id="char-photo-preview" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="Pré-visualização">
+                <label for="char-photo-input">Carregar imagem:</label>
+                <input type="file" id="char-photo-input" accept="image/*">
+            </section>
+
+            <section class="detalhes-texto">
+                <h2>Descrição</h2>
+                <textarea id="char-descricao" rows="5" placeholder="Aparência, personalidade, etc..."></textarea>
+                
+                <h2>Habilidades & Equipamentos</h2>
+                <textarea id="char-habilidades" rows="8" placeholder="Liste aqui habilidades, equipamentos, notas..."></textarea>
+                
+                <h2>História do Personagem</h2>
+                <textarea id="char-historia" rows="12" placeholder="Escreva o passado do seu personagem..."></textarea>
+            </section>
+
+        </form>
+    </main>
+    
+    <div id="photo-modal" class="modal">
+        <span class="modal-close" id="modal-close-button">&times;</span>
+        <img class="modal-content" id="modal-image">
+      </div>
+    <script src="../scripts/detalhes-script.js"></script>
+    <script src="../scripts/leaves.js"></script>
+</body>
+</html>
