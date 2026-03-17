@@ -6,14 +6,31 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken')
 const db = require('./database');
 
+const http = require('http');
+const { Server } = require('socket.io');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const SEGREDO_JWT = process.env.SEGREDO_JWT
 
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: { origin: '*' } // Permite comunicação livre com o front-end
+});
+
+io.on('connection', (socket) => {
+    console.log('Um jogador sentou na mesa! ID:', socket.id);
+
+    // Quando o servidor ouve o evento 'rolar-dados' vindo de alguém...
+    socket.on('rolar-dados', (pacoteDeDados) => {
+        // Ele retransmite (broadcast) para TODOS os outros jogadores conectados!
+        socket.broadcast.emit('nova-rolagem', pacoteDeDados);
+    });
+});
+
 app.use(cors());
-app.use(express.json({limit:'10mb'}));
-app.use(express.urlencoded({ limit: '10mb', extended: true }));
+app.use(express.json({limit:'50mb'}));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 
 app.get('/', (req, res) => {
@@ -145,6 +162,6 @@ app.delete('/personagens/:id', (req, res) => {
 
 
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Servidor a correr na porta http://localhost:${PORT}`);
 });
