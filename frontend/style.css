@@ -1335,7 +1335,7 @@ main.container {
 }
 
 .btn-acessar-ficha {
-    background-color: #a64dff; /* Roxo brilhante */
+    background-color: #3a7c8c; /* Roxo brilhante */
     color: white;
     border: none;
     padding: 6px 12px;
@@ -1349,5 +1349,65 @@ main.container {
 }
 
 .btn-acessar-ficha:hover {
-    background-color: #b366ff;
+    background-color: #224e58;
+}
+
+#btn-abrir-galeria:hover {
+    background-color: #11292e;
+}
+
+/* ========================================
+   ESTILOS DO LOBBY DE CAMPANHAS
+   ========================================
+*/
+.campanha-card {
+    background: #242424;
+    border: 1px solid #444;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: transform 0.2s, border-color 0.2s;
+}
+.campanha-card:hover {
+    transform: translateX(5px);
+    border-color: #666;
+}
+.campanha-info h4 { 
+    margin: 0 0 5px 0; 
+    color: white; 
+    font-size: 1.1em;
+}
+.campanha-info p { 
+    margin: 0; 
+    font-size: 0.85em; 
+    color: #aaa; 
+    font-family: Arial, sans-serif;
+}
+.badge-mestre {
+    background: var(--color-assim-blue);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 0.8em;
+    font-weight: bold;
+    display: inline-block;
+    margin-top: 5px;
+}
+.badge-jogador {
+    background: #4CAF50;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 0.8em;
+    font-weight: bold;
+    display: inline-block;
+    margin-top: 5px;
+}
+.btn-jogar { 
+    background-color: var(--color-det-red); 
+    padding: 8px 15px; 
+    font-size: 0.9em; 
 }
