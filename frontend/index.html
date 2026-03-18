@@ -9,104 +9,181 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="../styles/style.css"> <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class', 
+            theme: {
+                extend: {
+                    colors: {
+                        'rpg-red': '#8c3a3a',
+                        'rpg-red-hover': '#a85252',
+                        'rpg-blue': '#3a7c8c',
+                        'rpg-blue-hover': '#4a9cb0',
+                        'rpg-green': '#3e9c35',
+                        'rpg-brown': '#a97b53',
+                        'rpg-paper': '#ffffff',
+                        'rpg-paper-dark': '#1e1e1e',
+                        'rpg-bg-light': '#f7f4f0',
+                        'rpg-bg-dark': '#121212',
+                    },
+                    fontFamily: {
+                        'rpg': ['"Special Elite"', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
     <link rel="shortcut icon" href="./assets/icon.jpg" type="image/x-icon">
     
-    <link rel="stylesheet" href="./style.css">
 </head>
 <body>
     <div id="leaves-container"></div>
-    <div id="auth-container" class="paper auth-box" style="max-width: 400px; margin: 100px auto; text-align: center; padding: 30px;">
-        <h1 id="auth-title">Acesso Restrito</h1>
-        <p class="auth-subtitle" style="color: #666; margin-bottom: 20px;">Identifique-se para acessar o sistema.</p>
+    <div id="auth-container" class="max-w-[400px] mx-auto mt-[10vh] text-center p-8 bg-rpg-paper dark:bg-rpg-paper-dark border border-gray-300 dark:border-gray-800 rounded-lg shadow-xl relative z-10 transition-colors duration-300 mx-4 md:mx-auto">
+        
+        <h1 id="auth-title" class="text-3xl font-black font-rpg text-rpg-text-dark dark:text-orange-500 uppercase border-b-2 border-rpg-red pb-3 mb-2 mt-0">
+            Acesso Restrito
+        </h1>
+        <p class="auth-subtitle text-gray-500 dark:text-gray-400 mb-6 font-rpg text-sm md:text-base">
+            Identifique-se para acessar o sistema.
+        </p>
         
         <form id="auth-form">
-            <div class="form-group" style="text-align: left; margin-bottom: 15px;">
-                <label for="auth-username">Nome do Operador</label>
-                <input type="text" id="auth-username" required autocomplete="off" style="width: 100%; box-sizing: border-box; padding: 8px;">
-            </div>
-            <div class="form-group" style="text-align: left; margin-bottom: 20px;">
-                <label for="auth-password">Senha</label>
-                <input type="password" id="auth-password" required style="width: 100%; box-sizing: border-box; padding: 8px;">
+            <div class="text-left mb-4">
+                <label for="auth-username" class="block font-bold text-gray-700 dark:text-gray-300 mb-1 font-rpg">Nome do Operador</label>
+                <input type="text" id="auth-username" required autocomplete="off" class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-[#f0f3f5] dark:bg-[#2a2a2a] text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-blue transition-colors font-sans">
             </div>
             
-            <button type="submit" id="auth-submit-btn" style="width: 100%; padding: 10px;">Entrar no Sistema</button>
+            <div class="text-left mb-6">
+                <label for="auth-password" class="block font-bold text-gray-700 dark:text-gray-300 mb-1 font-rpg">Senha</label>
+                <input type="password" id="auth-password" required class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-[#f0f3f5] dark:bg-[#2a2a2a] text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-blue transition-colors font-sans">
+            </div>
+            
+            <button type="submit" id="auth-submit-btn" class="w-full bg-rpg-blue hover:bg-rpg-blue-hover text-white font-bold font-rpg py-3 rounded uppercase transition-colors shadow-md cursor-pointer border-none text-lg">
+                Entrar no Sistema
+            </button>
         </form>
         
-        <p id="auth-mensagem" style="font-weight: bold; margin-top: 15px; min-height: 20px;"></p>
+        <p id="auth-mensagem" class="font-bold mt-4 min-h-[20px] text-rpg-red dark:text-red-400"></p>
         
-        <p id="auth-toggle-text" style="margin-top: 20px; font-size: 0.9em;">
-            Não possui credenciais? <span id="auth-toggle-link" style="color: #a04040; cursor: pointer; text-decoration: underline; font-weight: bold;">Criar nova conta</span>
+        <p id="auth-toggle-text" class="mt-5 text-sm text-gray-600 dark:text-gray-400 font-rpg">
+            Não possui credenciais? 
+            <span id="auth-toggle-link" class="text-rpg-red hover:text-rpg-red-hover dark:text-orange-500 dark:hover:text-orange-400 cursor-pointer underline font-bold transition-colors">Criar nova conta</span>
         </p>
     </div>
 
     <div id="app-container" style="display: none;">
-    <nav class="navbar">
-        <ul>
-            <li><a href="#" id="nav-btn-rolador">Rolador de Dados</a></li>
-            <li><a href="./index.html" class="active">Ficha de Personagem</a></li>
-            <li><a href="#" id="nav-btn-campanhas">Campanhas</a></li>
-            <li><a href="#" id="btn-toggle-tema" style="cursor: pointer;">🌙 Tema Escuro</a></li>
-            
-            <li style="float: right;"><a href="#" id="btn-sair" style="color: #a04040;">Desconectar</a></li>
-            
-            <li style="float: right;">
-                
+    <nav class="w-full bg-rpg-paper dark:bg-rpg-paper-dark border-b border-gray-300 dark:border-gray-800 shadow-sm transition-colors duration-300">
+        <ul class="flex flex-wrap list-none mx-auto p-0 justify-center max-w-[1100px]">
+            <li>
+                <a href="#" id="nav-btn-rolador" class="block text-gray-600 dark:text-gray-400 py-4 px-[22px] text-base font-bold uppercase transition-all duration-300 border-b-[3px] border-transparent hover:text-black dark:hover:text-orange-500">
+                    Rolador de Dados
+                </a>
+            </li>
+            <li>
+                <a href="#" id="nav-btn-ficha" class="block text-rpg-red dark:text-rpg-red-hover py-4 px-[22px] text-base font-bold uppercase transition-all duration-300 border-b-[3px] border-rpg-red dark:border-rpg-red-hover hover:text-black dark:hover:text-orange-500">
+                    Ficha de Personagem
+                </a>
+            </li>
+            <li>
+                <a href="#" id="nav-btn-campanhas" class="block text-gray-600 dark:text-gray-400 py-4 px-[22px] text-base font-bold uppercase transition-all duration-300 border-b-[3px] border-transparent hover:text-black dark:hover:text-orange-500">
+                    Campanhas
+                </a>
+            </li>
+            <li>
+                <a href="#" id="btn-toggle-tema" class="block text-gray-600 dark:text-gray-400 py-4 px-[22px] text-base font-bold uppercase transition-all duration-300 border-b-[3px] border-transparent hover:text-black dark:hover:text-orange-500 cursor-pointer">
+                    🌙 Tema Escuro
+                </a>
+            </li>
+            <li>
+                <a href="#" id="btn-sair" class="block text-rpg-red dark:text-red-400 py-4 px-[22px] text-base font-bold uppercase transition-all duration-300 border-b-[3px] border-transparent hover:text-black dark:hover:text-orange-500">
+                    Desconectar
+                </a>
             </li>
         </ul>
     </nav>
 
-    <div class="container">
-        <section class="character-manager paper">
-            <h2>Gerenciar Personagens</h2>
-            <div class="manager-controls">
-        <label>Carregar Personagem:</label>
-        <select id="char-select">
-            <option value="">-- Novo Personagem --</option>
-        </select>
-            <button id="btn-load-char" style="display: none;">Carregar</button> <button id="btn-abrir-galeria" style="background-color: #3a7c8c; color: white; border-color: #3a7c8c;">Personagens</button>
-            <button id="btn-fichas-mesa" style="display: none; background-color: #ff9800; color: white; border-color: #ff9800; font-weight: bold;">👑 Fichas da Mesa</button>
-            <button id="btn-gerenciar-jogadores" style="display: none; background-color: #d9534f; color: white; border-color: #d9534f; font-weight: bold;">👥 Jogadores</button>
-            <button id="btn-save-char">Salvar</button>
-        <button id="btn-delete-char">Excluir Selecionado</button>
-    </div>
-        </section>
+    <div class="max-w-[1100px] mx-auto mt-5 px-5">
+        <div class="bg-rpg-paper dark:bg-rpg-paper-dark border border-gray-300 dark:border-gray-800 rounded-md p-6 shadow-sm transition-colors duration-300 mb-6">
+            
+            <h2 class="text-left mt-0 mb-5 pb-3 border-b-2 border-gray-300 dark:border-gray-800 text-rpg-text-dark dark:text-orange-500 text-2xl font-black uppercase font-rpg">
+                Gerenciar Personagens
+            </h2>
+            
+            <div class="flex flex-wrap items-center gap-4 manager-controls">
+                <label class="text-[1.1em] font-bold text-gray-600 dark:text-orange-500">
+                    Carregar Personagem:
+                </label>
+                
+                <select id="char-select" class="flex-grow min-w-[200px] font-rpg text-base py-2.5 px-4 rounded border border-gray-400 dark:border-gray-600 bg-white dark:bg-[#2a2a2a] text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-blue transition-colors duration-200">
+                    <option value="">-- Novo Personagem --</option>
+                </select>
+                
+                <button id="btn-load-char" style="display: none;">Carregar</button> <button id="btn-abrir-galeria" class="font-rpg text-base py-2.5 px-4 rounded border-none font-bold text-white uppercase cursor-pointer transition-colors duration-200 bg-purple-600 hover:bg-purple-800">
+                    Personagens
+                </button>
+                
+                <button id="btn-fichas-mesa" style="display: none; background-color: #ff9800;" class="font-rpg text-base py-2.5 px-4 rounded border-none font-bold text-white uppercase cursor-pointer transition-colors duration-200 hover:brightness-90">
+                    👑 Fichas da Mesa
+                </button>
+                
+                <button id="btn-gerenciar-jogadores" style="display: none; background-color: #d9534f;" class="font-rpg text-base py-2.5 px-4 rounded border-none font-bold text-white uppercase cursor-pointer transition-colors duration-200 hover:brightness-90">
+                    👥 Jogadores
+                </button>
+                
+                <button id="btn-save-char" class="font-rpg text-base py-2.5 px-4 rounded border-none font-bold text-white uppercase cursor-pointer transition-colors duration-200 bg-rpg-green hover:bg-green-600">
+                    Salvar
+                </button>
+                
+                <button id="btn-delete-char" class="font-rpg text-base py-2.5 px-4 rounded border-none font-bold text-white uppercase cursor-pointer transition-colors duration-200 bg-rpg-red hover:bg-rpg-red-hover">
+                    Excluir Selecionado
+                </button>
+            </div>
+        </div>
     </div>
 
     <main class="container">
-        <form class="ficha-container">
-            <section class="ficha-origens">
-                <div class="logo-placeholder">
-                    <img src="./assets/icon.jpg" alt="Logo">
-                    <span id="nome-usuario-logado" style="display: block; color: #351f1f; padding: 14px 16px; font-weight: bold; padding-top: 50px;">
-                    </span>
+        <form class="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-5 items-start">
+            <section class="md:col-span-2 bg-white dark:bg-[#1e1e1e] p-4 md:px-8 md:py-5 rounded border border-gray-300 dark:border-gray-800 w-full overflow-hidden">
+                
+                <div class="flex flex-col md:flex-row items-center md:items-start gap-4 text-center md:text-left mb-6">
+                    <img src="./assets/icon.jpg" alt="Logo" class="max-w-[100px] md:max-w-[150px] h-auto rounded-lg shadow-sm">
+                    <span id="nome-usuario-logado" class="block text-rpg-text-dark dark:text-orange-500 font-bold text-2xl md:text-3xl font-rpg md:pt-4"></span>
                 </div>
-                <div class="form-group">
-                    <label for="nome">Nome:</label>
-                    <input type="text" id="nome">
+                
+                <div class="flex flex-col md:flex-row md:items-center mb-4 w-full">
+                    <label for="nome" class="text-lg font-bold text-gray-600 dark:text-gray-400 md:min-w-[180px] mb-1 md:mb-0 text-left">Nome:</label>
+                    <input type="text" id="nome" class="w-full font-rpg text-lg px-2 py-1 text-black dark:text-white bg-[#f0f3f5] dark:bg-[#2a2a2a] focus:bg-[#e8eef1] dark:focus:bg-[#333] border-b-2 border-rpg-brown dark:border-[#c59b76] outline-none transition-colors">
                 </div>
-                <div class="form-group">
-                    <label for="evento">Evento Marcante:</label>
-                    <input type="text" id="evento">
+                
+                <div class="flex flex-col md:flex-row md:items-center mb-4 w-full">
+                    <label for="evento" class="text-lg font-bold text-gray-600 dark:text-gray-400 md:min-w-[180px] mb-1 md:mb-0 text-left">Evento Marcante:</label>
+                    <input type="text" id="evento" class="w-full font-rpg text-lg px-2 py-1 text-black dark:text-white bg-[#f0f3f5] dark:bg-[#2a2a2a] focus:bg-[#e8eef1] dark:focus:bg-[#333] border-b-2 border-rpg-brown dark:border-[#c59b76] outline-none transition-colors">
                 </div>
-                <div class="form-group">
-                    <label for="ocupacao">Ocupação:</label>
-                    <input type="text" id="ocupacao">
+                
+                <div class="flex flex-col md:flex-row md:items-center mb-4 w-full">
+                    <label for="ocupacao" class="text-lg font-bold text-gray-600 dark:text-gray-400 md:min-w-[180px] mb-1 md:mb-0 text-left">Ocupação:</label>
+                    <input type="text" id="ocupacao" class="w-full font-rpg text-lg px-2 py-1 text-black dark:text-white bg-[#f0f3f5] dark:bg-[#2a2a2a] focus:bg-[#e8eef1] dark:focus:bg-[#333] border-b-2 border-rpg-brown dark:border-[#c59b76] outline-none transition-colors">
                 </div>
-                <div class="form-group">
-                    <label for="geracao">Geração:</label>
-                    <input type="text" id="geracao">
+                
+                <div class="flex flex-col md:flex-row md:items-center mb-4 w-full">
+                    <label for="geracao" class="text-lg font-bold text-gray-600 dark:text-gray-400 md:min-w-[180px] mb-1 md:mb-0 text-left">Geração:</label>
+                    <input type="text" id="geracao" class="w-full font-rpg text-lg px-2 py-1 text-black dark:text-white bg-[#f0f3f5] dark:bg-[#2a2a2a] focus:bg-[#e8eef1] dark:focus:bg-[#333] border-b-2 border-rpg-brown dark:border-[#c59b76] outline-none transition-colors">
                 </div>
-                <div class="form-group">
-                    <label for="proposito-pessoal">Propósitos Pessoais:</label>
-                    <input type="text" id="proposito-pessoal" rows="2">
+                
+                <div class="flex flex-col md:flex-row md:items-center mb-4 w-full">
+                    <label for="proposito-pessoal" class="text-lg font-bold text-gray-600 dark:text-gray-400 md:min-w-[180px] mb-1 md:mb-0 text-left">Propósitos Pessoais:</label>
+                    <input type="text" id="proposito-pessoal" class="w-full font-rpg text-lg px-2 py-1 text-black dark:text-white bg-[#f0f3f5] dark:bg-[#2a2a2a] focus:bg-[#e8eef1] dark:focus:bg-[#333] border-b-2 border-rpg-brown dark:border-[#c59b76] outline-none transition-colors">
                 </div>
-                <div class="form-group">
-                    <label for="proposito-coletivo">Propósito Coletivo:</label>
-                    <input type="text" id="proposito-coletivo" rows="2">
+                
+                <div class="flex flex-col md:flex-row md:items-center mb-4 w-full">
+                    <label for="proposito-coletivo" class="text-lg font-bold text-gray-600 dark:text-gray-400 md:min-w-[180px] mb-1 md:mb-0 text-left">Propósito Coletivo:</label>
+                    <input type="text" id="proposito-coletivo" class="w-full font-rpg text-lg px-2 py-1 text-black dark:text-white bg-[#f0f3f5] dark:bg-[#2a2a2a] focus:bg-[#e8eef1] dark:focus:bg-[#333] border-b-2 border-rpg-brown dark:border-[#c59b76] outline-none transition-colors">
                 </div>
             </section>
 
-            <section class="ficha-aptidoes">
+            <section class="col-span-1 self-start">
                 <h2>APTIDÕES</h2>
                 
                 <div class="grupo-aptidoes">
@@ -164,7 +241,7 @@
                 </div>
             </section>
 
-            <section class="ficha-saude">
+            <section class="col-span-1 self-start">
                 <div class="saude-header">
                     <input type="number" class="saude-num-input" value="24" id="saude-max">
                     <h2>SAÚDE</h2>
@@ -194,8 +271,8 @@
                         <div class="saude-drops-track"><input type="checkbox" id="saude-3-1"><input type="checkbox" id="saude-3-2"><input type="checkbox" id="saude-3-3"><input type="checkbox" id="saude-3-4"><input type="checkbox" id="saude-3-5"><input type="checkbox" id="saude-3-6"><input type="checkbox" id="saude-3-7"><input type="checkbox" id="saude-3-8"><input type="checkbox" id="saude-3-9"><input type="checkbox" id="saude-3-10"><input type="checkbox" id="saude-3-11"></div>
                     </div>
                 </div>
-                <div class="saude-legenda-detalhes-1">
-                    <div>Menos <img src="./assets/Sucesso.png" alt="" width="20px" height="20px" justify-itens="center"> em todos os testes</div> 
+                <div class="flex justify-center items-center gap-1 text-sm font-bold text-gray-600 dark:text-gray-400 mt-4 mb-6">
+                    Menos <img src="./assets/Sucesso.png" alt="Sucesso" class="w-5 h-5 object-contain"> em todos os testes.
                 </div>
                 
                 <div class="saude-legenda" style="border-left: #8c3a3a 2px solid; border-top: #8c3a3a 2px solid; border-right: #8c3a3a 2px solid;">Dano dessa gravidade não regenera naturalmente. Será necessário tratamento médico</div> 
@@ -210,15 +287,28 @@
                         <div class="saude-drops-track"><input type="checkbox" id="saude-1-1"><input type="checkbox" id="saude-1-2"><input type="checkbox" id="saude-1-3"><input type="checkbox" id="saude-1-4"><input type="checkbox" id="saude-1-5"><input type="checkbox" id="saude-1-6"><input type="checkbox" id="saude-1-7"><input type="checkbox" id="saude-1-8"><input type="checkbox" id="saude-1-9"><input type="checkbox" id="saude-1-10"><input type="checkbox" id="saude-1-11"></div>
                     </div>
                 </div>
-                <div class="saude-legenda-detalhes">
-                    <div>Incapaz de agir, mas mantém a consciência.<br>Menos <img src="./assets/Sucesso.png" alt="" width="20px" height="20px" justify-itens="center"><img src="./assets/Sucesso.png" alt="" width="20px" height="20px" justify-itens="center">  em todos os testes.</div> 
-                    <div>Inconsciente.<br>Qualquer Ação com teste exige <img src="./assets/Adaptacao.png" alt="" width="20px" height="20px" justify-itens="center"> <img src="./assets/Adaptacao.png" alt="" width="20px" height="20px" justify-itens="center">  para ativar.</div> 
+                <div class="grid grid-cols-2 gap-2 text-[0.8em] font-bold text-gray-600 dark:text-gray-400 mt-4 text-center">
+                    <div class="flex flex-col items-center justify-start">
+                        <span>Incapaz de agir, mas mantém a consciência.</span>
+                        <span class="mt-1 block">
+                            Menos <img src="./assets/Sucesso.png" class="w-4 h-4 inline-block align-middle mx-[2px]"><img src="./assets/Sucesso.png" class="w-4 h-4 inline-block align-middle mr-1"> em todos os testes.
+                        </span>
+                    </div>
+                    <div class="flex flex-col items-center justify-start">
+                        <span>Inconsciente.</span>
+                        <span class="mt-1 block">
+                            Qualquer ação exige <img src="./assets/Adaptacao.png" class="w-4 h-4 inline-block align-middle mx-[2px]"><img src="./assets/Adaptacao.png" class="w-4 h-4 inline-block align-middle mr-1"> para ativar.
+                        </span>
+                    </div>
                 </div>
 
             </section>
 
-            <section class="ficha-determinacao">
-                <h3 class="det-label-left">Determinação <input type="number" class="det-num-input" value="9" id="det-num"></h3>
+            <section class="md:col-span-2 bg-rpg-paper dark:bg-rpg-paper-dark border border-gray-300 dark:border-gray-800 border-t-[3px] border-t-rpg-blue border-b-[3px] border-b-rpg-red rounded p-4 md:px-8 flex flex-col md:flex-row justify-between items-center gap-3">
+                <h3 class="flex items-center justify-center gap-2 m-0 text-xl font-black text-rpg-red uppercase flex-shrink-0">
+                    Determinação 
+                    <input type="number" id="det-num" value="9" class="w-10 h-10 p-0 m-0 leading-none rounded-full border-2 border-rpg-red bg-transparent text-center text-xl font-black text-rpg-red outline-none shadow-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                </h3>
                 <div class="determinacao-track">
                     <input type="checkbox" class="determ-check" id="det-1"><input type="checkbox" class="assim-check" id="assim-1">
                     <input type="checkbox" class="determ-check" id="det-2"><input type="checkbox" class="assim-check" id="assim-2">
@@ -231,33 +321,43 @@
                     <input type="checkbox" class="determ-check" id="det-9"><input type="checkbox" class="assim-check" id="assim-9">
                     <input type="checkbox" class="determ-check" id="det-10"><input type="checkbox" class="assim-check" id="assim-10">
                 </div>
-                <h3 class="det-label-right"><input type="number" class="det-num-input" value="1" id="assim-num"> Assimilação</h3>
+                <h3 class="flex items-center justify-center gap-2 m-0 text-xl font-black text-rpg-blue uppercase flex-shrink-0">
+                    <input type="number" id="assim-num" value="1" class="w-10 h-10 p-0 m-0 leading-none rounded-full border-2 border-rpg-blue bg-transparent text-center text-xl font-black text-rpg-blue outline-none shadow-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"> 
+                    Assimilação
+                </h3>
             </section>
 
         </form>
 
-        <section style="padding-top: 50px;">
-            <form class="detalhes-container paper">
-            
-            <section class="detalhes-foto">
-                <h2>Foto do Personagem</h2>
-                <img id="char-photo-preview" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="Pré-visualização">
-                <label for="char-photo-input">Carregar imagem:</label>
-                <input type="file" id="char-photo-input" accept="image/*">
-            </section>
-
-            <section class="detalhes-texto">
-                <h2>Descrição</h2>
-                <textarea id="char-descricao" rows="5" placeholder="Aparência, personalidade, etc..."></textarea>
+        <section class="pt-12">
+            <form class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-rpg-paper dark:bg-rpg-paper-dark border border-gray-300 dark:border-gray-800 rounded-md p-6 shadow-sm">
                 
-                <h2>Habilidades & Equipamentos</h2>
-                <textarea id="char-habilidades" rows="8" placeholder="Liste aqui habilidades, equipamentos, notas..."></textarea>
-                
-                <h2>História do Personagem</h2>
-                <textarea id="char-historia" rows="12" placeholder="Escreva o passado do seu personagem..."></textarea>
-            </section>
+                <section class="col-span-1 flex flex-col items-center">
+                    <h2 class="text-left text-rpg-red font-black text-xl border-b-2 border-rpg-red pb-1 mb-3 w-full uppercase font-rpg mt-0">Foto do Personagem</h2>
+                    <img id="char-photo-preview" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="Pré-visualização" class="w-full min-h-[250px] bg-gray-200 dark:bg-[#242424] border border-gray-300 dark:border-gray-600 rounded object-cover mb-4 cursor-pointer hover:scale-[1.03] transition-transform duration-200">
+                    <label for="char-photo-input" class="font-bold text-gray-600 dark:text-orange-500 self-start mb-1">Carregar imagem:</label>
+                    <input type="file" id="char-photo-input" accept="image/*" class="font-rpg border border-gray-300 dark:border-gray-600 rounded p-2 w-full text-black dark:text-white bg-white dark:bg-[#2a2a2a] outline-none">
+                </section>
 
-        </form>
+                <section class="col-span-1 md:col-span-2 flex flex-col gap-5">
+                    <div>
+                        <h2 class="text-left text-rpg-red font-black text-xl border-b-2 border-rpg-red pb-1 mb-3 w-full uppercase font-rpg mt-0">Descrição</h2>
+                        <textarea id="char-descricao" rows="4" placeholder="Aparência, personalidade, etc..." class="w-full box-border font-rpg text-lg leading-relaxed p-3 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-[#2a2a2a] text-black dark:text-white resize-y outline-none focus:ring-2 focus:ring-rpg-blue transition-colors shadow-inner"></textarea>
+                    </div>
+                    
+                    <div>
+                        <h2 class="text-left text-rpg-red font-black text-xl border-b-2 border-rpg-red pb-1 mb-3 w-full uppercase font-rpg mt-0">Habilidades & Equipamentos</h2>
+                        <textarea id="char-habilidades" rows="6" placeholder="Liste aqui habilidades, equipamentos, notas..." class="w-full box-border font-rpg text-lg leading-relaxed p-3 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-[#2a2a2a] text-black dark:text-white resize-y outline-none focus:ring-2 focus:ring-rpg-blue transition-colors shadow-inner"></textarea>
+                    </div>
+                    
+                    <div>
+                        <h2 class="text-left text-rpg-red font-black text-xl border-b-2 border-rpg-red pb-1 mb-3 w-full uppercase font-rpg mt-0">História do Personagem</h2>
+                        <textarea id="char-historia" rows="10" placeholder="Escreva o passado do seu personagem..." class="w-full box-border font-rpg text-lg leading-relaxed p-3 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-[#2a2a2a] text-black dark:text-white resize-y outline-none focus:ring-2 focus:ring-rpg-blue transition-colors shadow-inner"></textarea>
+                    </div>
+                </section>
+
+            </form>
+        </section>
     </main>
     
     <div id="photo-modal" class="modal">
@@ -268,39 +368,50 @@
     </main>
 
     <div id="rolador-modal" class="modal">
-        <div class="modal-content paper" style="padding: 20px; width: 90%; max-width: 700px; max-height: 85vh; overflow-y: auto;">
+        <div class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border border-gray-300 dark:border-gray-800 rounded-md p-6 shadow-md max-w-[700px] w-[90%] max-h-[85vh] overflow-y-auto relative">
             
-            <span id="fechar-rolador" class="modal-close">&times;</span>
-            <h2 style="text-align: center; color: #333; font-family: 'Courier New', Courier, monospace; margin-bottom: 20px;">TERMINAL DE DADOS</h2>
+            <span id="fechar-rolador" class="absolute top-4 right-6 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white text-4xl font-bold cursor-pointer transition-colors">&times;</span>
             
-            <div style="text-align: center; margin-bottom: 20px;">
-                <input type="text" id="rolador-input" placeholder="2d6 2d12" style="padding: 10px; width: 150px; text-align: center; font-size: 1.1em; border: 1px solid #ccc; border-radius: 3px; background-color: #f2f7ff;">
-                <button id="rolador-btn-rolar" style="background-color: #3b7c87; color: white; border: none; padding: 10px 20px; margin-left: 10px; font-weight: bold; border-radius: 3px; cursor: pointer;">ROLAR</button>
-                <button id="rolador-btn-limpar" style="background-color: #8c3b3b; color: white; border: none; padding: 10px 20px; margin-left: 10px; font-weight: bold; border-radius: 3px; cursor: pointer;">LIMPAR</button>
+            <h2 class="text-center text-rpg-text-dark dark:text-orange-500 font-rpg font-black text-2xl mb-6 uppercase tracking-widest">
+                Terminal de Dados
+            </h2>
+            
+            <div class="text-center mb-6 p-4 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-md flex flex-wrap justify-center items-center gap-3">
+                <input type="text" id="rolador-input" placeholder="2d6 2d12" class="p-3 w-[160px] text-center text-lg border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-[#2a2a2a] text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-blue transition-colors font-rpg shadow-inner">
+                
+                <button id="rolador-btn-rolar" class="bg-rpg-blue hover:bg-rpg-blue-hover text-white border-none py-3 px-6 font-bold rounded cursor-pointer uppercase font-rpg transition-colors shadow-sm">
+                    Rolar
+                </button>
+                
+                <button id="rolador-btn-limpar" class="bg-rpg-red hover:bg-rpg-red-hover text-white border-none py-3 px-6 font-bold rounded cursor-pointer uppercase font-rpg transition-colors shadow-sm">
+                    Limpar
+                </button>
             </div>
 
             <div id="rolador-resultados-atuais"></div>
 
-            <div style="margin-top: 25px; border-top: 1px dashed #ccc; padding-top: 15px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
-                    <h3 style="margin: 0; font-size: 1.1em; color: var(--color-det-red);">HISTÓRICO DA SESSÃO</h3>
+            <div class="mt-8 border-t border-dashed border-gray-300 dark:border-gray-700 pt-5">
+                <div class="flex justify-between items-center mb-5 flex-wrap gap-3">
+                    <h3 class="m-0 text-lg text-rpg-red dark:text-rpg-red-hover font-black uppercase font-rpg">
+                        Histórico da Sessão
+                    </h3>
                     
-                    <input type="text" id="filtro-historico" placeholder="🔍 Filtrar jogador..." style="padding: 6px 12px; border-radius: 4px; border: 1px solid #ccc; background: #f9f9f9; color: #333; font-family: Arial, sans-serif; outline: none;">
+                    <input type="text" id="filtro-historico" placeholder="🔍 Filtrar jogador..." class="py-2 px-4 rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-[#2a2a2a] text-gray-800 dark:text-white font-sans outline-none focus:ring-2 focus:ring-rpg-blue transition-colors">
                 </div>
                 
-                <div id="rolador-historico" style="max-height: 250px; overflow-y: auto; padding-right: 10px;">
+                <div id="rolador-historico" class="max-h-[250px] overflow-y-auto pr-3">
                     </div>
             </div>
+            
         </div>
     </div>
 
-
     <div id="galeria-modal" class="modal">
-        <div class="modal-content" style="background-color: #1a1a1a; border: 1px solid #333; max-width: 900px; padding: 25px;">
-            <span id="fechar-galeria" class="modal-close" style="top: 10px; right: 20px;">&times;</span>
+        <div class="modal-content bg-[#1a1a1a] border border-[#333] max-w-[900px] w-[95%] p-6 md:p-8 rounded-md relative shadow-2xl">
+            <span id="fechar-galeria" class="modal-close absolute top-3 right-5 text-gray-400 hover:text-white text-3xl cursor-pointer">&times;</span>
             
-            <div style="margin-bottom: 25px; margin-top: 10px;">
-                <input type="text" id="busca-personagem" placeholder="🔍 Buscar personagem..." style="width: 100%; padding: 12px 15px; background-color: #242424; border: 1px solid #333; color: white; border-radius: 5px; font-size: 1.1em; font-family: sans-serif; box-sizing: border-box;">
+            <div class="mb-6 mt-2">
+                <input type="text" id="busca-personagem" placeholder="🔍 Buscar personagem..." class="w-full p-3 bg-[#242424] border border-[#333] text-white rounded font-sans text-lg box-border outline-none focus:ring-2 focus:ring-rpg-blue transition-colors shadow-inner">
             </div>
 
             <div id="grid-personagens" class="galeria-grid">
@@ -309,54 +420,52 @@
     </div>
 
     <div id="campanhas-modal" class="modal">
-        <div class="modal-content paper modal-campanhas-ui">
-            <span id="fechar-campanhas" class="modal-close" style="color: white; top: 15px; right: 25px;">&times;</span>
+        <div class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark p-0 overflow-hidden max-w-[850px] w-[95%] rounded-md relative shadow-xl border border-gray-300 dark:border-gray-800">
+            <span id="fechar-campanhas" class="modal-close absolute top-4 right-6 text-white hover:text-gray-200 text-3xl cursor-pointer z-10">&times;</span>
             
-            <div class="campanhas-header">
-                <h2>🎲 Lobby de Campanha</h2>
-                <p>Gerencie suas mesas ou conecte-se a uma nova aventura.</p>
+            <div class="bg-rpg-red text-white p-5 md:px-8 text-center relative">
+                <h2 class="text-white m-0 text-2xl font-black uppercase font-rpg border-none">🎲 Lobby de Campanha</h2>
+                <p class="m-0 mt-1 text-sm md:text-base opacity-90">Gerencie suas mesas ou conecte-se a uma nova aventura.</p>
             </div>
             
-            <div class="campanhas-body">
-                <div class="campanhas-lista-section">
-                    <h3>Minhas Mesas</h3>
-                    <div id="lista-campanhas" class="lista-campanhas-container">
-                        <p style="color: var(--color-text-medium); font-style: italic;">Carregando campanhas...</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-6 md:p-8 bg-rpg-bg-light dark:bg-rpg-bg-dark">
+                <div>
+                    <h3 class="mt-0 text-xl border-b-2 border-gray-300 dark:border-gray-700 pb-2 mb-4 text-gray-800 dark:text-gray-200 font-black uppercase font-rpg text-left">Minhas Mesas</h3>
+                    <div id="lista-campanhas" class="max-h-[420px] overflow-y-auto pr-2">
+                        <p class="text-gray-500 dark:text-gray-400 italic">Carregando campanhas...</p>
                     </div>
                 </div>
                 
-                <div class="campanhas-acoes-section">
-                    
-                    <div class="acao-box box-jogador">
-                        <h4>⚔️ Entrar em uma Mesa</h4>
-                        <p>Tem um código de convite? Junte-se à party!</p>
-                        <input type="text" id="codigo-convite-input" placeholder="Código (Ex: A7X9P2)" maxlength="6" style="text-transform: uppercase;">
-                        <select id="char-select-campanha">
+                <div class="flex flex-col gap-6">
+                    <div class="bg-white dark:bg-[#1e1e1e] border-t-4 border-t-rpg-green border border-gray-300 dark:border-gray-700 p-5 rounded-lg shadow-sm">
+                        <h4 class="m-0 mb-1 text-lg text-gray-800 dark:text-gray-200 font-bold">⚔️ Entrar em uma Mesa</h4>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Tem um código de convite? Junte-se à party!</p>
+                        <input type="text" id="codigo-convite-input" placeholder="Código (Ex: A7X9P2)" maxlength="6" class="w-full mb-3 p-2.5 bg-gray-50 dark:bg-[#2a2a2a] border border-gray-300 dark:border-gray-600 rounded text-black dark:text-white uppercase outline-none focus:ring-2 focus:ring-rpg-green transition-colors">
+                        <select id="char-select-campanha" class="w-full mb-3 p-2.5 bg-gray-50 dark:bg-[#2a2a2a] border border-gray-300 dark:border-gray-600 rounded text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-green transition-colors">
                             <option value="">-- Selecione seu Personagem --</option>
                         </select>
-                        <button id="btn-entrar-campanha" class="btn-success">Entrar na Mesa</button>
+                        <button id="btn-entrar-campanha" class="w-full bg-rpg-green hover:bg-green-600 text-white font-bold py-2.5 rounded transition-colors uppercase font-rpg">Entrar na Mesa</button>
                     </div>
 
-                    <div class="acao-box box-mestre">
-                        <h4>👑 Criar Nova Mesa</h4>
-                        <p>Seja o Mestre e convide seus jogadores.</p>
-                        <input type="text" id="nova-campanha-nome" placeholder="Nome da Campanha...">
-                        <button id="btn-criar-campanha" class="btn-primary">Fundar Campanha</button>
+                    <div class="bg-white dark:bg-[#1e1e1e] border-t-4 border-t-rpg-blue border border-gray-300 dark:border-gray-700 p-5 rounded-lg shadow-sm">
+                        <h4 class="m-0 mb-1 text-lg text-gray-800 dark:text-gray-200 font-bold">👑 Criar Nova Mesa</h4>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Seja o Mestre e convide seus jogadores.</p>
+                        <input type="text" id="nova-campanha-nome" placeholder="Nome da Campanha..." class="w-full mb-3 p-2.5 bg-gray-50 dark:bg-[#2a2a2a] border border-gray-300 dark:border-gray-600 rounded text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-blue transition-colors">
+                        <button id="btn-criar-campanha" class="w-full bg-rpg-blue hover:bg-rpg-blue-hover text-white font-bold py-2.5 rounded transition-colors uppercase font-rpg">Fundar Campanha</button>
                     </div>
-
                 </div>
             </div>
         </div>
     </div>
 
     <div id="gerenciar-jogadores-modal" class="modal">
-        <div class="modal-content paper modal-campanhas-ui" style="max-width: 650px !important;">
-            <span id="fechar-gerenciar-jogadores" class="modal-close" style="color: var(--color-text-dark); top: 15px; right: 25px;">&times;</span>
-            <div class="campanhas-header" style="background-color: var(--color-bg-main); border-bottom: 1px solid var(--color-border-medium);">
-                <h2 style="color: var(--color-text-dark); text-align: left; margin-left: 20px;">Jogadores</h2>
+        <div class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark max-w-[650px] w-[95%] rounded-md overflow-hidden relative border border-gray-300 dark:border-gray-800 shadow-xl p-0">
+            <span id="fechar-gerenciar-jogadores" class="modal-close absolute top-4 right-6 text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white text-3xl cursor-pointer transition-colors">&times;</span>
+            <div class="bg-gray-100 dark:bg-[#121212] border-b border-gray-300 dark:border-gray-800 p-5">
+                <h2 class="text-gray-800 dark:text-white text-left m-0 ml-2 text-xl font-black font-rpg uppercase border-none">Jogadores</h2>
             </div>
-            <div class="campanhas-body" style="grid-template-columns: 1fr; padding: 30px; background-color: var(--color-paper);">
-                <div id="grid-jogadores-mesa" style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: flex-start;">
+            <div class="p-6 md:p-8 bg-white dark:bg-[#1e1e1e]">
+                <div id="grid-jogadores-mesa" class="flex flex-wrap gap-4 justify-start">
                     </div>
             </div>
         </div>
