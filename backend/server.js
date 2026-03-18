@@ -229,6 +229,33 @@ app.get('/campanhas/usuario/:usuarioId', (req, res) => {
     });
 });
 
+app.get('/campanhas/:id/personagens', (req, res) => {
+    const campanhaId = req.params.id;
+    // Puxa o personagem e o nome de quem é o dono dele
+    const sql = `
+        SELECT p.id, p.nome_personagem, p.dados_personagem, u.username as nome_jogador
+        FROM membros_campanha m
+        JOIN personagens p ON m.personagem_id = p.id
+        JOIN usuarios u ON m.usuario_id = u.id
+        WHERE m.campanha_id = ?
+    `;
+    db.all(sql, [campanhaId], (err, rows) => {
+        if (err) return res.status(500).json({ erro: 'Erro ao buscar personagens da mesa.' });
+        
+        // Converte os dados salvos de volta para JSON para o Front-end ler
+        const personagensFormatados = rows.map(row => {
+            try {
+                row.dados_personagem = JSON.parse(row.dados_personagem);
+            } catch (e) {
+                row.dados_personagem = {};
+            }
+            return row;
+        });
+        
+        res.json(personagensFormatados);
+    });
+});
+
 
 
 server.listen(PORT, () => {

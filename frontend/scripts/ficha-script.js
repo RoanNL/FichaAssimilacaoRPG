@@ -194,6 +194,87 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ==========================================
+    // PODERES DO MESTRE: INSPECIONAR FICHAS DA MESA
+    // ==========================================
+    const btnFichasMesa = document.getElementById('btn-fichas-mesa');
+    
+    // Um radarzinho que checa a cada 1 segundo se você virou Mestre de alguma mesa
+    setInterval(() => {
+        const isMestre = sessionStorage.getItem('isMestreAtivo') === 'true';
+        if (btnFichasMesa) {
+            btnFichasMesa.style.display = isMestre ? 'inline-block' : 'none';
+        }
+    }, 1000);
+
+    if (btnFichasMesa) {
+        btnFichasMesa.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const campanhaId = sessionStorage.getItem('campanhaAtiva');
+            if (!campanhaId) return alert('Você não está em nenhuma mesa ativa!');
+
+            btnFichasMesa.textContent = "Buscando...";
+            try {
+                const resposta = await fetch(`${API_URL}/campanhas/${campanhaId}/personagens`);
+                const personagensMesa = await resposta.json();
+                
+                const gridPersonagens = document.getElementById('grid-personagens');
+                gridPersonagens.innerHTML = ''; // Limpa a galeria para mostrar a mesa
+                
+                if (personagensMesa.length === 0) {
+                    gridPersonagens.innerHTML = '<p style="color: white; padding: 20px;">Nenhum jogador colocou um personagem nesta mesa ainda.</p>';
+                } else {
+                    // Povoa a galeria com os personagens dos SEUS jogadores
+                    personagensMesa.forEach(char => {
+                        const dados = char.dados_personagem || {};
+                        const fotoBase64 = dados['char-photo'];
+                        const ocupacao = dados['ocupacao'] || 'Desconhecido';
+                        const placeholderInterno = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='110' height='130'%3E%3Crect width='110' height='130' fill='%23111'/%3E%3Ctext x='50%25' y='50%25' font-size='40' fill='%23555' dominant-baseline='middle' text-anchor='middle'%3E?%3C/text%3E%3C/svg%3E";
+                        const imgSrc = (fotoBase64 && !fotoBase64.includes('R0lGODlhAQAB')) ? fotoBase64 : placeholderInterno;
+
+                        const card = document.createElement('div');
+                        card.className = 'char-card';
+                        card.innerHTML = `
+                            <img src="${imgSrc}" class="char-card-img" alt="Foto">
+                            <div class="char-card-info">
+                                <h3 class="char-card-nome">${char.nome_personagem || 'Sem Nome'}</h3>
+                                <p class="char-card-detalhe">${ocupacao}</p>
+                                <p class="char-card-detalhe" style="color: #4CAF50; margin-top: 5px; font-weight: bold;">👤 Jogador: ${char.nome_jogador}</p>
+                                <button class="btn-acessar-ficha btn-inspecionar" data-dados='${JSON.stringify(dados).replace(/'/g, "&#39;")}'>Inspecionar</button>
+                            </div>
+                        `;
+                        gridPersonagens.appendChild(card);
+                    });
+                    
+                    // Ação de carregar a ficha do jogador na tela do Mestre
+                    document.querySelectorAll('.btn-inspecionar').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            const dadosString = e.target.getAttribute('data-dados');
+                            const dadosJson = JSON.parse(dadosString);
+                            
+                            preencherFicha(dadosJson); // Joga os dados na tela
+                            
+                            // TRUQUE DE SEGURANÇA: Limpamos o ID para o Mestre não salvar por cima sem querer!
+                            idPersonagemAtual = null; 
+                            
+                            document.getElementById('galeria-modal').classList.remove('show');
+                            alert("Ficha do jogador carregada no Modo Inspeção! (Apenas visualização)");
+                        });
+                    });
+                }
+                
+                // Abre a janela da galeria adaptada
+                document.getElementById('galeria-modal').classList.add('show');
+                
+            } catch (erro) {
+                console.error(erro);
+                alert("Erro ao buscar as fichas da mesa.");
+            } finally {
+                btnFichasMesa.innerHTML = "👑 Fichas da Mesa";
+            }
+        });
+    }
+
+    // ==========================================
     // SISTEMA DA FICHA E DETALHES
     // ==========================================
 
@@ -332,7 +413,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const imgSrc = (fotoBase64 && !fotoBase64.includes('R0lGODlhAQAB')) 
                                     ? fotoBase64 
                                     : placeholderInterno;
-                                    
+
                     const card = document.createElement('div');
                     card.className = 'char-card';
                     card.dataset.nome = (char.nome_personagem || 'sem nome').toLowerCase(); // Para a busca
