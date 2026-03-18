@@ -1,8 +1,3 @@
-/* ========================================
-   CSS UNIFICADO - ASSIMILAÇÃO RPG (V 1.6 - VARIÁVEIS DE TEMA)
-   ========================================
-*/
-
 /* --- DICIONÁRIO DE CORES: TEMA CLARO (PADRÃO) --- */
 :root {
     --font-theme: 'Special Elite', monospace;
@@ -22,7 +17,7 @@
     /* Textos */
     --color-text-dark: #333333;
     --color-text-medium: #555555;
-    --color-text-light: #ffffff; /* Textos em botões */
+    --color-text-light: #ffffff;
     --color-text-nav-hover: #000000;
     --color-saude-formula: #777777;
     
@@ -63,7 +58,7 @@
 }
 
 /* --- DICIONÁRIO DE CORES: TEMA ESCURO (DARK MODE) --- */
-body.theme-dark {
+body.dark {
     /* Fundos */
     --color-bg-main: #121212;
     --color-paper: #1e1e1e;
@@ -79,7 +74,7 @@ body.theme-dark {
     /* Textos (Invertem para claro) */
     --color-text-dark: #e0e0e0;
     --color-text-medium: #aaaaaa;
-    --color-text-nav-hover: #ff9800; /* Laranja pro Mestre no hover */
+    --color-text-nav-hover: #ff9800; 
     --color-saude-formula: #999999;
     
     /* Bordas (Mais escuras para mesclar no fundo) */
@@ -103,7 +98,7 @@ body.theme-dark {
     --color-drop-full: #e0e0e0;
     --color-modal-overlay: rgba(0, 0, 0, 0.9);
 
-    /* Galeria / Campanhas (Preserva o tom escuro) */
+    /* Galeria / Campanhas */
     --color-galeria-bg: #121212;
     --color-card-bg: #1e1e1e;
     --color-card-border: #333333;
@@ -146,108 +141,10 @@ h2 {
     margin-bottom: 15px;
 }
 
-/* --- Menu de Navegação --- */
-.navbar {
-    width: 100%;
-    background-color: var(--color-paper);
-    border-bottom: 1px solid var(--color-border-light);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-.navbar ul {
-    display: flex;
-    list-style-type: none;
-    margin: 0 auto;
-    padding: 0;
-    justify-content: center;
-    max-width: 1100px;
-}
-.navbar li a {
-    display: block;
-    color: var(--color-text-medium);
-    text-decoration: none;
-    padding: 16px 22px;
-    font-size: 1em;
-    font-weight: 700;
-    text-transform: uppercase;
-    transition: all 0.3s;
-    border-bottom: 3px solid transparent;
-}
-.navbar li a:hover { 
-    color: var(--color-text-nav-hover); 
-}
-.navbar li a.active {
-    color: var(--color-det-red);
-    border-bottom: 3px solid var(--color-det-red);
-}
-
 /* ========================================
    ESTILOS DO ROLADOR (index.html)
    ========================================
 */
-.paper {
-    background-color: var(--color-paper);
-    border: 1px solid var(--color-border-light);
-    border-radius: 5px;
-    padding: 20px;
-    margin-bottom: 25px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-}
-
-.controles-container {
-    padding: 15px;
-    margin-bottom: 20px;
-    border: 2px dashed var(--color-border-medium);
-    border-radius: 5px;
-}
-.controles {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    gap: 15px;
-}
-.controles label {
-    font-size: 1.1em;
-    font-weight: 700;
-    color: var(--color-text-medium);
-}
-#input-dados {
-    font-family: var(--font-theme);
-    font-size: 1.2em;
-    padding: 10px;
-    border: 1px solid var(--color-border-medium);
-    background-color: var(--color-input-bg);
-    border-radius: 3px;
-    text-align: center;
-    color: var(--color-text-dark);
-    flex-grow: 1;
-    min-width: 200px;
-}
-
-button {
-    font-family: var(--font-theme);
-    padding: 12px 20px;
-    font-size: 1.1em;
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    color: var(--color-text-light);
-    text-transform: uppercase;
-    font-weight: 700;
-}
-#btn-rolar {
-    background-color: var(--color-assim-blue);
-}
-#btn-rolar:hover {
-    background-color: var(--color-assim-blue-hover);
-}
-#btn-limpar {
-    background-color: var(--color-det-red);
-}
-#btn-limpar:hover {
-    background-color: var(--color-det-red-hover);
-}
 
 .roll-group {
     border-bottom: 1px solid var(--color-border-light);
@@ -332,81 +229,10 @@ button {
 }
 
 /* ========================================
-   ESTILOS DA FICHA (index.html)
+   APTIDÕES E SAÚDE
    ========================================
 */
-.ficha-container {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    grid-template-rows: auto auto auto;
-    grid-template-areas:
-        "origens origens"
-        "aptidoes saude"
-        "determinacao determinacao";
-    gap: 20px;
-    align-items: start;
-}
 
-/* --- Seção Origens --- */
-.ficha-origens {
-    grid-area: origens;
-    background: var(--color-paper);
-    padding: 20px 30px;
-    border-radius: 5px;
-    border: 1px solid var(--color-border-light);
-}
-.logo-placeholder {
-    display: flex;
-    font-size: 50px;
-    gap: 15px;
-    font-weight: 900;
-    color: var(--color-text-dark);
-    text-align: left;
-    margin-bottom: 20px;
-}
-.logo-placeholder img {
-    max-width: 150px;
-    height: auto;
-    border-radius: 10px;
-}
-.ficha-origens .form-group {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-}
-.ficha-origens .form-group label {
-    font-size: 1.1em;
-    font-weight: 700;
-    color: var(--color-text-medium);
-    min-width: 180px; 
-}
-.ficha-origens .form-group input[type="text"] {
-    flex-grow: 1;
-    font-family: var(--font-theme);
-    font-size: 1.1em;
-    padding: 5px 8px;
-    color: var(--color-text-dark);
-    background-color: var(--color-input-bg-origens); 
-    border: none;
-    border-bottom: 1px solid var(--color-input-border-bottom); 
-    border-radius: 0;
-}
-.ficha-origens .form-group input[type="text"]:focus {
-    outline: none;
-    background-color: var(--color-input-bg-origens-focus);
-}
-
-/* --- Seção Aptidões --- */
-.ficha-aptidoes {
-    grid-area: aptidoes;
-    padding: 0;
-    align-self: start;
-}
-.ficha-aptidoes > h2 {
-    font-size: 2em;
-    text-align: center;
-    margin-bottom: 15px;
-}
 .grupo-aptidoes {
     margin-bottom: 20px;
 }
@@ -493,11 +319,6 @@ button {
     border-color: var(--color-det-red);
 }
 
-/* --- Seção Saúde --- */
-.ficha-saude {
-    grid-area: saude;
-    align-self: start;
-}
 .saude-header {
     text-align: center;
     margin-bottom: 15px;
@@ -550,17 +371,6 @@ button {
     margin-bottom: 5px;
 }
 .saude-legenda:first-of-type { margin-top: 0; }
-.saude-legenda-detalhes {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    font-size: 0.9em;
-    color: var(--color-text-medium);
-    text-align: center;
-    margin-top: 5px;
-    padding: 0 5px;
-}
-.saude-legenda-detalhes strong { color: var(--color-det-red); }
 
 .saude-box-container {
     background: var(--color-paper);
@@ -624,62 +434,11 @@ button {
 .saude-drops-track input[type="checkbox"]:not(:first-child):nth-child(even) { transform: scale(0.8) translateY(-4px); }
 .saude-drops-track input[type="checkbox"]:not(:first-child):nth-child(odd) { transform: scale(0.8) translateY(4px); }
 
-/* --- Seção Determinação --- */
-.ficha-determinacao {
-    grid-area: determinacao;
-    background: var(--color-paper);
-    border: 1px solid var(--color-border-light);
-    border-top: 3px solid var(--color-assim-blue);
-    border-bottom: 3px solid var(--color-det-red);
-    border-radius: 5px;
-    padding: 15px 30px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-}
-.ficha-determinacao h3 {
-    margin: 10px 0;
-    font-size: 1.4em;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-shrink: 0;
-}
-.ficha-determinacao h3.det-label-right { color: var(--color-assim-blue); }
-.ficha-determinacao h3.det-label-left { color: var(--color-det-red); }
 
-.det-num-input {
-    font-family: var(--font-theme);
-    font-size: 1.5em;
-    font-weight: 800;
-    color: var(--color-text-dark);
-    background-color: transparent;
-    border: 2px solid var(--color-text-dark);
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    line-height: 38px;
-    text-align: center;
-    padding:10px 2px 2px 2px;
-    -moz-appearance: textfield;
-    outline: none;
-    transition: all 0.2s;
-}
-.det-num-input::-webkit-outer-spin-button,
-.det-num-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-.det-label-left .det-num-input {
-    color: var(--color-det-red);
-    border-color: var(--color-det-red);
-    order: -1; 
-}
-.det-label-right .det-num-input {
-    color: var(--color-assim-blue);
-    border-color: var(--color-assim-blue);
-}
+/* ========================================
+   DETERMINAÇÃO (TRACKS)
+   ========================================
+*/
 .determinacao-track {
     display: flex;
     justify-content: center;
@@ -723,140 +482,6 @@ button {
 .assim-check:checked {
     background-color: var(--color-assim-blue);
     border-color: var(--color-assim-blue);
-}
-
-/* ========================================
-   ESTILOS DO GERENCIADOR DE PERSONAGENS
-   ========================================
-*/
-.character-manager { padding: 15px 25px; }
-.character-manager h2 {
-    text-align: left;
-    margin-top: 0;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid var(--color-border-light);
-}
-.manager-controls {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 15px;
-}
-.manager-controls label {
-    font-size: 1.1em;
-    font-weight: 700;
-    color: var(--color-text-medium);
-}
-.manager-controls select,
-.manager-controls button {
-    font-family: var(--font-theme);
-    font-size: 1em;
-    padding: 10px 15px;
-    border-radius: 3px;
-    border: 1px solid var(--color-border-medium);
-}
-.manager-controls select {
-    flex-grow: 1;
-    min-width: 200px;
-    background-color: var(--color-input-bg);
-    color: var(--color-text-dark);
-}
-#btn-load-char {
-    background-color: var(--color-assim-blue);
-    color: var(--color-text-light);
-    font-weight: 700;
-}
-#btn-load-char:hover { background-color: var(--color-assim-blue-hover); }
-
-#btn-save-char {
-    background-color: var(--color-btn-save); 
-    color: var(--color-text-light);
-    font-weight: 700;
-    border-color: var(--color-btn-save);
-}
-#btn-save-char:hover { background-color: var(--color-btn-save-hover); }
-
-#btn-delete-char {
-    background-color: var(--color-det-red);
-    color: var(--color-text-light);
-    font-weight: 700;
-}
-#btn-delete-char:hover { background-color: var(--color-det-red-hover); }
-
-body > .container { padding: 0 20px; }
-main.container { margin-top: 0; }
-
-/* ========================================
-   ESTILOS DA PÁGINA DE DETALHES
-   ========================================
-*/
-.detalhes-container {
-    display: grid;
-    grid-template-columns: 1fr 2fr; 
-    gap: 25px;
-}
-.detalhes-foto {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-#char-photo-preview {
-    width: 100%;
-    min-height: 250px;
-    background-color: var(--color-photo-preview-bg);
-    border: 1px solid var(--color-border-medium);
-    border-radius: 5px;
-    object-fit: cover; 
-    margin-bottom: 15px;
-    cursor: pointer;
-    transition: transform 0.2s ease-in-out;
-}
-#char-photo-preview:hover { transform: scale(1.03); }
-
-#char-photo-input {
-    font-family: var(--font-theme);
-    border: 1px solid var(--color-border-medium);
-    border-radius: 3px;
-    padding: 8px;
-    width: 100%;
-    color: var(--color-text-dark);
-}
-.detalhes-texto h2 {
-    text-align: left;
-    color: var(--color-det-red);
-    border-bottom: 2px solid var(--color-det-red);
-    padding-bottom: 5px;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    font-size: 1.4em;
-}
-.detalhes-texto h2:first-child { margin-top: 0; }
-.detalhes-texto textarea {
-    width: 100%;
-    box-sizing: border-box; 
-    font-family: var(--font-theme);
-    font-size: 1.1em;
-    line-height: 1.6;
-    padding: 10px;
-    border: 1px solid var(--color-border-light);
-    border-radius: 5px;
-    resize: vertical; 
-    background-color: var(--color-input-bg);
-    color: var(--color-text-dark);
-}
-
-@media (max-width: 768px) {
-    .detalhes-container { grid-template-columns: 1fr; }
-    .container { padding: 0 10px; margin-top: 10px; }
-    .ficha-container {
-        grid-template-columns: 1fr;
-        grid-template-areas: "origens" "aptidoes" "saude" "determinacao";
-    }
-    .ficha-determinacao { flex-direction: column; text-align: center; }
-    .ficha-determinacao h3 { flex-direction: column; gap: 0; }
-    .det-label-left .det-num-input { order: 0; }
-    .determinacao-track { padding: 10px 0; }
 }
 
 /* ========================================
@@ -993,11 +618,25 @@ main.container { margin-top: 0; }
 #btn-abrir-galeria:hover { background-color: var(--color-btn-galeria-hover); }
 
 .campanha-card {
-    background: var(--color-card-bg); border: 1px solid var(--color-card-border);
-    padding: 15px; margin-bottom: 15px; border-radius: 5px; display: flex;
-    justify-content: space-between; align-items: center; transition: transform 0.2s, border-color 0.2s;
+    background: var(--color-card-bg);
+    border: 1px solid var(--color-card-border);
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    display: flex;
+    flex-wrap: wrap; 
+    gap: 15px;
+    justify-content: space-between;
+    align-items: center;
+    transition: transform 0.2s, border-color 0.2s;
 }
-.campanha-card:hover { transform: translateX(5px); border-color: var(--color-card-border-hover); }
+.campanha-card:hover { 
+    transform: translateX(5px); border-color: var(--color-card-border-hover); 
+}
+.campanha-info {
+    flex-grow: 1;
+    min-width: 180px;
+}
 .campanha-info h4 { margin: 0 0 5px 0; color: var(--color-card-text); font-size: 1.1em; }
 .campanha-info p { margin: 0; font-size: 0.85em; color: var(--color-card-text-muted); font-family: Arial, sans-serif; }
 .badge-mestre {
@@ -1011,130 +650,12 @@ main.container { margin-top: 0; }
 .btn-jogar { background-color: var(--color-det-red); color: var(--color-text-light); padding: 8px 15px; font-size: 0.9em; border: none; cursor: pointer; border-radius: 3px; }
 .btn-jogar:hover { background-color: var(--color-det-red-hover); }
 
-
-/* ========================================
-   MODAL DE CAMPANHAS 
-   ========================================
-*/
-.modal-campanhas-ui {
-    max-width: 850px !important;
-    padding: 0 !important; /* Retiramos o padding para o cabeçalho encostar nas bordas */
-    overflow: hidden;
-}
-
-.campanhas-header {
-    background-color: var(--color-det-red); /* Fundo vermelho do RPG */
-    color: white;
-    padding: 20px 30px;
-    text-align: center;
-}
-
-.campanhas-header h2 {
-    color: white;
-    margin: 0 0 5px 0;
-    border: none;
-    padding: 0;
-}
-
-.campanhas-header p {
-    margin: 0;
-    font-size: 0.95em;
-    opacity: 0.9;
-}
-
-.campanhas-body {
-    display: grid;
-    grid-template-columns: 1fr 1fr; /* Duas colunas perfeitas */
-    gap: 30px;
-    padding: 30px;
-    background-color: var(--color-paper);
-}
-
-.campanhas-lista-section h3 {
-    margin-top: 0;
-    font-size: 1.3em;
-    border-bottom: 2px solid var(--color-border-light);
-    padding-bottom: 10px;
-    color: var(--color-text-dark);
-    text-align: left;
-}
-
-.lista-campanhas-container {
-    max-height: 420px;
-    overflow-y: auto;
-    padding-right: 10px;
-}
-
-.campanhas-acoes-section {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-/* O Card de cada Ação */
-.acao-box {
-    background-color: var(--color-bg-main); 
-    border: 1px solid var(--color-border-medium);
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.acao-box h4 {
-    margin: 0 0 5px 0;
-    font-size: 1.1em;
-    color: var(--color-text-dark);
-}
-
-.acao-box p {
-    font-size: 0.85em;
-    color: var(--color-text-medium);
-    margin: 0 0 15px 0;
-}
-
-.acao-box input, 
-.acao-box select {
-    width: 100%;
-    box-sizing: border-box;
-    margin-bottom: 10px;
-    padding: 10px;
-    background-color: var(--color-input-bg);
-    color: var(--color-text-dark);
-    border: 1px solid var(--color-border-medium);
-    border-radius: 3px;
-    font-family: Arial, sans-serif;
-}
-
-.acao-box button {
-    width: 100%;
-}
-
-/* Bordas coloridas para dar identidade visual */
-.box-jogador {
-    border-top: 4px solid var(--color-btn-save); 
-}
-
-.box-mestre {
-    border-top: 4px solid var(--color-assim-blue);
-}
-
-.btn-success { background-color: var(--color-btn-save); }
-.btn-success:hover { background-color: var(--color-btn-save-hover); }
-.btn-primary { background-color: var(--color-assim-blue); }
-.btn-primary:hover { background-color: var(--color-assim-blue-hover); }
-
-@media (max-width: 768px) {
-    .campanhas-body {
-        grid-template-columns: 1fr; 
-    }
-}
-
 /* ========================================
    PAINEL DE JOGADORES DO MESTRE (V1.6)
    ========================================
 */
 .jogador-card-mestre {
-    background-color: #1a1a1a; /* Fundo bem escuro como no print */
+    background-color: #1a1a1a; 
     border: 1px solid #333;
     border-radius: 4px;
     padding: 20px;
@@ -1155,7 +676,7 @@ main.container { margin-top: 0; }
     font-size: 1.1em;
     text-align: left;
     font-family: Arial, sans-serif;
-    text-transform: none; /* Tira o tudo maiúsculo para ficar igual ao print */
+    text-transform: none; 
 }
 .btn-remover-jogador {
     background-color: #d9534f;

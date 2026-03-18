@@ -542,7 +542,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const temaSalvo = localStorage.getItem('tema-rpg-assimilacao');
     
     if (temaSalvo === 'dark') {
-        corpoDoSite.classList.add('theme-dark');
+        corpoDoSite.classList.add('dark');
         if (btnToggleTema) btnToggleTema.textContent = '☀️ Tema Claro';
     }
 
@@ -552,10 +552,10 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             
             // Liga/Desliga a classe theme-dark no <body>
-            corpoDoSite.classList.toggle('theme-dark');
+            corpoDoSite.classList.toggle('dark');
             
             // Verifica se a classe está lá agora para atualizar o botão e salvar na memória
-            if (corpoDoSite.classList.contains('theme-dark')) {
+            if (corpoDoSite.classList.contains('dark')) {
                 localStorage.setItem('tema-rpg-assimilacao', 'dark');
                 btnToggleTema.textContent = '☀️ Tema Claro';
             } else {
