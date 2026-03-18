@@ -214,10 +214,26 @@ app.post('/campanhas/entrar', (req, res) => {
 });
 
 // 4. Buscar todos os personagens de uma campanha (Visão do Mestre)
+app.get('/campanhas/usuario/:usuarioId', (req, res) => {
+    const { usuarioId } = req.params;
+    const sql = `
+        SELECT c.id, c.nome, c.codigo_convite, c.mestre_id, 
+        (c.mestre_id = ?) as is_mestre
+        FROM campanhas c
+        JOIN membros_campanha m ON c.id = m.campanha_id
+        WHERE m.usuario_id = ?
+    `;
+    db.all(sql, [usuarioId, usuarioId], (err, rows) => {
+        if (err) return res.status(500).json({ erro: 'Erro ao buscar campanhas.' });
+        res.json(rows);
+    });
+});
+
+
 app.get('/campanhas/:id/personagens', (req, res) => {
     const campanhaId = req.params.id;
     
-    // Consulta SQL simplificada e super segura (sem JOIN na tabela usuarios)
+    // Consulta SQL simplificada e super segura (sem JOIN perigoso)
     const sql = `
         SELECT p.id, p.nome_personagem, p.dados_personagem
         FROM membros_campanha m
@@ -237,14 +253,13 @@ app.get('/campanhas/:id/personagens', (req, res) => {
             } catch (e) {
                 row.dados_personagem = {};
             }
-            row.nome_jogador = "Membro da Mesa"; // Texto padrão genérico
+            row.nome_jogador = "Membro da Mesa"; 
             return row;
         });
         
         res.json(personagensFormatados);
     });
 });
-
 
 
 server.listen(PORT, () => {
