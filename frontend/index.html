@@ -45,6 +45,7 @@
             <li><a href="#" id="nav-btn-rolador">Rolador de Dados</a></li>
             <li><a href="./index.html" class="active">Ficha de Personagem</a></li>
             <li><a href="#" id="nav-btn-campanhas">Campanhas</a></li>
+            <li><a href="#" id="btn-toggle-tema" style="cursor: pointer;">🌙 Tema Escuro</a></li>
             
             <li style="float: right;"><a href="#" id="btn-sair" style="color: #a04040;">Desconectar</a></li>
             
@@ -64,6 +65,7 @@
         </select>
             <button id="btn-load-char" style="display: none;">Carregar</button> <button id="btn-abrir-galeria" style="background-color: #3a7c8c; color: white; border-color: #3a7c8c;">Personagens</button>
             <button id="btn-fichas-mesa" style="display: none; background-color: #ff9800; color: white; border-color: #ff9800; font-weight: bold;">👑 Fichas da Mesa</button>
+            <button id="btn-gerenciar-jogadores" style="display: none; background-color: #d9534f; color: white; border-color: #d9534f; font-weight: bold;">👥 Jogadores</button>
             <button id="btn-save-char">Salvar</button>
         <button id="btn-delete-char">Excluir Selecionado</button>
     </div>
@@ -268,22 +270,30 @@
     <div id="rolador-modal" class="modal">
         <div class="modal-content paper" style="padding: 20px; width: 90%; max-width: 700px; max-height: 85vh; overflow-y: auto;">
             
-            <span id="fechar-rolador" style="position: absolute; top: 15px; right: 25px; color: #a04040; font-size: 35px; font-weight: bold; cursor: pointer;">&times;</span>
+            <span id="fechar-rolador" class="modal-close">&times;</span>
+            <h2 style="text-align: center; color: #333; font-family: 'Courier New', Courier, monospace; margin-bottom: 20px;">TERMINAL DE DADOS</h2>
             
-            <h2 style="margin-top: 0; border-bottom: 2px solid var(--color-border-light); padding-bottom: 10px;">Terminal de Dados</h2>
-            
-            <div class="controles" style="display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap;">
-                <input type="text" id="rolador-input" placeholder="Ex: 2d6 1d10" style="padding: 10px; font-size: 1.1em; width: 200px; text-align: center; border: 1px solid var(--color-border-medium); border-radius: 3px; font-family: var(--font-theme);">
-                <button id="rolador-btn-rolar" style="background-color: var(--color-assim-blue);">Rolar</button>
-                <button id="rolador-btn-limpar" style="background-color: var(--color-det-red);">Limpar</button>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <input type="text" id="rolador-input" placeholder="2d6 2d12" style="padding: 10px; width: 150px; text-align: center; font-size: 1.1em; border: 1px solid #ccc; border-radius: 3px; background-color: #f2f7ff;">
+                <button id="rolador-btn-rolar" style="background-color: #3b7c87; color: white; border: none; padding: 10px 20px; margin-left: 10px; font-weight: bold; border-radius: 3px; cursor: pointer;">ROLAR</button>
+                <button id="rolador-btn-limpar" style="background-color: #8c3b3b; color: white; border: none; padding: 10px 20px; margin-left: 10px; font-weight: bold; border-radius: 3px; cursor: pointer;">LIMPAR</button>
             </div>
 
-            <div id="rolador-resultados-atuais" style="min-height: 100px; margin-bottom: 20px;"></div>
-            
-            <h3 style="border-top: 1px dashed var(--color-border-medium); padding-top: 15px;">Histórico da Sessão</h3>
-            <div id="rolador-historico"></div>
+            <div id="rolador-resultados-atuais"></div>
+
+            <div style="margin-top: 25px; border-top: 1px dashed #ccc; padding-top: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                    <h3 style="margin: 0; font-size: 1.1em; color: var(--color-det-red);">HISTÓRICO DA SESSÃO</h3>
+                    
+                    <input type="text" id="filtro-historico" placeholder="🔍 Filtrar jogador..." style="padding: 6px 12px; border-radius: 4px; border: 1px solid #ccc; background: #f9f9f9; color: #333; font-family: Arial, sans-serif; outline: none;">
+                </div>
+                
+                <div id="rolador-historico" style="max-height: 250px; overflow-y: auto; padding-right: 10px;">
+                    </div>
+            </div>
         </div>
     </div>
+
 
     <div id="galeria-modal" class="modal">
         <div class="modal-content" style="background-color: #1a1a1a; border: 1px solid #333; max-width: 900px; padding: 25px;">
@@ -299,39 +309,55 @@
     </div>
 
     <div id="campanhas-modal" class="modal">
-        <div class="modal-content" style="background-color: #1a1a1a; border: 1px solid #333; max-width: 850px; padding: 25px; color: white;">
-            <span id="fechar-campanhas" class="modal-close" style="top: 10px; right: 20px;">&times;</span>
-            <h2 style="color: var(--color-det-red); border-bottom: 1px solid #333; padding-bottom: 10px; text-align: left;">Lobby de Campanha</h2>
+        <div class="modal-content paper modal-campanhas-ui">
+            <span id="fechar-campanhas" class="modal-close" style="color: white; top: 15px; right: 25px;">&times;</span>
             
-            <div style="display: flex; gap: 30px; margin-top: 20px; flex-wrap: wrap;">
-                
-                <div style="flex: 1; min-width: 300px; border-right: 1px solid #333; padding-right: 20px;">
-                    <h3 style="color: #ccc; font-size: 1.2em; text-align: left;">Minhas Mesas Ativas</h3>
-                    <div id="lista-campanhas" style="max-height: 350px; overflow-y: auto; padding-right: 10px;">
-                        <p style="color: #666; font-style: italic;">Carregando campanhas...</p>
+            <div class="campanhas-header">
+                <h2>🎲 Lobby de Campanha</h2>
+                <p>Gerencie suas mesas ou conecte-se a uma nova aventura.</p>
+            </div>
+            
+            <div class="campanhas-body">
+                <div class="campanhas-lista-section">
+                    <h3>Minhas Mesas</h3>
+                    <div id="lista-campanhas" class="lista-campanhas-container">
+                        <p style="color: var(--color-text-medium); font-style: italic;">Carregando campanhas...</p>
                     </div>
                 </div>
                 
-                <div style="flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 20px;">
+                <div class="campanhas-acoes-section">
                     
-                    <div style="background: #242424; padding: 20px; border-radius: 5px; border: 1px solid #444;">
-                        <h4 style="margin-top: 0; color: var(--color-assim-blue); font-size: 1.1em;">Criar Nova Mesa (Mestre)</h4>
-                        <input type="text" id="nova-campanha-nome" placeholder="Nome da Campanha..." style="width: 100%; padding: 10px; margin-bottom: 10px; background: #111; color: white; border: 1px solid #555; border-radius: 3px; font-family: sans-serif; box-sizing: border-box;">
-                        <button id="btn-criar-campanha" style="width: 100%; background-color: var(--color-assim-blue);">Fundar Campanha</button>
-                    </div>
-
-                    <div style="background: #242424; padding: 20px; border-radius: 5px; border: 1px solid #444;">
-                        <h4 style="margin-top: 0; color: #4CAF50; font-size: 1.1em;">Entrar em uma Mesa (Jogador)</h4>
-                        <input type="text" id="codigo-convite-input" placeholder="Código (Ex: A7X9P2)" style="width: 100%; padding: 10px; margin-bottom: 10px; background: #111; color: white; border: 1px solid #555; border-radius: 3px; font-family: sans-serif; text-transform: uppercase; box-sizing: border-box;">
-                        
-                        <select id="char-select-campanha" style="width: 100%; padding: 10px; margin-bottom: 15px; background: #111; color: white; border: 1px solid #555; border-radius: 3px; font-family: sans-serif; box-sizing: border-box;">
+                    <div class="acao-box box-jogador">
+                        <h4>⚔️ Entrar em uma Mesa</h4>
+                        <p>Tem um código de convite? Junte-se à party!</p>
+                        <input type="text" id="codigo-convite-input" placeholder="Código (Ex: A7X9P2)" maxlength="6" style="text-transform: uppercase;">
+                        <select id="char-select-campanha">
                             <option value="">-- Selecione seu Personagem --</option>
                         </select>
-                        
-                        <button id="btn-entrar-campanha" style="width: 100%; background-color: #4CAF50;">Entrar na Mesa</button>
+                        <button id="btn-entrar-campanha" class="btn-success">Entrar na Mesa</button>
+                    </div>
+
+                    <div class="acao-box box-mestre">
+                        <h4>👑 Criar Nova Mesa</h4>
+                        <p>Seja o Mestre e convide seus jogadores.</p>
+                        <input type="text" id="nova-campanha-nome" placeholder="Nome da Campanha...">
+                        <button id="btn-criar-campanha" class="btn-primary">Fundar Campanha</button>
                     </div>
 
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="gerenciar-jogadores-modal" class="modal">
+        <div class="modal-content paper modal-campanhas-ui" style="max-width: 650px !important;">
+            <span id="fechar-gerenciar-jogadores" class="modal-close" style="color: var(--color-text-dark); top: 15px; right: 25px;">&times;</span>
+            <div class="campanhas-header" style="background-color: var(--color-bg-main); border-bottom: 1px solid var(--color-border-medium);">
+                <h2 style="color: var(--color-text-dark); text-align: left; margin-left: 20px;">Jogadores</h2>
+            </div>
+            <div class="campanhas-body" style="grid-template-columns: 1fr; padding: 30px; background-color: var(--color-paper);">
+                <div id="grid-jogadores-mesa" style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: flex-start;">
+                    </div>
             </div>
         </div>
     </div>

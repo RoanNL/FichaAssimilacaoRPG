@@ -57,10 +57,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 3. Lógica dos Dados
     const iconFiles = {
-        sucesso: '../assets/Sucesso.png',
-        pressao: '../assets/pressao.png',
-        adaptacao: '../assets/Adaptacao.png',
-        nada: '../assets/nada.png'
+        sucesso: 'assets/Sucesso.png',
+        pressao: 'assets/pressao.png',
+        adaptacao: 'assets/Adaptacao.png',
+        nada: 'assets/nada.png'
     };
 
     const diceTable = {
@@ -208,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
             subRollIcons.style.opacity = '0';
 
             const logoImg = document.createElement('img');
-            logoImg.src = '../assets/icon.jpg'; 
+            logoImg.src = 'assets/icon.jpg'; 
             logoImg.className = 'logo-animado';
             subRollDiv.appendChild(logoImg);
             
@@ -267,9 +267,40 @@ document.addEventListener('DOMContentLoaded', () => {
         resultsDiv.innerHTML = '';
         historicoDiv.innerHTML = '';
         inputDados.value = '';
+        if(inputFiltroHistorico) inputFiltroHistorico.value = '';
     });
     
     inputDados.addEventListener('keypress', (event) => {
         if (event.key === 'Enter') handleRoll();
     });
+
+
+    // ==========================================
+    // VERSÃO 1.6: FILTRO DE HISTÓRICO DE ROLAGENS
+    // ==========================================
+    const inputFiltroHistorico = document.getElementById('filtro-historico');
+    
+    if (inputFiltroHistorico) {
+        inputFiltroHistorico.addEventListener('input', (e) => {
+            const termoBusca = e.target.value.toLowerCase().trim();
+            // Pega todas as rolagens que estão dentro do histórico
+            const rolagensSalvas = historicoDiv.children; 
+
+            Array.from(rolagensSalvas).forEach(caixaDeRolagem => {
+                // O título (h3) é onde guardamos o texto "Fulano rolou: 2d6"
+                const tituloRolagem = caixaDeRolagem.querySelector('h3');
+                
+                if (tituloRolagem) {
+                    const textoDoTitulo = tituloRolagem.textContent.toLowerCase();
+                    
+                    // Se o texto do título contiver o que o mestre digitou, mostra. Se não, esconde.
+                    if (textoDoTitulo.includes(termoBusca)) {
+                        caixaDeRolagem.style.display = 'block'; // Mostra a rolagem
+                    } else {
+                        caixaDeRolagem.style.display = 'none';  // Esconde a rolagem
+                    }
+                }
+            });
+        });
+    }
 });

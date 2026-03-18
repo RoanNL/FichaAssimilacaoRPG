@@ -48,7 +48,7 @@ function gerarCodigoConvite() {
 }
 
 // ==========================================
-// ROTA 1: REGISTRO DE USUÁRIO
+// REGISTRO DE USUÁRIO
 // ==========================================
 app.post('/registro', async (req, res) => {
     const { nome_usuario, senha } = req.body;
@@ -77,7 +77,7 @@ app.post('/registro', async (req, res) => {
 });
 
 // ==========================================
-// ROTA 2: LOGIN DE USUÁRIO
+// LOGIN DE USUÁRIO
 // ==========================================
 app.post('/login', (req, res) => {
     const { nome_usuario, senha } = req.body;
@@ -196,7 +196,7 @@ app.post('/campanhas', (req, res) => {
     );
 });
 
-// 2. Entrar em uma campanha via código de convite
+// Entrar em uma campanha via código de convite
 app.post('/campanhas/entrar', (req, res) => {
     const { codigo_convite, usuario_id, personagem_id } = req.body;
 
@@ -213,7 +213,7 @@ app.post('/campanhas/entrar', (req, res) => {
     });
 });
 
-// 4. Buscar todos os personagens de uma campanha (Visão do Mestre)
+// Buscar todos os personagens de uma campanha (Visão do Mestre)
 app.get('/campanhas/usuario/:usuarioId', (req, res) => {
     const { usuarioId } = req.params;
     const sql = `
@@ -259,6 +259,39 @@ app.get('/campanhas/:id/personagens', (req, res) => {
         
         res.json(personagensFormatados);
     });
+});
+
+// =========================================================================
+// Buscar jogadores para o painel de Gerenciamento (Mestre)
+// =========================================================================
+app.get('/campanhas/:id/jogadores', (req, res) => {
+    const campanhaId = req.params.id;
+    // Puxamos o ID do usuário e o nome do personagem que ele está usando na mesa
+    const sql = `
+        SELECT m.usuario_id, p.nome_personagem 
+        FROM membros_campanha m
+        JOIN personagens p ON m.personagem_id = p.id
+        WHERE m.campanha_id = ?
+    `;
+    db.all(sql, [campanhaId], (err, rows) => {
+        if (err) return res.status(500).json({ erro: 'Erro ao buscar jogadores.' });
+        res.json(rows);
+    });
+});
+
+// =========================================================================
+// Remover jogador da campanha (Mestre)
+// =========================================================================
+app.delete('/campanhas/:campanhaId/membros/:usuarioId', (req, res) => {
+    const { campanhaId, usuarioId } = req.params;
+    
+    db.run(`DELETE FROM membros_campanha WHERE campanha_id = ? AND usuario_id = ?`, 
+        [campanhaId, usuarioId], 
+        function(err) {
+            if (err) return res.status(500).json({ erro: 'Erro ao remover jogador.' });
+            res.json({ mensagem: 'Jogador removido com sucesso!' });
+        }
+    );
 });
 
 

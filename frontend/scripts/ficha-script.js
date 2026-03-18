@@ -530,4 +530,121 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Erro ao deletar:', erro);
         }
     });
+
+
+    // ==========================================
+    // VERSÃO 1.6: CONTROLE DE TEMA (DARK MODE)
+    // ==========================================
+    const btnToggleTema = document.getElementById('btn-toggle-tema');
+    const corpoDoSite = document.body;
+
+    // 1. Checa a memória para ver se o jogador já prefere o tema escuro
+    const temaSalvo = localStorage.getItem('tema-rpg-assimilacao');
+    
+    if (temaSalvo === 'dark') {
+        corpoDoSite.classList.add('theme-dark');
+        if (btnToggleTema) btnToggleTema.textContent = '☀️ Tema Claro';
+    }
+
+    // 2. A Mágica do Clique
+    if (btnToggleTema) {
+        btnToggleTema.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            // Liga/Desliga a classe theme-dark no <body>
+            corpoDoSite.classList.toggle('theme-dark');
+            
+            // Verifica se a classe está lá agora para atualizar o botão e salvar na memória
+            if (corpoDoSite.classList.contains('theme-dark')) {
+                localStorage.setItem('tema-rpg-assimilacao', 'dark');
+                btnToggleTema.textContent = '☀️ Tema Claro';
+            } else {
+                localStorage.setItem('tema-rpg-assimilacao', 'light');
+                btnToggleTema.textContent = '🌙 Tema Escuro';
+            }
+        });
+    }
+
+    // ==========================================
+    // PODERES DO MESTRE: GERENCIAR JOGADORES (V1.6)
+    // ==========================================
+    const btnGerenciarJogadores = document.getElementById('btn-gerenciar-jogadores');
+    const modalGerenciarJogadores = document.getElementById('gerenciar-jogadores-modal');
+    const btnFecharGerenciar = document.getElementById('fechar-gerenciar-jogadores');
+
+    // Radar: Mostra o botão junto com o "Fichas da Mesa"
+    setInterval(() => {
+        const isMestre = sessionStorage.getItem('isMestreAtivo') === 'true';
+        if (btnGerenciarJogadores) {
+            btnGerenciarJogadores.style.display = isMestre ? 'inline-block' : 'none';
+        }
+    }, 1000);
+
+    if (btnFecharGerenciar) {
+        btnFecharGerenciar.addEventListener('click', () => modalGerenciarJogadores.classList.remove('show'));
+    }
+
+    if (btnGerenciarJogadores) {
+        btnGerenciarJogadores.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const campanhaId = sessionStorage.getItem('campanhaAtiva');
+            if (!campanhaId) return alert('Você não está em nenhuma mesa ativa!');
+
+            btnGerenciarJogadores.textContent = "Buscando...";
+            try {
+                // 1. Busca os jogadores no Back-end
+                const resposta = await fetch(`${API_URL}/campanhas/${campanhaId}/jogadores`);
+                const jogadores = await resposta.json();
+                
+                const gridJogadores = document.getElementById('grid-jogadores-mesa');
+                gridJogadores.innerHTML = ''; 
+                
+                if (jogadores.length === 0) {
+                    gridJogadores.innerHTML = '<p style="color: var(--color-text-medium);">Nenhum jogador na mesa ainda.</p>';
+                } else {
+                    // 2. Desenha os cards na tela
+                    jogadores.forEach(jog => {
+                        const card = document.createElement('div');
+                        card.className = 'jogador-card-mestre';
+                        card.innerHTML = `
+                            <h4>${jog.nome_personagem || 'Desconhecido'}</h4>
+                            <button class="btn-remover-jogador" data-usuario="${jog.usuario_id}">Remover</button>
+                        `;
+                        gridJogadores.appendChild(card);
+                    });
+
+                    // 3. Adiciona a função da Guilhotina (Botão Remover)
+                    document.querySelectorAll('.btn-remover-jogador').forEach(btn => {
+                        btn.addEventListener('click', async (event) => {
+                            const usuarioIdRemover = event.target.getAttribute('data-usuario');
+                            
+                            if(confirm("Tem certeza que deseja remover este jogador da campanha?")) {
+                                try {
+                                    const delRes = await fetch(`${API_URL}/campanhas/${campanhaId}/membros/${usuarioIdRemover}`, {
+                                        method: 'DELETE'
+                                    });
+                                    if(delRes.ok) {
+                                        // Some com o card visualmente na mesma hora, sem precisar recarregar a página!
+                                        event.target.closest('.jogador-card-mestre').remove(); 
+                                    } else {
+                                        alert("Erro ao remover jogador.");
+                                    }
+                                } catch (err) {
+                                    alert("Erro de conexão.");
+                                }
+                            }
+                        });
+                    });
+                }
+                
+                // Abre a janela
+                modalGerenciarJogadores.classList.add('show');
+            } catch (erro) {
+                console.error(erro);
+                alert("Erro ao buscar jogadores.");
+            } finally {
+                btnGerenciarJogadores.innerHTML = "👥 Jogadores";
+            }
+        });
+    }
 });
