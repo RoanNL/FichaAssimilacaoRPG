@@ -266,15 +266,20 @@ app.get('/campanhas/:id/personagens', (req, res) => {
 // =========================================================================
 app.get('/campanhas/:id/jogadores', (req, res) => {
     const campanhaId = req.params.id;
-    // Puxamos o ID do usuário e o nome do personagem que ele está usando na mesa
+
     const sql = `
-        SELECT m.usuario_id, p.nome_personagem 
+        SELECT m.usuario_id, u.username, p.nome_personagem 
         FROM membros_campanha m
-        JOIN personagens p ON m.personagem_id = p.id
+        JOIN usuarios u ON m.usuario_id = u.id
+        LEFT JOIN personagens p ON m.personagem_id = p.id
         WHERE m.campanha_id = ?
     `;
+    
     db.all(sql, [campanhaId], (err, rows) => {
-        if (err) return res.status(500).json({ erro: 'Erro ao buscar jogadores.' });
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ erro: 'Erro ao buscar jogadores.' });
+        }
         res.json(rows);
     });
 });

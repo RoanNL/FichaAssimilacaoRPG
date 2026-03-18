@@ -606,8 +606,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     jogadores.forEach(jog => {
                         const card = document.createElement('div');
                         card.className = 'jogador-card-mestre';
+                        
+                        // Pegamos o nome do operador (username) como principal!
+                        const nomeConta = jog.username || 'Operador Desconhecido';
+                        const nomeChar = jog.nome_personagem || 'Sem personagem ativo';
+
                         card.innerHTML = `
-                            <h4>${jog.nome_personagem || 'Desconhecido'}</h4>
+                            <div>
+                                <h4 style="margin-bottom: 5px;">${nomeConta}</h4>
+                                <p style="color: #888; font-size: 0.8em; margin-top: 0; margin-bottom: 25px;">👤 ${nomeChar}</p>
+                            </div>
                             <button class="btn-remover-jogador" data-usuario="${jog.usuario_id}">Remover</button>
                         `;
                         gridJogadores.appendChild(card);
