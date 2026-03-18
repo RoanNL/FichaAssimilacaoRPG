@@ -328,10 +328,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     const ocupacao = dados['ocupacao'] || 'Desconhecido';
                     
                     // Se não tiver foto, usamos uma imagem neutra (placeholder)
+                    const placeholderInterno = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='110' height='130'%3E%3Crect width='110' height='130' fill='%23111'/%3E%3Ctext x='50%25' y='50%25' font-size='40' fill='%23555' dominant-baseline='middle' text-anchor='middle'%3E?%3C/text%3E%3C/svg%3E";
                     const imgSrc = (fotoBase64 && !fotoBase64.includes('R0lGODlhAQAB')) 
                                     ? fotoBase64 
-                                    : 'https://via.placeholder.com/110x130/111111/555555?text=?';
-
+                                    : placeholderInterno;
+                                    
                     const card = document.createElement('div');
                     card.className = 'char-card';
                     card.dataset.nome = (char.nome_personagem || 'sem nome').toLowerCase(); // Para a busca
