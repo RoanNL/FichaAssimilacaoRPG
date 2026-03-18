@@ -285,20 +285,36 @@ app.get('/campanhas/:id/jogadores', (req, res) => {
 });
 
 // =========================================================================
-// Remover jogador da campanha (Mestre)
+// ROTA DO MESTRE: Ver todas as fichas da mesa + Suas próprias fichas
 // =========================================================================
-app.delete('/campanhas/:campanhaId/membros/:usuarioId', (req, res) => {
-    const { campanhaId, usuarioId } = req.params;
-    
-    db.run(`DELETE FROM membros_campanha WHERE campanha_id = ? AND usuario_id = ?`, 
-        [campanhaId, usuarioId], 
-        function(err) {
-            if (err) return res.status(500).json({ erro: 'Erro ao remover jogador.' });
-            res.json({ mensagem: 'Jogador removido com sucesso!' });
-        }
-    );
-});
+app.get('/campanhas/:id/fichas-mesa', (req, res) => {
+    const campanhaId = req.params.id;
 
+    // 1. Primeiro descobrimos quem é o Mestre desta campanha
+    db.get(`SELECT mestre_id FROM campanhas WHERE id = ?`, [campanhaId], (err, camp) => {
+        if (err || !camp) return res.status(404).json({ erro: 'Campanha não encontrada.' });
+
+        const mestreId = camp.mestre_id;
+
+        // 2. Buscamos as fichas: As do Mestre (usuario_id = mestreId) OU as dos Jogadores (vinculadas na mesa)
+        const sql = `
+            SELECT DISTINCT p.*, u.username as nome_conta
+            FROM personagens p
+            JOIN usuarios u ON p.usuario_id = u.id
+            LEFT JOIN membros_campanha m ON m.personagem_id = p.id
+            WHERE p.usuario_id = ? 
+                OR (m.campanha_id = ? AND m.personagem_id IS NOT NULL)
+        `;
+
+        db.all(sql, [mestreId, campanhaId], (err, rows) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ erro: 'Erro ao buscar fichas da mesa.' });
+            }
+            res.json(rows);
+        });
+    });
+});
 
 server.listen(PORT, () => {
     console.log(`Servidor a correr na porta http://localhost:${PORT}`);

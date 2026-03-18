@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Mesma API do seu render!
-    const API_URL = 'https://assimilacao-backend-api.onrender.com'; 
+    const API_URL = 'http://localhost:3000'; 
     
     // Controles do Modal
     const btnAbrirCampanhas = document.getElementById('nav-btn-campanhas');

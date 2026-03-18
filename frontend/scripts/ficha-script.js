@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const API_URL = 'https://assimilacao-backend-api.onrender.com';
+    const API_URL = 'http://localhost:3000';
     
     // Variável que guarda o ID do usuário apenas na memória RAM 
     let token = sessionStorage.getItem('token')
@@ -194,17 +194,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ==========================================
-    // PODERES DO MESTRE: INSPECIONAR FICHAS DA MESA
+    // PODER DO MESTRE: ABRIR FICHAS DA MESA
     // ==========================================
     const btnFichasMesa = document.getElementById('btn-fichas-mesa');
-    
-    // Um radarzinho que checa a cada 1 segundo se você virou Mestre de alguma mesa
-    setInterval(() => {
-        const isMestre = sessionStorage.getItem('isMestreAtivo') === 'true';
-        if (btnFichasMesa) {
-            btnFichasMesa.style.display = isMestre ? 'inline-block' : 'none';
-        }
-    }, 1000);
+    const gridPersonagens = document.getElementById('grid-personagens');
 
     if (btnFichasMesa) {
         btnFichasMesa.addEventListener('click', async (e) => {
@@ -213,69 +206,55 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!campanhaId) return alert('Você não está em nenhuma mesa ativa!');
 
             btnFichasMesa.textContent = "Buscando...";
+            
             try {
-                const resposta = await fetch(`${API_URL}/campanhas/${campanhaId}/personagens`);
-                const personagensMesa = await resposta.json();
-                
-                // === A BLINDAGEM ===
-                if (!resposta.ok) {
-                    throw new Error(personagensMesa.erro || "Erro desconhecido no servidor.");
-                }
-                // ===================
-                
-                const gridPersonagens = document.getElementById('grid-personagens');
-                gridPersonagens.innerHTML = ''; // Limpa a galeria para mostrar a mesa
-                
-                if (personagensMesa.length === 0) {
-                    gridPersonagens.innerHTML = '<p style="color: white; padding: 20px;">Nenhum jogador colocou um personagem nesta mesa ainda.</p>';
+                const resposta = await fetch(`${API_URL}/campanhas/${campanhaId}/fichas-mesa`);
+                const fichas = await resposta.json();
+
+                gridPersonagens.innerHTML = ''; // Limpa a galeria atual
+
+                if (fichas.length === 0) {
+                    gridPersonagens.innerHTML = '<p style="color: white; padding: 20px;">Nenhuma ficha encontrada na mesa.</p>';
                 } else {
-                    // Povoa a galeria com os personagens dos SEUS jogadores
-                    personagensMesa.forEach(char => {
-                        const dados = char.dados_personagem || {};
-                        const fotoBase64 = dados['char-photo'];
-                        const ocupacao = dados['ocupacao'] || 'Desconhecido';
-                        const placeholderInterno = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='110' height='130'%3E%3Crect width='110' height='130' fill='%23111'/%3E%3Ctext x='50%25' y='50%25' font-size='40' fill='%23555' dominant-baseline='middle' text-anchor='middle'%3E?%3C/text%3E%3C/svg%3E";
-                        const imgSrc = (fotoBase64 && !fotoBase64.includes('R0lGODlhAQAB')) ? fotoBase64 : placeholderInterno;
+                    fichas.forEach(char => {
+                        // Verifica se a ficha é do próprio Mestre para colocar uma tag
+                        const isMestre = char.usuario_id == sessionStorage.getItem('usuarioId');
+                        const tagDono = isMestre ? '👑 Minha Ficha (NPC)' : `👤 Jogador: ${char.nome_conta}`;
 
                         const card = document.createElement('div');
-                        card.className = 'char-card';
+                        card.className = 'char-card'; // Classe CSS que já estilizamos
                         card.innerHTML = `
-                            <img src="${imgSrc}" class="char-card-img" alt="Foto">
+                            <img src="${char.foto || './assets/icon.jpg'}" class="char-card-img" alt="Foto">
                             <div class="char-card-info">
-                                <h3 class="char-card-nome">${char.nome_personagem || 'Sem Nome'}</h3>
-                                <p class="char-card-detalhe">${ocupacao}</p>
-                                <p class="char-card-detalhe" style="color: #4CAF50; margin-top: 5px; font-weight: bold;">👤 Jogador: ${char.nome_jogador}</p>
-                                <button class="btn-acessar-ficha btn-inspecionar" data-dados='${JSON.stringify(dados).replace(/'/g, "&#39;")}'>Inspecionar</button>
+                                <h4 class="char-card-nome">${char.nome_personagem || 'Sem Nome'}</h4>
+                                <p class="char-card-detalhe" style="color: #ff9800; font-weight: bold;">${tagDono}</p>
+                                <p class="char-card-detalhe">Ocupação: ${char.ocupacao || 'Nenhuma'}</p>
+                                <button class="btn-acessar-ficha mt-2" data-id="${char.id}">Inspecionar</button>
                             </div>
                         `;
                         gridPersonagens.appendChild(card);
                     });
-                    
-                    // Ação de carregar a ficha do jogador na tela do Mestre
-                    document.querySelectorAll('.btn-inspecionar').forEach(btn => {
-                        btn.addEventListener('click', (e) => {
-                            const dadosString = e.target.getAttribute('data-dados');
-                            const dadosJson = JSON.parse(dadosString);
-                            
-                            preencherFicha(dadosJson); // Joga os dados na tela
-                            
-                            // TRUQUE DE SEGURANÇA: Limpamos o ID para o Mestre não salvar por cima sem querer!
-                            idPersonagemAtual = null; 
-                            
-                            document.getElementById('galeria-modal').classList.remove('show');
-                            alert("Ficha do jogador carregada no Modo Inspeção! (Apenas visualização)");
+
+                    // Adiciona o evento de Inspecionar (Carregar a ficha na tela sem poder salvar por cima)
+                    document.querySelectorAll('.btn-acessar-ficha').forEach(btn => {
+                        btn.addEventListener('click', async (event) => {
+                            const fichaId = event.target.getAttribute('data-id');
+                            // Aqui você chama a sua função já existente que carrega os dados nos inputs
+                            await carregarPersonagem(fichaId); 
+                            modalGaleria.classList.remove('show'); // Fecha a janela
+                            alert('Ficha carregada em Modo de Inspeção!');
                         });
                     });
                 }
                 
-                // Abre a janela da galeria adaptada
-                document.getElementById('galeria-modal').classList.add('show');
+                // Abre o modal da galeria com os dados da mesa
+                modalGaleria.classList.add('show');
                 
             } catch (erro) {
                 console.error(erro);
                 alert("Erro ao buscar as fichas da mesa.");
             } finally {
-                btnFichasMesa.innerHTML = "👑 Fichas da Mesa";
+                btnFichasMesa.textContent = "👑 Fichas da Mesa";
             }
         });
     }
