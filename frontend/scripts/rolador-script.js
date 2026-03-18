@@ -178,7 +178,8 @@ document.addEventListener('DOMContentLoaded', () => {
         header.style.marginTop = '0';
         
         // Destaca em azul se a rolagem for de outro jogador
-        if(pacote.jogador !== nomeOperador) {
+        const meuNomeLocal = sessionStorage.getItem('nomeUsuario');
+        if(pacote.jogador !== meuNomeLocal) {
             header.style.color = 'var(--color-assim-blue)';
         }
 
