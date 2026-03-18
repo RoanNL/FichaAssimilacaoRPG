@@ -217,6 +217,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const resposta = await fetch(`${API_URL}/campanhas/${campanhaId}/personagens`);
                 const personagensMesa = await resposta.json();
                 
+                // === A BLINDAGEM ===
+                if (!resposta.ok) {
+                    throw new Error(personagensMesa.erro || "Erro desconhecido no servidor.");
+                }
+                // ===================
+                
                 const gridPersonagens = document.getElementById('grid-personagens');
                 gridPersonagens.innerHTML = ''; // Limpa a galeria para mostrar a mesa
                 

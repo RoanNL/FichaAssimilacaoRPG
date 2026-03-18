@@ -213,42 +213,31 @@ app.post('/campanhas/entrar', (req, res) => {
     });
 });
 
-// 3. Buscar campanhas de um usuário (como Mestre ou como Jogador)
-app.get('/campanhas/usuario/:usuarioId', (req, res) => {
-    const { usuarioId } = req.params;
-    const sql = `
-        SELECT c.id, c.nome, c.codigo_convite, c.mestre_id, 
-        (c.mestre_id = ?) as is_mestre
-        FROM campanhas c
-        JOIN membros_campanha m ON c.id = m.campanha_id
-        WHERE m.usuario_id = ?
-    `;
-    db.all(sql, [usuarioId, usuarioId], (err, rows) => {
-        if (err) return res.status(500).json({ erro: 'Erro ao buscar campanhas.' });
-        res.json(rows);
-    });
-});
-
+// 4. Buscar todos os personagens de uma campanha (Visão do Mestre)
 app.get('/campanhas/:id/personagens', (req, res) => {
     const campanhaId = req.params.id;
-    // Puxa o personagem e o nome de quem é o dono dele
+    
+    // Consulta SQL simplificada e super segura (sem JOIN na tabela usuarios)
     const sql = `
-        SELECT p.id, p.nome_personagem, p.dados_personagem, u.username as nome_jogador
+        SELECT p.id, p.nome_personagem, p.dados_personagem
         FROM membros_campanha m
         JOIN personagens p ON m.personagem_id = p.id
-        JOIN usuarios u ON m.usuario_id = u.id
         WHERE m.campanha_id = ?
     `;
+    
     db.all(sql, [campanhaId], (err, rows) => {
-        if (err) return res.status(500).json({ erro: 'Erro ao buscar personagens da mesa.' });
+        if (err) {
+            console.error("Erro no SQL da Visão do Mestre:", err.message);
+            return res.status(500).json({ erro: 'Erro no banco de dados', detalhe: err.message });
+        }
         
-        // Converte os dados salvos de volta para JSON para o Front-end ler
         const personagensFormatados = rows.map(row => {
             try {
                 row.dados_personagem = JSON.parse(row.dados_personagem);
             } catch (e) {
                 row.dados_personagem = {};
             }
+            row.nome_jogador = "Membro da Mesa"; // Texto padrão genérico
             return row;
         });
         
