@@ -1,17 +1,21 @@
 document.addEventListener('DOMContentLoaded', () => {
-    
+
     // === 1. CONEXÃO MULTIPLAYER (SOCKET.IO) ===
-    const socket = io('https://assimilacao-backend-api.onrender.com');
-    
+    const socket = io('http://localhost:3000');
+
     // Compartilhamos o socket com os outros scripts para eles poderem usar
-    window.meuSocket = socket; 
+    window.meuSocket = socket;
 
     socket.on('connect', () => {
-        console.log('Conectado ao Servidor Multiplayer!');
-        // Se a página recarregar e eu já estiver numa mesa, reconecta automaticamente!
         const campanhaAtiva = sessionStorage.getItem('campanhaAtiva');
-        if (campanhaAtiva) {
-            socket.emit('entrar-na-campanha', campanhaAtiva);
+        const usuarioId = sessionStorage.getItem('usuarioId');
+        
+        if (campanhaAtiva && usuarioId) {
+            // Volta a entrar na sala silenciosamente após o F5
+            socket.emit('entrar-na-campanha', { 
+                campanhaId: campanhaAtiva, 
+                usuarioId: usuarioId 
+            });
         }
     });
 
@@ -20,13 +24,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // Agora o script pergunta: "Nesta campanha específica, eu sou o mestre?"
         const isMestre = sessionStorage.getItem('isMestreAtivo') === 'true';
 
-        if (isMestre) {
-            renderizarRolagem(pacoteDeDados);
-            // Mostra um aviso visual que a rolagem chegou na aba do mestre
-            const modalRolador = document.getElementById('rolador-modal');
-            if(modalRolador && !modalRolador.classList.contains('show')){
-                modalRolador.classList.add('show');
-            }
+        // Mestre ou outro jogador da mesa recebem o dado
+        renderizarRolagem(pacoteDeDados);
+        
+        // Mostra um aviso visual que a rolagem chegou
+        const modalRolador = document.getElementById('rolador-modal');
+        if (modalRolador && !modalRolador.classList.contains('show')) {
+            // Opcional: Se quiser que a tela do dado abra sozinha para o Mestre, descomente a linha abaixo
+            // modalRolador.classList.add('show');
         }
     });
     // ==========================================
@@ -36,14 +41,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalRolador = document.getElementById('rolador-modal');
     const btnFecharModal = document.getElementById('fechar-rolador');
 
-    if(btnAbrirModal) {
+    if (btnAbrirModal) {
         btnAbrirModal.addEventListener('click', (e) => {
             e.preventDefault();
-            modalRolador.classList.add('show'); 
+            modalRolador.classList.add('show');
         });
     }
 
-    if(btnFecharModal) {
+    if (btnFecharModal) {
         btnFecharModal.addEventListener('click', () => {
             modalRolador.classList.remove('show');
         });
@@ -98,8 +103,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const diceRequests = [];
         const parts = inputString.trim().toLowerCase().split(/\s+/);
         for (const part of parts) {
-            if (!part) continue; 
-            const match = part.match(/^(\d*)d(\d+)$/); 
+            if (!part) continue;
+            const match = part.match(/^(\d*)d(\d+)$/);
             if (!match) {
                 alert(`Formato inválido: "${part}". Use "2d6", "1d10", etc.`);
                 return null;
@@ -121,13 +126,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const parsedDice = parseInput(inputString);
         if (!parsedDice || parsedDice.length === 0) return;
 
-        // A CORREÇÃO: Pega o nome atualizado na memória no instante exato da rolagem!
-        const jogadorAtual = sessionStorage.getItem('nomeUsuario') || 'Cobaia Anônima';
         const campanhaAtiva = sessionStorage.getItem('campanhaAtiva');
+        
+        // CORREÇÃO: Pega o nome do personagem OU o nome da conta corretos
+        let nomeRolador = 'Operador Misterioso';
+        const inputNome = document.getElementById('nome');
 
-        // O pacote que vai trafegar pela internet
+        if (inputNome && inputNome.value.trim() !== '') {
+            nomeRolador = inputNome.value.trim();
+        } else if (sessionStorage.getItem('usuarioNome') && sessionStorage.getItem('usuarioNome') !== 'undefined') {
+            nomeRolador = sessionStorage.getItem('usuarioNome'); // Chave correta!
+        }
+
+        // O pacote blindado que vai trafegar pela internet
         const pacoteDeDados = {
-            jogador: jogadorAtual,
+            nome: nomeRolador,
             input: inputString,
             campanhaId: campanhaAtiva,
             resultados: [],
@@ -137,9 +150,9 @@ document.addEventListener('DOMContentLoaded', () => {
         let dieCounter = { d6: 0, d10: 0, d12: 0 };
 
         parsedDice.forEach(die => {
-            const dieType = 'd' + die.size; 
+            const dieType = 'd' + die.size;
             for (let i = 0; i < die.quantity; i++) {
-                dieCounter[dieType]++; 
+                dieCounter[dieType]++;
                 const rollNumber = rollDie(die.size);
                 const icons = diceTable[dieType][rollNumber];
 
@@ -165,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // === O DESENHISTA: Só pega um pacote e desenha na tela com animações ===
     function renderizarRolagem(pacote) {
-        resultsDiv.innerHTML = ''; 
+        resultsDiv.innerHTML = '';
 
         const rollGroup = document.createElement('div');
         rollGroup.style.borderBottom = '1px solid #ccc';
@@ -173,13 +186,15 @@ document.addEventListener('DOMContentLoaded', () => {
         rollGroup.style.marginBottom = '15px';
 
         const header = document.createElement('h3');
-        // Adicionamos o nome do jogador no título!
-        header.textContent = `${pacote.jogador} rolou: ${pacote.input}`;
+        // CORREÇÃO: Usa 'pacote.nome' em vez do antigo 'pacote.jogador'
+        header.textContent = `${pacote.nome} rolou: ${pacote.input}`;
         header.style.marginTop = '0';
-        
+
         // Destaca em azul se a rolagem for de outro jogador
-        const meuNomeLocal = sessionStorage.getItem('nomeUsuario');
-        if(pacote.jogador !== meuNomeLocal) {
+        const meuNomeLocal = sessionStorage.getItem('usuarioNome');
+        const meuPersonagemLocal = document.getElementById('nome') ? document.getElementById('nome').value.trim() : '';
+        
+        if (pacote.nome !== meuNomeLocal && pacote.nome !== meuPersonagemLocal) {
             header.style.color = 'var(--color-assim-blue)';
         }
 
@@ -187,16 +202,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const subRollsContainer = document.createElement('div');
         subRollsContainer.className = 'sub-rolls-container';
-        
-        const tempoGiroLogo = 1000; 
-        const delaySuspense = 300;  
-        const tempoTotalAntesDados = tempoGiroLogo + delaySuspense; 
 
-        // Lê os resultados do pacote em vez de rolar de novo
+        const tempoGiroLogo = 1000;
+        const delaySuspense = 300;
+        const tempoTotalAntesDados = tempoGiroLogo + delaySuspense;
+
         pacote.resultados.forEach(dado => {
             const subRollDiv = document.createElement('div');
             subRollDiv.className = 'sub-roll';
-            subRollDiv.style.position = 'relative'; 
+            subRollDiv.style.position = 'relative';
 
             const subRollHeader = document.createElement('h4');
             subRollHeader.textContent = `${dado.tipo} #${dado.numero} (rolou ${dado.faceMecanica})`;
@@ -208,20 +222,20 @@ document.addEventListener('DOMContentLoaded', () => {
             subRollIcons.style.opacity = '0';
 
             const logoImg = document.createElement('img');
-            logoImg.src = 'assets/icon.jpg'; 
+            logoImg.src = 'assets/icon.jpg';
             logoImg.className = 'logo-animado';
             subRollDiv.appendChild(logoImg);
-            
+
             dado.icones.forEach((iconName, index) => {
                 const img = document.createElement('img');
                 img.src = iconFiles[iconName];
                 img.alt = iconName;
-                img.className = 'dado-animado'; 
-                
-                const delayDados = tempoTotalAntesDados / 1000; 
-                img.style.animationDelay = `${delayDados + (index * 0.1)}s`; 
-                
-                subRollIcons.appendChild(img); 
+                img.className = 'dado-animado';
+
+                const delayDados = tempoTotalAntesDados / 1000;
+                img.style.animationDelay = `${delayDados + (index * 0.1)}s`;
+
+                subRollIcons.appendChild(img);
             });
 
             setTimeout(() => {
@@ -243,10 +257,10 @@ document.addEventListener('DOMContentLoaded', () => {
         rollGroup.appendChild(summary);
 
         resultsDiv.appendChild(rollGroup);
-        
+
         setTimeout(() => {
             const historyEntry = rollGroup.cloneNode(true);
-            
+
             historyEntry.querySelectorAll('h4').forEach(h => h.style.opacity = '1');
             historyEntry.querySelectorAll('.icons-container').forEach(c => c.style.opacity = '1');
             historyEntry.querySelectorAll('.logo-animado').forEach(logo => logo.remove());
@@ -262,42 +276,37 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     rollButton.addEventListener('click', handleRoll);
-    
+
     clearButton.addEventListener('click', () => {
         resultsDiv.innerHTML = '';
         historicoDiv.innerHTML = '';
         inputDados.value = '';
-        if(inputFiltroHistorico) inputFiltroHistorico.value = '';
+        if (inputFiltroHistorico) inputFiltroHistorico.value = '';
     });
-    
+
     inputDados.addEventListener('keypress', (event) => {
         if (event.key === 'Enter') handleRoll();
     });
-
 
     // ==========================================
     // VERSÃO 1.6: FILTRO DE HISTÓRICO DE ROLAGENS
     // ==========================================
     const inputFiltroHistorico = document.getElementById('filtro-historico');
-    
+
     if (inputFiltroHistorico) {
         inputFiltroHistorico.addEventListener('input', (e) => {
             const termoBusca = e.target.value.toLowerCase().trim();
-            // Pega todas as rolagens que estão dentro do histórico
-            const rolagensSalvas = historicoDiv.children; 
+            const rolagensSalvas = historicoDiv.children;
 
             Array.from(rolagensSalvas).forEach(caixaDeRolagem => {
-                // O título (h3) é onde guardamos o texto "Fulano rolou: 2d6"
                 const tituloRolagem = caixaDeRolagem.querySelector('h3');
-                
+
                 if (tituloRolagem) {
                     const textoDoTitulo = tituloRolagem.textContent.toLowerCase();
-                    
-                    // Se o texto do título contiver o que o mestre digitou, mostra. Se não, esconde.
                     if (textoDoTitulo.includes(termoBusca)) {
-                        caixaDeRolagem.style.display = 'block'; // Mostra a rolagem
+                        caixaDeRolagem.style.display = 'block'; 
                     } else {
-                        caixaDeRolagem.style.display = 'none';  // Esconde a rolagem
+                        caixaDeRolagem.style.display = 'none';  
                     }
                 }
             });

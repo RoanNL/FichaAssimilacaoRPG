@@ -13,19 +13,19 @@ document.addEventListener('DOMContentLoaded', () => {
         leaf.classList.add('leaf');
 
         // Posição horizontal inicial aleatória
-        const startX = Math.random() * 100 + 'vw'; 
-        
+        const startX = Math.random() * 100 + 'vw';
+
         // Desvio horizontal final aleatório (-20vw a +20vw)
-        const endXOffset = (Math.random() * 40 - 20) + 'vw'; 
-        
+        const endXOffset = (Math.random() * 40 - 20) + 'vw';
+
         // Rotação final aleatória (-360deg a +360deg)
-        const rotation = (Math.random() * 720 - 360) + 'deg'; 
-        
+        const rotation = (Math.random() * 720 - 360) + 'deg';
+
         // Duração da queda aleatória (8 a 15 segundos)
-        const duration = Math.random() * 7 + 8 + 's'; 
-        
+        const duration = Math.random() * 7 + 8 + 's';
+
         // Atraso inicial aleatório (0 a 10 segundos)
-        const delay = Math.random() * 10 + 's'; 
+        const delay = Math.random() * 10 + 's';
 
         // Define as variáveis CSS para a animação
         leaf.style.setProperty('--start-x', startX);
