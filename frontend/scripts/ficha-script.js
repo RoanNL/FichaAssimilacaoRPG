@@ -557,16 +557,21 @@ document.addEventListener('DOMContentLoaded', () => {
                         const card = document.createElement('div');
                         card.className = 'char-card'; 
                         
-                        // Aplicamos uma trava de segurança com flexbox e margens zeradas no H3
+                        // Mudamos o info para alinhar no topo (justify-content: flex-start)
+                        // E removemos o overflow: hidden do info para o texto não sumir
                         card.innerHTML = `
                             <img src="${char.foto || './assets/icon.jpg'}" class="char-card-img" alt="Foto">
-                            <div class="char-card-info" style="display: flex; flex-direction: column; justify-content: center; padding: 10px;">
-                                <h3 class="char-card-nome" style="margin: 0 0 5px 0; line-height: normal; font-size: 1.1em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;">
-                                    ${escaparHTML(char.nome_personagem) || 'Sem Nome'}
-                                </h3>
-                                <p class="char-card-detalhe" style="color: #ff9800; font-weight: bold; margin: 0;">👤 Jogador: ${escaparHTML(char.nome_conta)}</p>
-                                <p class="char-card-detalhe" style="margin: 2px 0 10px 0;">Ocupação: ${escaparHTML(char.ocupacao) || 'Nenhuma'}</p>
-                                <button class="btn-acessar-ficha mt-2" data-id="${char.id}">Inspecionar</button>
+                            <div class="char-card-info" style="display: flex; flex-direction: column; justify-content: flex-start; padding: 10px; overflow: visible;">
+                                
+                                <div class="nome-container" style="display: block; width: 100%; margin-bottom: 5px;">
+                                    <h3 class="char-card-nome" style="margin: 0; line-height: 1.2; font-size: 1.1em; word-wrap: break-word; white-space: normal; overflow: visible; color: white;">
+                                        ${escaparHTML(char.nome_personagem) || 'Sem Nome'}
+                                    </h3>
+                                </div>
+
+                                <p class="char-card-detalhe" style="color: #ff9800; font-weight: bold; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;">👤 Jogador: ${escaparHTML(char.nome_conta)}</p>
+                                <p class="char-card-detalhe" style="margin: 2px 0 10px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;">Ocupação: ${escaparHTML(char.ocupacao) || 'Nenhuma'}</p>
+                                <button class="btn-acessar-ficha mt-2" data-id="${char.id}" style="margin-top: auto;">Inspecionar</button>
                             </div>
                         `;
                         gridPersonagensMesa.appendChild(card);
