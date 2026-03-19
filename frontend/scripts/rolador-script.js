@@ -21,18 +21,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // === O NOVO ESCUDO DO MESTRE INTELIGENTE ===
     socket.on('nova-rolagem', (pacoteDeDados) => {
-        // Agora o script pergunta: "Nesta campanha específica, eu sou o mestre?"
         const isMestre = sessionStorage.getItem('isMestreAtivo') === 'true';
 
-        // Mestre ou outro jogador da mesa recebem o dado
         renderizarRolagem(pacoteDeDados);
         
-        // Mostra um aviso visual que a rolagem chegou
         const modalRolador = document.getElementById('rolador-modal');
         if (modalRolador && !modalRolador.classList.contains('show')) {
-            // Opcional: Se quiser que a tela do dado abra sozinha para o Mestre, descomente a linha abaixo
-            // modalRolador.classList.add('show');
+
         }
+
+        socket.on('mesa-encerrada', () => {
+        alert("🚨 O Mestre encerrou esta campanha permanentemente! Você está sendo desconectado.");
+        
+        // Limpa a memória da mesa
+        sessionStorage.removeItem('campanhaAtiva');
+        sessionStorage.removeItem('isMestreAtivo');
+        
+        // Dá um F5 forçado para limpar a tela e voltar pro Lobby
+        window.location.reload();
+    });
     });
     // ==========================================
 

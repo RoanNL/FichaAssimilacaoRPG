@@ -32,6 +32,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
     cors: { origin: '*' }
 });
+app.set('io', io);
 
 io.on('connection', (socket) => {
     console.log('Um jogador conectou! ID:', socket.id);
@@ -372,6 +373,38 @@ app.delete('/campanhas/:id/membros/:usuarioId', async (req, res) => {
         res.status(200).json({ mensagem: 'Membro removido.' });
     } catch (erro) {
         res.status(500).json({ erro: 'Erro ao deletar membro.' });
+    }
+});
+
+// =========================================================================
+// ROTA DO MESTRE: Excluir Campanha (Destruir a Mesa)
+// =========================================================================
+app.delete('/campanhas/:id', async (req, res) => {
+    const campanhaId = req.params.id;
+    const mestreId = req.headers['usuario-id']; 
+
+    try {
+        const sqlCheck = `SELECT mestre_id FROM campanhas WHERE id = $1`;
+        const resultCheck = await pool.query(sqlCheck, [campanhaId]);
+
+        if (resultCheck.rows.length === 0) {
+            return res.status(404).json({ erro: 'Campanha não encontrada.' });
+        }
+        if (resultCheck.rows[0].mestre_id != mestreId) {
+            return res.status(403).json({ erro: 'Acesso negado: Apenas o Mestre pode apagar esta mesa!' });
+        }
+        await pool.query(`DELETE FROM membros_campanha WHERE campanha_id = $1`, [campanhaId]);
+
+        await pool.query(`DELETE FROM campanhas WHERE id = $1`, [campanhaId]);
+        const io = req.app.get('io');
+        if (io) {
+            io.to(campanhaId.toString()).emit('mesa-encerrada');
+        }
+
+        res.json({ mensagem: 'A mesa foi destruída permanentemente!' });
+    } catch (erro) {
+        console.error('❌ Erro ao excluir campanha:', erro);
+        res.status(500).json({ erro: 'Erro interno ao destruir a mesa.' });
     }
 });
 

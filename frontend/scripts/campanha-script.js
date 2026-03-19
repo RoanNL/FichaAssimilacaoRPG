@@ -52,12 +52,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     ? `<span class="badge-mestre">👑 Mestre (Código: ${camp.codigo_convite})</span>`
                     : `<span class="badge-jogador">⚔️ Jogador</span>`;
 
+                const btnExcluir = camp.is_mestre
+                    ? `<button class="btn-excluir-campanha" data-id="${camp.id}" style="background-color: #8b0000; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; margin-top: 5px; font-weight: bold; font-family: 'Special Elite', monospace;">Apagar Mesa</button>`
+                    : '';
+
                 card.innerHTML = `
                     <div class="campanha-info">
                         <h4>${camp.nome}</h4>
                         ${badge}
                     </div>
-                    <button class="btn-jogar" data-id="${camp.id}" data-mestre="${camp.is_mestre}">Entrar</button>
+                    <div style="display: flex; flex-direction: column;">
+                        <button class="btn-jogar" data-id="${camp.id}" data-mestre="${camp.is_mestre}">Entrar</button>
+                        ${btnExcluir}
+                    </div>
                 `;
                 listaCampanhas.appendChild(card);
             });
@@ -100,6 +107,39 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (erro) {
             listaCampanhas.innerHTML = '<p style="color: #a04040;">Erro ao carregar campanhas.</p>';
         }
+
+        document.querySelectorAll('.btn-excluir-campanha').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const idCampanha = e.target.getAttribute('data-id');
+                    const usuarioLogadoId = sessionStorage.getItem('usuarioId');
+
+                    const confirmacao = confirm('🔥 ALERTA CRÍTICO 🔥\n\nTem certeza que deseja APAGAR esta mesa? Todos os jogadores serão expulsos e o histórico será perdido. Isso NÃO tem volta!');
+
+                    if (confirmacao) {
+                        e.target.textContent = "Apagando...";
+                        try {
+                            const resposta = await fetch(`${API_URL}/campanhas/${idCampanha}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'usuario-id': usuarioLogadoId // Manda a "Identidade" pro back-end conferir
+                                }
+                            });
+                            
+                            const dados = await resposta.json();
+                            
+                            if (resposta.ok) {
+                                alert(dados.mensagem);
+                                carregarMinhasCampanhas(usuarioLogadoId); // Recarrega a lista
+                            } else {
+                                alert(dados.erro);
+                            }
+                        } catch (err) {
+                            alert("Erro ao excluir mesa.");
+                        }
+                    }
+                });
+            });
     }
 
     // Puxa os personagens da galeria principal para o select de entrada
