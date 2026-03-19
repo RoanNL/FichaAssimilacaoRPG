@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // === 1. CONEXÃO MULTIPLAYER (SOCKET.IO) ===
-    const socket = io('http://localhost:3000');
+    const socket = io('https://fichaassimilacaorpg.onrender.com');
 
     // Compartilhamos o socket com os outros scripts para eles poderem usar
     window.meuSocket = socket;

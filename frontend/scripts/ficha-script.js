@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const API_URL = 'http://localhost:3000';
+    const API_URL = 'https://fichaassimilacaorpg.onrender.com';
 
     // Variável que guarda o ID do usuário apenas na memória RAM 
     let token = sessionStorage.getItem('token')

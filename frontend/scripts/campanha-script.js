@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Mesma API do seu render!
-    const API_URL = 'http://localhost:3000';
+    const API_URL = 'https://fichaassimilacaorpg.onrender.com';
 
     // Controles do Modal
     const btnAbrirCampanhas = document.getElementById('nav-btn-campanhas');
