@@ -1,6 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
     const API_URL = 'https://fichaassimilacaorpg.onrender.com';
 
+    function escaparHTML(texto) {
+        if (!texto) return '';
+        const div = document.createElement('div');
+        div.textContent = texto;
+        return div.innerHTML;
+    }
+
     // Variável que guarda o ID do usuário apenas na memória RAM 
     let token = sessionStorage.getItem('token')
     let usuarioLogadoId = sessionStorage.getItem('usuarioId');
@@ -369,10 +376,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     card.dataset.nome = (char.nome_personagem || 'sem nome').toLowerCase();
 
                     card.innerHTML = `
-                        <img src="${imgSrc}" class="char-card-img" alt="Foto de ${char.nome_personagem}">
+                        <img src="${imgSrc}" class="char-card-img" alt="Foto">
                         <div class="char-card-info">
-                            <h3 class="char-card-nome">${char.nome_personagem || 'Sem Nome'}</h3>
-                            <p class="char-card-detalhe">${ocupacao}</p>
+                            <h3 class="char-card-nome" style="margin: 0 0 5px 0; line-height: normal; font-size: 1.1em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;">
+                                ${escaparHTML(char.nome_personagem) || 'Sem Nome'}
+                            </h3>
+                            <p class="char-card-detalhe">${escaparHTML(ocupacao)}</p>
                             <button class="btn-acessar-ficha" data-id="${char.id}">Acessar Ficha</button>
                         </div>
                     `;
@@ -552,8 +561,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         card.innerHTML = `
                             <img src="${char.foto || './assets/icon.jpg'}" class="char-card-img" alt="Foto">
                             <div class="char-card-info" style="display: flex; flex-direction: column; justify-content: center; padding: 10px;">
-                            <h3 class="char-card-nome" style="margin: 0 0 5px 0; line-height: normal; font-size: 1.1em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;">${char.nome_personagem || 'Sem Nome'}</h3>                                <p class="char-card-detalhe" style="color: #ff9800; font-weight: bold; margin: 0;">👤 Jogador: ${char.nome_conta}</p>
-                                <p class="char-card-detalhe" style="margin: 2px 0 10px 0;">Ocupação: ${char.ocupacao || 'Nenhuma'}</p>
+                                <h3 class="char-card-nome" style="margin: 0 0 5px 0; line-height: normal; font-size: 1.1em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;">
+                                    ${escaparHTML(char.nome_personagem) || 'Sem Nome'}
+                                </h3>
+                                <p class="char-card-detalhe" style="color: #ff9800; font-weight: bold; margin: 0;">👤 Jogador: ${escaparHTML(char.nome_conta)}</p>
+                                <p class="char-card-detalhe" style="margin: 2px 0 10px 0;">Ocupação: ${escaparHTML(char.ocupacao) || 'Nenhuma'}</p>
                                 <button class="btn-acessar-ficha mt-2" data-id="${char.id}">Inspecionar</button>
                             </div>
                         `;
