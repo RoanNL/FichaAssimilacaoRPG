@@ -1,10 +1,21 @@
-require('dotenv').config() 
+require('dotenv').config()
 
 const express = require('express');
 const cors = require('cors');
-const bcrypt = require('bcryptjs'); 
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken')
 const db = require('./database');
+
+const { pool, criarTabelas } = require('./database');
+
+pool.query('SELECT NOW()', (err, res) => {
+    if (err) {
+        console.error('❌ Erro ao conectar no PostgreSQL:', err);
+    } else {
+        console.log('✅ Conectado ao PostgreSQL com sucesso!');
+        criarTabelas();
+    }
+});
 
 const http = require('http');
 const { Server } = require('socket.io');
@@ -13,307 +24,355 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const SEGREDO_JWT = process.env.SEGREDO_JWT
 
+app.use(cors());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
 const server = http.createServer(app);
 const io = new Server(server, {
-    cors: { origin: '*' } // Permite comunicação livre com o front-end
+    cors: { origin: '*' }
 });
 
 io.on('connection', (socket) => {
     console.log('Um jogador conectou! ID:', socket.id);
 
-    // 1. O jogador avisa em qual mesa ele sentou
-    socket.on('entrar-na-campanha', (campanhaId) => {
-        socket.join(campanhaId); // Tranca o jogador na sala da campanha
-        console.log(`Socket ${socket.id} entrou na sala da campanha: ${campanhaId}`);
+    // 🛡️ A CATRACA VIP
+    socket.on('entrar-na-campanha', async (dados) => {
+        const campanhaId = typeof dados === 'object' ? dados.campanhaId : dados;
+        const usuarioId = typeof dados === 'object' ? dados.usuarioId : null;
+
+        if (!usuarioId || !campanhaId) return; 
+
+        // A MÁGICA AQUI: Transforma o ID em texto para o Socket.io entender!
+        const salaStr = campanhaId.toString(); 
+
+        try {
+            const sql = `SELECT * FROM membros_campanha WHERE campanha_id = $1 AND usuario_id = $2`;
+            const resultado = await pool.query(sql, [campanhaId, usuarioId]);
+
+            if (resultado.rows.length > 0) {
+                socket.join(salaStr); 
+                console.log(`✅ Catraca VIP: Usuário ${usuarioId} acessou a mesa ${salaStr}`);
+            } else {
+                console.log(`🚨 BARRADO: Usuário ${usuarioId} tentou espionar a mesa ${salaStr}!`);
+            }
+        } catch (err) {
+            console.error('Erro na catraca VIP:', err);
+        }
     });
 
-    // 2. Quando rolar os dados, manda APENAS para a sala dele
+    // 🛡️ O ESCUDO DA ROLAGEM
     socket.on('rolar-dados', (pacoteDeDados) => {
-        // O "socket.to(id)" grita apenas dentro da sala correta!
-        socket.to(pacoteDeDados.campanhaId).emit('nova-rolagem', pacoteDeDados);
+        // CONVERSÃO PARA TEXTO AQUI TAMBÉM!
+        const salaStr = pacoteDeDados.campanhaId.toString(); 
+        
+        if (socket.rooms.has(salaStr)) {
+            socket.to(salaStr).emit('nova-rolagem', pacoteDeDados);
+        } else {
+            console.log(`🚨 FALSO HACKER BARRADO: Socket não está na sala ${salaStr}!`);
+        }
     });
 });
-app.use(cors());
-app.use(express.json({limit:'50mb'}));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
-
 
 app.get('/', (req, res) => {
-    res.json({ mensagem: 'Servidor online!' });
+    res.json({ mensagem: 'Servidor online e blindado!' });
 });
 
-// Função auxiliar para gerar código de convite (Ex: A7X9P2)
 function gerarCodigoConvite() {
     return Math.random().toString(36).substring(2, 8).toUpperCase();
 }
 
-// ==========================================
-// REGISTRO DE USUÁRIO
-// ==========================================
+// =========================================================================
+// ROTA DE REGISTRO 
+// =========================================================================
 app.post('/registro', async (req, res) => {
-    const { nome_usuario, senha } = req.body;
+    const username = req.body.username || req.body.usuario || req.body.nome || req.body.login;
+    const password = req.body.password || req.body.senha;
 
-    if (!nome_usuario || !senha) {
-        return res.status(400).json({ erro: 'Preencha usuário e senha!' });
+    if (!username || !password) {
+        return res.status(400).json({ erro: 'Usuário e senha são obrigatórios.' });
     }
 
     try {
-        const senhaCriptografada = await bcrypt.hash(senha, 10);
+        const sql = `INSERT INTO usuarios (username, password) VALUES ($1, $2) RETURNING id`;
+        const resultado = await pool.query(sql, [username, password]);
 
-        // Insere no banco de dados
-        const query = `INSERT INTO utilizadores (nome_utilizador, senha) VALUES (?, ?)`;
-        db.run(query, [nome_usuario, senhaCriptografada], function(err) {
-            if (err) {
-                if (err.code === 'SQLITE_CONSTRAINT') {
-                    return res.status(400).json({ erro: 'Este nome de usuário já existe.' });
-                }
-                return res.status(500).json({ erro: 'Erro interno no banco de dados.' });
+        // TRADUÇÃO PARA O FRONT-END: Devolvemos usuario.id e usuario.nome
+        res.status(201).json({
+            mensagem: 'Usuário registrado com sucesso!',
+            usuario: { id: resultado.rows[0].id, nome: username }
+        });
+    } catch (erro) {
+        if (erro.code === '23505') {
+            return res.status(400).json({ erro: 'Nome de usuário já está em uso.' });
+        }
+        console.error('❌ Erro no registro:', erro);
+        res.status(500).json({ erro: 'Erro interno ao registrar usuário.' });
+    }
+});
+
+// =========================================================================
+// ROTA DE LOGIN 
+// =========================================================================
+app.post('/login', async (req, res) => {
+    const username = req.body.username || req.body.usuario || req.body.nome || req.body.login;
+    const password = req.body.password || req.body.senha;
+
+    if (!username || !password) {
+        return res.status(400).json({ erro: 'Usuário e senha são obrigatórios.' });
+    }
+
+    try {
+        const sql = `SELECT id, username FROM usuarios WHERE username = $1 AND password = $2`;
+        const resultado = await pool.query(sql, [username, password]);
+
+        if (resultado.rows.length === 0) {
+            return res.status(401).json({ erro: 'Credenciais inválidas.' });
+        }
+
+        res.json({
+            mensagem: 'Login realizado com sucesso!',
+            usuario: {
+                id: resultado.rows[0].id,
+                nome: resultado.rows[0].username
             }
-            res.status(201).json({ mensagem: 'Conta criada com sucesso!', id: this.lastID });
         });
-    } catch (error) {
-        res.status(500).json({ erro: 'Erro ao processar o registro.' });
+    } catch (erro) {
+        console.error('❌ Erro no login:', erro);
+        res.status(500).json({ erro: 'Erro interno ao realizar login.' });
     }
 });
 
-// ==========================================
-// LOGIN DE USUÁRIO
-// ==========================================
-app.post('/login', (req, res) => {
-    const { nome_usuario, senha } = req.body;
+// =========================================================================
+// SALVAR OU ATUALIZAR FICHA
+// =========================================================================
+app.post('/personagens', async (req, res) => {
 
-    if (!nome_usuario || !senha) {
-        return res.status(400).json({ erro: 'Preencha usuário e senha!' });
+    const usuarioId = req.body.usuarioId || req.body.usuario_id || req.body.utilizador_id;
+    const personagemId = req.body.personagemId || req.body.id;
+    const nome = req.body.nome || req.body.nome_personagem || 'Desconhecido';
+    const ocupacao = req.body.ocupacao || '';
+    const dadosFicha = req.body.dadosFicha || req.body.dados_ficha || req.body.dados_personagem || {};
+    const foto = req.body.foto || null;
+
+    if (!usuarioId) {
+        return res.status(400).json({ erro: 'Usuário não autenticado.' });
     }
 
-    // Busca o usuário no banco
-    const query = `SELECT * FROM utilizadores WHERE nome_utilizador = ?`;
-    db.get(query, [nome_usuario], async (err, row) => {
-        if (err) {
-            return res.status(500).json({ erro: 'Erro interno no banco de dados.' });
+    const fichaParaOBanco = JSON.stringify(dadosFicha);
+    const isUpdate = personagemId && personagemId !== 'null' && personagemId !== '';
+
+    try {
+        if (isUpdate) {
+            // ATUALIZAR
+            const sql = `UPDATE personagens SET nome_personagem = $1, ocupacao = $2, dados_ficha = $3, foto = $4 WHERE id = $5 AND usuario_id = $6`;
+            await pool.query(sql, [nome, ocupacao, fichaParaOBanco, foto, personagemId, usuarioId]);
+            res.json({ mensagem: 'Ficha atualizada com sucesso!', id: personagemId });
+        } else {
+            // CRIAR NOVO
+            const sql = `INSERT INTO personagens (usuario_id, nome_personagem, ocupacao, dados_ficha, foto) VALUES ($1, $2, $3, $4, $5) RETURNING id`;
+            const resultado = await pool.query(sql, [usuarioId, nome, ocupacao, fichaParaOBanco, foto]);
+            res.json({ mensagem: 'Nova ficha salva no banco com sucesso!', id: resultado.rows[0].id });
         }
-
-        if (!row) {
-            return res.status(401).json({ erro: 'Usuário não encontrado.' });
-        }
-
-        const senhaValida = await bcrypt.compare(senha, row.senha);
-
-        if (!senhaValida) {
-            return res.status(401).json({ erro: 'Senha incorreta.' });
-        }
-
-        const token = jwt.sign({id: row.id}, SEGREDO_JWT, {expiresIn: '12h'});
-
-        res.status(200).json({ 
-            mensagem: 'Login realizado com sucesso!', 
-            token: token,
-            usuarioId: row.id,
-            nome_usuario: row.nome_utilizador
-        });
-    });
-});
-
-// ==========================================
-// ROTAS DE PERSONAGENS (FICHA)
-// ==========================================
-
-// Salvar ou Atualizar um Personagem
-app.post('/personagens', (req, res) => {
-    const { id, nome_personagem, dados_personagem, utilizador_id } = req.body;
-
-    // Se tem um ID, é para atualizar uma ficha existente
-    if (id) {
-        const query = `UPDATE personagens SET nome_personagem = ?, dados_personagem = ? WHERE id = ? AND utilizador_id = ?`;
-        db.run(query, [nome_personagem, JSON.stringify(dados_personagem), id, utilizador_id], function(err) {
-            if (err) return res.status(500).json({ erro: 'Erro ao atualizar ficha.' });
-            res.status(200).json({ mensagem: 'Ficha atualizada com sucesso!' });
-        });
-    } 
-    // Se não tem ID, é para criar uma ficha nova
-    else {
-        const query = `INSERT INTO personagens (nome_personagem, dados_personagem, utilizador_id) VALUES (?, ?, ?)`;
-        db.run(query, [nome_personagem, JSON.stringify(dados_personagem), utilizador_id], function(err) {
-            if (err) return res.status(500).json({ erro: 'Erro ao criar ficha.' });
-            res.status(201).json({ mensagem: 'Nova ficha criada!', id: this.lastID });
-        });
+    } catch (erro) {
+        console.error('❌ Erro SQL ao salvar:', erro);
+        res.status(500).json({ erro: 'Erro interno do banco de dados.' });
     }
 });
 
-// Buscar todos os personagens de um Usuário
-app.get('/personagens/usuario/:usuario_id', (req, res) => {
-    const usuario_id = req.params.usuario_id;
-    const query = `SELECT id, nome_personagem, dados_personagem FROM personagens WHERE utilizador_id = ?`;
-    
-    db.all(query, [usuario_id], (err, rows) => {
-        if (err) return res.status(500).json({ erro: 'Erro ao buscar personagens.' });
-        
-        // Converte o texto JSON do banco de volta para um objeto JavaScript
-        const personagens = rows.map(row => ({
-            id: row.id,
-            nome_personagem: row.nome_personagem,
-            dados_personagem: JSON.parse(row.dados_personagem)
-        }));
-        
-        res.status(200).json(personagens);
-    });
+// =========================================================================
+// LISTAR TODAS AS FICHAS DO USUÁRIO
+// =========================================================================
+app.get('/personagens/usuario/:usuarioId', async (req, res) => {
+    const { usuarioId } = req.params;
+
+    if (usuarioId === 'undefined' || !usuarioId) {
+        return res.json([]);
+    }
+
+    try {
+        const sql = `SELECT id, nome_personagem, ocupacao, foto FROM personagens WHERE usuario_id = $1 ORDER BY id DESC`;
+        const resultado = await pool.query(sql, [usuarioId]);
+        res.json(resultado.rows);
+    } catch (erro) {
+        console.error('❌ Erro ao listar personagens:', erro);
+        res.status(500).json({ erro: 'Erro ao buscar personagens.' });
+    }
 });
 
-// Excluir um personagem
-app.delete('/personagens/:id', (req, res) => {
+// =========================================================================
+// CARREGAR UMA FICHA ESPECÍFICA 
+// =========================================================================
+app.get('/personagem/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const sql = `SELECT * FROM personagens WHERE id = $1`;
+        const resultado = await pool.query(sql, [id]);
+
+        if (resultado.rows.length === 0) {
+            return res.status(404).json({ erro: 'Personagem não encontrado.' });
+        }
+
+        // Retorna a ficha completinha para o front-end
+        res.json(resultado.rows[0]);
+    } catch (erro) {
+        console.error('❌ Erro ao carregar ficha:', erro);
+        res.status(500).json({ erro: 'Erro ao buscar dados do personagem.' });
+    }
+});
+
+// =========================================================================
+// EXCLUIR UM PERSONAGEM (POSTGRESQL)
+// =========================================================================
+app.delete('/personagens/:id', async (req, res) => {
     const id = req.params.id;
-    const query = `DELETE FROM personagens WHERE id = ?`;
-    
-    db.run(query, [id], function(err) {
-        if (err) return res.status(500).json({ erro: 'Erro ao deletar ficha.' });
+    try {
+        // Deleta do PostgreSQL usando $1
+        await pool.query('DELETE FROM personagens WHERE id = $1', [id]);
         res.status(200).json({ mensagem: 'Personagem excluído.' });
-    });
+    } catch (erro) {
+        console.error('❌ Erro ao deletar ficha:', erro);
+        res.status(500).json({ erro: 'Erro ao deletar ficha.' });
+    }
 });
 
 // ==========================================
-// ROTAS DE CAMPANHA (VTT MULTIPLAYER)
+// ROTAS DE CAMPANHA (POSTGRESQL - BLINDADAS)
 // ==========================================
 
-app.post('/campanhas', (req, res) => {
+app.post('/campanhas', async (req, res) => {
     const { nome, mestre_id } = req.body;
     const codigo = gerarCodigoConvite();
 
-    db.run(`INSERT INTO campanhas (nome, codigo_convite, mestre_id) VALUES (?, ?, ?)`, 
-        [nome, codigo, mestre_id], 
-        function(err) {
-            if (err) return res.status(500).json({ erro: 'Erro ao criar campanha.' });
-            
-            const campanha_id = this.lastID;
-            // O Mestre também é inserido como membro automaticamente (sem personagem)
-            db.run(`INSERT INTO membros_campanha (campanha_id, usuario_id) VALUES (?, ?)`, 
-                [campanha_id, mestre_id], 
-                (err) => {
-                    if (err) console.error("Erro ao vincular mestre à campanha.");
-                    res.json({ mensagem: 'Campanha criada!', id: campanha_id, codigo: codigo });
-                }
-            );
-        }
-    );
+    try {
+        const sqlCampanha = `INSERT INTO campanhas (nome, codigo_convite, mestre_id) VALUES ($1, $2, $3) RETURNING id`;
+        const resultCampanha = await pool.query(sqlCampanha, [nome, codigo, mestre_id]);
+
+        const campanha_id = resultCampanha.rows[0].id;
+
+        const sqlMembro = `INSERT INTO membros_campanha (campanha_id, usuario_id) VALUES ($1, $2)`;
+        await pool.query(sqlMembro, [campanha_id, mestre_id]);
+
+        res.json({ mensagem: 'Campanha criada!', id: campanha_id, codigo: codigo });
+    } catch (erro) {
+        console.error("Erro ao criar campanha:", erro);
+        res.status(500).json({ erro: 'Erro ao criar campanha.' });
+    }
 });
 
-// Entrar em uma campanha via código de convite
-app.post('/campanhas/entrar', (req, res) => {
+app.post('/campanhas/entrar', async (req, res) => {
     const { codigo_convite, usuario_id, personagem_id } = req.body;
 
-    db.get(`SELECT id FROM campanhas WHERE codigo_convite = ?`, [codigo_convite], (err, campanha) => {
-        if (err || !campanha) return res.status(404).json({ erro: 'Código de convite inválido ou não encontrado.' });
+    try {
+        const sqlBusca = `SELECT id FROM campanhas WHERE codigo_convite = $1`;
+        const resultBusca = await pool.query(sqlBusca, [codigo_convite]);
 
-        db.run(`INSERT INTO membros_campanha (campanha_id, usuario_id, personagem_id) VALUES (?, ?, ?)`, 
-            [campanha.id, usuario_id, personagem_id], 
-            function(err) {
-                if (err) return res.status(400).json({ erro: 'Você já está nesta campanha ou ocorreu um erro.' });
-                res.json({ mensagem: 'Você entrou na campanha com sucesso!', campanha_id: campanha.id });
-            }
-        );
-    });
-});
-
-// Buscar todos os personagens de uma campanha (Visão do Mestre)
-app.get('/campanhas/usuario/:usuarioId', (req, res) => {
-    const { usuarioId } = req.params;
-    const sql = `
-        SELECT c.id, c.nome, c.codigo_convite, c.mestre_id, 
-        (c.mestre_id = ?) as is_mestre
-        FROM campanhas c
-        JOIN membros_campanha m ON c.id = m.campanha_id
-        WHERE m.usuario_id = ?
-    `;
-    db.all(sql, [usuarioId, usuarioId], (err, rows) => {
-        if (err) return res.status(500).json({ erro: 'Erro ao buscar campanhas.' });
-        res.json(rows);
-    });
-});
-
-
-app.get('/campanhas/:id/personagens', (req, res) => {
-    const campanhaId = req.params.id;
-    
-    // Consulta SQL simplificada e super segura (sem JOIN perigoso)
-    const sql = `
-        SELECT p.id, p.nome_personagem, p.dados_personagem
-        FROM membros_campanha m
-        JOIN personagens p ON m.personagem_id = p.id
-        WHERE m.campanha_id = ?
-    `;
-    
-    db.all(sql, [campanhaId], (err, rows) => {
-        if (err) {
-            console.error("Erro no SQL da Visão do Mestre:", err.message);
-            return res.status(500).json({ erro: 'Erro no banco de dados', detalhe: err.message });
+        if (resultBusca.rows.length === 0) {
+            return res.status(404).json({ erro: 'Código de convite inválido ou não encontrado.' });
         }
-        
-        const personagensFormatados = rows.map(row => {
-            try {
-                row.dados_personagem = JSON.parse(row.dados_personagem);
-            } catch (e) {
-                row.dados_personagem = {};
-            }
-            row.nome_jogador = "Membro da Mesa"; 
+
+        const campanhaId = resultBusca.rows[0].id;
+
+        const sqlInsert = `INSERT INTO membros_campanha (campanha_id, usuario_id, personagem_id) VALUES ($1, $2, $3)`;
+        await pool.query(sqlInsert, [campanhaId, usuario_id, personagem_id]);
+
+        res.json({ mensagem: 'Você entrou na campanha com sucesso!', campanha_id: campanhaId });
+    } catch (erro) {
+        res.status(400).json({ erro: 'Você já está nesta campanha ou ocorreu um erro.' });
+    }
+});
+
+app.get('/campanhas/usuario/:usuarioId', async (req, res) => {
+    const { usuarioId } = req.params;
+    try {
+        const sql = `
+            SELECT c.id, c.nome, c.codigo_convite, c.mestre_id, 
+            (c.mestre_id::text = $1::text) as is_mestre
+            FROM campanhas c
+            JOIN membros_campanha m ON c.id = m.campanha_id
+            WHERE m.usuario_id = $2
+        `;
+        const result = await pool.query(sql, [usuarioId, usuarioId]);
+        res.json(result.rows);
+    } catch (erro) {
+        res.status(500).json({ erro: 'Erro ao buscar campanhas.' });
+    }
+});
+
+app.get('/campanhas/:id/personagens', async (req, res) => {
+    const campanhaId = req.params.id;
+    try {
+        const sql = `
+            SELECT p.id, p.nome_personagem, p.dados_ficha as dados_personagem
+            FROM membros_campanha m
+            JOIN personagens p ON m.personagem_id = p.id
+            WHERE m.campanha_id = $1
+        `;
+        const result = await pool.query(sql, [campanhaId]);
+
+        const personagensFormatados = result.rows.map(row => {
+            row.nome_jogador = "Membro da Mesa";
             return row;
         });
-        
+
         res.json(personagensFormatados);
-    });
+    } catch (erro) {
+        res.status(500).json({ erro: 'Erro ao buscar personagens da mesa.' });
+    }
 });
 
 // =========================================================================
-// Buscar jogadores para o painel de Gerenciamento (Mestre)
+// Buscar jogadores para o painel de Gerenciamento 
 // =========================================================================
-app.get('/campanhas/:id/jogadores', (req, res) => {
+app.get('/campanhas/:id/jogadores', async (req, res) => {
     const campanhaId = req.params.id;
-
-    const sql = `
-        SELECT m.usuario_id, u.username, p.nome_personagem 
-        FROM membros_campanha m
-        JOIN usuarios u ON m.usuario_id = u.id
-        LEFT JOIN personagens p ON m.personagem_id = p.id
-        WHERE m.campanha_id = ?
-    `;
-    
-    db.all(sql, [campanhaId], (err, rows) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).json({ erro: 'Erro ao buscar jogadores.' });
-        }
-        res.json(rows);
-    });
-});
-
-// =========================================================================
-// ROTA DO MESTRE: Ver todas as fichas da mesa + Suas próprias fichas
-// =========================================================================
-app.get('/campanhas/:id/fichas-mesa', (req, res) => {
-    const campanhaId = req.params.id;
-
-    // 1. Primeiro descobrimos quem é o Mestre desta campanha
-    db.get(`SELECT mestre_id FROM campanhas WHERE id = ?`, [campanhaId], (err, camp) => {
-        if (err || !camp) return res.status(404).json({ erro: 'Campanha não encontrada.' });
-
-        const mestreId = camp.mestre_id;
-
-        // 2. Buscamos as fichas: As do Mestre (usuario_id = mestreId) OU as dos Jogadores (vinculadas na mesa)
+    try {
+        // Lógica à prova de balas: Traz todos que são membros da campanha, tendo ficha ou não!
         const sql = `
-            SELECT DISTINCT p.*, u.username as nome_conta
+            SELECT m.usuario_id, u.username, 
+                   (SELECT nome_personagem FROM personagens WHERE usuario_id = u.id LIMIT 1) as nome_personagem
+            FROM membros_campanha m
+            JOIN usuarios u ON m.usuario_id = u.id
+            WHERE m.campanha_id = $1
+        `;
+        const result = await pool.query(sql, [campanhaId]);
+        res.json(result.rows);
+    } catch (erro) {
+        console.error('Erro ao buscar jogadores:', erro);
+        res.status(500).json({ erro: 'Erro ao buscar jogadores.' });
+    }
+});
+
+// =========================================================================
+// ROTA DO MESTRE: Ver todas as fichas da mesa 
+// =========================================================================
+app.get('/campanhas/:id/fichas-mesa', async (req, res) => {
+    const campanhaId = req.params.id;
+    try {
+        // Lógica à prova de balas: Pega as fichas cruzando pelo ID do Usuário, não importa como ele entrou!
+        const sql = `
+            SELECT p.*, u.username as nome_conta
             FROM personagens p
             JOIN usuarios u ON p.usuario_id = u.id
-            LEFT JOIN membros_campanha m ON m.personagem_id = p.id
-            WHERE p.usuario_id = ? 
-                OR (m.campanha_id = ? AND m.personagem_id IS NOT NULL)
+            JOIN membros_campanha m ON m.usuario_id = p.usuario_id
+            WHERE m.campanha_id = $1
         `;
+        const result = await pool.query(sql, [campanhaId]);
+        res.json(result.rows);
+    } catch (erro) {
+        console.error('Erro ao buscar fichas:', erro);
+        res.status(500).json({ erro: 'Erro ao buscar fichas da mesa.' });
+    }
+});
 
-        db.all(sql, [mestreId, campanhaId], (err, rows) => {
-            if (err) {
-                console.error(err);
-                return res.status(500).json({ erro: 'Erro ao buscar fichas da mesa.' });
-            }
-            res.json(rows);
-        });
-    });
+app.delete('/campanhas/:id/membros/:usuarioId', async (req, res) => {
+    const { id, usuarioId } = req.params;
+    try {
+        await pool.query('DELETE FROM membros_campanha WHERE campanha_id = $1 AND usuario_id = $2', [id, usuarioId]);
+        res.status(200).json({ mensagem: 'Membro removido.' });
+    } catch (erro) {
+        res.status(500).json({ erro: 'Erro ao deletar membro.' });
+    }
 });
 
 server.listen(PORT, () => {

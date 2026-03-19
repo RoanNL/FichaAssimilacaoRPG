@@ -1,12 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Mesma API do seu render!
-    const API_URL = 'http://localhost:3000'; 
-    
+    const API_URL = 'http://localhost:3000';
+
     // Controles do Modal
     const btnAbrirCampanhas = document.getElementById('nav-btn-campanhas');
     const modalCampanhas = document.getElementById('campanhas-modal');
     const btnFecharCampanhas = document.getElementById('fechar-campanhas');
-    
+
     const listaCampanhas = document.getElementById('lista-campanhas');
     const btnCriarCampanha = document.getElementById('btn-criar-campanha');
     const nomeCampanhaInput = document.getElementById('nova-campanha-nome');
@@ -15,19 +15,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const charSelectCampanha = document.getElementById('char-select-campanha');
 
     // Abre a janela de campanhas
-    if(btnAbrirCampanhas) {
+    if (btnAbrirCampanhas) {
         btnAbrirCampanhas.addEventListener('click', (e) => {
             e.preventDefault();
             const usuarioLogadoId = sessionStorage.getItem('usuarioId');
-            if(!usuarioLogadoId) return alert("Faça login primeiro!");
-            
+            if (!usuarioLogadoId) return alert("Faça login primeiro!");
+
             modalCampanhas.classList.add('show');
             carregarMinhasCampanhas(usuarioLogadoId);
             preencherSelectPersonagens();
         });
     }
 
-    if(btnFecharCampanhas) {
+    if (btnFecharCampanhas) {
         btnFecharCampanhas.addEventListener('click', () => modalCampanhas.classList.remove('show'));
     }
 
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const resposta = await fetch(`${API_URL}/campanhas/usuario/${userId}`);
             const campanhas = await resposta.json();
 
-            if(campanhas.length === 0) {
+            if (campanhas.length === 0) {
                 listaCampanhas.innerHTML = '<p style="color: #888;">Você ainda não participa de nenhuma campanha.</p>';
                 return;
             }
@@ -47,9 +47,9 @@ document.addEventListener('DOMContentLoaded', () => {
             campanhas.forEach(camp => {
                 const card = document.createElement('div');
                 card.className = 'campanha-card';
-                
-                const badge = camp.is_mestre 
-                    ? `<span class="badge-mestre">👑 Mestre (Código: ${camp.codigo_convite})</span>` 
+
+                const badge = camp.is_mestre
+                    ? `<span class="badge-mestre">👑 Mestre (Código: ${camp.codigo_convite})</span>`
                     : `<span class="badge-jogador">⚔️ Jogador</span>`;
 
                 card.innerHTML = `
@@ -62,23 +62,38 @@ document.addEventListener('DOMContentLoaded', () => {
                 listaCampanhas.appendChild(card);
             });
 
-                document.querySelectorAll('.btn-jogar').forEach(btn => {
+            // Adiciona o evento de clique aos botões recém-criados
+            document.querySelectorAll('.btn-jogar').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const idCampanha = e.target.getAttribute('data-id');
-                    const isMestre = e.target.getAttribute('data-mestre') === '1';
                     
+                    // CORREÇÃO 1: Trata o retorno do Postgres corretamente (pode ser "true", true, ou "1")
+                    const rawMestre = e.target.getAttribute('data-mestre');
+                    const isMestre = rawMestre === 'true' || rawMestre === true || rawMestre === '1';
+
                     // Salva na memória
                     sessionStorage.setItem('campanhaAtiva', idCampanha);
                     sessionStorage.setItem('isMestreAtivo', isMestre);
+
+                    // CORREÇÃO 2: Pega o socket global do arquivo rolador-script.js
+                    const socketAtivo = typeof socket !== 'undefined' ? socket : (window.socket || window.meuSocket);
                     
-                    // === A MÁGICA DE ENTRAR NA SALA ===
-                    if (window.meuSocket) {
-                        window.meuSocket.emit('entrar-na-campanha', idCampanha);
+                    if (socketAtivo) {
+                        socketAtivo.emit('entrar-na-campanha', {
+                            campanhaId: idCampanha,
+                            usuarioId: sessionStorage.getItem('usuarioId')
+                        });
+                    } else {
+                        console.error("⚠️ Socket não encontrado! O multiplayer não vai funcionar.");
                     }
-                    
+
                     const papel = isMestre ? 'Mestre' : 'Jogador';
                     alert(`Conectado como ${papel}! Suas rolagens agora pertencem a esta mesa.`);
+                    
                     modalCampanhas.classList.remove('show');
+                    
+                    // CORREÇÃO 3: Recarrega a página para ativar os botões e painéis do Mestre!
+                    window.location.reload();
                 });
             });
 
@@ -90,11 +105,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Puxa os personagens da galeria principal para o select de entrada
     function preencherSelectPersonagens() {
         const selectPrincipal = document.getElementById('char-select');
-        if(selectPrincipal && charSelectCampanha) {
+        if (selectPrincipal && charSelectCampanha) {
             charSelectCampanha.innerHTML = '<option value="">-- Selecione seu Personagem --</option>';
             // Copia as opções do select que já está carregado
             Array.from(selectPrincipal.options).forEach(opt => {
-                if(opt.value !== "") {
+                if (opt.value !== "") {
                     const novaOpt = document.createElement('option');
                     novaOpt.value = opt.value;
                     novaOpt.textContent = opt.textContent;
@@ -108,8 +123,8 @@ document.addEventListener('DOMContentLoaded', () => {
     btnCriarCampanha.addEventListener('click', async () => {
         const nome = nomeCampanhaInput.value.trim();
         const mestre_id = sessionStorage.getItem('usuarioId');
-        
-        if(!nome) return alert("Digite um nome para a campanha!");
+
+        if (!nome) return alert("Digite um nome para a campanha!");
 
         btnCriarCampanha.textContent = "Criando...";
         try {
@@ -119,8 +134,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ nome, mestre_id })
             });
             const dados = await resposta.json();
-            
-            if(resposta.ok) {
+
+            if (resposta.ok) {
                 alert(`Campanha criada!\nEnvie este código para seus jogadores: ${dados.codigo}`);
                 nomeCampanhaInput.value = '';
                 carregarMinhasCampanhas(mestre_id);
@@ -140,8 +155,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const personagem_id = charSelectCampanha.value;
         const usuario_id = sessionStorage.getItem('usuarioId');
 
-        if(!codigo_convite) return alert("Digite o código de convite!");
-        if(!personagem_id) return alert("Você precisa selecionar um personagem para entrar na mesa!");
+        if (!codigo_convite) return alert("Digite o código de convite!");
+        if (!personagem_id) return alert("Você precisa selecionar um personagem para entrar na mesa!");
 
         btnEntrarCampanha.textContent = "Entrando...";
         try {
@@ -151,8 +166,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ codigo_convite, usuario_id, personagem_id })
             });
             const dados = await resposta.json();
-            
-            if(resposta.ok) {
+
+            if (resposta.ok) {
                 alert(dados.mensagem);
                 codigoConviteInput.value = '';
                 carregarMinhasCampanhas(usuario_id);

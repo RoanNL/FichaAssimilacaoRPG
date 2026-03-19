@@ -1,55 +1,57 @@
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
+require('dotenv').config();
 
-// Define o caminho onde o ficheiro da base de dados será guardado
-const dbPath = path.resolve(__dirname, 'assimilacao.db');
+const { Pool } = require('pg');
+const databaseURL = process.env.DATABASE_URL
 
-// Inicia a ligação à base de dados 
-const db = new sqlite3.Database(dbPath, (err) => {
-    if (err) {
-        console.error('Erro ao conectar à base de dados:', err.message);
-    } else {
-        console.log('Conectado com sucesso à base de dados SQLite.');
+const pool = new Pool({
+    connectionString: databaseURL,
+    ssl: {
+        rejectUnauthorized: false 
     }
 });
 
-// Criação das Tabelas
-db.serialize(() => {
-    //  Tabela de Utilizadores (Contas)
-    db.run(`CREATE TABLE IF NOT EXISTS utilizadores (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nome_utilizador TEXT UNIQUE NOT NULL,
-        senha TEXT NOT NULL
-    )`);
+// =========================================================================
+// CRIAÇÃO DAS TABELAS (ESTRUTURA RELACIONAL ROBUSTA)
+// =========================================================================
+async function criarTabelas() {
+    const query = `
+        CREATE TABLE IF NOT EXISTS usuarios (
+            id SERIAL PRIMARY KEY,
+            username VARCHAR(255) UNIQUE NOT NULL,
+            password VARCHAR(255) NOT NULL
+        );
 
-    //  Tabela de Personagens
-    db.run(`CREATE TABLE IF NOT EXISTS personagens (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nome_personagem TEXT NOT NULL,
-        dados_personagem TEXT,
-        utilizador_id INTEGER,
-        FOREIGN KEY(utilizador_id) REFERENCES utilizadores(id)
-    )`);
+        CREATE TABLE IF NOT EXISTS personagens (
+            id SERIAL PRIMARY KEY,
+            usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE,
+            nome_personagem VARCHAR(255),
+            ocupacao VARCHAR(255),
+            foto TEXT,
+            dados_ficha JSONB -- A Bala de Prata! Salva a ficha nativamente sem bugar.
+        );
 
-    db.run(`CREATE TABLE IF NOT EXISTS campanhas (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nome TEXT NOT NULL,
-        codigo_convite TEXT UNIQUE NOT NULL,
-        mestre_id INTEGER NOT NULL,
-        FOREIGN KEY (mestre_id) REFERENCES usuarios(id)
-    )`);
+        CREATE TABLE IF NOT EXISTS campanhas (
+            id SERIAL PRIMARY KEY,
+            nome VARCHAR(255) NOT NULL,
+            codigo_convite VARCHAR(10) UNIQUE NOT NULL,
+            mestre_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE
+        );
 
-    db.run(`CREATE TABLE IF NOT EXISTS membros_campanha (
-        campanha_id INTEGER NOT NULL,
-        usuario_id INTEGER NOT NULL,
-        personagem_id INTEGER, 
-        FOREIGN KEY (campanha_id) REFERENCES campanhas(id),
-        FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
-        FOREIGN KEY (personagem_id) REFERENCES personagens(id),
-        PRIMARY KEY (campanha_id, usuario_id)
-    )`);
-    
-    console.log('Tabelas verificadas/criadas com sucesso.');
-});
+        CREATE TABLE IF NOT EXISTS membros_campanha (
+            id SERIAL PRIMARY KEY,
+            campanha_id INTEGER REFERENCES campanhas(id) ON DELETE CASCADE,
+            usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE,
+            personagem_id INTEGER REFERENCES personagens(id) ON DELETE SET NULL,
+            UNIQUE(campanha_id, usuario_id) -- Impede de entrar na mesma mesa duas vezes
+        );
+    `;
 
-module.exports = db;
+    try {
+        await pool.query(query);
+        console.log('✅ Tabelas do PostgreSQL verificadas/criadas com sucesso!');
+    } catch (err) {
+        console.error('❌ Erro ao criar tabelas:', err);
+    }
+}
+
+module.exports = { pool, criarTabelas };
