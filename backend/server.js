@@ -5,6 +5,7 @@ const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken')
 const db = require('./database');
+const helmet = require('helmet');
 
 const { pool, criarTabelas } = require('./database');
 
@@ -27,6 +28,10 @@ const SEGREDO_JWT = process.env.SEGREDO_JWT
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(helmet({
+    contentSecurityPolicy: false, 
+    crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -34,17 +39,11 @@ const io = new Server(server, {
 });
 app.set('io', io);
 
-io.on('connection', (socket) => {
-    console.log('Um jogador conectou! ID:', socket.id);
-
-    // 🛡️ A CATRACA VIP
-    socket.on('entrar-na-campanha', async (dados) => {
+socket.on('entrar-na-campanha', async (dados) => {
         const campanhaId = typeof dados === 'object' ? dados.campanhaId : dados;
         const usuarioId = typeof dados === 'object' ? dados.usuarioId : null;
-
         if (!usuarioId || !campanhaId) return; 
 
-        // A MÁGICA AQUI: Transforma o ID em texto para o Socket.io entender!
         const salaStr = campanhaId.toString(); 
 
         try {
@@ -54,6 +53,15 @@ io.on('connection', (socket) => {
             if (resultado.rows.length > 0) {
                 socket.join(salaStr); 
                 console.log(`✅ Catraca VIP: Usuário ${usuarioId} acessou a mesa ${salaStr}`);
+
+                // 📜 A MÁGICA DO HISTÓRICO: Puxa as últimas 30 rolagens do banco!
+                const sqlHist = `SELECT pacote FROM historico_rolagens WHERE campanha_id = $1 ORDER BY id ASC LIMIT 30`;
+                const histResult = await pool.query(sqlHist, [campanhaId]);
+                
+                const rolagensAntigas = histResult.rows.map(row => row.pacote);
+                // Manda o histórico apenas para quem acabou de entrar/dar F5
+                socket.emit('carregar-historico', rolagensAntigas);
+
             } else {
                 console.log(`🚨 BARRADO: Usuário ${usuarioId} tentou espionar a mesa ${salaStr}!`);
             }
@@ -62,18 +70,25 @@ io.on('connection', (socket) => {
         }
     });
 
-    // 🛡️ O ESCUDO DA ROLAGEM
-    socket.on('rolar-dados', (pacoteDeDados) => {
-        // CONVERSÃO PARA TEXTO AQUI TAMBÉM!
+    // 🛡️ O ESCUDO DA ROLAGEM E SALVAMENTO
+    socket.on('rolar-dados', async (pacoteDeDados) => {
         const salaStr = pacoteDeDados.campanhaId.toString(); 
         
         if (socket.rooms.has(salaStr)) {
+            // Emite para os outros jogadores
             socket.to(salaStr).emit('nova-rolagem', pacoteDeDados);
-        } else {
-            console.log(`🚨 FALSO HACKER BARRADO: Socket não está na sala ${salaStr}!`);
+            
+            // 💾 Salva no Banco de Dados para não sumir no F5!
+            try {
+                await pool.query(
+                    `INSERT INTO historico_rolagens (campanha_id, pacote) VALUES ($1, $2)`, 
+                    [salaStr, pacoteDeDados]
+                );
+            } catch (err) {
+                console.error("Erro ao salvar histórico de rolagem:", err);
+            }
         }
     });
-});
 
 app.get('/', (req, res) => {
     res.json({ mensagem: 'Servidor online e blindado!' });

@@ -30,6 +30,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
         }
 
+        // === 📜 RECEBE O HISTÓRICO APÓS O F5 ===
+    socket.on('carregar-historico', (historico) => {
+        const historicoDiv = document.getElementById('rolador-historico');
+        const resultsDiv = document.getElementById('rolador-resultados-atuais');
+        
+        historicoDiv.innerHTML = '';
+        resultsDiv.innerHTML = '';
+
+        historico.forEach(pacote => {
+            renderizarRolagem(pacote); 
+        });
+    });
+
         socket.on('mesa-encerrada', () => {
         alert("🚨 O Mestre encerrou esta campanha permanentemente! Você está sendo desconectado.");
         
