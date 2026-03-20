@@ -9,12 +9,26 @@ const helmet = require('helmet');
 
 const { pool, criarTabelas } = require('./database');
 
-pool.query('SELECT NOW()', (err, res) => {
+pool.query('SELECT NOW()', async (err, res) => {
     if (err) {
         console.error('❌ Erro ao conectar no PostgreSQL:', err);
     } else {
         console.log('✅ Conectado ao PostgreSQL com sucesso!');
-        criarTabelas();
+        criarTabelas(); 
+        
+        try {
+            await pool.query(`
+                CREATE TABLE IF NOT EXISTS historico_rolagens (
+                    id SERIAL PRIMARY KEY,
+                    campanha_id INTEGER,
+                    pacote JSONB NOT NULL,
+                    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
+            `);
+            console.log('✅ Tabela de Histórico verificada!');
+        } catch (erroTabela) {
+            console.error('❌ Erro ao criar tabela de histórico:', erroTabela);
+        }
     }
 });
 
@@ -84,9 +98,13 @@ io.on('connection', (socket) => {
             
             // 💾 Salva no Banco de Dados para não sumir no F5!
             try {
+                // Converte o ID da mesa para Número e o pacote para Texto (JSON)
+                const campanhaInt = parseInt(pacoteDeDados.campanhaId, 10);
+                const pacoteJson = JSON.stringify(pacoteDeDados);
+                
                 await pool.query(
                     `INSERT INTO historico_rolagens (campanha_id, pacote) VALUES ($1, $2)`, 
-                    [salaStr, pacoteDeDados]
+                    [campanhaInt, pacoteJson]
                 );
             } catch (err) {
                 console.error("Erro ao salvar histórico de rolagem:", err);
