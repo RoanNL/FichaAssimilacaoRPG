@@ -39,7 +39,11 @@ const io = new Server(server, {
 });
 app.set('io', io);
 
-socket.on('entrar-na-campanha', async (dados) => {
+io.on('connection', (socket) => {
+    console.log('Um jogador conectou! ID:', socket.id);
+
+    // 🛡️ A CATRACA VIP E O HISTÓRICO
+    socket.on('entrar-na-campanha', async (dados) => {
         const campanhaId = typeof dados === 'object' ? dados.campanhaId : dados;
         const usuarioId = typeof dados === 'object' ? dados.usuarioId : null;
         if (!usuarioId || !campanhaId) return; 
@@ -89,6 +93,7 @@ socket.on('entrar-na-campanha', async (dados) => {
             }
         }
     });
+});
 
 app.get('/', (req, res) => {
     res.json({ mensagem: 'Servidor online e blindado!' });
