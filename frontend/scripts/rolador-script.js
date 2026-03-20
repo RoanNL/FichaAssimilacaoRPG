@@ -31,15 +31,68 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // === 📜 RECEBE O HISTÓRICO APÓS O F5 ===
+    // === 📜 RECEBE O HISTÓRICO APÓS O F5 ===
     socket.on('carregar-historico', (historico) => {
         const historicoDiv = document.getElementById('rolador-historico');
-        const resultsDiv = document.getElementById('rolador-resultados-atuais');
         
+        // Limpa tudo antes de carregar
         historicoDiv.innerHTML = '';
-        resultsDiv.innerHTML = '';
 
+        // Renderiza cada rolagem salva na memória instantaneamente
         historico.forEach(pacote => {
-            renderizarRolagem(pacote); 
+            const historyEntry = document.createElement('div');
+            historyEntry.style.borderBottom = '1px solid #ccc';
+            historyEntry.style.paddingBottom = '15px';
+            historyEntry.style.marginBottom = '15px';
+
+            const header = document.createElement('h3');
+            header.textContent = `${pacote.nome} rolou: ${pacote.input}`;
+            header.style.marginTop = '0';
+            
+            // Pinta de azul se não for teu
+            const meuNomeLocal = sessionStorage.getItem('usuarioNome');
+            const meuPersonagemLocal = document.getElementById('nome') ? document.getElementById('nome').value.trim() : '';
+            if (pacote.nome !== meuNomeLocal && pacote.nome !== meuPersonagemLocal) {
+                header.style.color = 'var(--color-assim-blue)';
+            }
+            historyEntry.appendChild(header);
+
+            const subRollsContainer = document.createElement('div');
+            subRollsContainer.className = 'sub-rolls-container';
+
+            pacote.resultados.forEach(dado => {
+                const subRollDiv = document.createElement('div');
+                subRollDiv.className = 'sub-roll';
+
+                const subRollHeader = document.createElement('h4');
+                subRollHeader.textContent = `${dado.tipo} #${dado.numero} (rolou ${dado.faceMecanica})`;
+                subRollHeader.style.opacity = '1'; // Já visível!
+
+                const subRollIcons = document.createElement('div');
+                subRollIcons.className = 'icons-container';
+                subRollIcons.style.opacity = '1'; // Já visível!
+
+                dado.icones.forEach(iconName => {
+                    const img = document.createElement('img');
+                    img.src = iconFiles[iconName];
+                    img.alt = iconName;
+                    subRollIcons.appendChild(img);
+                });
+
+                subRollDiv.appendChild(subRollHeader);
+                subRollDiv.appendChild(subRollIcons);
+                subRollsContainer.appendChild(subRollDiv);
+            });
+
+            historyEntry.appendChild(subRollsContainer);
+
+            const summary = document.createElement('p');
+            summary.className = 'rolador-summary';
+            summary.textContent = `Total: ${pacote.totais.sucesso} Sucesso, ${pacote.totais.pressao} Pressão, ${pacote.totais.adaptacao} Adaptação.`;
+            historyEntry.appendChild(summary);
+
+            // Prepend coloca no topo, invertendo a ordem para que os mais recentes fiquem em cima
+            historicoDiv.prepend(historyEntry);
         });
     });
 
