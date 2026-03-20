@@ -7,15 +7,19 @@ document.addEventListener('DOMContentLoaded', () => {
     window.meuSocket = socket;
 
     socket.on('connect', () => {
+        console.log("🔌 Conectado ao Servidor Multiplayer!");
         const campanhaAtiva = sessionStorage.getItem('campanhaAtiva');
         const usuarioId = sessionStorage.getItem('usuarioId');
         
-        if (campanhaAtiva && usuarioId) {
-            // Volta a entrar na sala silenciosamente após o F5
+        if (campanhaAtiva && usuarioId && usuarioId !== 'undefined') {
+            console.log("📡 Solicitando entrada na mesa...", campanhaAtiva);
+            // Volta a entrar na sala após o F5
             socket.emit('entrar-na-campanha', { 
                 campanhaId: campanhaAtiva, 
                 usuarioId: usuarioId 
             });
+        } else {
+            console.log("⚠️ Nenhuma mesa ativa na memória para reconectar.");
         }
     });
 

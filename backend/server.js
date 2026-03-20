@@ -56,11 +56,15 @@ app.set('io', io);
 io.on('connection', (socket) => {
     console.log('Um jogador conectou! ID:', socket.id);
 
-    // 🛡️ A CATRACA VIP E O HISTÓRICO
+    // 🛡️ A CATRACA VIP E O HISTÓRICO LIGADO
     socket.on('entrar-na-campanha', async (dados) => {
         const campanhaId = typeof dados === 'object' ? dados.campanhaId : dados;
         const usuarioId = typeof dados === 'object' ? dados.usuarioId : null;
-        if (!usuarioId || !campanhaId) return; 
+        
+        if (!usuarioId || !campanhaId) {
+            console.log("⚠️ Alguém tentou entrar na mesa sem ID de usuário ou Campanha!");
+            return; 
+        }
 
         const salaStr = campanhaId.toString(); 
 
@@ -72,43 +76,44 @@ io.on('connection', (socket) => {
                 socket.join(salaStr); 
                 console.log(`✅ Catraca VIP: Usuário ${usuarioId} acessou a mesa ${salaStr}`);
 
-                // 📜 A MÁGICA DO HISTÓRICO: Puxa as últimas 30 rolagens do banco!
+                // 📜 A MÁGICA DO HISTÓRICO
                 const sqlHist = `SELECT pacote FROM historico_rolagens WHERE campanha_id = $1 ORDER BY id ASC LIMIT 30`;
                 const histResult = await pool.query(sqlHist, [campanhaId]);
                 
                 const rolagensAntigas = histResult.rows.map(row => row.pacote);
-                // Manda o histórico apenas para quem acabou de entrar/dar F5
+                console.log(`📜 Enviando ${rolagensAntigas.length} rolagens do histórico para o usuário ${usuarioId}`);
+                
+                // Manda o histórico de volta pro Front-end
                 socket.emit('carregar-historico', rolagensAntigas);
 
             } else {
-                console.log(`🚨 BARRADO: Usuário ${usuarioId} tentou espionar a mesa ${salaStr}!`);
+                console.log(`🚨 BARRADO: Usuário ${usuarioId} não faz parte da mesa ${salaStr}!`);
             }
         } catch (err) {
-            console.error('Erro na catraca VIP:', err);
+            console.error('❌ Erro na catraca VIP/Histórico:', err);
         }
     });
 
     // 🛡️ O ESCUDO DA ROLAGEM E SALVAMENTO
     socket.on('rolar-dados', async (pacoteDeDados) => {
         const salaStr = pacoteDeDados.campanhaId.toString(); 
+        console.log(`🎲 Dados rolados na mesa ${salaStr} por ${pacoteDeDados.nome}`);
         
-        if (socket.rooms.has(salaStr)) {
-            // Emite para os outros jogadores
-            socket.to(salaStr).emit('nova-rolagem', pacoteDeDados);
+        // Emite para a sala toda
+        socket.to(salaStr).emit('nova-rolagem', pacoteDeDados);
+        
+        // 💾 Salva no Banco de Dados!
+        try {
+            const campanhaInt = parseInt(pacoteDeDados.campanhaId, 10);
+            const pacoteJson = JSON.stringify(pacoteDeDados);
             
-            // 💾 Salva no Banco de Dados para não sumir no F5!
-            try {
-                // Converte o ID da mesa para Número e o pacote para Texto (JSON)
-                const campanhaInt = parseInt(pacoteDeDados.campanhaId, 10);
-                const pacoteJson = JSON.stringify(pacoteDeDados);
-                
-                await pool.query(
-                    `INSERT INTO historico_rolagens (campanha_id, pacote) VALUES ($1, $2)`, 
-                    [campanhaInt, pacoteJson]
-                );
-            } catch (err) {
-                console.error("Erro ao salvar histórico de rolagem:", err);
-            }
+            await pool.query(
+                `INSERT INTO historico_rolagens (campanha_id, pacote) VALUES ($1, $2)`, 
+                [campanhaInt, pacoteJson]
+            );
+            console.log(`✅ Rolagem salva no banco com sucesso!`);
+        } catch (err) {
+            console.error("❌ Erro ao salvar histórico de rolagem no banco:", err);
         }
     });
 });
