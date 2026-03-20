@@ -1,8 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     const leavesContainer = document.getElementById('leaves-container');
-    const numLeaves = 25; // Quantidade de folhas (ajuste se quiser mais/menos)
+    const numLeaves = 40; 
 
-    if (!leavesContainer) return; // Sai se o container não existir
+    if (!leavesContainer) return; 
 
     for (let i = 0; i < numLeaves; i++) {
         createLeaf();

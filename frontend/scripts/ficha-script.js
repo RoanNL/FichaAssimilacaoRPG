@@ -1,3 +1,59 @@
+// ==========================================
+// SISTEMA DE NOTIFICAÇÕES (TOAST) DA TAVERNA
+// ==========================================
+window.mostrarNotificacao = function(mensagem, tipo = 'sucesso') {
+
+    let container = document.getElementById('toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        Object.assign(container.style, {
+            position: 'fixed',
+            top: '20px',
+            right: '20px',
+            zIndex: '9999999',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px',
+            pointerEvents: 'none' 
+        });
+        document.body.appendChild(container);
+    }
+
+
+    const card = document.createElement('div');
+
+    const corBorda = tipo === 'erro' ? '#f44336' : (tipo === 'aviso' ? '#ff9800' : '#4caf50');
+    
+    Object.assign(card.style, {
+        backgroundColor: '#1a1a1a', 
+        color: '#f0f0f0',
+        padding: '15px 20px',
+        borderRadius: '5px',
+        borderLeft: `5px solid ${corBorda}`,
+        boxShadow: '0 4px 8px rgba(0,0,0,0.6)',
+        fontFamily: "'Special Elite', monospace", 
+        fontSize: '1rem',
+        opacity: '0',
+        transform: 'translateX(100%)',
+        transition: 'all 0.3s ease-out'
+    });
+
+    card.innerHTML = `<strong>${mensagem}</strong>`;
+    container.appendChild(card);
+
+    requestAnimationFrame(() => {
+        card.style.opacity = '1';
+        card.style.transform = 'translateX(0)';
+    });
+
+    setTimeout(() => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateX(100%)';
+        setTimeout(() => card.remove(), 300); 
+    }, 2500);
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     const API_URL = 'https://fichaassimilacaorpg.onrender.com';
 
@@ -46,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if(btnAbrirGaleria) {
         btnAbrirGaleria.addEventListener('click', async (e) => {
             e.preventDefault();
-            // 🛡️ A MÁGICA 1: Recarrega a sua pasta pessoal antes de abrir a tela!
+
             await carregarListaPersonagens(); 
             modalGaleria.classList.add('show');
         });
@@ -132,7 +188,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 authMensagem.style.color = '#a04040';
             } else {
                 if (isLoginMode) {
-                    // VACINA ANTI-UNDEFINED
                     const nomeParaSalvar = dados.usuario?.nome || dados.usuario?.username || dados.nome || dados.username || 'Operador';
                     const idParaSalvar = dados.usuario?.id || dados.id;
 
@@ -153,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     carregarListaPersonagens();
 
-                    alert(dados.mensagem);
+                    mostrarNotificacao(dados.mensagem, 'sucesso');
                 } else {
                     authMensagem.textContent = 'Conta criada com sucesso! Faça login.';
                     authMensagem.style.color = 'green';
@@ -190,7 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // ==========================================
-    // SISTEMA DA FICHA E DETALHES (A MÁGICA DO CARREGAMENTO)
+    // SISTEMA DA FICHA E DETALHES 
     // ==========================================
 
     // FUNÇÃO CENTRAL PARA BUSCAR E CARREGAR UMA FICHA DO POSTGRESQL
@@ -200,7 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const personagem = await resposta.json();
 
             if (!resposta.ok) {
-                return alert(personagem.erro || "Erro ao carregar a ficha.");
+                return mostrarNotificacao(personagem.erro || "Erro ao carregar a ficha.", 'erro');
             }
 
 
@@ -218,7 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (err) {
             console.error("Erro ao carregar personagem:", err);
-            alert("Erro de conexão ao carregar a ficha.");
+            mostrarNotificacao("Erro de conexão ao carregar a ficha.", 'erro');
         }
     }
 
@@ -231,7 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function (e) {
-                    // O COMPRESSOR DE VELOCIDADE 🚀
+
                     const img = new Image();
                     img.onload = function () {
                         const canvas = document.createElement('canvas');
@@ -364,7 +419,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 charSelect.appendChild(option);
 
                 if (gridPersonagens) {
-                    // Puxamos a foto direto do banco agora!
                     const fotoBase64 = char.foto;
                     const ocupacao = char.ocupacao || 'Desconhecido';
 
@@ -404,7 +458,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
    // === FUNÇÃO CENTRAL DE SALVAMENTO ===
-    // Se "silencioso" for true, ele não emite alerts na tela
     async function salvarFicha(silencioso = false) {
         if (!usuarioLogadoId) return;
 
@@ -439,26 +492,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 
                 if (!silencioso) {
-                    alert(resultado.mensagem);
+                    mostrarNotificacao(resultado.mensagem, 'sucesso');
                     await carregarListaPersonagens();
                 } else {
-                    // Feedback visual sutil (Opcional)
                     console.log("Autosave concluído com sucesso!");
                     btnSave.textContent = 'Salvo!';
                     setTimeout(() => btnSave.textContent = 'SALVAR', 2000);
                 }
             } else {
-                if (!silencioso) alert("Servidor diz: " + (resultado.erro || "Erro desconhecido."));
+                if (!silencioso) mostrarNotificacao("Servidor diz: " + (resultado.erro || "Erro desconhecido."), 'erro');
             }
         } catch (erro) {
             console.error("❌ Erro no Front-end ao tentar enviar:", erro);
-            if (!silencioso) alert("Erro de comunicação com o servidor!");
+            if (!silencioso) mostrarNotificacao("Erro de comunicação com o servidor!", 'erro');
         } finally {
             if (!silencioso) btnSave.textContent = 'SALVAR';
         }
     }
 
-    // O botão agora apenas chama a função em modo barulhento (com alerts)
     btnSave.addEventListener('click', () => salvarFicha(false));
 
     // BOTÃO CARREGAR (DO DROPDOWN MENU)
@@ -475,14 +526,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // BOTÃO DELETAR
     btnDelete.addEventListener('click', async () => {
-        if (!idPersonagemAtual) return alert('Selecione um personagem para excluir.');
+        if (!idPersonagemAtual) return mostrarNotificacao('Selecione um personagem para excluir.', 'aviso');
 
         const confirmacao = confirm('Tem certeza que deseja apagar esta ficha permanentemente?');
         if (!confirmacao) return;
 
         try {
             await fetch(`${API_URL}/personagens/${idPersonagemAtual}`, { method: 'DELETE' });
-            alert('Ficha deletada com sucesso.');
+            mostrarNotificacao('Ficha deletada com sucesso.', 'sucesso');
 
             document.querySelectorAll('form').forEach(f => {
                 if (f.id !== 'auth-form') f.reset();
@@ -499,7 +550,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // ==========================================
-    // VERSÃO 1.6: CONTROLE DE TEMA (DARK MODE)
+    // CONTROLE DE TEMA (DARK MODE)
     // ==========================================
     const btnToggleTema = document.getElementById('btn-toggle-tema');
     const corpoDoSite = document.body;
@@ -535,7 +586,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnFichasMesa.addEventListener('click', async (e) => {
             e.preventDefault();
             const campanhaId = sessionStorage.getItem('campanhaAtiva');
-            if (!campanhaId) return alert('Você não está em nenhuma mesa ativa!');
+            if (!campanhaId) return mostrarNotificacao('Você não está em nenhuma mesa ativa!', 'erro');
 
             btnFichasMesa.textContent = "Buscando...";
             
@@ -543,7 +594,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const resposta = await fetch(`${API_URL}/campanhas/${campanhaId}/fichas-mesa`);
                 let fichas = await resposta.json();
 
-                // 🛡️ A MÁGICA 2: Remove as fichas do próprio Mestre da lista!
                 const meuId = sessionStorage.getItem('usuarioId');
                 fichas = fichas.filter(char => char.usuario_id != meuId);
 
@@ -553,12 +603,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     gridPersonagensMesa.innerHTML = '<p style="color: var(--color-text-medium); padding: 20px;">Nenhum jogador criou ficha nesta mesa ainda.</p>';
                 } else {
                     fichas.forEach(char => {
-                        // Como filtramos o Mestre, todos aqui são 100% Jogadores
                         const card = document.createElement('div');
                         card.className = 'char-card'; 
                         
-                        // Mudamos o info para alinhar no topo (justify-content: flex-start)
-                        // E removemos o overflow: hidden do info para o texto não sumir
                         card.innerHTML = `
                             <img src="${char.foto || './assets/icon.jpg'}" class="char-card-img" alt="Foto">
                             <div class="char-card-info" style="display: flex; flex-direction: column; justify-content: flex-start; padding: 10px; overflow: visible;">
@@ -583,7 +630,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             const fichaId = event.target.getAttribute('data-id');
                             await carregarPersonagem(fichaId); 
                             modalGaleria.classList.remove('show'); 
-                            alert('Ficha do jogador carregada na tela!');
+                            mostrarNotificacao('Ficha do jogador carregada na tela!', 'aviso');
                         });
                     });
                 }
@@ -592,7 +639,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
             } catch (erro) {
                 console.error(erro);
-                alert("Erro ao buscar as fichas da mesa.");
+                mostrarNotificacao("Erro ao buscar as fichas da mesa.", 'erro');
             } finally {
                 btnFichasMesa.textContent = "👑 Fichas da Mesa";
             }
@@ -600,7 +647,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
-    // PODERES DO MESTRE: GERENCIAR JOGADORES (V1.6)
+    // PODERES DO MESTRE: GERENCIAR JOGADORES 
     // ==========================================
     const btnGerenciarJogadores = document.getElementById('btn-gerenciar-jogadores');
     const modalGerenciarJogadores = document.getElementById('gerenciar-jogadores-modal');
@@ -628,7 +675,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnGerenciarJogadores.addEventListener('click', async (e) => {
             e.preventDefault();
             const campanhaId = sessionStorage.getItem('campanhaAtiva');
-            if (!campanhaId) return alert('Você não está em nenhuma mesa ativa!');
+            if (!campanhaId) return mostrarNotificacao('Você não está em nenhuma mesa ativa!', 'aviso');
 
             btnGerenciarJogadores.textContent = "Buscando...";
             try {
@@ -670,10 +717,10 @@ document.addEventListener('DOMContentLoaded', () => {
                                     if (delRes.ok) {
                                         event.target.closest('.jogador-card-mestre').remove();
                                     } else {
-                                        alert("Erro ao remover jogador.");
+                                        mostrarNotificacao("Erro ao remover jogador.", 'erro');
                                     }
                                 } catch (err) {
-                                    alert("Erro de conexão.");
+                                    mostrarNotificacao("Erro de conexão.", 'erro');
                                 }
                             }
                         });
@@ -683,7 +730,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 modalGerenciarJogadores.classList.add('show');
             } catch (erro) {
                 console.error(erro);
-                alert("Erro ao buscar jogadores.");
+                mostrarNotificacao("Erro ao buscar jogadores.", 'erro');
             } finally {
                 btnGerenciarJogadores.innerHTML = "👥 Jogadores";
             }
@@ -691,31 +738,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
-    // SISTEMA DE AUTOSAVE (DEBOUNCE)
+    // SISTEMA DE AUTOSAVE 
     // ==========================================
     let timeoutAutosave;
 
     function agendarAutosave() {
-        // Só salva automaticamente se já for um personagem existente (evita criar fichas vazias à toa)
+
         if (!idPersonagemAtual) return;
 
-        // Cancela o timer anterior se o jogador continuou digitando
         clearTimeout(timeoutAutosave);
         
-        // Inicia um novo timer de 2 segundos (2000 milissegundos)
         timeoutAutosave = setTimeout(() => {
-            salvarFicha(true); // O "true" faz o salvamento ser silencioso
+            salvarFicha(true); 
         }, 2000); 
     }
 
-    // Instala os sensores em todos os inputs e textareas do app
     const todosInputs = document.querySelectorAll('#app-container input, #app-container textarea');
     
     todosInputs.forEach(el => {
-        // Ignora campos de pesquisa ou arquivos
         if (el.type === 'file' || el.id === 'char-select' || el.id === 'busca-personagem') return;
         
-        // Escuta quando digita ou marca checkbox
         el.addEventListener('input', agendarAutosave);
         el.addEventListener('change', agendarAutosave);
     });

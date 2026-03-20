@@ -1,19 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // === 1. CONEXÃO MULTIPLAYER (SOCKET.IO) ===
+    // === CONEXÃO MULTIPLAYER (SOCKET.IO) ===
     const socket = io('https://fichaassimilacaorpg.onrender.com');
-
-    // Compartilhamos o socket com os outros scripts para eles poderem usar
     window.meuSocket = socket;
 
+
     socket.on('connect', () => {
-        console.log("🔌 Conectado ao Servidor Multiplayer!");
         const campanhaAtiva = sessionStorage.getItem('campanhaAtiva');
         const usuarioId = sessionStorage.getItem('usuarioId');
         
         if (campanhaAtiva && usuarioId && usuarioId !== 'undefined') {
             console.log("📡 Solicitando entrada na mesa...", campanhaAtiva);
-            // Volta a entrar na sala após o F5
+
             socket.emit('entrar-na-campanha', { 
                 campanhaId: campanhaAtiva, 
                 usuarioId: usuarioId 
@@ -23,7 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // === O NOVO ESCUDO DO MESTRE INTELIGENTE ===
     socket.on('nova-rolagem', (pacoteDeDados) => {
         const isMestre = sessionStorage.getItem('isMestreAtivo') === 'true';
 
@@ -33,87 +30,108 @@ document.addEventListener('DOMContentLoaded', () => {
         if (modalRolador && !modalRolador.classList.contains('show')) {
 
         }
-
-        // === 📜 RECEBE O HISTÓRICO APÓS O F5 ===
-    // === 📜 RECEBE O HISTÓRICO APÓS O F5 ===
-    socket.on('carregar-historico', (historico) => {
-        const historicoDiv = document.getElementById('rolador-historico');
-        
-        // Limpa tudo antes de carregar
-        historicoDiv.innerHTML = '';
-
-        // Renderiza cada rolagem salva na memória instantaneamente
-        historico.forEach(pacote => {
-            const historyEntry = document.createElement('div');
-            historyEntry.style.borderBottom = '1px solid #ccc';
-            historyEntry.style.paddingBottom = '15px';
-            historyEntry.style.marginBottom = '15px';
-
-            const header = document.createElement('h3');
-            header.textContent = `${pacote.nome} rolou: ${pacote.input}`;
-            header.style.marginTop = '0';
-            
-            // Pinta de azul se não for teu
-            const meuNomeLocal = sessionStorage.getItem('usuarioNome');
-            const meuPersonagemLocal = document.getElementById('nome') ? document.getElementById('nome').value.trim() : '';
-            if (pacote.nome !== meuNomeLocal && pacote.nome !== meuPersonagemLocal) {
-                header.style.color = 'var(--color-assim-blue)';
-            }
-            historyEntry.appendChild(header);
-
-            const subRollsContainer = document.createElement('div');
-            subRollsContainer.className = 'sub-rolls-container';
-
-            pacote.resultados.forEach(dado => {
-                const subRollDiv = document.createElement('div');
-                subRollDiv.className = 'sub-roll';
-
-                const subRollHeader = document.createElement('h4');
-                subRollHeader.textContent = `${dado.tipo} #${dado.numero} (rolou ${dado.faceMecanica})`;
-                subRollHeader.style.opacity = '1'; // Já visível!
-
-                const subRollIcons = document.createElement('div');
-                subRollIcons.className = 'icons-container';
-                subRollIcons.style.opacity = '1'; // Já visível!
-
-                dado.icones.forEach(iconName => {
-                    const img = document.createElement('img');
-                    img.src = iconFiles[iconName];
-                    img.alt = iconName;
-                    subRollIcons.appendChild(img);
-                });
-
-                subRollDiv.appendChild(subRollHeader);
-                subRollDiv.appendChild(subRollIcons);
-                subRollsContainer.appendChild(subRollDiv);
-            });
-
-            historyEntry.appendChild(subRollsContainer);
-
-            const summary = document.createElement('p');
-            summary.className = 'rolador-summary';
-            summary.textContent = `Total: ${pacote.totais.sucesso} Sucesso, ${pacote.totais.pressao} Pressão, ${pacote.totais.adaptacao} Adaptação.`;
-            historyEntry.appendChild(summary);
-
-            // Prepend coloca no topo, invertendo a ordem para que os mais recentes fiquem em cima
-            historicoDiv.prepend(historyEntry);
-        });
     });
 
+     // === 📜 RECEBE O HISTÓRICO APÓS O F5 ===
+    socket.on('carregar-historico', (historico) => {
+
+        const historicoDiv = document.getElementById('rolador-historico');
+        if (!historicoDiv) return;
+
+        historicoDiv.innerHTML = '';
+
+        historico.forEach(pacoteBruto => {
+            try {
+                const pacote = typeof pacoteBruto === 'string' ? JSON.parse(pacoteBruto) : pacoteBruto;
+
+                const historyEntry = document.createElement('div');
+                historyEntry.style.borderBottom = '1px solid #ccc';
+                historyEntry.style.paddingBottom = '15px';
+                historyEntry.style.marginBottom = '15px';
+
+                const header = document.createElement('h3');
+                header.textContent = `${pacote.nome} rolou: ${pacote.input}`;
+                header.style.marginTop = '0';
+                
+                const meuNomeLocal = sessionStorage.getItem('usuarioNome');
+                const meuPersonagemLocal = document.getElementById('nome') ? document.getElementById('nome').value.trim() : '';
+                
+                if (pacote.nome !== meuNomeLocal && pacote.nome !== meuPersonagemLocal) {
+                    header.style.color = 'var(--color-assim-blue)';
+                }
+                historyEntry.appendChild(header);
+
+                const subRollsContainer = document.createElement('div');
+                subRollsContainer.className = 'sub-rolls-container';
+
+                if (pacote.resultados) {
+                    const iconFilesSeguro = {
+                        sucesso: 'assets/Sucesso.png', pressao: 'assets/pressao.png',
+                        adaptacao: 'assets/Adaptacao.png', nada: 'assets/nada.png'
+                    };
+
+                    pacote.resultados.forEach(dado => {
+                        const subRollDiv = document.createElement('div');
+                        subRollDiv.className = 'sub-roll';
+
+                        const subRollHeader = document.createElement('h4');
+                        subRollHeader.textContent = `${dado.tipo} #${dado.numero} (rolou ${dado.faceMecanica})`;
+                        subRollHeader.style.opacity = '1';
+
+                        const subRollIcons = document.createElement('div');
+                        subRollIcons.className = 'icons-container';
+                        subRollIcons.style.opacity = '1';
+
+                        if (dado.icones) {
+                            dado.icones.forEach(iconName => {
+                                const img = document.createElement('img');
+                                img.src = iconFilesSeguro[iconName];
+                                img.alt = iconName;
+                                
+                                
+                                img.className = 'dado-animado'; 
+                                img.style.animation = 'none';
+                                img.style.opacity = '1';     
+                                img.style.visibility = 'visible';
+                                img.style.transform = 'scale(1) rotate(0deg)';
+                                
+                                subRollIcons.appendChild(img);
+                            });
+                        }
+
+                        subRollDiv.appendChild(subRollHeader);
+                        subRollDiv.appendChild(subRollIcons);
+                        subRollsContainer.appendChild(subRollDiv);
+                    });
+                }
+
+                historyEntry.appendChild(subRollsContainer);
+
+                const summary = document.createElement('p');
+                summary.className = 'rolador-summary';
+            
+                summary.textContent = `Total: ${pacote.totais?.sucesso || 0} Sucesso, ${pacote.totais?.pressao || 0} Pressão, ${pacote.totais?.adaptacao || 0} Adaptação.`;
+                historyEntry.appendChild(summary);
+
+                historicoDiv.prepend(historyEntry);
+            } catch (err) {
+                console.error("❌ Erro ao desenhar uma rolagem antiga:", err, pacoteBruto);
+            }
+        });
+
         socket.on('mesa-encerrada', () => {
-        alert("🚨 O Mestre encerrou esta campanha permanentemente! Você está sendo desconectado.");
+        mostrarNotificacao("🚨 O Mestre encerrou esta campanha permanentemente! Você está sendo desconectado.", 'aviso');
         
         // Limpa a memória da mesa
         sessionStorage.removeItem('campanhaAtiva');
         sessionStorage.removeItem('isMestreAtivo');
         
-        // Dá um F5 forçado para limpar a tela e voltar pro Lobby
         window.location.reload();
     });
     });
     // ==========================================
 
-    // 2. Controle do Modal (Abrir e Fechar)
+    //  Controle do Modal (Abrir e Fechar)
     const btnAbrirModal = document.getElementById('nav-btn-rolador');
     const modalRolador = document.getElementById('rolador-modal');
     const btnFecharModal = document.getElementById('fechar-rolador');
@@ -137,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 3. Lógica dos Dados
+    // Lógica dos Dados
     const iconFiles = {
         sucesso: 'assets/Sucesso.png',
         pressao: 'assets/pressao.png',
@@ -183,13 +201,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!part) continue;
             const match = part.match(/^(\d*)d(\d+)$/);
             if (!match) {
-                alert(`Formato inválido: "${part}". Use "2d6", "1d10", etc.`);
+                mostrarNotificacao(`Formato inválido: "${part}". Use "2d6", "1d10", etc.`, 'erro');
                 return null;
             }
             const quantity = parseInt(match[1] || '1', 10);
             const size = parseInt(match[2], 10);
             if (![6, 10, 12].includes(size)) {
-                alert(`Dado inválido: "d${size}". Use apenas d6, d10 ou d12.`);
+                mostrarNotificacao(`Dado inválido: "d${size}". Use apenas d6, d10 ou d12.`, 'aviso');
                 return null;
             }
             diceRequests.push({ quantity, size });
@@ -205,7 +223,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const campanhaAtiva = sessionStorage.getItem('campanhaAtiva');
         
-        // CORREÇÃO: Pega o nome do personagem OU o nome da conta corretos
         let nomeRolador = 'Operador Misterioso';
         const inputNome = document.getElementById('nome');
 
@@ -215,7 +232,6 @@ document.addEventListener('DOMContentLoaded', () => {
             nomeRolador = sessionStorage.getItem('usuarioNome'); // Chave correta!
         }
 
-        // O pacote blindado que vai trafegar pela internet
         const pacoteDeDados = {
             nome: nomeRolador,
             input: inputString,
@@ -244,10 +260,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // 1. Desenha na minha tela
         renderizarRolagem(pacoteDeDados);
 
-        // 2. Envia para os outros SOMENTE se eu estiver numa mesa
+        //  Envia para os outros SOMENTE se eu estiver numa mesa
         if (campanhaAtiva) {
             socket.emit('rolar-dados', pacoteDeDados);
         }
@@ -263,7 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
         rollGroup.style.marginBottom = '15px';
 
         const header = document.createElement('h3');
-        // CORREÇÃO: Usa 'pacote.nome' em vez do antigo 'pacote.jogador'
+
         header.textContent = `${pacote.nome} rolou: ${pacote.input}`;
         header.style.marginTop = '0';
 
@@ -366,7 +381,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ==========================================
-    // VERSÃO 1.6: FILTRO DE HISTÓRICO DE ROLAGENS
+    // FILTRO DE HISTÓRICO DE ROLAGENS
     // ==========================================
     const inputFiltroHistorico = document.getElementById('filtro-historico');
 

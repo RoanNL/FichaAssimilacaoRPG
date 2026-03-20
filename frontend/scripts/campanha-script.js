@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Mesma API do seu render!
+    // API!
     const API_URL = 'https://fichaassimilacaorpg.onrender.com';
 
     // Controles do Modal
@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnAbrirCampanhas.addEventListener('click', (e) => {
             e.preventDefault();
             const usuarioLogadoId = sessionStorage.getItem('usuarioId');
-            if (!usuarioLogadoId) return alert("Faça login primeiro!");
+            if (!usuarioLogadoId) return mostrarNotificacao("Faça login primeiro!");
 
             modalCampanhas.classList.add('show');
             carregarMinhasCampanhas(usuarioLogadoId);
@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnFecharCampanhas.addEventListener('click', () => modalCampanhas.classList.remove('show'));
     }
 
-    // 1. Busca as campanhas do Banco de Dados
+    // Busca as campanhas do Banco de Dados
     async function carregarMinhasCampanhas(userId) {
         listaCampanhas.innerHTML = '<p style="color: #666; font-style: italic;">Buscando conexões...</p>';
         try {
@@ -69,12 +69,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 listaCampanhas.appendChild(card);
             });
 
-            // Adiciona o evento de clique aos botões recém-criados
             document.querySelectorAll('.btn-jogar').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const idCampanha = e.target.getAttribute('data-id');
                     
-                    // CORREÇÃO 1: Trata o retorno do Postgres corretamente (pode ser "true", true, ou "1")
                     const rawMestre = e.target.getAttribute('data-mestre');
                     const isMestre = rawMestre === 'true' || rawMestre === true || rawMestre === '1';
 
@@ -82,7 +80,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     sessionStorage.setItem('campanhaAtiva', idCampanha);
                     sessionStorage.setItem('isMestreAtivo', isMestre);
 
-                    // CORREÇÃO 2: Pega o socket global do arquivo rolador-script.js
                     const socketAtivo = typeof socket !== 'undefined' ? socket : (window.socket || window.meuSocket);
                     
                     if (socketAtivo) {
@@ -95,11 +92,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     const papel = isMestre ? 'Mestre' : 'Jogador';
-                    alert(`Conectado como ${papel}! Suas rolagens agora pertencem a esta mesa.`);
+                    mostrarNotificacao(`Conectado como ${papel}! Suas rolagens agora pertencem a esta mesa.`);
                     
                     modalCampanhas.classList.remove('show');
-                    
-                    // CORREÇÃO 3: Recarrega a página para ativar os botões e painéis do Mestre!
                     window.location.reload();
                 });
             });
@@ -122,20 +117,20 @@ document.addEventListener('DOMContentLoaded', () => {
                                 method: 'DELETE',
                                 headers: {
                                     'Content-Type': 'application/json',
-                                    'usuario-id': usuarioLogadoId // Manda a "Identidade" pro back-end conferir
+                                    'usuario-id': usuarioLogadoId 
                                 }
                             });
                             
                             const dados = await resposta.json();
                             
                             if (resposta.ok) {
-                                alert(dados.mensagem);
-                                carregarMinhasCampanhas(usuarioLogadoId); // Recarrega a lista
+                                mostrarNotificacao(dados.mensagem, 'sucesso');
+                                carregarMinhasCampanhas(usuarioLogadoId); 
                             } else {
-                                alert(dados.erro);
+                                mostrarNotificacao(dados.erro, 'erro');
                             }
                         } catch (err) {
-                            alert("Erro ao excluir mesa.");
+                            mostrarNotificacao("Erro ao excluir mesa.", 'erro');
                         }
                     }
                 });
@@ -159,12 +154,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 2. Criar Nova Campanha (Mestre)
+    // Criar Nova Campanha (Mestre)
     btnCriarCampanha.addEventListener('click', async () => {
         const nome = nomeCampanhaInput.value.trim();
         const mestre_id = sessionStorage.getItem('usuarioId');
 
-        if (!nome) return alert("Digite um nome para a campanha!");
+        if (!nome) return mostrarNotificacao("Digite um nome para a campanha!", 'erro');
 
         btnCriarCampanha.textContent = "Criando...";
         try {
@@ -176,27 +171,27 @@ document.addEventListener('DOMContentLoaded', () => {
             const dados = await resposta.json();
 
             if (resposta.ok) {
-                alert(`Campanha criada!\nEnvie este código para seus jogadores: ${dados.codigo}`);
+                mostrarNotificacao(`Campanha criada!\nEnvie este código para seus jogadores: ${dados.codigo}`, 'sucesso');
                 nomeCampanhaInput.value = '';
                 carregarMinhasCampanhas(mestre_id);
             } else {
-                alert(dados.erro);
+                mostrarNotificacao(dados.erro, 'erro');
             }
         } catch (erro) {
-            alert("Erro de conexão.");
+            mostrarNotificacao("Erro de conexão.", 'erro');
         } finally {
             btnCriarCampanha.textContent = "Fundar Campanha";
         }
     });
 
-    // 3. Entrar em Campanha Existente (Jogador)
+    // Entrar em Campanha Existente (Jogador)
     btnEntrarCampanha.addEventListener('click', async () => {
         const codigo_convite = codigoConviteInput.value.trim().toUpperCase();
         const personagem_id = charSelectCampanha.value;
         const usuario_id = sessionStorage.getItem('usuarioId');
 
-        if (!codigo_convite) return alert("Digite o código de convite!");
-        if (!personagem_id) return alert("Você precisa selecionar um personagem para entrar na mesa!");
+        if (!codigo_convite) return mostrarNotificacao("Digite o código de convite!", 'aviso');
+        if (!personagem_id) return mostrarNotificacao("Você precisa selecionar um personagem para entrar na mesa!", 'aviso');
 
         btnEntrarCampanha.textContent = "Entrando...";
         try {
@@ -208,14 +203,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const dados = await resposta.json();
 
             if (resposta.ok) {
-                alert(dados.mensagem);
+                mostrarNotificacao(dados.mensagem, 'sucesso');
                 codigoConviteInput.value = '';
                 carregarMinhasCampanhas(usuario_id);
             } else {
-                alert(dados.erro);
+                mostrarNotificacao(dados.erro, 'erro');
             }
         } catch (erro) {
-            alert("Erro de conexão.");
+            mostrarNotificacao("Erro de conexão.", 'erro');
         } finally {
             btnEntrarCampanha.textContent = "Entrar na Mesa";
         }

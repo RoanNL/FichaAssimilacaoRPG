@@ -11,7 +11,7 @@ const pool = new Pool({
 });
 
 // =========================================================================
-// CRIAÇÃO DAS TABELAS (ESTRUTURA RELACIONAL ROBUSTA)
+// CRIAÇÃO DAS TABELAS
 // =========================================================================
 async function criarTabelas() {
     const query = `

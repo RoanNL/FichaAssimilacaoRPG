@@ -15,20 +15,6 @@ pool.query('SELECT NOW()', async (err, res) => {
     } else {
         console.log('✅ Conectado ao PostgreSQL com sucesso!');
         criarTabelas(); 
-        
-        try {
-            await pool.query(`
-                CREATE TABLE IF NOT EXISTS historico_rolagens (
-                    id SERIAL PRIMARY KEY,
-                    campanha_id INTEGER,
-                    pacote JSONB NOT NULL,
-                    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                );
-            `);
-            console.log('✅ Tabela de Histórico verificada!');
-        } catch (erroTabela) {
-            console.error('❌ Erro ao criar tabela de histórico:', erroTabela);
-        }
     }
 });
 
@@ -46,6 +32,18 @@ app.use(helmet({
     contentSecurityPolicy: false, 
     crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
+
+const { createClient } = require('@supabase/supabase-js');
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_KEY;
+
+let supabase;
+if (supabaseUrl && supabaseKey) {
+    supabase = createClient(supabaseUrl, supabaseKey);
+    console.log('☁️ Conectado ao Supabase Storage!');
+} else {
+    console.log('⚠️ Chaves do Supabase não encontradas no .env. O upload de imagens será ignorado.');
+}
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -76,14 +74,12 @@ io.on('connection', (socket) => {
                 socket.join(salaStr); 
                 console.log(`✅ Catraca VIP: Usuário ${usuarioId} acessou a mesa ${salaStr}`);
 
-                // 📜 A MÁGICA DO HISTÓRICO
                 const sqlHist = `SELECT pacote FROM historico_rolagens WHERE campanha_id = $1 ORDER BY id ASC LIMIT 30`;
                 const histResult = await pool.query(sqlHist, [campanhaId]);
                 
                 const rolagensAntigas = histResult.rows.map(row => row.pacote);
                 console.log(`📜 Enviando ${rolagensAntigas.length} rolagens do histórico para o usuário ${usuarioId}`);
                 
-                // Manda o histórico de volta pro Front-end
                 socket.emit('carregar-historico', rolagensAntigas);
 
             } else {
@@ -99,17 +95,14 @@ io.on('connection', (socket) => {
         const salaStr = pacoteDeDados.campanhaId.toString(); 
         console.log(`🎲 Dados rolados na mesa ${salaStr} por ${pacoteDeDados.nome}`);
         
-        // Emite para a sala toda
         socket.to(salaStr).emit('nova-rolagem', pacoteDeDados);
         
-        // 💾 Salva no Banco de Dados!
         try {
             const campanhaInt = parseInt(pacoteDeDados.campanhaId, 10);
-            const pacoteJson = JSON.stringify(pacoteDeDados);
             
             await pool.query(
                 `INSERT INTO historico_rolagens (campanha_id, pacote) VALUES ($1, $2)`, 
-                [campanhaInt, pacoteJson]
+                [campanhaInt, pacoteDeDados] 
             );
             console.log(`✅ Rolagem salva no banco com sucesso!`);
         } catch (err) {
@@ -188,19 +181,49 @@ app.post('/login', async (req, res) => {
 });
 
 // =========================================================================
-// SALVAR OU ATUALIZAR FICHA
+// SALVAR OU ATUALIZAR FICHA 
 // =========================================================================
 app.post('/personagens', async (req, res) => {
-
     const usuarioId = req.body.usuarioId || req.body.usuario_id || req.body.utilizador_id;
     const personagemId = req.body.personagemId || req.body.id;
     const nome = req.body.nome || req.body.nome_personagem || 'Desconhecido';
     const ocupacao = req.body.ocupacao || '';
     const dadosFicha = req.body.dadosFicha || req.body.dados_ficha || req.body.dados_personagem || {};
-    const foto = req.body.foto || null;
+    let foto = req.body.foto || null; 
 
     if (!usuarioId) {
         return res.status(400).json({ erro: 'Usuário não autenticado.' });
+    }
+
+    if (supabase && foto && foto.startsWith('data:image')) {
+        try {
+            console.log("☁️ Subindo nova imagem para o Supabase...");
+            
+            const base64Data = foto.replace(/^data:image\/\w+;base64,/, "");
+            const buffer = Buffer.from(base64Data, 'base64');
+            const extensao = foto.substring(foto.indexOf('/') + 1, foto.indexOf(';base64'));
+            
+            const nomeArquivo = `ficha_${usuarioId}_${Date.now()}.${extensao}`;
+
+            const { data, error } = await supabase.storage
+                .from('ficha-fotos') 
+                .upload(nomeArquivo, buffer, {
+                    contentType: `image/${extensao}`,
+                    upsert: true
+                });
+
+            if (error) throw error;
+
+            const { data: publicUrlData } = supabase.storage
+                .from('ficha-fotos')
+                .getPublicUrl(nomeArquivo);
+
+            foto = publicUrlData.publicUrl; 
+            console.log("✅ Imagem hospedada com sucesso:", foto);
+
+        } catch (err) {
+            console.error("❌ Erro ao enviar imagem pro Supabase:", err);
+        }
     }
 
     const fichaParaOBanco = JSON.stringify(dadosFicha);
@@ -371,7 +394,6 @@ app.get('/campanhas/:id/personagens', async (req, res) => {
 app.get('/campanhas/:id/jogadores', async (req, res) => {
     const campanhaId = req.params.id;
     try {
-        // Lógica à prova de balas: Traz todos que são membros da campanha, tendo ficha ou não!
         const sql = `
             SELECT m.usuario_id, u.username, 
                    (SELECT nome_personagem FROM personagens WHERE usuario_id = u.id LIMIT 1) as nome_personagem
@@ -393,7 +415,6 @@ app.get('/campanhas/:id/jogadores', async (req, res) => {
 app.get('/campanhas/:id/fichas-mesa', async (req, res) => {
     const campanhaId = req.params.id;
     try {
-        // Lógica à prova de balas: Pega as fichas cruzando pelo ID do Usuário, não importa como ele entrou!
         const sql = `
             SELECT p.*, u.username as nome_conta
             FROM personagens p
