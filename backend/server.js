@@ -3,8 +3,7 @@ require('dotenv').config()
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken')
-const db = require('./database');
+const jwt = require('jsonwebtoken');
 const helmet = require('helmet');
 
 const { pool, criarTabelas } = require('./database');
@@ -126,18 +125,29 @@ app.post('/registro', async (req, res) => {
     const username = req.body.username || req.body.usuario || req.body.nome || req.body.login;
     const password = req.body.password || req.body.senha;
 
-    if (!username || !password) {
+    const usernameLowerCase = username ? username.toLowerCase() : '';
+
+    if (!usernameLowerCase || !password) {
         return res.status(400).json({ erro: 'Usuário e senha são obrigatórios.' });
     }
 
     try {
-        const sql = `INSERT INTO usuarios (username, password) VALUES ($1, $2) RETURNING id`;
-        const resultado = await pool.query(sql, [username, password]);
+        const salt = await bcrypt.genSalt(10);
+        const senhaHash = await bcrypt.hash(password, salt);
 
-        // TRADUÇÃO PARA O FRONT-END: Devolvemos usuario.id e usuario.nome
+        const sql = `INSERT INTO usuarios (username, password) VALUES ($1, $2) RETURNING id`;
+        const resultado = await pool.query(sql, [usernameLowerCase, senhaHash]);
+        
+        const novoUsuarioId = resultado.rows[0].id;
+
+
+        const segredo = SEGREDO_JWT || 'segredo_super_secreto_rpg';
+        const token = jwt.sign({ id: novoUsuarioId, nome: username }, segredo, { expiresIn: '7d' });
+
         res.status(201).json({
             mensagem: 'Usuário registrado com sucesso!',
-            usuario: { id: resultado.rows[0].id, nome: username }
+            usuario: { id: novoUsuarioId, nome: username },
+            token: token 
         });
     } catch (erro) {
         if (erro.code === '23505') {
@@ -149,30 +159,44 @@ app.post('/registro', async (req, res) => {
 });
 
 // =========================================================================
-// ROTA DE LOGIN 
+// ROTA DE LOGIN
 // =========================================================================
 app.post('/login', async (req, res) => {
     const username = req.body.username || req.body.usuario || req.body.nome || req.body.login;
     const password = req.body.password || req.body.senha;
 
-    if (!username || !password) {
+    const usernameLowerCase = username ? username.toLowerCase() : '';
+
+    if (!usernameLowerCase || !password) {
         return res.status(400).json({ erro: 'Usuário e senha são obrigatórios.' });
     }
 
     try {
-        const sql = `SELECT id, username FROM usuarios WHERE username = $1 AND password = $2`;
-        const resultado = await pool.query(sql, [username, password]);
+        const sql = `SELECT id, username, password FROM usuarios WHERE username = $1`;
+        const resultado = await pool.query(sql, [usernameLowerCase]);
 
         if (resultado.rows.length === 0) {
             return res.status(401).json({ erro: 'Credenciais inválidas.' });
         }
 
+        const usuarioDb = resultado.rows[0];
+
+        const senhaValida = await bcrypt.compare(password, usuarioDb.password);
+
+        if (!senhaValida) {
+            return res.status(401).json({ erro: 'Credenciais inválidas.' });
+        }
+
+        const segredo = SEGREDO_JWT || 'segredo_super_secreto_rpg';
+        const token = jwt.sign({ id: usuarioDb.id, nome: usuarioDb.username }, segredo, { expiresIn: '7d' });
+
         res.json({
             mensagem: 'Login realizado com sucesso!',
             usuario: {
-                id: resultado.rows[0].id,
-                nome: resultado.rows[0].username
-            }
+                id: usuarioDb.id,
+                nome: usuarioDb.username
+            },
+            token: token 
         });
     } catch (erro) {
         console.error('❌ Erro no login:', erro);
