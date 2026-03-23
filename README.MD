@@ -31,7 +31,7 @@ Um Virtual TableTop (VTT) completo e responsivo, focado na experiência do usuá
 
 1. Clone o repositório:
 ```bash
-git clone [https://github.com/RoanNL/FichaAssimilacaoRPG.git](https://github.com/RoanNL/FichaAssimilacaoRPG.git)
+git clone https://github.com/RoanNL/FichaAssimilacaoRPG.git
 ```
 2. Instale as dependências do Back-end:
 ```bash
