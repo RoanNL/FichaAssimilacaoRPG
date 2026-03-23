@@ -59,51 +59,57 @@
 
 /* --- DICIONÁRIO DE CORES: TEMA ESCURO (DARK MODE) --- */
 body.dark {
-    /* Fundos */
-    --color-bg-main: #121212;
-    --color-paper: #1e1e1e;
-    --color-input-bg: #2a2a2a;
-    --color-input-bg-origens: #242424;
-    --color-input-bg-origens-focus: #333333;
-    --color-summary-bg: #2a2a2a;
-    --color-rolador-summary-bg: #2c2a26;
-    --color-checkbox-empty-bg: #2a2a2a;
-    --color-checkbox-losango-bg: #2a2a2a;
-    --color-photo-preview-bg: #242424;
+    /* Fundos: O oposto do Bege Quente é o Azul Profundo (Slate/Navy) */
+    --color-bg-main: #0f172a; 
+    --color-paper: #1e293b;   
+    --color-input-bg: #334155; 
+    --color-input-bg-origens: #1e293b;
+    --color-input-bg-origens-focus: #334155;
+    --color-summary-bg: #1e293b;
+    --color-rolador-summary-bg: #0f172a;
+    --color-checkbox-empty-bg: #1e293b;
+    --color-checkbox-losango-bg: #334155;
+    --color-photo-preview-bg: #0f172a;
     
-    /* Textos (Invertem para claro) */
-    --color-text-dark: #e0e0e0;
-    --color-text-medium: #aaaaaa;
-    --color-text-nav-hover: #ff9800; 
-    --color-saude-formula: #999999;
+    /* Textos (Claros e nítidos, puxando pro gelo) */
+    --color-text-dark: #f8fafc;
+    --color-text-medium: #94a3b8;
+    --color-text-nav-hover: #38bdf8; 
+    --color-saude-formula: #cbd5e1;
     
-    /* Bordas (Mais escuras para mesclar no fundo) */
-    --color-border-light: #333333;
-    --color-border-medium: #444444;
-    --color-border-dark: #666666;
-    --color-border-very-light: #333333;
-    --color-input-border-bottom: #c59b76;
+    /* Bordas (Sutis e frias para fundir com o fundo) */
+    --color-border-light: #334155;
+    --color-border-medium: #475569;
+    --color-border-dark: #64748b;
+    --color-border-very-light: #1e293b;
+    --color-input-border-bottom: #60a5fa; /* Oposto do marrom: Azul Aço */
     
-    /* Cores Temáticas RPG (Ajuste de brilho para contraste) */
-    --color-det-red: #a85252;
-    --color-det-red-hover: #c46868;
-    --color-assim-blue: #4a9cb0;
-    --color-assim-blue-hover: #5eb5ca;
-    --color-btn-save: #50b848;
-    --color-btn-save-hover: #65d45d;
-    --color-label-brown: #8b6040;
+    /* O Vermelho Escuro (#8c3a3a) vira Ciano Vibrante */
+    --color-det-red: #2dd4bf; 
+    --color-det-red-hover: #14b8a6;
+    
+    /* O Azul Mudo (#3a7c8c) vira Laranja Cobre Quente */
+    --color-assim-blue: #f59e0b; 
+    --color-assim-blue-hover: #d97706;
+    
+    /* O Marrom (#a97b53) vira Roxo/Índigo */
+    --color-label-brown: #818cf8; 
+    
+    /* Semântica */
+    --color-btn-save: #10b981;
+    --color-btn-save-hover: #059669;
     
     /* Detalhes Específicos */
-    --color-drop-empty: #444444;
-    --color-drop-full: #e0e0e0;
-    --color-modal-overlay: rgba(0, 0, 0, 0.9);
+    --color-drop-empty: #475569;
+    --color-drop-full: #38bdf8; 
+    --color-modal-overlay: rgba(15, 23, 42, 0.9);
 
     /* Galeria / Campanhas */
-    --color-galeria-bg: #121212;
-    --color-card-bg: #1e1e1e;
-    --color-card-border: #333333;
-    --color-card-border-hover: #888888;
-    --color-card-img-bg: #111111;
+    --color-galeria-bg: #020617;
+    --color-card-bg: #0f172a;
+    --color-card-border: #334155;
+    --color-card-border-hover: #2dd4bf; 
+    --color-card-img-bg: #000000;
 }
 
 /* --- Estilos Gerais --- */
@@ -651,7 +657,7 @@ h2 {
 .btn-jogar:hover { background-color: var(--color-det-red-hover); }
 
 /* ========================================
-   PAINEL DE JOGADORES DO MESTRE (V1.6)
+   PAINEL DE JOGADORES DO MESTRE 
    ========================================
 */
 .jogador-card-mestre {

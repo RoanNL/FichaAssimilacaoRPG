@@ -248,7 +248,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // SISTEMA DA FICHA E DETALHES 
     // ==========================================
 
-    // FUNÇÃO CENTRAL PARA BUSCAR E CARREGAR UMA FICHA DO POSTGRESQL
     async function carregarPersonagem(id) {
         try {
             const resposta = await fetch(`${API_URL}/personagem/${id}`);
@@ -292,7 +291,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         const canvas = document.createElement('canvas');
                         const ctx = canvas.getContext('2d');
 
-                        // Reduz a imagem para no máximo 400x400 pixels (Tamanho perfeito pra token)
                         const MAX_WIDTH = 400;
                         const MAX_HEIGHT = 400;
                         let width = img.width;
@@ -314,7 +312,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         canvas.height = height;
                         ctx.drawImage(img, 0, 0, width, height);
 
-                        // Converte para WebP (preserva fundo transparente e é hiper leve) com 80% de qualidade
                         const compressedBase64 = canvas.toDataURL('image/webp', 0.8);
                         photoPreview.src = compressedBase64;
                     };

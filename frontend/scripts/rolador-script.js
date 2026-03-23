@@ -1,9 +1,30 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+    // === DICIONÁRIOS DE ÍCONES (TEMA DINÂMICO) ===
+    // Ícones originais (pretos) para usar quando o fundo for claro
+    const iconesTemaClaro = {
+        sucesso: 'assets/Sucesso.png',
+        pressao: 'assets/pressao.png',
+        adaptacao: 'assets/Adaptacao.png',
+        nada: 'assets/nada.png'
+    };
+
+    // Ícones novos (brancos) para usar quando o tema dark estiver ativo
+    const iconesTemaEscuro = {
+        sucesso: 'assets/sucesso-branco.png',
+        pressao: 'assets/pressao-branco.png',
+        adaptacao: 'assets/adaptacao-branco.png',
+        nada: 'assets/nada-branco.png'
+    };
+
+    // Função Radar: Descobre na hora qual pasta de imagens usar
+    function obterIconesAtuais() {
+        return document.body.classList.contains('dark') ? iconesTemaEscuro : iconesTemaClaro;
+    }
+
     // === CONEXÃO ===
     const socket = io('https://fichaassimilacaorpg.onrender.com');
     window.meuSocket = socket;
-
 
     socket.on('connect', () => {
         const campanhaAtiva = sessionStorage.getItem('campanhaAtiva');
@@ -22,17 +43,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     socket.on('nova-rolagem', (pacoteDeDados) => {
-        const isMestre = sessionStorage.getItem('isMestreAtivo') === 'true';
-
         renderizarRolagem(pacoteDeDados);
-        
-        const modalRolador = document.getElementById('rolador-modal');
-        if (modalRolador && !modalRolador.classList.contains('show')) {
-
-        }
     });
 
-     // === 📜 RECEBE O HISTÓRICO APÓS O F5 ===
+    // === 📜 RECEBE O HISTÓRICO APÓS O F5 ===
     socket.on('carregar-historico', (historico) => {
 
         const historicoDiv = document.getElementById('rolador-historico');
@@ -40,12 +54,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         historicoDiv.innerHTML = '';
 
+        // Pega os ícones certos com base no tema atual
+        const iconFilesSeguro = obterIconesAtuais();
+
         historico.forEach(pacoteBruto => {
             try {
                 const pacote = typeof pacoteBruto === 'string' ? JSON.parse(pacoteBruto) : pacoteBruto;
 
                 const historyEntry = document.createElement('div');
-                historyEntry.style.borderBottom = '1px solid #ccc';
+                historyEntry.style.borderBottom = '1px solid var(--color-border-medium)';
                 historyEntry.style.paddingBottom = '15px';
                 historyEntry.style.marginBottom = '15px';
 
@@ -65,11 +82,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 subRollsContainer.className = 'sub-rolls-container';
 
                 if (pacote.resultados) {
-                    const iconFilesSeguro = {
-                        sucesso: 'assets/Sucesso.png', pressao: 'assets/pressao.png',
-                        adaptacao: 'assets/Adaptacao.png', nada: 'assets/nada.png'
-                    };
-
                     pacote.resultados.forEach(dado => {
                         const subRollDiv = document.createElement('div');
                         subRollDiv.className = 'sub-roll';
@@ -85,9 +97,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (dado.icones) {
                             dado.icones.forEach(iconName => {
                                 const img = document.createElement('img');
+                                
+                                // USA O DICIONÁRIO DINÂMICO AQUI!
                                 img.src = iconFilesSeguro[iconName];
                                 img.alt = iconName;
-                                
                                 
                                 img.className = 'dado-animado'; 
                                 img.style.animation = 'none';
@@ -118,20 +131,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error("❌ Erro ao desenhar uma rolagem antiga:", err, pacoteBruto);
             }
         });
+    });
 
-        socket.on('mesa-encerrada', () => {
-        mostrarNotificacao("🚨 O Mestre encerrou esta campanha permanentemente! Você está sendo desconectado.", 'aviso');
+    socket.on('mesa-encerrada', () => {
+        if(typeof mostrarNotificacao === 'function') {
+            mostrarNotificacao("🚨 O Mestre encerrou esta campanha permanentemente! Você está sendo desconectado.", 'aviso');
+        } else {
+            alert("🚨 O Mestre encerrou esta campanha permanentemente! Você está sendo desconectado.");
+        }
         
-        // Limpa a memória da mesa
         sessionStorage.removeItem('campanhaAtiva');
         sessionStorage.removeItem('isMestreAtivo');
-        
         window.location.reload();
     });
-    });
-    // ==========================================
 
-    //  Controle do Modal (Abrir e Fechar)
+    // ==========================================
+    // Controle do Modal (Abrir e Fechar)
     const btnAbrirModal = document.getElementById('nav-btn-rolador');
     const modalRolador = document.getElementById('rolador-modal');
     const btnFecharModal = document.getElementById('fechar-rolador');
@@ -155,29 +170,38 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Lógica dos Dados
-    const iconFiles = {
-        sucesso: 'assets/Sucesso.png',
-        pressao: 'assets/pressao.png',
-        adaptacao: 'assets/Adaptacao.png',
-        nada: 'assets/nada.png'
-    };
-
+    // Lógica Matemática dos Dados
     const diceTable = {
         d6: {
-            1: ['nada'], 2: ['nada'], 3: ['pressao'], 4: ['pressao'],
-            5: ['adaptacao', 'pressao'], 6: ['sucesso']
+            1: ['nada'], 
+            2: ['nada'], 
+            3: ['pressao'], 
+            4: ['pressao'],
+            5: ['adaptacao', 'pressao'], 
+            6: ['sucesso']
         },
         d10: {
-            1: ['nada'], 2: ['nada'], 3: ['pressao'], 4: ['pressao'],
-            5: ['adaptacao', 'pressao'], 6: ['sucesso'], 7: ['pressao', 'pressao'],
-            8: ['sucesso', 'adaptacao'], 9: ['sucesso', 'adaptacao', 'pressao'],
+            1: ['nada'], 
+            2: ['nada'], 
+            3: ['pressao'], 
+            4: ['pressao'],
+            5: ['adaptacao', 'pressao'], 
+            6: ['sucesso'], 
+            7: ['sucesso', 'sucesso'],
+            8: ['sucesso', 'adaptacao'], 
+            9: ['sucesso', 'adaptacao', 'pressao'],
             10: ['sucesso', 'sucesso', 'pressao']
         },
         d12: {
-            1: ['nada'], 2: ['nada'], 3: ['pressao'], 4: ['pressao'],
-            5: ['adaptacao', 'pressao'], 6: ['sucesso'], 7: ['pressao', 'pressao'],
-            8: ['sucesso', 'adaptacao'], 9: ['sucesso', 'adaptacao', 'pressao'],
+            1: ['nada'], 
+            2: ['nada'], 
+            3: ['pressao'], 
+            4: ['pressao'],
+            5: ['adaptacao', 'pressao'], 
+            6: ['sucesso'], 
+            7: ['sucesso', 'sucesso'],
+            8: ['sucesso', 'adaptacao'], 
+            9: ['sucesso', 'adaptacao', 'pressao'],
             10: ['sucesso', 'sucesso', 'pressao'],
             11: ['sucesso', 'adaptacao', 'adaptacao', 'pressao'],
             12: ['pressao', 'pressao']
@@ -201,13 +225,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!part) continue;
             const match = part.match(/^(\d*)d(\d+)$/);
             if (!match) {
-                mostrarNotificacao(`Formato inválido: "${part}". Use "2d6", "1d10", etc.`, 'erro');
+                if(typeof mostrarNotificacao === 'function') mostrarNotificacao(`Formato inválido: "${part}". Use "2d6", "1d10", etc.`, 'erro');
                 return null;
             }
             const quantity = parseInt(match[1] || '1', 10);
             const size = parseInt(match[2], 10);
             if (![6, 10, 12].includes(size)) {
-                mostrarNotificacao(`Dado inválido: "d${size}". Use apenas d6, d10 ou d12.`, 'aviso');
+                if(typeof mostrarNotificacao === 'function') mostrarNotificacao(`Dado inválido: "d${size}". Use apenas d6, d10 ou d12.`, 'aviso');
                 return null;
             }
             diceRequests.push({ quantity, size });
@@ -229,7 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (inputNome && inputNome.value.trim() !== '') {
             nomeRolador = inputNome.value.trim();
         } else if (sessionStorage.getItem('usuarioNome') && sessionStorage.getItem('usuarioNome') !== 'undefined') {
-            nomeRolador = sessionStorage.getItem('usuarioNome'); // Chave correta!
+            nomeRolador = sessionStorage.getItem('usuarioNome'); 
         }
 
         const pacoteDeDados = {
@@ -262,18 +286,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         renderizarRolagem(pacoteDeDados);
 
-        //  Envia para os outros SOMENTE se eu estiver numa mesa
+        // Envia para os outros SOMENTE se eu estiver numa mesa
         if (campanhaAtiva) {
             socket.emit('rolar-dados', pacoteDeDados);
         }
     }
 
-    // === O DESENHISTA: Só pega um pacote e desenha na tela com animações ===
+    // === O DESENHISTA: Pega o pacote e desenha animado ===
     function renderizarRolagem(pacote) {
         resultsDiv.innerHTML = '';
 
         const rollGroup = document.createElement('div');
-        rollGroup.style.borderBottom = '1px solid #ccc';
+        rollGroup.style.borderBottom = '1px solid var(--color-border-medium)';
         rollGroup.style.paddingBottom = '15px';
         rollGroup.style.marginBottom = '15px';
 
@@ -282,7 +306,6 @@ document.addEventListener('DOMContentLoaded', () => {
         header.textContent = `${pacote.nome} rolou: ${pacote.input}`;
         header.style.marginTop = '0';
 
-        // Destaca em azul se a rolagem for de outro jogador
         const meuNomeLocal = sessionStorage.getItem('usuarioNome');
         const meuPersonagemLocal = document.getElementById('nome') ? document.getElementById('nome').value.trim() : '';
         
@@ -298,6 +321,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const tempoGiroLogo = 1000;
         const delaySuspense = 300;
         const tempoTotalAntesDados = tempoGiroLogo + delaySuspense;
+
+        const iconFilesAtuais = obterIconesAtuais();
 
         pacote.resultados.forEach(dado => {
             const subRollDiv = document.createElement('div');
@@ -320,7 +345,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             dado.icones.forEach((iconName, index) => {
                 const img = document.createElement('img');
-                img.src = iconFiles[iconName];
+                
+
+                img.src = iconFilesAtuais[iconName];
+                
                 img.alt = iconName;
                 img.className = 'dado-animado';
 
