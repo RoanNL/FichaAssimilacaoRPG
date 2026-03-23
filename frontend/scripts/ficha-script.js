@@ -236,43 +236,6 @@ document.addEventListener('DOMContentLoaded', () => {
             authSubmitBtn.disabled = false;
             authSubmitBtn.textContent = isLoginMode ? 'Entrar no Sistema' : 'Registrar Conta';
         }
-
-        // ==========================================
-        // SISTEMA DE LOGOUT (DESCONECTAR)
-        // ==========================================
-        const btnSair = document.getElementById('btn-sair');
-
-        if (btnSair) {
-            btnSair.addEventListener('click', (e) => {
-                e.preventDefault();
-
-                sessionStorage.clear();
-
-                token = null;
-                usuarioLogadoId = null;
-                nomeOperador = null;
-                idPersonagemAtual = null;
-
-                document.querySelectorAll('form').forEach(f => {
-                    if (f.id !== 'auth-form' && f.id !== 'recuperar-form') f.reset();
-                });
-
-
-                const photoPreview = document.getElementById('char-photo-preview');
-                if (photoPreview) photoPreview.src = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
-
-
-                const appContainer = document.getElementById('app-container');
-                const authContainer = document.getElementById('auth-container');
-
-                if (appContainer) appContainer.style.display = 'none';
-                if (authContainer) authContainer.style.display = 'block';
-
-                if (typeof mostrarNotificacao === 'function') {
-                    mostrarNotificacao('Você foi desconectado com segurança.', 'aviso');
-                }
-            });
-        }
     });
 
 
@@ -371,6 +334,41 @@ document.addEventListener('DOMContentLoaded', () => {
             btnSalvarNovaSenha.textContent = 'Redefinir Senha';
         }
     });
+
+    // ==========================================
+    // SISTEMA DE LOGOUT (DESCONECTAR)
+    // ==========================================
+        if (btnSair) {
+            btnSair.addEventListener('click', (e) => {
+                e.preventDefault();
+
+                sessionStorage.clear();
+
+                token = null;
+                usuarioLogadoId = null;
+                nomeOperador = null;
+                idPersonagemAtual = null;
+
+                document.querySelectorAll('form').forEach(f => {
+                    if (f.id !== 'auth-form' && f.id !== 'recuperar-form') f.reset();
+                });
+
+
+                const photoPreview = document.getElementById('char-photo-preview');
+                if (photoPreview) photoPreview.src = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
+
+
+                const appContainer = document.getElementById('app-container');
+                const authContainer = document.getElementById('auth-container');
+
+                if (appContainer) appContainer.style.display = 'none';
+                if (authContainer) authContainer.style.display = 'block';
+
+                if (typeof mostrarNotificacao === 'function') {
+                    mostrarNotificacao('Você foi desconectado com segurança.', 'aviso');
+                }
+            });
+        }
 
     // ==========================================
     // SISTEMA DA FICHA E DETALHES 
