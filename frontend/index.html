@@ -41,7 +41,10 @@
 <body>
     <div id="leaves-container"></div>
     <div id="auth-container" class="max-w-[400px] mx-auto mt-[10vh] text-center p-8 bg-rpg-paper dark:bg-rpg-paper-dark border border-gray-300 dark:border-gray-800 rounded-lg shadow-xl relative z-10 transition-colors duration-300 mx-4 md:mx-auto">
-        
+    
+        <button id="auth-theme-toggle" type="button" title="Trocar Tema" class="absolute top-4 right-5 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white transition-colors cursor-pointer text-2xl bg-transparent border-none outline-none">
+            <i class="fas fa-moon"></i>
+        </button>
         <h1 id="auth-title" class="text-3xl font-black font-rpg text-rpg-text-dark dark:text-orange-500 uppercase border-b-2 border-rpg-red pb-3 mb-2 mt-0">
             Acesso Restrito
         </h1>
@@ -206,32 +209,32 @@
                 
                 <div class="flex flex-col md:flex-row md:items-center mb-4 w-full">
                     <label for="nome" class="text-lg font-bold text-gray-600 dark:text-gray-400 md:min-w-[180px] mb-1 md:mb-0 text-left">Nome:</label>
-                    <input type="text" id="nome" class="w-full font-rpg text-lg px-2 py-1 text-black dark:text-white bg-[#f0f3f5] dark:bg-[#2a2a2a] focus:bg-[#e8eef1] dark:focus:bg-[#333] border-b-2 border-rpg-brown dark:border-[#c59b76] outline-none transition-colors">
+                    <input type="text" id="nome" maxlength="20" class="w-full font-rpg text-lg px-2 py-1 text-black dark:text-white bg-[#f0f3f5] dark:bg-[#2a2a2a] focus:bg-[#e8eef1] dark:focus:bg-[#333] border-b-2 border-rpg-brown dark:border-[#c59b76] outline-none transition-colors">
                 </div>
                 
                 <div class="flex flex-col md:flex-row md:items-center mb-4 w-full">
                     <label for="evento" class="text-lg font-bold text-gray-600 dark:text-gray-400 md:min-w-[180px] mb-1 md:mb-0 text-left">Evento Marcante:</label>
-                    <input type="text" id="evento" class="w-full font-rpg text-lg px-2 py-1 text-black dark:text-white bg-[#f0f3f5] dark:bg-[#2a2a2a] focus:bg-[#e8eef1] dark:focus:bg-[#333] border-b-2 border-rpg-brown dark:border-[#c59b76] outline-none transition-colors">
+                    <input type="text" id="evento" maxlength="50" class="w-full font-rpg text-lg px-2 py-1 text-black dark:text-white bg-[#f0f3f5] dark:bg-[#2a2a2a] focus:bg-[#e8eef1] dark:focus:bg-[#333] border-b-2 border-rpg-brown dark:border-[#c59b76] outline-none transition-colors">
                 </div>
                 
                 <div class="flex flex-col md:flex-row md:items-center mb-4 w-full">
                     <label for="ocupacao" class="text-lg font-bold text-gray-600 dark:text-gray-400 md:min-w-[180px] mb-1 md:mb-0 text-left">Ocupação:</label>
-                    <input type="text" id="ocupacao" class="w-full font-rpg text-lg px-2 py-1 text-black dark:text-white bg-[#f0f3f5] dark:bg-[#2a2a2a] focus:bg-[#e8eef1] dark:focus:bg-[#333] border-b-2 border-rpg-brown dark:border-[#c59b76] outline-none transition-colors">
+                    <input type="text" id="ocupacao" maxlength="20" class="w-full font-rpg text-lg px-2 py-1 text-black dark:text-white bg-[#f0f3f5] dark:bg-[#2a2a2a] focus:bg-[#e8eef1] dark:focus:bg-[#333] border-b-2 border-rpg-brown dark:border-[#c59b76] outline-none transition-colors">
                 </div>
                 
                 <div class="flex flex-col md:flex-row md:items-center mb-4 w-full">
                     <label for="geracao" class="text-lg font-bold text-gray-600 dark:text-gray-400 md:min-w-[180px] mb-1 md:mb-0 text-left">Geração:</label>
-                    <input type="text" id="geracao" class="w-full font-rpg text-lg px-2 py-1 text-black dark:text-white bg-[#f0f3f5] dark:bg-[#2a2a2a] focus:bg-[#e8eef1] dark:focus:bg-[#333] border-b-2 border-rpg-brown dark:border-[#c59b76] outline-none transition-colors">
+                    <input type="text" id="geracao" maxlength="20" class="w-full font-rpg text-lg px-2 py-1 text-black dark:text-white bg-[#f0f3f5] dark:bg-[#2a2a2a] focus:bg-[#e8eef1] dark:focus:bg-[#333] border-b-2 border-rpg-brown dark:border-[#c59b76] outline-none transition-colors">
                 </div>
                 
                 <div class="flex flex-col md:flex-row md:items-center mb-4 w-full">
                     <label for="proposito-pessoal" class="text-lg font-bold text-gray-600 dark:text-gray-400 md:min-w-[180px] mb-1 md:mb-0 text-left">Propósitos Pessoais:</label>
-                    <input type="text" id="proposito-pessoal" class="w-full font-rpg text-lg px-2 py-1 text-black dark:text-white bg-[#f0f3f5] dark:bg-[#2a2a2a] focus:bg-[#e8eef1] dark:focus:bg-[#333] border-b-2 border-rpg-brown dark:border-[#c59b76] outline-none transition-colors">
+                    <input type="text" id="proposito-pessoal" maxlength="100" class="w-full font-rpg text-lg px-2 py-1 text-black dark:text-white bg-[#f0f3f5] dark:bg-[#2a2a2a] focus:bg-[#e8eef1] dark:focus:bg-[#333] border-b-2 border-rpg-brown dark:border-[#c59b76] outline-none transition-colors">
                 </div>
                 
                 <div class="flex flex-col md:flex-row md:items-center mb-4 w-full">
                     <label for="proposito-coletivo" class="text-lg font-bold text-gray-600 dark:text-gray-400 md:min-w-[180px] mb-1 md:mb-0 text-left">Propósito Coletivo:</label>
-                    <input type="text" id="proposito-coletivo" class="w-full font-rpg text-lg px-2 py-1 text-black dark:text-white bg-[#f0f3f5] dark:bg-[#2a2a2a] focus:bg-[#e8eef1] dark:focus:bg-[#333] border-b-2 border-rpg-brown dark:border-[#c59b76] outline-none transition-colors">
+                    <input type="text" id="proposito-coletivo" maxlength="100" class="w-full font-rpg text-lg px-2 py-1 text-black dark:text-white bg-[#f0f3f5] dark:bg-[#2a2a2a] focus:bg-[#e8eef1] dark:focus:bg-[#333] border-b-2 border-rpg-brown dark:border-[#c59b76] outline-none transition-colors">
                 </div>
             </section>
 
@@ -542,7 +545,10 @@
                Ficha Assimilação RPG
             </h3>
             <p class="font-sans text-gray-600 dark:text-gray-400 text-sm md:text-base font-bold mb-3">
-                Desenvolvido com ❤ por <a href="https://www.linkedin.com/in/roannl" target="_blank" class="text-rpg-blue hover:text-rpg-blue-hover dark:text-rpg-blue-hover hover:underline transition-colors">Roan Lisboa</a>.
+                Desenvolvido com ❤ por <a href="https://www.linkedin.com/in/roannl" target="_blank" class="text-rpg-blue hover:text-rpg-blue-hover dark:text-rpg-blue-hover hover:underline transition-colors">Roan Lisboa</a>
+            </p>
+            <p class="font-sans text-gray-600 dark:text-gray-400 text-sm md:text-base font-bold mb-3">
+                <a href="https://github.com/RoanNL/FichaAssimilacaoRPG" target="_blank" class="text-rpg-blue hover:text-rpg-blue-hover dark:text-rpg-blue-hover hover:underline transition-colors">Github</a>
             </p>
             <p class="font-rpg text-xs text-gray-500 dark:text-gray-500">
                 Sistema de Rolagem Dinâmica • Gerenciamento de Fichas • Multiplayer em Tempo Real

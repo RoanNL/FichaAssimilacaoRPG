@@ -328,6 +328,33 @@ app.post('/personagens', async (req, res) => {
         return res.status(400).json({ erro: 'Usuário não autenticado.' });
     }
 
+    const regexSeguro = /^[^<>{}\[\]=;]*$/;
+
+    // Função fiscalizadora
+    function validarTexto(texto, limite) {
+        if (!texto) return true; 
+        if (typeof texto !== 'string') return false; 
+        if (texto.length > limite) return false; 
+        return regexSeguro.test(texto); 
+    }
+
+    // Passa os campos pelo detector de metais:
+    if (
+        !validarTexto(nome, 50) ||
+        !validarTexto(ocupacao, 50) ||
+        (dadosFicha && (
+            !validarTexto(dadosFicha['evento'], 80) ||
+            !validarTexto(dadosFicha['geracao'], 30) ||
+            !validarTexto(dadosFicha['proposito-pessoal'], 100) ||
+            !validarTexto(dadosFicha['proposito-coletivo'], 100)
+        ))
+    ) {
+        console.warn(`⚠️ Tentativa de injeção de código ou limite excedido pelo Usuário ID: ${usuarioId}`);
+        return res.status(400).json({ 
+            erro: "Texto inválido! O texto excedeu o limite ou contém caracteres proibidos de código (< > { } [ ] = ;)." 
+        });
+    }
+
     if (supabase && foto && foto.startsWith('data:image')) {
         try {
             console.log("☁️ Subindo nova imagem para o Supabase...");

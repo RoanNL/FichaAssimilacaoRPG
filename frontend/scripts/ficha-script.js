@@ -522,6 +522,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const gridPersonagens = document.getElementById('grid-personagens');
             if (gridPersonagens) gridPersonagens.innerHTML = '';
+            
+            const charSelectCampanha = document.getElementById('char-select-campanha');
+            if (charSelectCampanha) {
+                charSelectCampanha.innerHTML = '<option value="">-- Selecione seu Personagem --</option>';
+            }
 
             if (gridPersonagens) {
                 const cardNovo = document.createElement('div');
@@ -547,6 +552,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             personagensCarregados.forEach(char => {
+                if (charSelectCampanha) {
+                    const option = document.createElement('option');
+                    option.value = char.id;
+                    option.textContent = char.nome_personagem || 'Sem Nome';
+                    charSelectCampanha.appendChild(option);
+                }
                 if (gridPersonagens) {
                     const fotoBase64 = char.foto;
                     const ocupacao = char.ocupacao || 'Desconhecido';
@@ -591,7 +602,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!usuarioLogadoId) return;
 
         const dadosFicha = coletarDadosFicha();
-        const nomePersonagem = nomeInput.value || 'Cobaia Desconhecida';
+        const nomePersonagem = nomeInput.value || 'Assimilado';
         const foto = dadosFicha['char-photo'] || null;
 
         const payload = {
@@ -667,30 +678,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // ==========================================
-    // CONTROLE DE TEMA (DARK MODE)
+    // CONTROLE DE TEMA (DARK MODE) 
     // ==========================================
-    const btnToggleTema = document.getElementById('btn-toggle-tema');
+    const btnToggleTemaApp = document.getElementById('btn-toggle-tema'); 
+    const btnToggleTemaAuth = document.getElementById('auth-theme-toggle'); 
     const corpoDoSite = document.body;
+
+    function atualizarBotoesTema(isDark) {
+        const iconHtml = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+        
+        // Atualiza o botão interno (do menu)
+        if (btnToggleTemaApp) {
+            btnToggleTemaApp.innerHTML = iconHtml;
+        }
+        
+        // Atualiza o botão externo (do login)
+        if (btnToggleTemaAuth) {
+            btnToggleTemaAuth.innerHTML = iconHtml;
+        }
+    }
+
+    function alternarTema(e) {
+        if(e) e.preventDefault();
+        corpoDoSite.classList.toggle('dark');
+        const isDark = corpoDoSite.classList.contains('dark');
+        
+        localStorage.setItem('tema-rpg-assimilacao', isDark ? 'dark' : 'light');
+        
+        atualizarBotoesTema(isDark);
+    }
+
+    if (btnToggleTemaApp) btnToggleTemaApp.addEventListener('click', alternarTema);
+    if (btnToggleTemaAuth) btnToggleTemaAuth.addEventListener('click', alternarTema);
+
 
     const temaSalvo = localStorage.getItem('tema-rpg-assimilacao');
 
     if (temaSalvo === 'dark') {
         corpoDoSite.classList.add('dark');
-        if (btnToggleTema) btnToggleTema.textContent = '☀️ Tema Claro';
-    }
-
-    if (btnToggleTema) {
-        btnToggleTema.addEventListener('click', (e) => {
-            e.preventDefault();
-            corpoDoSite.classList.toggle('dark');
-            if (corpoDoSite.classList.contains('dark')) {
-                localStorage.setItem('tema-rpg-assimilacao', 'dark');
-                btnToggleTema.textContent = '☀️ Tema Claro';
-            } else {
-                localStorage.setItem('tema-rpg-assimilacao', 'light');
-                btnToggleTema.textContent = '🌙 Tema Escuro';
-            }
-        });
+        atualizarBotoesTema(true);
+    } else {
+        atualizarBotoesTema(false);
     }
 
     // ==========================================
