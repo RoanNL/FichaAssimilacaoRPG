@@ -46,29 +46,65 @@
             Acesso Restrito
         </h1>
         <p class="auth-subtitle text-gray-500 dark:text-gray-400 mb-6 font-rpg text-sm md:text-base">
-            Identifique-se para acessar o sistema.
+            Identifique-se para acessar a Ficha.
         </p>
         
         <form id="auth-form">
+            <div id="auth-email-container" class="text-left mb-4" style="display: none;">
+                <label for="auth-email" class="block font-bold text-gray-700 dark:text-gray-300 mb-1 font-rpg">E-mail</label>
+                <input type="email" id="auth-email" autocomplete="email" class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-[#f0f3f5] dark:bg-[#2a2a2a] text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-blue transition-colors font-sans">
+            </div>
+            
             <div class="text-left mb-4">
-                <label for="auth-username" class="block font-bold text-gray-700 dark:text-gray-300 mb-1 font-rpg">Nome do Operador</label>
+                <label for="auth-username" class="block font-bold text-gray-700 dark:text-gray-300 mb-1 font-rpg">Nome do Assimilado</label>
                 <input type="text" id="auth-username" required autocomplete="off" class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-[#f0f3f5] dark:bg-[#2a2a2a] text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-blue transition-colors font-sans">
             </div>
             
-            <div class="text-left mb-6">
+            <div class="text-left mb-2">
                 <label for="auth-password" class="block font-bold text-gray-700 dark:text-gray-300 mb-1 font-rpg">Senha</label>
                 <input type="password" id="auth-password" required class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-[#f0f3f5] dark:bg-[#2a2a2a] text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-blue transition-colors font-sans">
+            </div>
+            
+            <div class="text-right mb-5" id="esqueci-senha-wrapper">
+                <span id="btn-esqueci-senha" class="text-sm text-rpg-blue hover:text-rpg-blue-hover dark:text-orange-400 dark:hover:text-orange-300 cursor-pointer underline font-bold transition-colors">Esqueci minha senha</span>
             </div>
             
             <button type="submit" id="auth-submit-btn" class="w-full bg-rpg-blue hover:bg-rpg-blue-hover text-white font-bold font-rpg py-3 rounded uppercase transition-colors shadow-md cursor-pointer border-none text-lg">
                 Entrar no Sistema
             </button>
         </form>
+
+        <form id="recuperar-form" style="display: none;">
+            <div id="recuperar-email-step" class="text-left mb-4">
+                <label for="recuperar-email" class="block font-bold text-gray-700 dark:text-gray-300 mb-1 font-rpg">Qual e-mail você cadastrou?</label>
+                <input type="email" id="recuperar-email" class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-[#f0f3f5] dark:bg-[#2a2a2a] text-black dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-colors font-sans">
+                
+                <button type="button" id="btn-enviar-codigo" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold font-rpg py-3 rounded uppercase transition-colors shadow-md cursor-pointer border-none text-lg mt-4">
+                    Receber Código
+                </button>
+            </div>
+
+            <div id="recuperar-codigo-step" class="text-left mb-4" style="display: none;">
+                <label for="recuperar-token" class="block font-bold text-gray-700 dark:text-gray-300 mb-1 font-rpg text-center">Código de 6 dígitos</label>
+                <input type="text" id="recuperar-token" placeholder="Ex: 123456" maxlength="6" class="w-full mb-4 px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-[#f0f3f5] dark:bg-[#2a2a2a] text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-green transition-colors font-sans text-center tracking-widest text-2xl font-black">
+
+                <label for="recuperar-nova-senha" class="block font-bold text-gray-700 dark:text-gray-300 mb-1 font-rpg">Nova Senha Segura</label>
+                <input type="password" id="recuperar-nova-senha" class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-[#f0f3f5] dark:bg-[#2a2a2a] text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-green transition-colors font-sans">
+
+                <button type="button" id="btn-salvar-nova-senha" class="w-full bg-rpg-green hover:bg-green-600 text-white font-bold font-rpg py-3 rounded uppercase transition-colors shadow-md cursor-pointer border-none text-lg mt-4">
+                    Redefinir Senha
+                </button>
+            </div>
+
+            <div class="text-center mt-6">
+                <span id="btn-voltar-login" class="text-sm text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white cursor-pointer underline transition-colors font-bold">← Voltar para o Login</span>
+            </div>
+        </form>
         
         <p id="auth-mensagem" class="font-bold mt-4 min-h-[20px] text-rpg-red dark:text-red-400"></p>
         
-        <p id="auth-toggle-text" class="mt-5 text-sm text-gray-600 dark:text-gray-400 font-rpg">
-            Não possui credenciais? 
+        <p id="auth-toggle-text" class="mt-4 text-sm text-gray-600 dark:text-gray-400 font-rpg">
+            Não possui conta? 
             <span id="auth-toggle-link" class="text-rpg-red hover:text-rpg-red-hover dark:text-orange-500 dark:hover:text-orange-400 cursor-pointer underline font-bold transition-colors">Criar nova conta</span>
         </p>
     </div>
@@ -112,14 +148,6 @@
             </h2>
             
             <div class="flex flex-wrap items-center gap-4 manager-controls">
-                <label class="text-[1.1em] font-bold text-gray-600 dark:text-orange-500">
-                    Carregar Personagem:
-                </label>
-                
-                <select id="char-select" class="flex-grow min-w-[200px] font-rpg text-base py-2.5 px-4 rounded border border-gray-400 dark:border-gray-600 bg-white dark:bg-[#2a2a2a] text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-blue transition-colors duration-200">
-                    <option value="">-- Novo Personagem --</option>
-                </select>
-                
                 <button id="btn-load-char" style="display: none;">Carregar</button> <button id="btn-abrir-galeria" class="font-rpg text-base py-2.5 px-4 rounded border-none font-bold text-white uppercase cursor-pointer transition-colors duration-200 bg-purple-600 hover:bg-purple-800">
                     Personagens
                 </button>
@@ -137,7 +165,7 @@
                 </button>
                 
                 <button id="btn-delete-char" class="font-rpg text-base py-2.5 px-4 rounded border-none font-bold text-white uppercase cursor-pointer transition-colors duration-200 bg-rpg-red hover:bg-rpg-red-hover">
-                    Excluir Selecionado
+                    Excluir personagem
                 </button>
             </div>
         </div>

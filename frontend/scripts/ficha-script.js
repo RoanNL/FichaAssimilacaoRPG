@@ -1,5 +1,5 @@
 // ==========================================
-// SISTEMA DE NOTIFICAÇÕES (TOAST) DA TAVERNA
+// SISTEMA DE NOTIFICAÇÕES (TOAST) DA FICHA
 // ==========================================
 window.mostrarNotificacao = function(mensagem, tipo = 'sucesso') {
 
@@ -148,18 +148,29 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // SISTEMA DE LOGIN E CRIAÇÃO DE CONTA
     // ==========================================
+    const authEmailContainer = document.getElementById('auth-email-container');
+    const authEmailInput = document.getElementById('auth-email');
+    const esqueciSenhaWrapper = document.getElementById('esqueci-senha-wrapper');
+    const subtitleTexto = document.querySelector('.auth-subtitle');
+
     authToggleLink.addEventListener('click', () => {
         isLoginMode = !isLoginMode;
         authMensagem.textContent = '';
 
         if (isLoginMode) {
             authTitle.textContent = 'Acesso Restrito';
-            authSubmitBtn.textContent = 'Entrar no Sistema';
+            authSubmitBtn.textContent = 'Entrar';
             authToggleText.innerHTML = 'Não possui credenciais? <span id="auth-toggle-link" style="color: #a04040; cursor: pointer; text-decoration: underline; font-weight: bold;">Criar nova conta</span>';
+            
+            authEmailContainer.style.display = 'none'; 
+            esqueciSenhaWrapper.style.display = 'block'; 
         } else {
-            authTitle.textContent = 'Novo Registro de Operador';
+            authTitle.textContent = 'Novo Registro de Assimilado';
             authSubmitBtn.textContent = 'Registrar Conta';
-            authToggleText.innerHTML = 'Já possui cadastro? <span id="auth-toggle-link" style="color: #a04040; cursor: pointer; text-decoration: underline; font-weight: bold;">Fazer Login</span>';
+            authToggleText.innerHTML = 'Já possui Conta? <span id="auth-toggle-link" style="color: #a04040; cursor: pointer; text-decoration: underline; font-weight: bold;">Fazer Login</span>';
+            
+            authEmailContainer.style.display = 'block'; 
+            esqueciSenhaWrapper.style.display = 'none'; 
         }
         document.getElementById('auth-toggle-link').addEventListener('click', () => authToggleLink.click());
     });
@@ -169,7 +180,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const username = usernameInput.value.trim();
         const password = passwordInput.value.trim();
+        const email = authEmailInput.value.trim();
         const endpoint = isLoginMode ? '/login' : '/registro';
+
+        // Prepara os dados. No registro, manda o e-mail junto.
+        const bodyData = { username: username, password: password };
+        if (!isLoginMode) bodyData.email = email;
 
         try {
             authSubmitBtn.disabled = true;
@@ -178,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const resposta = await fetch(`${API_URL}${endpoint}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: username, password: password })
+                body: JSON.stringify(bodyData)
             });
 
             const dados = await resposta.json();
@@ -207,7 +223,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     passwordInput.value = '';
 
                     carregarListaPersonagens();
-
                     mostrarNotificacao(dados.mensagem, 'sucesso');
                 } else {
                     authMensagem.textContent = 'Conta criada com sucesso! Faça login.';
@@ -223,26 +238,101 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    btnSair.addEventListener('click', (e) => {
-        e.preventDefault();
-        sessionStorage.clear();
+    // ==========================================
+    // LÓGICA DE RECUPERAÇÃO DE SENHA 
+    // ==========================================
+    const btnEsqueciSenha = document.getElementById('btn-esqueci-senha');
+    const btnVoltarLogin = document.getElementById('btn-voltar-login');
+    const recuperarForm = document.getElementById('recuperar-form');
+    const recuperarEmailStep = document.getElementById('recuperar-email-step');
+    const recuperarCodigoStep = document.getElementById('recuperar-codigo-step');
+    
+    const btnEnviarCodigo = document.getElementById('btn-enviar-codigo');
+    const btnSalvarNovaSenha = document.getElementById('btn-salvar-nova-senha');
 
-        token = null;
-        usuarioLogadoId = null;
-        nomeOperador = null;
-        idPersonagemAtual = null;
-
-        document.querySelectorAll('form').forEach(f => {
-            if (f.id !== 'auth-form') f.reset();
-        });
-
-        const photoPreview = document.getElementById('char-photo-preview');
-        if (photoPreview) photoPreview.src = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
-
-        appContainer.style.display = 'none';
-        authContainer.style.display = 'block';
+    // Abre a tela de Esqueci a Senha
+    btnEsqueciSenha.addEventListener('click', () => {
+        authForm.style.display = 'none';
+        authToggleText.style.display = 'none';
+        recuperarForm.style.display = 'block';
+        authTitle.textContent = 'Recuperar Senha';
+        subtitleTexto.textContent = 'Enviaremos um código para o seu e-mail.';
+        authMensagem.textContent = '';
     });
 
+    // Volta para o Login
+    btnVoltarLogin.addEventListener('click', () => {
+        recuperarForm.style.display = 'none';
+        authForm.style.display = 'block';
+        authToggleText.style.display = 'block';
+        authTitle.textContent = 'Acesso Restrito';
+        subtitleTexto.textContent = 'Identifique-se para acessar o sistema.';
+        authMensagem.textContent = '';
+        recuperarEmailStep.style.display = 'block';
+        recuperarCodigoStep.style.display = 'none';
+    });
+
+    // Botão de Pedir o Código pro Carteiro
+    btnEnviarCodigo.addEventListener('click', async () => {
+        const emailRec = document.getElementById('recuperar-email').value.trim();
+        if (!emailRec) return mostrarNotificacao('Por favor, digite o seu e-mail.', 'aviso');
+
+        btnEnviarCodigo.textContent = 'Enviando...';
+        try {
+            const res = await fetch(`${API_URL}/esqueci-senha`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: emailRec })
+            });
+            const data = await res.json();
+            
+            if (res.ok) {
+                mostrarNotificacao(data.mensagem, 'sucesso');
+                recuperarEmailStep.style.display = 'none';
+                recuperarCodigoStep.style.display = 'block';
+                subtitleTexto.textContent = 'Verifique sua caixa de entrada (e o Spam).';
+                authMensagem.textContent = '';
+            } else {
+                authMensagem.textContent = data.erro;
+                authMensagem.style.color = '#a04040';
+            }
+        } catch (err) {
+            authMensagem.textContent = 'Erro de comunicação com o servidor.';
+        } finally {
+            btnEnviarCodigo.textContent = 'Receber Código';
+        }
+    });
+
+    // Botão de Validar Código e Redefinir Senha
+    btnSalvarNovaSenha.addEventListener('click', async () => {
+        const emailRec = document.getElementById('recuperar-email').value.trim();
+        const token = document.getElementById('recuperar-token').value.trim();
+        const novaSenha = document.getElementById('recuperar-nova-senha').value.trim();
+
+        if (!token || !novaSenha) return mostrarNotificacao('Preencha o código e a nova senha.', 'aviso');
+
+        btnSalvarNovaSenha.textContent = 'Validando...';
+        try {
+            const res = await fetch(`${API_URL}/resetar-senha`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: emailRec, token, novaSenha })
+            });
+            const data = await res.json();
+            
+            if (res.ok) {
+                mostrarNotificacao(data.mensagem, 'sucesso');
+                btnVoltarLogin.click();
+            } else {
+                authMensagem.textContent = data.erro;
+                authMensagem.style.color = '#a04040';
+            }
+        } catch (err) {
+            authMensagem.textContent = 'Erro de comunicação com o servidor.';
+        } finally {
+            btnSalvarNovaSenha.textContent = 'Redefinir Senha';
+        }
+    });
 
     // ==========================================
     // SISTEMA DA FICHA E DETALHES 
@@ -268,7 +358,6 @@ document.addEventListener('DOMContentLoaded', () => {
             idPersonagemAtual = id;
             sessionStorage.setItem('personagemAtivoId', id);
 
-            if (charSelect) charSelect.value = id;
 
         } catch (err) {
             console.error("Erro ao carregar personagem:", err);
@@ -380,8 +469,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const resposta = await fetch(`${API_URL}/personagens/usuario/${usuarioLogadoId}`);
             personagensCarregados = await resposta.json();
 
-            charSelect.innerHTML = '<option value="">-- Novo Personagem --</option>';
-
             const gridPersonagens = document.getElementById('grid-personagens');
             if (gridPersonagens) gridPersonagens.innerHTML = '';
 
@@ -403,18 +490,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (photoPreview) photoPreview.src = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
                     idPersonagemAtual = null;
                     sessionStorage.removeItem('personagemAtivoId');
-                    charSelect.value = "";
                     modalGaleria.classList.remove('show');
                 });
                 gridPersonagens.appendChild(cardNovo);
             }
 
             personagensCarregados.forEach(char => {
-                const option = document.createElement('option');
-                option.value = char.id;
-                option.textContent = char.nome_personagem || 'Sem Nome';
-                charSelect.appendChild(option);
-
                 if (gridPersonagens) {
                     const fotoBase64 = char.foto;
                     const ocupacao = char.ocupacao || 'Desconhecido';
@@ -508,18 +589,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     btnSave.addEventListener('click', () => salvarFicha(false));
-
-    // BOTÃO CARREGAR (DO DROPDOWN MENU)
-    btnLoad.addEventListener('click', () => {
-        const idSelecionado = charSelect.value;
-        if (!idSelecionado) {
-            document.querySelector('.ficha-container').reset();
-            idPersonagemAtual = null;
-            sessionStorage.removeItem('personagemAtivoId');
-            return;
-        }
-        carregarPersonagem(idSelecionado);
-    });
 
     // BOTÃO DELETAR
     btnDelete.addEventListener('click', async () => {

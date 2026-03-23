@@ -1,10 +1,20 @@
 require('dotenv').config()
 
+// bibliotecas
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const helmet = require('helmet');
+const nodemailer = require('nodemailer');
+
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.EMAIL_USUARIO,
+        pass: process.env.EMAIL_SENHA
+    }
+});
 
 const { pool, criarTabelas } = require('./database');
 
@@ -124,22 +134,23 @@ function gerarCodigoConvite() {
 app.post('/registro', async (req, res) => {
     const username = req.body.username || req.body.usuario || req.body.nome || req.body.login;
     const password = req.body.password || req.body.senha;
+    const email = req.body.email; 
 
     const usernameLowerCase = username ? username.toLowerCase() : '';
 
-    if (!usernameLowerCase || !password) {
-        return res.status(400).json({ erro: 'Usuário e senha são obrigatórios.' });
+    if (!usernameLowerCase || !password || !email) {
+        return res.status(400).json({ erro: 'Usuário, e-mail e senha são obrigatórios.' });
     }
 
     try {
         const salt = await bcrypt.genSalt(10);
         const senhaHash = await bcrypt.hash(password, salt);
 
-        const sql = `INSERT INTO usuarios (username, password) VALUES ($1, $2) RETURNING id`;
-        const resultado = await pool.query(sql, [usernameLowerCase, senhaHash]);
+
+        const sql = `INSERT INTO usuarios (username, password, email) VALUES ($1, $2, $3) RETURNING id`;
+        const resultado = await pool.query(sql, [usernameLowerCase, senhaHash, email]);
         
         const novoUsuarioId = resultado.rows[0].id;
-
 
         const segredo = SEGREDO_JWT || 'segredo_super_secreto_rpg';
         const token = jwt.sign({ id: novoUsuarioId, nome: username }, segredo, { expiresIn: '7d' });
@@ -151,6 +162,9 @@ app.post('/registro', async (req, res) => {
         });
     } catch (erro) {
         if (erro.code === '23505') {
+            if (erro.constraint.includes('email')) {
+                return res.status(400).json({ erro: 'Este e-mail já está cadastrado.' });
+            }
             return res.status(400).json({ erro: 'Nome de usuário já está em uso.' });
         }
         console.error('❌ Erro no registro:', erro);
@@ -201,6 +215,89 @@ app.post('/login', async (req, res) => {
     } catch (erro) {
         console.error('❌ Erro no login:', erro);
         res.status(500).json({ erro: 'Erro interno ao realizar login.' });
+    }
+});
+
+// =========================================================================
+// ROTA 1: PEDIR CÓDIGO DE RECUPERAÇÃO (ESQUECI A SENHA)
+// =========================================================================
+app.post('/esqueci-senha', async (req, res) => {
+    const { email } = req.body;
+    
+    if (!email) return res.status(400).json({ erro: 'Forneça o seu e-mail cadastrado.' });
+
+    try {
+        const result = await pool.query('SELECT id, username FROM usuarios WHERE email = $1', [email]);
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ erro: 'E-mail não encontrado nos registros da ficha.' });
+        }
+
+
+        const token = crypto.randomInt(100000, 999999).toString(); 
+        const expires = Date.now() + 15 * 60 * 1000; 
+
+        await pool.query('UPDATE usuarios SET reset_token = $1, reset_token_expires = $2 WHERE email = $3', [token, expires, email]);
+
+
+        const mailOptions = {
+            from: `"Ficha Assimilação RPG" <${process.env.EMAIL_USUARIO}>`,
+            to: email,
+            subject: '🔑 Seu Código de Recuperação de Senha',
+            html: `
+                <div style="font-family: Arial, sans-serif; background-color: #f4f1ea; padding: 20px; text-align: center; border-radius: 8px;">
+                    <h2 style="color: #8c3a3a;">Assimilação RPG</h2>
+                    <p style="font-size: 16px; color: #333;">Olá <strong>${result.rows[0].username}</strong>,</p>
+                    <p style="font-size: 16px; color: #333;">Você solicitou a recuperação da sua senha. Use o código abaixo para criar uma nova senha:</p>
+                    <div style="background-color: #3a7c8c; color: white; font-size: 24px; font-weight: bold; letter-spacing: 5px; padding: 15px; border-radius: 5px; margin: 20px auto; max-width: 200px;">
+                        ${token}
+                    </div>
+                    <p style="color: #d9534f; font-weight: bold;">⚠️ Este código expira em 15 minutos.</p>
+                    <p style="font-size: 12px; color: #777;">Se não foi você que pediu, apenas ignore este e-mail.</p>
+                </div>
+            `
+        };
+
+        await transporter.sendMail(mailOptions);
+        console.log(`📧 E-mail de recuperação enviado para: ${email}`);
+        
+        res.json({ mensagem: 'Um código de 6 dígitos foi enviado para o seu e-mail!' });
+    } catch (err) {
+        console.error("❌ Erro ao enviar e-mail:", err);
+        res.status(500).json({ erro: 'Erro no servidor ao tentar enviar o e-mail.' });
+    }
+});
+
+// =========================================================================
+// ROTA 2: VALIDAR CÓDIGO E TROCAR A SENHA
+// =========================================================================
+app.post('/resetar-senha', async (req, res) => {
+    const { email, token, novaSenha } = req.body;
+
+    if (!email || !token || !novaSenha) {
+        return res.status(400).json({ erro: 'Preencha todos os campos corretamente.' });
+    }
+
+    try {
+        const result = await pool.query('SELECT id, reset_token_expires FROM usuarios WHERE email = $1 AND reset_token = $2', [email, token]);
+
+        if (result.rows.length === 0) {
+            return res.status(400).json({ erro: 'Código de recuperação inválido ou incorreto.' });
+        }
+
+        if (Date.now() > result.rows[0].reset_token_expires) {
+            return res.status(400).json({ erro: 'Este código já expirou! Solicite um novo.' });
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        const senhaHash = await bcrypt.hash(novaSenha, salt);
+
+        await pool.query('UPDATE usuarios SET password = $1, reset_token = NULL, reset_token_expires = NULL WHERE email = $2', [senhaHash, email]);
+
+        res.json({ mensagem: 'Senha redefinida com sucesso! Você já pode fazer login.' });
+    } catch (err) {
+        console.error("❌ Erro ao resetar senha:", err);
+        res.status(500).json({ erro: 'Erro interno ao redefinir a senha.' });
     }
 });
 
