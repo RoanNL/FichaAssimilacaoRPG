@@ -7,14 +7,6 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const helmet = require('helmet');
 
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USUARIO,
-        pass: process.env.EMAIL_SENHA
-    }
-});
-
 const { pool, criarTabelas } = require('./database');
 
 pool.query('SELECT NOW()', async (err, res) => {
