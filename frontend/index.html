@@ -99,7 +99,7 @@
                 <label for="recuperar-token" class="block font-bold text-gray-700 dark:text-gray-300 mb-1 font-rpg text-center">Código de 6 dígitos</label>
                 <input type="text" id="recuperar-token" placeholder="Ex: 123456" maxlength="6" class="w-full mb-4 px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-[#f0f3f5] dark:bg-[#2a2a2a] text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-green transition-colors font-sans text-center tracking-widest text-2xl font-black">
 
-                <label for="recuperar-nova-senha" class="block font-bold text-gray-700 dark:text-gray-300 mb-1 font-rpg">Nova Senha Segura</label>
+                <label for="recuperar-nova-senha" class="block font-bold text-gray-700 dark:text-gray-300 mb-1 font-rpg">Nova Senha</label>
                 <div class="relative mb-3">
                     <input type="password" id="recuperar-nova-senha" class="w-full px-3 py-2.5 pr-10 border border-gray-300 dark:border-gray-600 rounded bg-[#f0f3f5] dark:bg-[#2a2a2a] text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-green transition-colors font-sans">
                     <i class="fas fa-eye absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors" id="toggle-recuperar-senha"></i>
@@ -170,7 +170,7 @@
                 
                 <button id="btn-load-char" style="display: none;">Carregar</button> 
                 
-                <button id="btn-abrir-galeria" class="font-rpg text-base py-2.5 px-4 rounded border-none font-bold text-white uppercase cursor-pointer transition-colors duration-200 bg-purple-600 hover:bg-purple-800">
+                <button id="btn-abrir-galeria" class="font-rpg text-base py-2.5 px-4 rounded border-none font-bold text-white uppercase cursor-pointer transition-colors duration-200 bg-sky-600 hover:bg-sky-800">
                     Personagens
                 </button>
                 
@@ -535,6 +535,20 @@
             </div>
         </div>
     </div>
+
+    <footer class="w-full bg-rpg-paper dark:bg-rpg-paper-dark border-t border-gray-300 dark:border-gray-800 mt-12 py-8 transition-colors duration-300 mt-auto">
+        <div class="max-w-[1100px] mx-auto text-center px-4">
+            <h3 class="font-rpg font-black text-xl text-rpg-red dark:text-orange-500 uppercase mb-2 tracking-wider">
+               Ficha Assimilação RPG
+            </h3>
+            <p class="font-sans text-gray-600 dark:text-gray-400 text-sm md:text-base font-bold mb-3">
+                Desenvolvido com ❤ por <a href="www.linkedin.com/in/roannl" target="_blank" class="text-rpg-blue hover:text-rpg-blue-hover dark:text-rpg-blue-hover hover:underline transition-colors">Seu Nome</a>.
+            </p>
+            <p class="font-rpg text-xs text-gray-500 dark:text-gray-500">
+                Sistema de Rolagem Dinâmica • Gerenciamento de Fichas • Multiplayer em Tempo Real
+            </p>
+        </div>
+    </footer>
 
     <script src="./scripts/ficha-script.js"></script>
     <script src="./scripts/rolador-script.js"></script>
