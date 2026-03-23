@@ -161,10 +161,12 @@ document.addEventListener('DOMContentLoaded', () => {
             authTitle.textContent = 'Acesso Restrito';
             authSubmitBtn.textContent = 'Entrar';
             authToggleText.innerHTML = 'Não possui credenciais? <span id="auth-toggle-link" style="color: #a04040; cursor: pointer; text-decoration: underline; font-weight: bold;">Criar nova conta</span>';
+            document.getElementById('auth-confirm-container').style.display = 'none';
 
             authEmailContainer.style.display = 'none';
             esqueciSenhaWrapper.style.display = 'block';
         } else {
+            document.getElementById('auth-confirm-container').style.display = 'block';
             authTitle.textContent = 'Novo Registro de Assimilado';
             authSubmitBtn.textContent = 'Registrar Conta';
             authToggleText.innerHTML = 'Já possui Conta? <span id="auth-toggle-link" style="color: #a04040; cursor: pointer; text-decoration: underline; font-weight: bold;">Fazer Login</span>';
@@ -180,8 +182,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const username = usernameInput.value.trim();
         const password = passwordInput.value.trim();
+        const confirmPassword = document.getElementById('auth-confirm-password').value.trim(); // Pega a confirmação
         const email = authEmailInput.value.trim();
         const endpoint = isLoginMode ? '/login' : '/registro';
+
+
+        if (!isLoginMode && password !== confirmPassword) {
+            authMensagem.textContent = 'As senhas não coincidem!';
+            authMensagem.style.color = '#a04040';
+            return; 
+        }
 
         // Prepara os dados. No registro, manda o e-mail junto.
         const bodyData = { username: username, password: password };
@@ -309,8 +319,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const emailRec = document.getElementById('recuperar-email').value.trim();
         const token = document.getElementById('recuperar-token').value.trim();
         const novaSenha = document.getElementById('recuperar-nova-senha').value.trim();
+        const confirmNovaSenha = document.getElementById('recuperar-confirmar-senha').value.trim(); 
 
-        if (!token || !novaSenha) return mostrarNotificacao('Preencha o código e a nova senha.', 'aviso');
+        if (!token || !novaSenha || !confirmNovaSenha) return mostrarNotificacao('Preencha todos os campos!!', 'aviso');
+
+        if (novaSenha !== confirmNovaSenha) {
+            return mostrarNotificacao('As senhas não coincidem!', 'erro');
+        }
 
         btnSalvarNovaSenha.textContent = 'Validando...';
         try {
@@ -863,4 +878,31 @@ document.addEventListener('DOMContentLoaded', () => {
         el.addEventListener('input', agendarAutosave);
         el.addEventListener('change', agendarAutosave);
     });
+
+    // ==========================================
+    // SISTEMA DE REVELAR SENHAS (OLHINHO)
+    // ==========================================
+    function configurarOlhinho(inputId, iconId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
+        
+        if (input && icon) {
+            icon.addEventListener('click', () => {
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash'); 
+                } else {
+                    input.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            });
+        }
+    }
+
+    configurarOlhinho('auth-password', 'toggle-auth-password');
+    configurarOlhinho('auth-confirm-password', 'toggle-auth-confirm');
+    configurarOlhinho('recuperar-nova-senha', 'toggle-recuperar-senha');
+    configurarOlhinho('recuperar-confirmar-senha', 'toggle-recuperar-confirmar');
 });

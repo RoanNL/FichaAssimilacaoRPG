@@ -238,12 +238,12 @@ app.post('/esqueci-senha', async (req, res) => {
         }
 
         const emailData = {
-            sender: { name: "Assimilação RPG", email: remetenteEmail },
+            sender: { name: "Ficha Assimilação RPG", email: remetenteEmail },
             to: [{ email: email }],
             subject: "🔑 Seu Código de Recuperação de Senha",
             htmlContent: `
                 <div style="font-family: Arial, sans-serif; background-color: #f4f1ea; padding: 20px; text-align: center; border-radius: 8px;">
-                    <h2 style="color: #8c3a3a;">Assimilação RPG</h2>
+                    <h2 style="color: #8c3a3a;">Ficha Assimilação RPG</h2>
                     <p style="font-size: 16px; color: #333;">Olá <strong>${result.rows[0].username}</strong>,</p>
                     <p style="font-size: 16px; color: #333;">Você solicitou a recuperação da sua senha. Use o código abaixo:</p>
                     <div style="background-color: #3a7c8c; color: white; font-size: 24px; font-weight: bold; letter-spacing: 5px; padding: 15px; border-radius: 5px; margin: 20px auto; max-width: 200px;">
