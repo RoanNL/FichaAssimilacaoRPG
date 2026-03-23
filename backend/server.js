@@ -7,6 +7,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const helmet = require('helmet');
 const nodemailer = require('nodemailer');
+const crypto = require('crypto');
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
