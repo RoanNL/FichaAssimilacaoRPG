@@ -1,7 +1,7 @@
 // ==========================================
 // SISTEMA DE NOTIFICAÇÕES (TOAST) DA FICHA
 // ==========================================
-window.mostrarNotificacao = function(mensagem, tipo = 'sucesso') {
+window.mostrarNotificacao = function (mensagem, tipo = 'sucesso') {
 
     let container = document.getElementById('toast-container');
     if (!container) {
@@ -15,7 +15,7 @@ window.mostrarNotificacao = function(mensagem, tipo = 'sucesso') {
             display: 'flex',
             flexDirection: 'column',
             gap: '10px',
-            pointerEvents: 'none' 
+            pointerEvents: 'none'
         });
         document.body.appendChild(container);
     }
@@ -24,15 +24,15 @@ window.mostrarNotificacao = function(mensagem, tipo = 'sucesso') {
     const card = document.createElement('div');
 
     const corBorda = tipo === 'erro' ? '#f44336' : (tipo === 'aviso' ? '#ff9800' : '#4caf50');
-    
+
     Object.assign(card.style, {
-        backgroundColor: '#1a1a1a', 
+        backgroundColor: '#1a1a1a',
         color: '#f0f0f0',
         padding: '15px 20px',
         borderRadius: '5px',
         borderLeft: `5px solid ${corBorda}`,
         boxShadow: '0 4px 8px rgba(0,0,0,0.6)',
-        fontFamily: "'Special Elite', monospace", 
+        fontFamily: "'Special Elite', monospace",
         fontSize: '1rem',
         opacity: '0',
         transform: 'translateX(100%)',
@@ -50,7 +50,7 @@ window.mostrarNotificacao = function(mensagem, tipo = 'sucesso') {
     setTimeout(() => {
         card.style.opacity = '0';
         card.style.transform = 'translateX(100%)';
-        setTimeout(() => card.remove(), 300); 
+        setTimeout(() => card.remove(), 300);
     }, 2500);
 };
 
@@ -99,11 +99,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnFecharGaleria = document.getElementById('fechar-galeria');
     const inputBuscaGaleria = document.getElementById('busca-personagem');
 
-    if(btnAbrirGaleria) {
+    if (btnAbrirGaleria) {
         btnAbrirGaleria.addEventListener('click', async (e) => {
             e.preventDefault();
 
-            await carregarListaPersonagens(); 
+            await carregarListaPersonagens();
             modalGaleria.classList.add('show');
         });
     }
@@ -161,16 +161,16 @@ document.addEventListener('DOMContentLoaded', () => {
             authTitle.textContent = 'Acesso Restrito';
             authSubmitBtn.textContent = 'Entrar';
             authToggleText.innerHTML = 'Não possui credenciais? <span id="auth-toggle-link" style="color: #a04040; cursor: pointer; text-decoration: underline; font-weight: bold;">Criar nova conta</span>';
-            
-            authEmailContainer.style.display = 'none'; 
-            esqueciSenhaWrapper.style.display = 'block'; 
+
+            authEmailContainer.style.display = 'none';
+            esqueciSenhaWrapper.style.display = 'block';
         } else {
             authTitle.textContent = 'Novo Registro de Assimilado';
             authSubmitBtn.textContent = 'Registrar Conta';
             authToggleText.innerHTML = 'Já possui Conta? <span id="auth-toggle-link" style="color: #a04040; cursor: pointer; text-decoration: underline; font-weight: bold;">Fazer Login</span>';
-            
-            authEmailContainer.style.display = 'block'; 
-            esqueciSenhaWrapper.style.display = 'none'; 
+
+            authEmailContainer.style.display = 'block';
+            esqueciSenhaWrapper.style.display = 'none';
         }
         document.getElementById('auth-toggle-link').addEventListener('click', () => authToggleLink.click());
     });
@@ -236,7 +236,45 @@ document.addEventListener('DOMContentLoaded', () => {
             authSubmitBtn.disabled = false;
             authSubmitBtn.textContent = isLoginMode ? 'Entrar no Sistema' : 'Registrar Conta';
         }
+
+        // ==========================================
+        // SISTEMA DE LOGOUT (DESCONECTAR)
+        // ==========================================
+        const btnSair = document.getElementById('btn-sair');
+
+        if (btnSair) {
+            btnSair.addEventListener('click', (e) => {
+                e.preventDefault();
+
+                sessionStorage.clear();
+
+                token = null;
+                usuarioLogadoId = null;
+                nomeOperador = null;
+                idPersonagemAtual = null;
+
+                document.querySelectorAll('form').forEach(f => {
+                    if (f.id !== 'auth-form' && f.id !== 'recuperar-form') f.reset();
+                });
+
+
+                const photoPreview = document.getElementById('char-photo-preview');
+                if (photoPreview) photoPreview.src = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
+
+
+                const appContainer = document.getElementById('app-container');
+                const authContainer = document.getElementById('auth-container');
+
+                if (appContainer) appContainer.style.display = 'none';
+                if (authContainer) authContainer.style.display = 'block';
+
+                if (typeof mostrarNotificacao === 'function') {
+                    mostrarNotificacao('Você foi desconectado com segurança.', 'aviso');
+                }
+            });
+        }
     });
+
 
     // ==========================================
     // LÓGICA DE RECUPERAÇÃO DE SENHA 
@@ -246,7 +284,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const recuperarForm = document.getElementById('recuperar-form');
     const recuperarEmailStep = document.getElementById('recuperar-email-step');
     const recuperarCodigoStep = document.getElementById('recuperar-codigo-step');
-    
+
     const btnEnviarCodigo = document.getElementById('btn-enviar-codigo');
     const btnSalvarNovaSenha = document.getElementById('btn-salvar-nova-senha');
 
@@ -285,7 +323,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ email: emailRec })
             });
             const data = await res.json();
-            
+
             if (res.ok) {
                 mostrarNotificacao(data.mensagem, 'sucesso');
                 recuperarEmailStep.style.display = 'none';
@@ -319,7 +357,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ email: emailRec, token, novaSenha })
             });
             const data = await res.json();
-            
+
             if (res.ok) {
                 mostrarNotificacao(data.mensagem, 'sucesso');
                 btnVoltarLogin.click();
@@ -535,7 +573,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-   // === FUNÇÃO CENTRAL DE SALVAMENTO ===
+    // === FUNÇÃO CENTRAL DE SALVAMENTO ===
     async function salvarFicha(silencioso = false) {
         if (!usuarioLogadoId) return;
 
@@ -545,8 +583,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const payload = {
             usuarioId: usuarioLogadoId,
-            personagemId: idPersonagemAtual, 
-            nome: nomePersonagem, 
+            personagemId: idPersonagemAtual,
+            nome: nomePersonagem,
             ocupacao: document.getElementById('ocupacao').value,
             dadosFicha: dadosFicha,
             foto: foto
@@ -562,13 +600,13 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             const resultado = await resposta.json();
-            
+
             if (resposta.ok) {
-                if (resultado.id) { 
+                if (resultado.id) {
                     sessionStorage.setItem('personagemAtivoId', resultado.id);
                     idPersonagemAtual = resultado.id;
                 }
-                
+
                 if (!silencioso) {
                     mostrarNotificacao(resultado.mensagem, 'sucesso');
                     await carregarListaPersonagens();
@@ -655,7 +693,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!campanhaId) return mostrarNotificacao('Você não está em nenhuma mesa ativa!', 'erro');
 
             btnFichasMesa.textContent = "Buscando...";
-            
+
             try {
                 const resposta = await fetch(`${API_URL}/campanhas/${campanhaId}/fichas-mesa`);
                 let fichas = await resposta.json();
@@ -663,15 +701,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 const meuId = sessionStorage.getItem('usuarioId');
                 fichas = fichas.filter(char => char.usuario_id != meuId);
 
-                gridPersonagensMesa.innerHTML = ''; 
+                gridPersonagensMesa.innerHTML = '';
 
                 if (fichas.length === 0) {
                     gridPersonagensMesa.innerHTML = '<p style="color: var(--color-text-medium); padding: 20px;">Nenhum jogador criou ficha nesta mesa ainda.</p>';
                 } else {
                     fichas.forEach(char => {
                         const card = document.createElement('div');
-                        card.className = 'char-card'; 
-                        
+                        card.className = 'char-card';
+
                         card.innerHTML = `
                             <img src="${char.foto || './assets/icon.jpg'}" class="char-card-img" alt="Foto">
                             <div class="char-card-info" style="display: flex; flex-direction: column; justify-content: flex-start; padding: 10px; overflow: visible;">
@@ -694,15 +732,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.querySelectorAll('.btn-acessar-ficha').forEach(btn => {
                         btn.addEventListener('click', async (event) => {
                             const fichaId = event.target.getAttribute('data-id');
-                            await carregarPersonagem(fichaId); 
-                            modalGaleria.classList.remove('show'); 
+                            await carregarPersonagem(fichaId);
+                            modalGaleria.classList.remove('show');
                             mostrarNotificacao('Ficha do jogador carregada na tela!', 'aviso');
                         });
                     });
                 }
-                
+
                 modalGaleria.classList.add('show');
-                
+
             } catch (erro) {
                 console.error(erro);
                 mostrarNotificacao("Erro ao buscar as fichas da mesa.", 'erro');
@@ -721,12 +759,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setInterval(() => {
         const isMestre = sessionStorage.getItem('isMestreAtivo') === 'true';
-        
+
         // Revela o botão de Gerenciar Jogadores
         if (btnGerenciarJogadores) {
             btnGerenciarJogadores.style.display = isMestre ? 'inline-block' : 'none';
         }
-        
+
         // Revela o botão de Fichas da Mesa
         if (btnFichasMesa) {
             btnFichasMesa.style.display = isMestre ? 'inline-block' : 'none';
@@ -813,17 +851,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!idPersonagemAtual) return;
 
         clearTimeout(timeoutAutosave);
-        
+
         timeoutAutosave = setTimeout(() => {
-            salvarFicha(true); 
-        }, 2000); 
+            salvarFicha(true);
+        }, 2000);
     }
 
     const todosInputs = document.querySelectorAll('#app-container input, #app-container textarea');
-    
+
     todosInputs.forEach(el => {
         if (el.type === 'file' || el.id === 'char-select' || el.id === 'busca-personagem') return;
-        
+
         el.addEventListener('input', agendarAutosave);
         el.addEventListener('change', agendarAutosave);
     });
