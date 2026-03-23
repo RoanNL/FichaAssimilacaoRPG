@@ -6,8 +6,6 @@ const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const helmet = require('helmet');
-const nodemailer = require('nodemailer');
-const crypto = require('crypto');
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -220,7 +218,7 @@ app.post('/login', async (req, res) => {
 });
 
 // =========================================================================
-// ROTA 1: PEDIR CÓDIGO DE RECUPERAÇÃO (ESQUECI A SENHA)
+// ROTA 1: PEDIR CÓDIGO DE RECUPERAÇÃO 
 // =========================================================================
 app.post('/esqueci-senha', async (req, res) => {
     const { email } = req.body;
@@ -231,40 +229,61 @@ app.post('/esqueci-senha', async (req, res) => {
         const result = await pool.query('SELECT id, username FROM usuarios WHERE email = $1', [email]);
         
         if (result.rows.length === 0) {
-            return res.status(404).json({ erro: 'E-mail não encontrado nos registros da ficha.' });
+            return res.status(404).json({ erro: 'E-mail não encontrado nos registros da Taverna.' });
         }
 
-
-        const token = crypto.randomInt(100000, 999999).toString(); 
+        const token = Math.floor(100000 + Math.random() * 900000).toString();
         const expires = Date.now() + 15 * 60 * 1000; 
 
         await pool.query('UPDATE usuarios SET reset_token = $1, reset_token_expires = $2 WHERE email = $3', [token, expires, email]);
 
+        const brevoApiKey = process.env.BREVO_API_KEY;
+        const remetenteEmail = process.env.EMAIL_USUARIO; 
 
-        const mailOptions = {
-            from: `"Ficha Assimilação RPG" <${process.env.EMAIL_USUARIO}>`,
-            to: email,
-            subject: '🔑 Seu Código de Recuperação de Senha',
-            html: `
+        if (!brevoApiKey) {
+            console.error("⚠️ Chave do Brevo não encontrada no .env!");
+            return res.status(500).json({ erro: 'Servidor de e-mail não configurado.' });
+        }
+
+        const emailData = {
+            sender: { name: "Assimilação RPG", email: remetenteEmail },
+            to: [{ email: email }],
+            subject: "🔑 Seu Código de Recuperação de Senha",
+            htmlContent: `
                 <div style="font-family: Arial, sans-serif; background-color: #f4f1ea; padding: 20px; text-align: center; border-radius: 8px;">
                     <h2 style="color: #8c3a3a;">Assimilação RPG</h2>
                     <p style="font-size: 16px; color: #333;">Olá <strong>${result.rows[0].username}</strong>,</p>
-                    <p style="font-size: 16px; color: #333;">Você solicitou a recuperação da sua senha. Use o código abaixo para criar uma nova senha:</p>
+                    <p style="font-size: 16px; color: #333;">Você solicitou a recuperação da sua senha. Use o código abaixo:</p>
                     <div style="background-color: #3a7c8c; color: white; font-size: 24px; font-weight: bold; letter-spacing: 5px; padding: 15px; border-radius: 5px; margin: 20px auto; max-width: 200px;">
                         ${token}
                     </div>
                     <p style="color: #d9534f; font-weight: bold;">⚠️ Este código expira em 15 minutos.</p>
-                    <p style="font-size: 12px; color: #777;">Se não foi você que pediu, apenas ignore este e-mail.</p>
                 </div>
             `
         };
 
-        await transporter.sendMail(mailOptions);
-        console.log(`📧 E-mail de recuperação enviado para: ${email}`);
-        
+        // Teletransporta o e-mail via HTTPS
+        const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+            method: 'POST',
+            headers: {
+                'accept': 'application/json',
+                'api-key': brevoApiKey,
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify(emailData)
+        });
+
+        if (!response.ok) {
+            const erroBrevo = await response.json();
+            console.error("❌ O Brevo recusou a entrega:", erroBrevo);
+            throw new Error('Falha na API do Brevo');
+        }
+
+        console.log(`🚀 E-mail de recuperação enviado VIA API para: ${email}`);
         res.json({ mensagem: 'Um código de 6 dígitos foi enviado para o seu e-mail!' });
+
     } catch (err) {
-        console.error("❌ Erro ao enviar e-mail:", err);
+        console.error("❌ Erro na recuperação de senha:", err);
         res.status(500).json({ erro: 'Erro no servidor ao tentar enviar o e-mail.' });
     }
 });
