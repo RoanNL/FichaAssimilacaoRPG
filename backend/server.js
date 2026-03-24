@@ -199,39 +199,39 @@ app.post('/registro', async (req, res) => {
 // ROTA DE LOGIN
 // =========================================================================
 app.post('/login', async (req, res) => {
-    const username = req.body.username || req.body.usuario || req.body.nome || req.body.login;
+    const email = req.body.email;
     const password = req.body.password || req.body.senha;
 
-    const usernameLowerCase = username ? username.toLowerCase() : '';
+    const emailLowerCase = email ? email.toLowerCase() : '';
 
-    if (!usernameLowerCase || !password) {
-        return res.status(400).json({ erro: 'Usuário e senha são obrigatórios.' });
+    if (!emailLowerCase || !password) {
+        return res.status(400).json({ erro: 'E-mail e senha são obrigatórios.' });
     }
 
     try {
-        const sql = `SELECT id, username, password FROM usuarios WHERE username = $1`;
-        const resultado = await pool.query(sql, [usernameLowerCase]);
+        const sql = `SELECT id, username, password, email FROM usuarios WHERE email = $1`;
+        const resultado = await pool.query(sql, [emailLowerCase]);
 
         if (resultado.rows.length === 0) {
             return res.status(401).json({ erro: 'Credenciais inválidas.' });
         }
 
         const usuarioDb = resultado.rows[0];
-
         const senhaValida = await bcrypt.compare(password, usuarioDb.password);
 
         if (!senhaValida) {
             return res.status(401).json({ erro: 'Credenciais inválidas.' });
         }
 
-        const segredo = SEGREDO_JWT || 'segredo_super_secreto_rpg';
+        const segredo = process.env.SEGREDO_JWT || 'segredo_super_secreto_rpg';
         const token = jwt.sign({ id: usuarioDb.id, nome: usuarioDb.username }, segredo, { expiresIn: '7d' });
 
         res.json({
             mensagem: 'Login realizado com sucesso!',
             usuario: {
                 id: usuarioDb.id,
-                nome: usuarioDb.username
+                nome: usuarioDb.username,
+                email: usuarioDb.email
             },
             token: token 
         });

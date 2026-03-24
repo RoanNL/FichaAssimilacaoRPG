@@ -152,6 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const authEmailInput = document.getElementById('auth-email');
     const esqueciSenhaWrapper = document.getElementById('esqueci-senha-wrapper');
     const subtitleTexto = document.querySelector('.auth-subtitle');
+    const authUsernameContainer = document.getElementById('auth-username-container');
 
     authToggleLink.addEventListener('click', () => {
         isLoginMode = !isLoginMode;
@@ -163,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
             authToggleText.innerHTML = 'Não possui credenciais? <span id="auth-toggle-link" style="color: #a04040; cursor: pointer; text-decoration: underline; font-weight: bold;">Criar nova conta</span>';
             document.getElementById('auth-confirm-container').style.display = 'none';
 
-            authEmailContainer.style.display = 'none';
+            authUsernameContainer.style.display = 'none';
             esqueciSenhaWrapper.style.display = 'block';
         } else {
             document.getElementById('auth-confirm-container').style.display = 'block';
@@ -171,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
             authSubmitBtn.textContent = 'Registrar Conta';
             authToggleText.innerHTML = 'Já possui Conta? <span id="auth-toggle-link" style="color: #a04040; cursor: pointer; text-decoration: underline; font-weight: bold;">Fazer Login</span>';
 
-            authEmailContainer.style.display = 'block';
+            authUsernameContainer.style.display = 'block';
             esqueciSenhaWrapper.style.display = 'none';
         }
         document.getElementById('auth-toggle-link').addEventListener('click', () => authToggleLink.click());
@@ -186,6 +187,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const email = authEmailInput.value.trim();
         const endpoint = isLoginMode ? '/login' : '/registro';
 
+        if (!isLoginMode) {
+            if (!username) {
+                authMensagem.textContent = 'Nome do Infectado é obrigatório para criar conta!';
+                authMensagem.style.color = '#a04040';
+                return;
+            }
+            if (password !== confirmPassword) {
+                authMensagem.textContent = 'As senhas não coincidem!';
+                authMensagem.style.color = '#a04040';
+                return; 
+            }
+        }
 
         if (!isLoginMode && password !== confirmPassword) {
             authMensagem.textContent = 'As senhas não coincidem!';
@@ -194,8 +207,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Prepara os dados. No registro, manda o e-mail junto.
-        const bodyData = { username: username, password: password };
-        if (!isLoginMode) bodyData.email = email;
+        const bodyData = { email: email, password: password };
+        if (!isLoginMode) bodyData.username = username;
 
         try {
             authSubmitBtn.disabled = true;
@@ -521,6 +534,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     el.value = dados[key];
                 }
             }
+        }
+        
+        if (typeof window.sincronizarTrilhas === 'function') {
+            window.sincronizarTrilhas();
         }
     }
 
@@ -1096,4 +1113,46 @@ document.addEventListener('DOMContentLoaded', () => {
             if (typeof agendarAutosave === 'function') agendarAutosave();
         });
     }
+
+    // ==========================================
+    // SISTEMA DE SINCRONIZAÇÃO DAS TRILHAS (DET/ASSIM)
+    // ==========================================
+    window.sincronizarTrilhas = function() {
+        const detNum = parseInt(document.getElementById('det-num').value) || 0;
+        for (let i = 1; i <= 10; i++) {
+            const check = document.getElementById(`det-${i}`);
+            if (check) check.checked = (i <= detNum);
+        }
+
+        const assimNum = parseInt(document.getElementById('assim-num').value) || 0;
+        for (let i = 1; i <= 10; i++) {
+            const check = document.getElementById(`assim-${i}`);
+            if (check) check.checked = (i <= assimNum);
+        }
+    };
+
+    const inputDetNum = document.getElementById('det-num');
+    const inputAssimNum = document.getElementById('assim-num');
+
+    if (inputDetNum) {
+        inputDetNum.addEventListener('input', () => {
+            if(inputDetNum.value > 10) inputDetNum.value = 10; 
+            if(inputDetNum.value < 0) inputDetNum.value = 0;   
+            window.sincronizarTrilhas();
+        });
+    }
+
+    if (inputAssimNum) {
+        inputAssimNum.addEventListener('input', () => {
+            if(inputAssimNum.value > 10) inputAssimNum.value = 10;
+            if(inputAssimNum.value < 0) inputAssimNum.value = 0;
+            window.sincronizarTrilhas();
+        });
+    }
+    
+    document.querySelectorAll('.determ-check, .assim-check').forEach(chk => {
+        chk.addEventListener('click', (e) => {
+            e.preventDefault(); 
+        });
+    });
 });
