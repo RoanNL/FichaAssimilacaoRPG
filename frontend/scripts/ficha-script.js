@@ -629,7 +629,10 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const resposta = await fetch(`${API_URL}/personagens`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${sessionStorage.getItem('token')}` 
+                },
                 body: JSON.stringify(payload)
             });
 
@@ -670,7 +673,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!confirmacao) return;
 
         try {
-            await fetch(`${API_URL}/personagens/${idPersonagemAtual}`, { method: 'DELETE' });
+            await fetch(`${API_URL}/personagens/${idPersonagemAtual}`, { 
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` } 
+            });
             mostrarNotificacao('Ficha deletada com sucesso.', 'sucesso');
 
             document.querySelectorAll('form').forEach(f => {

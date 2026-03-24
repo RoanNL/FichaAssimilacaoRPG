@@ -111,6 +111,28 @@ io.on('connection', (socket) => {
     });
 });
 
+// =========================================================================
+// 🛡️ MIDDLEWARE DE SEGURANÇA: VALIDAÇÃO DE TOKEN 
+// =========================================================================
+function verificarToken(req, res, next) {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1]; 
+
+    if (!token) {
+        return res.status(401).json({ erro: 'Acesso negado. Token não fornecido.' });
+    }
+
+    try {
+        const segredo = process.env.SEGREDO_JWT || 'segredo_super_secreto_rpg';
+        
+        const usuarioVerificado = jwt.verify(token, segredo); 
+        req.usuario = usuarioVerificado; 
+        next(); 
+    } catch (err) {
+        return res.status(403).json({ erro: 'Token inválido, expirado ou forjado.' });
+    }
+}
+
 app.get('/', (req, res) => {
     res.json({ mensagem: 'Servidor online e blindado!' });
 });
@@ -316,21 +338,17 @@ app.post('/resetar-senha', async (req, res) => {
 // =========================================================================
 // SALVAR OU ATUALIZAR FICHA 
 // =========================================================================
-app.post('/personagens', async (req, res) => {
-    const usuarioId = req.body.usuarioId || req.body.usuario_id || req.body.utilizador_id;
+app.post('/personagens', verificarToken, async (req, res) => {
+    const usuarioIdSeguro = req.usuario.id; 
+    
     const personagemId = req.body.personagemId || req.body.id;
     const nome = req.body.nome || req.body.nome_personagem || 'Desconhecido';
     const ocupacao = req.body.ocupacao || '';
     const dadosFicha = req.body.dadosFicha || req.body.dados_ficha || req.body.dados_personagem || {};
     let foto = req.body.foto || null; 
 
-    if (!usuarioId) {
-        return res.status(400).json({ erro: 'Usuário não autenticado.' });
-    }
-
     const regexSeguro = /^[^<>{}\[\]=;]*$/;
 
-    // Função fiscalizadora
     function validarTexto(texto, limite) {
         if (!texto) return true; 
         if (typeof texto !== 'string') return false; 
@@ -391,14 +409,16 @@ app.post('/personagens', async (req, res) => {
 
     try {
         if (isUpdate) {
-            // ATUALIZAR
-            const sql = `UPDATE personagens SET nome_personagem = $1, ocupacao = $2, dados_ficha = $3, foto = $4 WHERE id = $5 AND usuario_id = $6`;
-            await pool.query(sql, [nome, ocupacao, fichaParaOBanco, foto, personagemId, usuarioId]);
+            const sql = `UPDATE personagens SET nome_personagem = $1, ocupacao = $2, dados_ficha = $3, foto = $4 WHERE id = $5 AND usuario_id = $6 RETURNING id`;
+            const result = await pool.query(sql, [nome, ocupacao, fichaParaOBanco, foto, personagemId, usuarioIdSeguro]);
+            
+            if (result.rowCount === 0) {
+                return res.status(403).json({ erro: 'Tentativa de invasão detectada. Você não é o dono desta ficha.' });
+            }
             res.json({ mensagem: 'Ficha atualizada com sucesso!', id: personagemId });
         } else {
-            // CRIAR NOVO
             const sql = `INSERT INTO personagens (usuario_id, nome_personagem, ocupacao, dados_ficha, foto) VALUES ($1, $2, $3, $4, $5) RETURNING id`;
-            const resultado = await pool.query(sql, [usuarioId, nome, ocupacao, fichaParaOBanco, foto]);
+            const resultado = await pool.query(sql, [usuarioIdSeguro, nome, ocupacao, fichaParaOBanco, foto]);
             res.json({ mensagem: 'Nova ficha salva no banco com sucesso!', id: resultado.rows[0].id });
         }
     } catch (erro) {
@@ -406,7 +426,6 @@ app.post('/personagens', async (req, res) => {
         res.status(500).json({ erro: 'Erro interno do banco de dados.' });
     }
 });
-
 // =========================================================================
 // LISTAR TODAS AS FICHAS DO USUÁRIO
 // =========================================================================
@@ -449,13 +468,17 @@ app.get('/personagem/:id', async (req, res) => {
 });
 
 // =========================================================================
-// EXCLUIR UM PERSONAGEM (POSTGRESQL)
+// EXCLUIR UM PERSONAGEM 
 // =========================================================================
-app.delete('/personagens/:id', async (req, res) => {
+app.delete('/personagens/:id', verificarToken, async (req, res) => {
     const id = req.params.id;
     try {
-        // Deleta do PostgreSQL usando $1
-        await pool.query('DELETE FROM personagens WHERE id = $1', [id]);
+
+        const result = await pool.query('DELETE FROM personagens WHERE id = $1 AND usuario_id = $2 RETURNING id', [id, req.usuario.id]);
+        
+        if (result.rowCount === 0) {
+            return res.status(403).json({ erro: 'Acesso negado. Ficha não pertence a você.' });
+        }
         res.status(200).json({ mensagem: 'Personagem excluído.' });
     } catch (erro) {
         console.error('❌ Erro ao deletar ficha:', erro);
@@ -467,8 +490,9 @@ app.delete('/personagens/:id', async (req, res) => {
 // ROTAS DE CAMPANHA (POSTGRESQL - BLINDADAS)
 // ==========================================
 
-app.post('/campanhas', async (req, res) => {
-    const { nome, mestre_id } = req.body;
+app.post('/campanhas', verificarToken, async (req, res) => {
+    const { nome } = req.body;
+    const mestre_id = req.usuario.id; 
     const codigo = gerarCodigoConvite();
 
     try {
@@ -603,27 +627,25 @@ app.delete('/campanhas/:id/membros/:usuarioId', async (req, res) => {
 // =========================================================================
 // ROTA DO MESTRE: Excluir Campanha (Destruir a Mesa)
 // =========================================================================
-app.delete('/campanhas/:id', async (req, res) => {
+app.delete('/campanhas/:id', verificarToken, async (req, res) => {
     const campanhaId = req.params.id;
-    const mestreId = req.headers['usuario-id']; 
+    const mestreIdSeguro = req.usuario.id; 
 
     try {
         const sqlCheck = `SELECT mestre_id FROM campanhas WHERE id = $1`;
         const resultCheck = await pool.query(sqlCheck, [campanhaId]);
 
-        if (resultCheck.rows.length === 0) {
-            return res.status(404).json({ erro: 'Campanha não encontrada.' });
+        if (resultCheck.rows.length === 0) return res.status(404).json({ erro: 'Campanha não encontrada.' });
+        
+        if (resultCheck.rows[0].mestre_id != mestreIdSeguro) {
+            return res.status(403).json({ erro: 'ALERTA DE SEGURANÇA: Apenas o Mestre pode apagar esta mesa!' });
         }
-        if (resultCheck.rows[0].mestre_id != mestreId) {
-            return res.status(403).json({ erro: 'Acesso negado: Apenas o Mestre pode apagar esta mesa!' });
-        }
-        await pool.query(`DELETE FROM membros_campanha WHERE campanha_id = $1`, [campanhaId]);
 
+        await pool.query(`DELETE FROM membros_campanha WHERE campanha_id = $1`, [campanhaId]);
         await pool.query(`DELETE FROM campanhas WHERE id = $1`, [campanhaId]);
+        
         const io = req.app.get('io');
-        if (io) {
-            io.to(campanhaId.toString()).emit('mesa-encerrada');
-        }
+        if (io) io.to(campanhaId.toString()).emit('mesa-encerrada');
 
         res.json({ mensagem: 'A mesa foi destruída permanentemente!' });
     } catch (erro) {

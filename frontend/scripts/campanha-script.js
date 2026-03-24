@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 method: 'DELETE',
                                 headers: {
                                     'Content-Type': 'application/json',
-                                    'usuario-id': usuarioLogadoId 
+                                    'Authorization': `Bearer ${sessionStorage.getItem('token')}` 
                                 }
                             });
                             
@@ -165,8 +165,11 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const resposta = await fetch(`${API_URL}/campanhas`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nome, mestre_id })
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${sessionStorage.getItem('token')}` 
+                },
+                body: JSON.stringify({ nome }) 
             });
             const dados = await resposta.json();
 
