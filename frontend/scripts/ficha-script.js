@@ -1138,17 +1138,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (inputDetNum) {
         inputDetNum.addEventListener('input', () => {
-            if(inputDetNum.value > 10) inputDetNum.value = 10; 
-            if(inputDetNum.value < 0) inputDetNum.value = 0;   
+            let val = parseInt(inputDetNum.value) || 0;
+            if(val > 10) val = 10; 
+            if(val < 0) val = 0;   
+            inputDetNum.value = val;
+            
+
+            if (inputAssimNum) {
+                inputAssimNum.value = 10 - val;
+            }
+            
             window.sincronizarTrilhas();
+            if (typeof agendarAutosave === 'function') agendarAutosave(); 
         });
     }
 
     if (inputAssimNum) {
         inputAssimNum.addEventListener('input', () => {
-            if(inputAssimNum.value > 10) inputAssimNum.value = 10;
-            if(inputAssimNum.value < 0) inputAssimNum.value = 0;
+            let val = parseInt(inputAssimNum.value) || 0;
+            if(val > 10) val = 10;
+            if(val < 0) val = 0;
+            inputAssimNum.value = val;
+            
+            if (inputDetNum) {
+                inputDetNum.value = 10 - val;
+            }
+            
             window.sincronizarTrilhas();
+            if (typeof agendarAutosave === 'function') agendarAutosave(); 
         });
     }
     

@@ -33,6 +33,28 @@ app.use(helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
+// =========================================================================
+// 🛡️ MIDDLEWARE ANTI-NAVEGADOR (BLOQUEIA ACESSO DIRETO PELA URL)
+// =========================================================================
+app.use((req, res, next) => {
+    // Verifica se a requisição está pedindo para abrir uma página de navegador (text/html)
+    const pediuPeloNavegador = req.headers.accept && req.headers.accept.includes('text/html');
+    
+    // Se não for o nosso frontend fazendo um fetch silencioso, levanta a parede!
+    if (pediuPeloNavegador) {
+        return res.status(403).send(`
+            <body style="background-color: #121212; color: #ff9800; font-family: 'Courier New', monospace; text-align: center; padding-top: 20vh;">
+                <h1 style="font-size: 3rem; color: #8c3a3a;">🛡️ FICHA BLINDADA 🛡️</h1>
+                <p style="font-size: 1.2rem; color: #a97b53;">Acesso direto à matriz de dados foi bloqueado pelo Mestre.</p>
+                <p style="font-size: 1rem; color: #666;">Por favor, retorne à interface principal do jogo, SEU SAFADO!!!!!</p>
+            </body>
+        `);
+    }
+    
+    // Se for o fetch do JavaScript, deixa passar para as rotas abaixo
+    next();
+});
+
 const { createClient } = require('@supabase/supabase-js');
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_KEY;
