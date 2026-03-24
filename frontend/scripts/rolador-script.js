@@ -267,11 +267,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const campanhaAtiva = sessionStorage.getItem('campanhaAtiva');
 
-        if (campanhaAtiva) {
-            pacoteDeDados.token = sessionStorage.getItem('token');
-            socket.emit('rolar-dados', pacoteDeDados);
-        }
-
         let nomeRolador = 'Operador Misterioso';
         const inputNome = document.getElementById('nome');
 
@@ -281,6 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
             nomeRolador = sessionStorage.getItem('usuarioNome');
         }
 
+        // 1. CRIAMOS O PACOTE PRIMEIRO
         const pacoteDeDados = {
             nome: nomeRolador,
             usuarioId: sessionStorage.getItem('usuarioId'),
@@ -309,11 +305,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
         });
-
+        
         renderizarRolagem(pacoteDeDados);
 
-        // Envia para os outros SOMENTE se eu estiver numa mesa
         if (campanhaAtiva) {
+            pacoteDeDados.token = sessionStorage.getItem('token'); 
             socket.emit('rolar-dados', pacoteDeDados);
         }
     }
