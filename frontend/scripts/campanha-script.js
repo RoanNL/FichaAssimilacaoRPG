@@ -35,7 +35,9 @@ document.addEventListener('DOMContentLoaded', () => {
     async function carregarMinhasCampanhas(userId) {
         listaCampanhas.innerHTML = '<p style="color: #666; font-style: italic;">Buscando conexões...</p>';
         try {
-            const resposta = await fetch(`${API_URL}/campanhas/usuario/${userId}`);
+            const resposta = await fetch(`${API_URL}/campanhas/usuario/${userId}`, {
+                headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
+            });
             const campanhas = await resposta.json();
 
             if (campanhas.length === 0) {

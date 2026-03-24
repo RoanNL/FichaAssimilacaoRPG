@@ -219,6 +219,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     sessionStorage.setItem('usuarioId', idParaSalvar);
                     sessionStorage.setItem('usuarioNome', nomeParaSalvar);
+                    
+                    sessionStorage.setItem('token', dados.token); 
 
                     usuarioLogadoId = idParaSalvar;
                     nomeOperador = nomeParaSalvar;
@@ -764,8 +766,15 @@ document.addEventListener('DOMContentLoaded', () => {
             btnFichasMesa.textContent = "Buscando...";
 
             try {
-                const resposta = await fetch(`${API_URL}/campanhas/${campanhaId}/fichas-mesa`);
-                let fichas = await resposta.json();
+                const resposta = await fetch(`${API_URL}/campanhas/${campanhaId}/fichas-mesa`, {
+                headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
+            });
+            let fichas = await resposta.json();
+
+
+            if (!resposta.ok) {
+                return mostrarNotificacao(fichas.erro, 'erro');
+            }
 
                 const meuId = sessionStorage.getItem('usuarioId');
                 fichas = fichas.filter(char => char.usuario_id != meuId);
@@ -852,8 +861,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
             btnGerenciarJogadores.textContent = "Buscando...";
             try {
-                const resposta = await fetch(`${API_URL}/campanhas/${campanhaId}/jogadores`);
-                const jogadores = await resposta.json();
+                const resposta = await fetch(`${API_URL}/campanhas/${campanhaId}/jogadores`, {
+                headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
+            });
+            const jogadores = await resposta.json();
+
+
+            if (!resposta.ok) {
+                return mostrarNotificacao(jogadores.erro, 'erro');
+            }
 
                 const gridJogadores = document.getElementById('grid-jogadores-mesa');
                 gridJogadores.innerHTML = '';

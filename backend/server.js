@@ -89,19 +89,28 @@ io.on('connection', (socket) => {
     // 🛡️ O ESCUDO DA ROLAGEM E SALVAMENTO
     socket.on('rolar-dados', async (pacoteDeDados) => {
         const { token, ...dadosDaRolagem } = pacoteDeDados;
-        
         if (!token) return;
 
         try {
             const segredo = process.env.SEGREDO_JWT || 'segredo_super_secreto_rpg';
             const usuarioVerificado = jwt.verify(token, segredo);
-            
-            dadosDaRolagem.usuarioId = usuarioVerificado.id;
-            
-            const salaStr = dadosDaRolagem.campanhaId.toString(); 
+            const usuarioIdSeguro = usuarioVerificado.id;
+
+            // 🛡️ A BARREIRA: O cara REALMENTE tá na mesa que ele diz estar?
+            const campanhaId = dadosDaRolagem.campanhaId;
+            const sqlCheck = `SELECT * FROM membros_campanha WHERE campanha_id = $1 AND usuario_id = $2`;
+            const resultCheck = await pool.query(sqlCheck, [campanhaId, usuarioIdSeguro]);
+
+            if (resultCheck.rows.length === 0) {
+                console.log(`🚨 HACKER BARRADO: Usuário ${usuarioIdSeguro} tentou rolar dado em mesa alheia!`);
+                return; 
+            }
+
+            dadosDaRolagem.usuarioId = usuarioIdSeguro;
+            const salaStr = campanhaId.toString(); 
             socket.to(salaStr).emit('nova-rolagem', dadosDaRolagem);
             
-            const campanhaInt = parseInt(dadosDaRolagem.campanhaId, 10);
+            const campanhaInt = parseInt(campanhaId, 10);
             await pool.query(
                 `INSERT INTO historico_rolagens (campanha_id, pacote) VALUES ($1, $2)`, 
                 [campanhaInt, dadosDaRolagem] 
@@ -582,9 +591,16 @@ app.get('/campanhas/:id/personagens', async (req, res) => {
 // =========================================================================
 // Buscar jogadores para o painel de Gerenciamento 
 // =========================================================================
-app.get('/campanhas/:id/jogadores', async (req, res) => {
+app.get('/campanhas/:id/jogadores', verificarToken, async (req, res) => {
     const campanhaId = req.params.id;
+    const mestreIdSeguro = req.usuario.id;
+
     try {
+        const checkMestre = await pool.query(`SELECT mestre_id FROM campanhas WHERE id = $1`, [campanhaId]);
+        if (checkMestre.rows.length === 0 || checkMestre.rows[0].mestre_id !== mestreIdSeguro) {
+            return res.status(403).json({ erro: 'ALERTA: Apenas o verdadeiro Mestre pode ver os jogadores!' });
+        }
+
         const sql = `
             SELECT m.usuario_id, u.username, 
                    (SELECT nome_personagem FROM personagens WHERE usuario_id = u.id LIMIT 1) as nome_personagem
@@ -595,17 +611,46 @@ app.get('/campanhas/:id/jogadores', async (req, res) => {
         const result = await pool.query(sql, [campanhaId]);
         res.json(result.rows);
     } catch (erro) {
-        console.error('Erro ao buscar jogadores:', erro);
         res.status(500).json({ erro: 'Erro ao buscar jogadores.' });
+    }
+});
+
+app.get('/campanhas/usuario/:usuarioId', verificarToken, async (req, res) => {
+    const { usuarioId } = req.params;
+
+    // Se o ID da URL não for o mesmo do Token, bloqueia na hora!
+    if (req.usuario.id != usuarioId) {
+        return res.status(403).json({ erro: 'Tentativa de bisbilhotar campanhas alheias bloqueada!' });
+    }
+
+    try {
+        const sql = `
+            SELECT c.id, c.nome, c.codigo_convite, c.mestre_id, 
+            (c.mestre_id::text = $1::text) as is_mestre
+            FROM campanhas c
+            JOIN membros_campanha m ON c.id = m.campanha_id
+            WHERE m.usuario_id = $2
+        `;
+        const result = await pool.query(sql, [usuarioId, usuarioId]);
+        res.json(result.rows);
+    } catch (erro) {
+        res.status(500).json({ erro: 'Erro ao buscar campanhas.' });
     }
 });
 
 // =========================================================================
 // ROTA DO MESTRE: Ver todas as fichas da mesa 
 // =========================================================================
-app.get('/campanhas/:id/fichas-mesa', async (req, res) => {
+app.get('/campanhas/:id/fichas-mesa', verificarToken, async (req, res) => {
     const campanhaId = req.params.id;
+    const mestreIdSeguro = req.usuario.id;
+
     try {
+        const checkMestre = await pool.query(`SELECT mestre_id FROM campanhas WHERE id = $1`, [campanhaId]);
+        if (checkMestre.rows.length === 0 || checkMestre.rows[0].mestre_id !== mestreIdSeguro) {
+            return res.status(403).json({ erro: 'ALERTA: Apenas o verdadeiro Mestre pode ver as fichas ocultas!' });
+        }
+
         const sql = `
             SELECT p.*, u.username as nome_conta
             FROM personagens p
@@ -616,7 +661,6 @@ app.get('/campanhas/:id/fichas-mesa', async (req, res) => {
         const result = await pool.query(sql, [campanhaId]);
         res.json(result.rows);
     } catch (erro) {
-        console.error('Erro ao buscar fichas:', erro);
         res.status(500).json({ erro: 'Erro ao buscar fichas da mesa.' });
     }
 });
