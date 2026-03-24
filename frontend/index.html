@@ -136,27 +136,27 @@
     <nav class="w-full bg-rpg-paper dark:bg-rpg-paper-dark border-b border-gray-300 dark:border-gray-800 shadow-sm transition-colors duration-300">
         <ul class="flex flex-wrap list-none mx-auto p-0 justify-center max-w-[1100px]">
             <li>
-                <a href="#" id="nav-btn-rolador" class="block text-gray-600 dark:text-gray-400 py-4 px-[22px] text-base font-bold uppercase transition-all duration-300 border-b-[3px] border-transparent hover:text-black dark:hover:text-orange-500">
+                <a href="#" id="nav-btn-rolador" class="block text-gray-600 dark:text-gray-400 py-4 px-[22px] text-base font-bold uppercase transition-all duration-300 border-b-[3px] border-transparent hover:text-black dark:hover:text-orange-500 hover:border-b-[#8c3a3a] dark:hover:border-b-[#3a7c8c]">
                     Rolador de Dados
                 </a>
             </li>
             <li>
-                <a href="#" id="nav-btn-ficha" class="block text-rpg-red dark:text-rpg-red-hover py-4 px-[22px] text-base font-bold uppercase transition-all duration-300 border-b-[3px] border-rpg-red dark:border-rpg-red-hover hover:text-black dark:hover:text-orange-500">
+                <a href="#" id="nav-btn-ficha" class="block text-gray-600 dark:text-gray-400 py-4 px-[22px] text-base font-bold uppercase transition-all duration-300 border-b-[3px] border-transparent hover:text-black dark:hover:text-orange-500 hover:border-b-[#8c3a3a] dark:hover:border-b-[#3a7c8c]">
                     Ficha de Personagem
                 </a>
             </li>
             <li>
-                <a href="#" id="nav-btn-campanhas" class="block text-gray-600 dark:text-gray-400 py-4 px-[22px] text-base font-bold uppercase transition-all duration-300 border-b-[3px] border-transparent hover:text-black dark:hover:text-orange-500">
+                <a href="#" id="nav-btn-campanhas" class="block text-gray-600 dark:text-gray-400 py-4 px-[22px] text-base font-bold uppercase transition-all duration-300 border-b-[3px] border-transparent hover:text-black dark:hover:text-orange-500 hover:border-b-[#8c3a3a] dark:hover:border-b-[#3a7c8c]">
                     Campanhas
                 </a>
             </li>
             <li>
-                <a href="#" id="btn-toggle-tema" class="block text-gray-600 dark:text-gray-400 py-4 px-[22px] text-base font-bold uppercase transition-all duration-300 border-b-[3px] border-transparent hover:text-black dark:hover:text-orange-500 cursor-pointer">
+                <a href="#" id="btn-toggle-tema" class="block text-gray-600 dark:text-gray-400 py-4 px-[22px] text-base font-bold uppercase transition-all duration-300 border-b-[3px] border-transparent hover:text-black dark:hover:text-orange-500 cursor-pointer hover:border-b-[#8c3a3a] dark:hover:border-b-[#3a7c8c]">
                     🌙 Tema Escuro
                 </a>
             </li>
             <li>
-                <a href="#" id="btn-sair" class="block text-rpg-red dark:text-red-400 py-4 px-[22px] text-base font-bold uppercase transition-all duration-300 border-b-[3px] border-transparent hover:text-black dark:hover:text-orange-500">
+                <a href="#" id="btn-sair" class="block text-rpg-red dark:text-red-400 py-4 px-[22px] text-base font-bold uppercase transition-all duration-300 border-b-[3px] border-transparent hover:text-black dark:hover:text-orange-500 hover:border-b-[#8c3a3a] dark:hover:border-b-[#3a7c8c]">
                     Desconectar
                 </a>
             </li>
@@ -203,7 +203,7 @@
                     <img src="./assets/icon.jpg" alt="Logo" class="max-w-[100px] md:max-w-[120px] h-auto rounded-lg shadow-sm">
                     <div class="flex flex-col md:pt-3">
                         <h1 class="text-gray-800 dark:text-gray-200 text-lg md:text-xl font-black font-rpg m-0 border-none pb-0 text-center md:text-left tracking-wider">Assimilação RPG</h1>
-                        <span id="nome-usuario-logado" class="block text-rpg-red dark:text-orange-500 font-bold text-2xl md:text-3xl font-rpg mt-1 text-center md:text-left"></span>
+                        <span id="nome-usuario-logado" class="block text-rpg-red dark:text-orange-500 font-bold text-2xl md:text-3xl font-rpg mt-1 text-center md:text-left capitalize"></span>
                     </div>
                 </div>
                 
@@ -412,27 +412,109 @@
                         <h2 class="text-left text-rpg-red font-black text-xl border-b-2 border-rpg-red pb-1 mb-3 w-full uppercase font-rpg mt-0">Descrição</h2>
                         <textarea id="char-descricao" rows="4" placeholder="Aparência, personalidade, etc..." class="w-full box-border font-rpg text-lg leading-relaxed p-3 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-[#2a2a2a] text-black dark:text-white resize-y outline-none focus:ring-2 focus:ring-rpg-blue transition-colors shadow-inner"></textarea>
                     </div>
-                    
-                    <div>
-                        <h2 class="text-left text-rpg-red font-black text-xl border-b-2 border-rpg-red pb-1 mb-3 w-full uppercase font-rpg mt-0">Habilidades & Equipamentos</h2>
-                        <textarea id="char-habilidades" rows="6" placeholder="Liste aqui habilidades, equipamentos, notas..." class="w-full box-border font-rpg text-lg leading-relaxed p-3 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-[#2a2a2a] text-black dark:text-white resize-y outline-none focus:ring-2 focus:ring-rpg-blue transition-colors shadow-inner"></textarea>
-                    </div>
-                    
                     <div>
                         <h2 class="text-left text-rpg-red font-black text-xl border-b-2 border-rpg-red pb-1 mb-3 w-full uppercase font-rpg mt-0">História do Personagem</h2>
                         <textarea id="char-historia" rows="10" placeholder="Escreva o passado do seu personagem..." class="w-full box-border font-rpg text-lg leading-relaxed p-3 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-[#2a2a2a] text-black dark:text-white resize-y outline-none focus:ring-2 focus:ring-rpg-blue transition-colors shadow-inner"></textarea>
                     </div>
                 </section>
 
+                <div class="col-span-1 md:col-span-3 w-full border-t-2 border-gray-300 dark:border-gray-800 pt-8 mt-2"> 
+                    
+                    <div class="mb-8">
+                        <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
+                            <h2 class="text-xl md:text-2xl font-rpg font-black text-white bg-[#6b2c2c] px-4 py-1 rounded-sm shadow-md uppercase tracking-wider text-center md:text-left mx-auto md:mx-0">Características</h2>
+                            <button type="button" id="btn-add-carac" class="w-full md:w-auto bg-[#6b2c2c] hover:bg-red-900 text-white font-bold py-2 px-4 rounded text-sm transition-colors cursor-pointer border-none shadow-md">
+                                + Adicionar
+                            </button>
+                        </div>
+                        
+                        <div id="caracteristicas-container" class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                            </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full items-start">
+                        
+                        <div class="flex flex-col w-full">
+                            <h2 class="text-xl md:text-2xl font-rpg font-black text-white bg-[#2a5b5e] px-4 py-1 rounded-sm shadow-md uppercase mb-6 w-max mx-auto text-center">Assimilações</h2>
+                            
+                            <div class="flex flex-col gap-4 w-full">
+                                <div class="flex border-2 border-[#2a5b5e] rounded-md overflow-hidden min-h-[7rem] shadow-sm bg-white dark:bg-[#2a2a2a] focus-within:ring-2 focus-within:ring-rpg-blue transition-all">
+                                    <textarea id="assimilacao-1" class="flex-grow p-3 bg-transparent text-black dark:text-white outline-none resize-y text-sm"></textarea>
+                                    <div class="bg-[#2a5b5e] flex flex-col justify-evenly items-center w-14 py-2 flex-shrink-0">
+                                        <img src="./assets/sucesso-branco.png" class="w-8 h-8 object-contain mb-1">
+                                        <span class="text-white text-2xl leading-none">&hearts;</span>
+                                    </div>
+                                </div>
+
+                                <div class="flex border-2 border-[#2a5b5e] rounded-md overflow-hidden min-h-[7rem] shadow-sm bg-white dark:bg-[#2a2a2a] focus-within:ring-2 focus-within:ring-rpg-blue transition-all">
+                                    <textarea id="assimilacao-2" class="flex-grow p-3 bg-transparent text-black dark:text-white outline-none resize-y text-sm"></textarea>
+                                    <div class="bg-[#2a5b5e] flex flex-col justify-evenly items-center w-14 py-2 flex-shrink-0">
+                                        <img src="./assets/adaptacao-branco.png" class="w-8 h-8 object-contain mb-1">
+                                        <span class="text-white text-2xl leading-none">&diams;</span>
+                                    </div>
+                                </div>
+
+                                <div class="flex border-2 border-[#2a5b5e] rounded-md overflow-hidden min-h-[7rem] shadow-sm bg-white dark:bg-[#2a2a2a] focus-within:ring-2 focus-within:ring-rpg-blue transition-all">
+                                    <textarea id="assimilacao-3" class="flex-grow p-3 bg-transparent text-black dark:text-white outline-none resize-y text-sm"></textarea>
+                                    <div class="bg-[#2a5b5e] flex flex-col justify-evenly items-center w-14 py-2 flex-shrink-0">
+                                        <img src="./assets/pressao-branco.png" class="w-8 h-8 object-contain mb-1">
+                                        <span class="text-white text-2xl leading-none">&spades;</span>
+                                    </div>
+                                </div>
+
+                                <div class="flex border-2 border-[#2a5b5e] rounded-md overflow-hidden min-h-[7rem] shadow-sm bg-white dark:bg-[#2a2a2a] focus-within:ring-2 focus-within:ring-rpg-blue transition-all">
+                                    <textarea id="assimilacao-4" class="flex-grow p-3 bg-transparent text-black dark:text-white outline-none resize-y text-sm"></textarea>
+                                    <div class="bg-[#2a5b5e] flex flex-col justify-evenly items-center w-14 py-2 flex-shrink-0">
+                                        <img src="./assets/singulares-branco.png" class="w-8 h-8 object-contain mb-1">
+                                        <span class="text-white text-2xl leading-none">&clubs;</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col gap-6 w-full h-full">
+                            <div class="w-full transition-colors duration-300">
+                                <h2 class="text-xl md:text-2xl font-rpg font-black text-white bg-[#8c7454] px-4 py-1 rounded-sm shadow-md uppercase mb-6 w-max mx-auto text-center">Espaços de Inventário</h2>
+                                <div class="grid grid-cols-5 gap-3 max-w-[250px] mx-auto justify-items-center mb-2">
+                                    <input type="checkbox" id="inv-1" class="custom-checkbox">
+                                    <input type="checkbox" id="inv-2" class="custom-checkbox">
+                                    <input type="checkbox" id="inv-3" class="custom-checkbox">
+                                    <input type="checkbox" id="inv-4" class="custom-checkbox">
+                                    <input type="checkbox" id="inv-5" class="custom-checkbox">
+                                    <input type="checkbox" id="inv-6" class="custom-checkbox">
+                                    <input type="checkbox" id="inv-7" class="custom-checkbox">
+                                    <input type="checkbox" id="inv-8" class="custom-checkbox">
+                                    <input type="checkbox" id="inv-9" class="custom-checkbox">
+                                    <input type="checkbox" id="inv-10" class="custom-checkbox">
+                                </div>
+                            </div>
+
+                            <div class="flex-grow flex flex-col w-full transition-colors duration-300 mt-2">
+                                <h2 class="text-xl md:text-2xl font-rpg font-black text-white bg-[#8c7454] px-4 py-1 rounded-sm shadow-md uppercase mb-4 w-max mx-auto text-center z-10">Anotações</h2>
+                                
+                                <div id="anotacoes-preview" class="w-full flex-grow min-h-[200px] p-4 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#2a2a2a] text-black dark:text-white font-sans text-base shadow-inner cursor-pointer hover:ring-2 hover:ring-[#8c7454] transition-all overflow-hidden relative group" title="Clique para expandir e editar">
+                                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-5 dark:group-hover:bg-opacity-20 transition-all z-10 pointer-events-none"></div>
+                                    <div id="anotacoes-texto-preview" class="whitespace-pre-wrap opacity-90 h-full overflow-hidden" style="display: -webkit-box; -webkit-line-clamp: 10; -webkit-box-orient: vertical;">
+                                        <span class="text-gray-400 dark:text-gray-500 italic font-bold">Clique aqui para escrever suas anotações...</span>
+                                    </div>
+                                </div>
+                            </div>
+                </div>
+
             </form>
         </section>
-    </main>
-    
-    <div id="photo-modal" class="modal">
-        <span class="modal-close" id="modal-close-button">&times;</span>
-        <img class="modal-content" id="modal-image">
-    </div>
-        </section>
+
+        <div id="anotacoes-modal" class="modal z-[9999]">
+            <div class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border border-gray-300 dark:border-gray-800 rounded-md p-6 shadow-2xl max-w-[900px] w-[95%] h-[80vh] flex flex-col relative">
+                <span id="fechar-anotacoes" class="modal-close absolute top-4 right-6 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white text-4xl font-bold cursor-pointer transition-colors">&times;</span>
+                
+                <h2 class="text-center text-xl md:text-3xl font-rpg font-black text-white bg-[#8c7454] px-8 py-2 rounded-sm shadow-md uppercase tracking-widest mb-6 mx-auto w-max">
+                    Anotações
+                </h2>
+                
+                <textarea id="anotacoes" placeholder="Escreva sua anotações, inventário e outras coisas..." class="w-full flex-grow p-4 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#1a1a1a] text-black dark:text-white outline-none resize-none font-sans text-lg shadow-inner focus:ring-2 focus:ring-[#8c7454] transition-colors leading-relaxed"></textarea>
+            </div>
+        </div>
     </main>
 
     <div id="rolador-modal" class="modal">
@@ -542,7 +624,7 @@
     <footer class="w-full bg-rpg-paper dark:bg-rpg-paper-dark border-t border-gray-300 dark:border-gray-800 mt-12 py-8 transition-colors duration-300 mt-auto">
         <div class="max-w-[1100px] mx-auto text-center px-4">
             <h3 class="font-rpg font-black text-xl text-rpg-red dark:text-orange-500 uppercase mb-2 tracking-wider">
-               Ficha Assimilação RPG
+            Ficha Assimilação RPG
             </h3>
             <p class="font-sans text-gray-600 dark:text-gray-400 text-sm md:text-base font-bold mb-3">
                 Desenvolvido com ❤ por <a href="https://www.linkedin.com/in/roannl" target="_blank" class="text-rpg-blue hover:text-rpg-blue-hover dark:text-rpg-blue-hover hover:underline transition-colors">Roan Lisboa</a>
@@ -556,10 +638,11 @@
         </div>
     </footer>
 
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    
     <script src="./scripts/ficha-script.js"></script>
     <script src="./scripts/rolador-script.js"></script>
     <script src="./scripts/campanha-script.js"></script>
-    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
     <script src="./scripts/leaves.js"></script>
 </body>
 </html>

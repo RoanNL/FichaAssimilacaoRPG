@@ -223,10 +223,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     usuarioLogadoId = idParaSalvar;
                     nomeOperador = nomeParaSalvar;
 
+                    
+
                     authContainer.style.display = 'none';
                     appContainer.style.display = 'block';
 
                     const nomeUsuarioLogado = document.getElementById('nome-usuario-logado');
+                    
                     if (nomeUsuarioLogado) nomeUsuarioLogado.textContent = `Bem-vindo, ${nomeOperador}`;
 
                     usernameInput.value = '';
@@ -409,6 +412,10 @@ document.addEventListener('DOMContentLoaded', () => {
             idPersonagemAtual = id;
             sessionStorage.setItem('personagemAtivoId', id);
 
+            if(typeof window.atualizarPreviewAnotacoes === 'function') {
+            window.atualizarPreviewAnotacoes();
+        }
+
 
         } catch (err) {
             console.error("Erro ao carregar personagem:", err);
@@ -431,8 +438,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         const canvas = document.createElement('canvas');
                         const ctx = canvas.getContext('2d');
 
-                        const MAX_WIDTH = 400;
-                        const MAX_HEIGHT = 400;
+                        const MAX_WIDTH = 800;
+                        const MAX_HEIGHT = 800;
                         let width = img.width;
                         let height = img.height;
 
@@ -450,9 +457,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         canvas.width = width;
                         canvas.height = height;
+                        
+                        ctx.imageSmoothingEnabled = true;
+                        ctx.imageSmoothingQuality = 'high';
                         ctx.drawImage(img, 0, 0, width, height);
 
-                        const compressedBase64 = canvas.toDataURL('image/webp', 0.8);
+                        const compressedBase64 = canvas.toDataURL('image/webp', 0.95);
                         photoPreview.src = compressedBase64;
                     };
                     img.src = e.target.result;
@@ -953,4 +963,112 @@ document.addEventListener('DOMContentLoaded', () => {
     configurarOlhinho('auth-confirm-password', 'toggle-auth-confirm');
     configurarOlhinho('recuperar-nova-senha', 'toggle-recuperar-senha');
     configurarOlhinho('recuperar-confirmar-senha', 'toggle-recuperar-confirmar');
+
+    
+    
+   // ==========================================
+    // SISTEMA DE CARACTERÍSTICAS DINÂMICAS 
+    // ==========================================
+    window.contadorCarac = 0;
+    
+    window.adicionarCaracteristicaDOM = function() {
+        window.contadorCarac++;
+        const indice = window.contadorCarac;
+        const container = document.getElementById('caracteristicas-container');
+        if(!container) return;
+
+        const bloco = document.createElement('div');
+
+        bloco.className = 'carac-item flex flex-col w-full mb-2 bg-white dark:bg-[#2a2a2a] p-3 rounded-md shadow-inner border border-gray-300 dark:border-gray-600 focus-within:ring-2 focus-within:ring-rpg-blue transition-all';
+        bloco.innerHTML = `
+            <div class="flex justify-between items-center mb-2 border-b-2 border-[#6b2c2c] pb-1">
+                <input type="text" id="carac-nome-${indice}" placeholder="Nome da Característica" class="w-full font-bold p-1 bg-transparent text-black dark:text-white text-base outline-none">
+                
+                <button type="button" class="btn-remover-carac ml-2 bg-red-800 hover:bg-red-900 text-white text-xs font-bold py-1 px-2 rounded cursor-pointer transition-colors shadow-sm border-none">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+            <textarea id="carac-desc-${indice}" rows="2" placeholder="Descrição..." class="w-full p-1 bg-transparent text-black dark:text-gray-300 outline-none resize-y text-sm"></textarea>
+        `;
+        container.appendChild(bloco);
+
+        if (typeof agendarAutosave === 'function') {
+            bloco.querySelector('input').addEventListener('input', agendarAutosave);
+            bloco.querySelector('textarea').addEventListener('input', agendarAutosave);
+        }
+    };
+
+    document.body.addEventListener('click', function(event) {
+        
+        if (event.target.id === 'btn-add-carac') {
+            event.preventDefault(); 
+            window.adicionarCaracteristicaDOM();
+        }
+
+        if (event.target.closest('.btn-remover-carac')) {
+            event.preventDefault();
+            const blocoParaRemover = event.target.closest('.carac-item');
+            if (blocoParaRemover) {
+                blocoParaRemover.remove();
+                if (typeof agendarAutosave === 'function') agendarAutosave(); 
+            }
+        }
+    });
+
+    setTimeout(() => {
+        const caracContainer = document.getElementById('caracteristicas-container');
+        if (caracContainer && caracContainer.children.length === 0) {
+            for(let i = 0; i < 6; i++) window.adicionarCaracteristicaDOM();
+        }
+    }, 500);
+
+    // ==========================================
+    // SISTEMA DE ANOTAÇÕES EM MODAL (PREVIEW)
+    // ==========================================
+    const anotacoesPreview = document.getElementById('anotacoes-preview');
+    const anotacoesTextoPreview = document.getElementById('anotacoes-texto-preview');
+    const modalAnotacoes = document.getElementById('anotacoes-modal');
+    const btnFecharAnotacoes = document.getElementById('fechar-anotacoes');
+    const textareaAnotacoes = document.getElementById('anotacoes');
+
+    window.atualizarPreviewAnotacoes = function() {
+        if (!anotacoesTextoPreview || !textareaAnotacoes) return;
+        const texto = textareaAnotacoes.value.trim();
+        
+        if (texto === '') {
+            anotacoesTextoPreview.innerHTML = '<span class="text-gray-400 dark:text-gray-500 italic font-bold">Clique aqui para escrever suas anotações...</span>';
+        } else {
+            const divSegura = document.createElement('div');
+            divSegura.textContent = texto;
+            anotacoesTextoPreview.innerHTML = divSegura.innerHTML.replace(/\n/g, '<br>');
+        }
+    };
+
+    if (anotacoesPreview) {
+        anotacoesPreview.addEventListener('click', () => {
+            modalAnotacoes.classList.add('show');
+            textareaAnotacoes.focus();
+        });
+    }
+
+    if (btnFecharAnotacoes) {
+        btnFecharAnotacoes.addEventListener('click', () => {
+            modalAnotacoes.classList.remove('show');
+            window.atualizarPreviewAnotacoes();
+        });
+    }
+
+    window.addEventListener('click', (event) => {
+        if (event.target == modalAnotacoes) {
+            modalAnotacoes.classList.remove('show');
+            window.atualizarPreviewAnotacoes();
+        }
+    });
+
+    if (textareaAnotacoes) {
+        textareaAnotacoes.addEventListener('input', () => {
+            window.atualizarPreviewAnotacoes();
+            if (typeof agendarAutosave === 'function') agendarAutosave();
+        });
+    }
 });

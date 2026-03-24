@@ -699,3 +699,20 @@ h2 {
 .btn-remover-jogador:hover {
     background-color: #c9302c;
 }
+
+.custom-checkbox {
+            appearance: none;
+            width: 1.8rem;
+            height: 1.8rem;
+            border: 2px solid #8c7454;
+            background-color: transparent;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .custom-checkbox:checked { background-color: #8c7454; }
+        .custom-checkbox:checked::after { color: white; font-weight: bold; }
+        .dark .custom-checkbox { border-color: #b89b74; }
+        .dark .custom-checkbox:checked { background-color: #b89b74; }
