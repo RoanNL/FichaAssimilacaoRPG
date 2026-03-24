@@ -706,6 +706,18 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('tema-rpg-assimilacao', isDark ? 'dark' : 'light');
         
         atualizarBotoesTema(isDark);
+
+        document.querySelectorAll('#rolador-historico img, #rolador-resultados-atuais img').forEach(img => {
+            if (img.src.includes('icon.jpg')) return; 
+
+            if (isDark) {
+                if (!img.src.includes('-branco.png')) {
+                    img.src = img.src.replace('.png', '-branco.png');
+                }
+            } else {
+                img.src = img.src.replace('-branco.png', '.png');
+            }
+        });
     }
 
     if (btnToggleTemaApp) btnToggleTemaApp.addEventListener('click', alternarTema);
@@ -840,12 +852,20 @@ document.addEventListener('DOMContentLoaded', () => {
                         const nomeConta = jog.username || 'Operador Desconhecido';
                         const nomeChar = jog.nome_personagem || 'Sem personagem ativo';
 
+                        const meuId = sessionStorage.getItem('usuarioId');
+                        const isEsteOMestre = jog.usuario_id == meuId;
+
+
+                        const controleHtml = isEsteOMestre 
+                            ? `<span style="color: #ff9800; font-weight: bold; font-size: 1.1em;">👑 Mestre</span>`
+                            : `<button class="btn-remover-jogador" data-usuario="${jog.usuario_id}">Remover</button>`;
+
                         card.innerHTML = `
                             <div>
                                 <h4 style="margin-bottom: 5px;">${nomeConta}</h4>
                                 <p style="color: #888; font-size: 0.8em; margin-top: 0; margin-bottom: 25px;">👤 ${nomeChar}</p>
                             </div>
-                            <button class="btn-remover-jogador" data-usuario="${jog.usuario_id}">Remover</button>
+                            ${controleHtml}
                         `;
                         gridJogadores.appendChild(card);
                     });
