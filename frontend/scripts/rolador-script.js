@@ -29,13 +29,13 @@ document.addEventListener('DOMContentLoaded', () => {
     socket.on('connect', () => {
         const campanhaAtiva = sessionStorage.getItem('campanhaAtiva');
         const usuarioId = sessionStorage.getItem('usuarioId');
-        
+
         if (campanhaAtiva && usuarioId && usuarioId !== 'undefined') {
             console.log("📡 Solicitando entrada na mesa...", campanhaAtiva);
 
-            socket.emit('entrar-na-campanha', { 
-                campanhaId: campanhaAtiva, 
-                usuarioId: usuarioId 
+            socket.emit('entrar-na-campanha', {
+                campanhaId: campanhaAtiva,
+                usuarioId: usuarioId
             });
         } else {
             console.log("⚠️ Nenhuma mesa ativa na memória para reconectar.");
@@ -43,6 +43,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     socket.on('nova-rolagem', (pacoteDeDados) => {
+        const souMestre = sessionStorage.getItem('isMestreAtivo') === 'true';
+        const meuId = sessionStorage.getItem('usuarioId');
+        const meuNomeLocal = sessionStorage.getItem('usuarioNome');
+        const meuPersonagemLocal = document.getElementById('nome') ? document.getElementById('nome').value.trim() : '';
+
+        const fuiEuQuemRolou = (pacoteDeDados.usuarioId === meuId) ||
+            (!pacoteDeDados.usuarioId && (pacoteDeDados.nome === meuNomeLocal || pacoteDeDados.nome === meuPersonagemLocal));
+
+        if (!souMestre && !fuiEuQuemRolou) {
+            return;
+        }
+
         renderizarRolagem(pacoteDeDados);
     });
 
@@ -62,17 +74,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 const pacote = typeof pacoteBruto === 'string' ? JSON.parse(pacoteBruto) : pacoteBruto;
 
                 const historyEntry = document.createElement('div');
+                const meuNomeLocal = sessionStorage.getItem('usuarioNome');
+                const meuPersonagemLocal = document.getElementById('nome') ? document.getElementById('nome').value.trim() : '';
                 historyEntry.style.borderBottom = '1px solid var(--color-border-medium)';
                 historyEntry.style.paddingBottom = '15px';
                 historyEntry.style.marginBottom = '15px';
 
+                const souMestre = sessionStorage.getItem('isMestreAtivo') === 'true';
+                const meuId = sessionStorage.getItem('usuarioId');
+
+                const fuiEuQuemRolou = (pacote.usuarioId === meuId) ||
+                    (!pacote.usuarioId && (pacote.nome === meuNomeLocal || pacote.nome === meuPersonagemLocal));
+
+                if (!souMestre && !fuiEuQuemRolou) {
+                    return;
+                }
                 const header = document.createElement('h3');
                 header.textContent = `${pacote.nome} rolou: ${pacote.input}`;
                 header.style.marginTop = '0';
-                
-                const meuNomeLocal = sessionStorage.getItem('usuarioNome');
-                const meuPersonagemLocal = document.getElementById('nome') ? document.getElementById('nome').value.trim() : '';
-                
+
                 if (pacote.nome !== meuNomeLocal && pacote.nome !== meuPersonagemLocal) {
                     header.style.color = 'var(--color-assim-blue)';
                 }
@@ -97,17 +117,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (dado.icones) {
                             dado.icones.forEach(iconName => {
                                 const img = document.createElement('img');
-                                
+
                                 // USA O DICIONÁRIO DINÂMICO AQUI!
                                 img.src = iconFilesSeguro[iconName];
                                 img.alt = iconName;
-                                
-                                img.className = 'dado-animado'; 
+
+                                img.className = 'dado-animado';
                                 img.style.animation = 'none';
-                                img.style.opacity = '1';     
+                                img.style.opacity = '1';
                                 img.style.visibility = 'visible';
                                 img.style.transform = 'scale(1) rotate(0deg)';
-                                
+
                                 subRollIcons.appendChild(img);
                             });
                         }
@@ -122,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const summary = document.createElement('p');
                 summary.className = 'rolador-summary';
-            
+
                 summary.textContent = `Total: ${pacote.totais?.sucesso || 0} Sucesso, ${pacote.totais?.pressao || 0} Pressão, ${pacote.totais?.adaptacao || 0} Adaptação.`;
                 historyEntry.appendChild(summary);
 
@@ -134,12 +154,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     socket.on('mesa-encerrada', () => {
-        if(typeof mostrarNotificacao === 'function') {
+        if (typeof mostrarNotificacao === 'function') {
             mostrarNotificacao("🚨 O Mestre encerrou esta campanha permanentemente! Você está sendo desconectado.", 'aviso');
         } else {
             alert("🚨 O Mestre encerrou esta campanha permanentemente! Você está sendo desconectado.");
         }
-        
+
         sessionStorage.removeItem('campanhaAtiva');
         sessionStorage.removeItem('isMestreAtivo');
         window.location.reload();
@@ -173,34 +193,34 @@ document.addEventListener('DOMContentLoaded', () => {
     // Lógica Matemática dos Dados
     const diceTable = {
         d6: {
-            1: ['nada'], 
-            2: ['nada'], 
-            3: ['pressao'], 
+            1: ['nada'],
+            2: ['nada'],
+            3: ['pressao'],
             4: ['pressao'],
-            5: ['adaptacao', 'pressao'], 
+            5: ['adaptacao', 'pressao'],
             6: ['sucesso']
         },
         d10: {
-            1: ['nada'], 
-            2: ['nada'], 
-            3: ['pressao'], 
+            1: ['nada'],
+            2: ['nada'],
+            3: ['pressao'],
             4: ['pressao'],
-            5: ['adaptacao', 'pressao'], 
-            6: ['sucesso'], 
+            5: ['adaptacao', 'pressao'],
+            6: ['sucesso'],
             7: ['sucesso', 'sucesso'],
-            8: ['sucesso', 'adaptacao'], 
+            8: ['sucesso', 'adaptacao'],
             9: ['sucesso', 'adaptacao', 'pressao'],
             10: ['sucesso', 'sucesso', 'pressao']
         },
         d12: {
-            1: ['nada'], 
-            2: ['nada'], 
-            3: ['pressao'], 
+            1: ['nada'],
+            2: ['nada'],
+            3: ['pressao'],
             4: ['pressao'],
-            5: ['adaptacao', 'pressao'], 
-            6: ['sucesso'], 
+            5: ['adaptacao', 'pressao'],
+            6: ['sucesso'],
             7: ['sucesso', 'sucesso'],
-            8: ['sucesso', 'adaptacao'], 
+            8: ['sucesso', 'adaptacao'],
             9: ['sucesso', 'adaptacao', 'pressao'],
             10: ['sucesso', 'sucesso', 'pressao'],
             11: ['sucesso', 'adaptacao', 'adaptacao', 'pressao'],
@@ -225,13 +245,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!part) continue;
             const match = part.match(/^(\d*)d(\d+)$/);
             if (!match) {
-                if(typeof mostrarNotificacao === 'function') mostrarNotificacao(`Formato inválido: "${part}". Use "2d6", "1d10", etc.`, 'erro');
+                if (typeof mostrarNotificacao === 'function') mostrarNotificacao(`Formato inválido: "${part}". Use "2d6", "1d10", etc.`, 'erro');
                 return null;
             }
             const quantity = parseInt(match[1] || '1', 10);
             const size = parseInt(match[2], 10);
             if (![6, 10, 12].includes(size)) {
-                if(typeof mostrarNotificacao === 'function') mostrarNotificacao(`Dado inválido: "d${size}". Use apenas d6, d10 ou d12.`, 'aviso');
+                if (typeof mostrarNotificacao === 'function') mostrarNotificacao(`Dado inválido: "d${size}". Use apenas d6, d10 ou d12.`, 'aviso');
                 return null;
             }
             diceRequests.push({ quantity, size });
@@ -246,18 +266,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!parsedDice || parsedDice.length === 0) return;
 
         const campanhaAtiva = sessionStorage.getItem('campanhaAtiva');
-        
+
         let nomeRolador = 'Operador Misterioso';
         const inputNome = document.getElementById('nome');
 
         if (inputNome && inputNome.value.trim() !== '') {
             nomeRolador = inputNome.value.trim();
         } else if (sessionStorage.getItem('usuarioNome') && sessionStorage.getItem('usuarioNome') !== 'undefined') {
-            nomeRolador = sessionStorage.getItem('usuarioNome'); 
+            nomeRolador = sessionStorage.getItem('usuarioNome');
         }
 
         const pacoteDeDados = {
             nome: nomeRolador,
+            usuarioId: sessionStorage.getItem('usuarioId'),
             input: inputString,
             campanhaId: campanhaAtiva,
             resultados: [],
@@ -308,7 +329,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const meuNomeLocal = sessionStorage.getItem('usuarioNome');
         const meuPersonagemLocal = document.getElementById('nome') ? document.getElementById('nome').value.trim() : '';
-        
+
         if (pacote.nome !== meuNomeLocal && pacote.nome !== meuPersonagemLocal) {
             header.style.color = 'var(--color-assim-blue)';
         }
@@ -345,10 +366,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             dado.icones.forEach((iconName, index) => {
                 const img = document.createElement('img');
-                
+
 
                 img.src = iconFilesAtuais[iconName];
-                
+
                 img.alt = iconName;
                 img.className = 'dado-animado';
 
@@ -424,9 +445,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (tituloRolagem) {
                     const textoDoTitulo = tituloRolagem.textContent.toLowerCase();
                     if (textoDoTitulo.includes(termoBusca)) {
-                        caixaDeRolagem.style.display = 'block'; 
+                        caixaDeRolagem.style.display = 'block';
                     } else {
-                        caixaDeRolagem.style.display = 'none';  
+                        caixaDeRolagem.style.display = 'none';
                     }
                 }
             });
