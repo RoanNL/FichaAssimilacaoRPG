@@ -3,9 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // === DICIONÁRIOS DE ÍCONES (TEMA DINÂMICO) ===
     // Ícones originais (pretos) para usar quando o fundo for claro
     const iconesTemaClaro = {
-        sucesso: 'assets/Sucesso.png',
+        sucesso: 'assets/sucesso.png',
         pressao: 'assets/pressao.png',
-        adaptacao: 'assets/Adaptacao.png',
+        adaptacao: 'assets/adaptacao.png',
         nada: 'assets/nada.png'
     };
 
