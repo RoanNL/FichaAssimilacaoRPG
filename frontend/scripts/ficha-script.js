@@ -535,7 +535,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
-        
+
         if (typeof window.sincronizarTrilhas === 'function') {
             window.sincronizarTrilhas();
         }
@@ -1118,16 +1118,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // SISTEMA DE SINCRONIZAÇÃO DAS TRILHAS (DET/ASSIM)
     // ==========================================
     window.sincronizarTrilhas = function() {
+        // Determinação: Preenche da Esquerda para a Direita (1 ao 10)
         const detNum = parseInt(document.getElementById('det-num').value) || 0;
         for (let i = 1; i <= 10; i++) {
             const check = document.getElementById(`det-${i}`);
             if (check) check.checked = (i <= detNum);
         }
 
+        // Assimilação: Preenche da Direita para a Esquerda (10 ao 1)
         const assimNum = parseInt(document.getElementById('assim-num').value) || 0;
         for (let i = 1; i <= 10; i++) {
             const check = document.getElementById(`assim-${i}`);
-            if (check) check.checked = (i <= assimNum);
+            if (check) check.checked = (i >= 11 - assimNum);
         }
     };
 
