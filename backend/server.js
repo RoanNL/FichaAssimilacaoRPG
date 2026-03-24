@@ -56,57 +56,58 @@ io.on('connection', (socket) => {
 
     // 🛡️ A CATRACA VIP E O HISTÓRICO LIGADO
     socket.on('entrar-na-campanha', async (dados) => {
-        const campanhaId = typeof dados === 'object' ? dados.campanhaId : dados;
-        const usuarioId = typeof dados === 'object' ? dados.usuarioId : null;
+        const { campanhaId, token } = dados; 
         
-        if (!usuarioId || !campanhaId) {
-            console.log("⚠️ Alguém tentou entrar na mesa sem ID de usuário ou Campanha!");
-            return; 
-        }
-
-        const salaStr = campanhaId.toString(); 
+        if (!token || !campanhaId) return;
 
         try {
+            const segredo = process.env.SEGREDO_JWT || 'segredo_super_secreto_rpg';
+            const usuarioVerificado = jwt.verify(token, segredo);
+            const usuarioIdSeguro = usuarioVerificado.id; 
+
+            const salaStr = campanhaId.toString(); 
             const sql = `SELECT * FROM membros_campanha WHERE campanha_id = $1 AND usuario_id = $2`;
-            const resultado = await pool.query(sql, [campanhaId, usuarioId]);
+            const resultado = await pool.query(sql, [campanhaId, usuarioIdSeguro]);
 
             if (resultado.rows.length > 0) {
                 socket.join(salaStr); 
-                console.log(`✅ Catraca VIP: Usuário ${usuarioId} acessou a mesa ${salaStr}`);
+                console.log(`✅ Catraca VIP: Usuário ${usuarioIdSeguro} acessou a mesa ${salaStr}`);
 
                 const sqlHist = `SELECT pacote FROM historico_rolagens WHERE campanha_id = $1 ORDER BY id ASC LIMIT 30`;
                 const histResult = await pool.query(sqlHist, [campanhaId]);
                 
                 const rolagensAntigas = histResult.rows.map(row => row.pacote);
-                console.log(`📜 Enviando ${rolagensAntigas.length} rolagens do histórico para o usuário ${usuarioId}`);
-                
                 socket.emit('carregar-historico', rolagensAntigas);
-
             } else {
-                console.log(`🚨 BARRADO: Usuário ${usuarioId} não faz parte da mesa ${salaStr}!`);
+                console.log(`🚨 BARRADO: Invasor bloqueado na mesa ${salaStr}!`);
             }
         } catch (err) {
-            console.error('❌ Erro na catraca VIP/Histórico:', err);
+            console.error('❌ Erro na catraca (Token Inválido ou Forjado)');
         }
     });
 
     // 🛡️ O ESCUDO DA ROLAGEM E SALVAMENTO
     socket.on('rolar-dados', async (pacoteDeDados) => {
-        const salaStr = pacoteDeDados.campanhaId.toString(); 
-        console.log(`🎲 Dados rolados na mesa ${salaStr} por ${pacoteDeDados.nome}`);
+        const { token, ...dadosDaRolagem } = pacoteDeDados;
         
-        socket.to(salaStr).emit('nova-rolagem', pacoteDeDados);
-        
+        if (!token) return;
+
         try {
-            const campanhaInt = parseInt(pacoteDeDados.campanhaId, 10);
+            const segredo = process.env.SEGREDO_JWT || 'segredo_super_secreto_rpg';
+            const usuarioVerificado = jwt.verify(token, segredo);
             
+            dadosDaRolagem.usuarioId = usuarioVerificado.id;
+            
+            const salaStr = dadosDaRolagem.campanhaId.toString(); 
+            socket.to(salaStr).emit('nova-rolagem', dadosDaRolagem);
+            
+            const campanhaInt = parseInt(dadosDaRolagem.campanhaId, 10);
             await pool.query(
                 `INSERT INTO historico_rolagens (campanha_id, pacote) VALUES ($1, $2)`, 
-                [campanhaInt, pacoteDeDados] 
+                [campanhaInt, dadosDaRolagem] 
             );
-            console.log(`✅ Rolagem salva no banco com sucesso!`);
         } catch (err) {
-            console.error("❌ Erro ao salvar histórico de rolagem no banco:", err);
+            console.error("❌ Tentativa de forjar rolagem bloqueada.");
         }
     });
 });
@@ -487,7 +488,7 @@ app.delete('/personagens/:id', verificarToken, async (req, res) => {
 });
 
 // ==========================================
-// ROTAS DE CAMPANHA (POSTGRESQL - BLINDADAS)
+// ROTAS DE CAMPANHA
 // ==========================================
 
 app.post('/campanhas', verificarToken, async (req, res) => {
@@ -511,8 +512,9 @@ app.post('/campanhas', verificarToken, async (req, res) => {
     }
 });
 
-app.post('/campanhas/entrar', async (req, res) => {
-    const { codigo_convite, usuario_id, personagem_id } = req.body;
+app.post('/campanhas/entrar', verificarToken, async (req, res) => {
+    const { codigo_convite, personagem_id } = req.body;
+    const usuarioIdSeguro = req.usuario.id; 
 
     try {
         const sqlBusca = `SELECT id FROM campanhas WHERE codigo_convite = $1`;
@@ -525,7 +527,7 @@ app.post('/campanhas/entrar', async (req, res) => {
         const campanhaId = resultBusca.rows[0].id;
 
         const sqlInsert = `INSERT INTO membros_campanha (campanha_id, usuario_id, personagem_id) VALUES ($1, $2, $3)`;
-        await pool.query(sqlInsert, [campanhaId, usuario_id, personagem_id]);
+        await pool.query(sqlInsert, [campanhaId, usuarioIdSeguro, personagem_id]);
 
         res.json({ mensagem: 'Você entrou na campanha com sucesso!', campanha_id: campanhaId });
     } catch (erro) {
@@ -533,20 +535,25 @@ app.post('/campanhas/entrar', async (req, res) => {
     }
 });
 
-app.get('/campanhas/usuario/:usuarioId', async (req, res) => {
-    const { usuarioId } = req.params;
+app.delete('/campanhas/:id/membros/:usuarioId', verificarToken, async (req, res) => {
+    const campanhaId = req.params.id;
+    const usuarioAlvoId = req.params.usuarioId;
+    const mestreRequisitanteId = req.usuario.id; 
+
     try {
-        const sql = `
-            SELECT c.id, c.nome, c.codigo_convite, c.mestre_id, 
-            (c.mestre_id::text = $1::text) as is_mestre
-            FROM campanhas c
-            JOIN membros_campanha m ON c.id = m.campanha_id
-            WHERE m.usuario_id = $2
-        `;
-        const result = await pool.query(sql, [usuarioId, usuarioId]);
-        res.json(result.rows);
+        const sqlCheck = `SELECT mestre_id FROM campanhas WHERE id = $1`;
+        const resultCheck = await pool.query(sqlCheck, [campanhaId]);
+
+        if (resultCheck.rows.length === 0) return res.status(404).json({ erro: 'Campanha não encontrada.' });
+
+        if (resultCheck.rows[0].mestre_id != mestreRequisitanteId) {
+            return res.status(403).json({ erro: 'ALERTA: Somente o Mestre pode remover jogadores!' });
+        }
+
+        await pool.query('DELETE FROM membros_campanha WHERE campanha_id = $1 AND usuario_id = $2', [campanhaId, usuarioAlvoId]);
+        res.status(200).json({ mensagem: 'Membro removido com sucesso.' });
     } catch (erro) {
-        res.status(500).json({ erro: 'Erro ao buscar campanhas.' });
+        res.status(500).json({ erro: 'Erro ao deletar membro.' });
     }
 });
 

@@ -893,7 +893,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             if (confirm("Tem certeza que deseja remover este jogador da campanha?")) {
                                 try {
                                     const delRes = await fetch(`${API_URL}/campanhas/${campanhaId}/membros/${usuarioIdRemover}`, {
-                                        method: 'DELETE'
+                                        method: 'DELETE',
+                                        headers: {
+                                            'Authorization': `Bearer ${sessionStorage.getItem('token')}`
+                                        }
                                     });
                                     if (delRes.ok) {
                                         event.target.closest('.jogador-card-mestre').remove();

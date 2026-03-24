@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             socket.emit('entrar-na-campanha', {
                 campanhaId: campanhaAtiva,
-                usuarioId: usuarioId
+                token: sessionStorage.getItem('token') 
             });
         } else {
             console.log("⚠️ Nenhuma mesa ativa na memória para reconectar.");
@@ -266,6 +266,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!parsedDice || parsedDice.length === 0) return;
 
         const campanhaAtiva = sessionStorage.getItem('campanhaAtiva');
+
+        if (campanhaAtiva) {
+            pacoteDeDados.token = sessionStorage.getItem('token');
+            socket.emit('rolar-dados', pacoteDeDados);
+        }
 
         let nomeRolador = 'Operador Misterioso';
         const inputNome = document.getElementById('nome');

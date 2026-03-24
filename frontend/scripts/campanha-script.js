@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (socketAtivo) {
                         socketAtivo.emit('entrar-na-campanha', {
                             campanhaId: idCampanha,
-                            usuarioId: sessionStorage.getItem('usuarioId')
+                            token: sessionStorage.getItem('token') 
                         });
                     } else {
                         console.error("⚠️ Socket não encontrado! O multiplayer não vai funcionar.");
@@ -200,8 +200,11 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const resposta = await fetch(`${API_URL}/campanhas/entrar`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ codigo_convite, usuario_id, personagem_id })
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${sessionStorage.getItem('token')}` 
+                },
+                body: JSON.stringify({ codigo_convite, personagem_id }) 
             });
             const dados = await resposta.json();
 
