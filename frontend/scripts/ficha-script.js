@@ -711,42 +711,51 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnConfirmDeleteChar = document.getElementById('btn-confirm-delete-char');
     const btnCancelDeleteChar = document.getElementById('btn-cancel-delete-char');
     const targetNameChar = document.getElementById('delete-char-target-name');
+    
+    let nomePersonagemLimpo = '';
 
-    btnDelete.addEventListener('click', async (e) => {
-        e.preventDefault();
-        if (!idPersonagemAtual) return mostrarNotificacao('Selecione um personagem para excluir.', 'aviso');
+    //  Abre o Modal
+    if (btnDelete) {
+        btnDelete.onclick = (e) => {
+            e.preventDefault();
+            if (!idPersonagemAtual) return mostrarNotificacao('Selecione um personagem para excluir.', 'aviso');
 
+            const nomePersonagemCru = document.getElementById('nome').value || '';
+            nomePersonagemLimpo = nomePersonagemCru.trim().toLowerCase() || 'sem nome';
+            
+            targetNameChar.textContent = nomePersonagemLimpo;
+            inputDeleteChar.value = '';
+            btnConfirmDeleteChar.disabled = true;
+            btnConfirmDeleteChar.classList.add('opacity-50', 'cursor-not-allowed');
 
-        const nomeDoPersonagem = document.getElementById('nome').value.trim() || 'Sem Nome';
-        
-        targetNameChar.textContent = nomeDoPersonagem;
-        inputDeleteChar.value = '';
-        btnConfirmDeleteChar.disabled = true;
-        btnConfirmDeleteChar.classList.add('opacity-50', 'cursor-not-allowed');
+            modalDeleteChar.classList.add('show');
+        };
+    }
 
-        modalDeleteChar.classList.add('show');
-    });
-
+    // Validador em Tempo Real
     if (inputDeleteChar) {
-        inputDeleteChar.addEventListener('input', (e) => {
-            if (e.target.value === targetNameChar.textContent) {
+        inputDeleteChar.oninput = (e) => {
+            const textoDigitado = e.target.value.trim().toLowerCase();
+            if (textoDigitado === nomePersonagemLimpo) {
                 btnConfirmDeleteChar.disabled = false;
                 btnConfirmDeleteChar.classList.remove('opacity-50', 'cursor-not-allowed');
             } else {
                 btnConfirmDeleteChar.disabled = true;
                 btnConfirmDeleteChar.classList.add('opacity-50', 'cursor-not-allowed');
             }
-        });
+        };
     }
 
+    // Cancela a exclusão
     if (btnCancelDeleteChar) {
-        btnCancelDeleteChar.addEventListener('click', () => {
+        btnCancelDeleteChar.onclick = () => {
             modalDeleteChar.classList.remove('show');
-        });
+        };
     }
 
+    // Executa a exclusão
     if (btnConfirmDeleteChar) {
-        btnConfirmDeleteChar.addEventListener('click', async () => {
+        btnConfirmDeleteChar.onclick = async () => {
             if (!idPersonagemAtual) return;
 
             const iconeOriginal = btnConfirmDeleteChar.innerHTML;
@@ -759,7 +768,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 
                 mostrarNotificacao('Ficha deletada com sucesso.', 'sucesso');
-
                 document.querySelectorAll('form').forEach(f => {
                     if (f.id !== 'auth-form' && f.id !== 'recuperar-form') f.reset();
                 });
@@ -777,7 +785,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } finally {
                 btnConfirmDeleteChar.innerHTML = iconeOriginal;
             }
-        });
+        };
     }
 
 
@@ -909,7 +917,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error(erro);
                 mostrarNotificacao("Erro ao buscar as fichas da mesa.", 'erro');
             } finally {
-                btnFichasMesa.textContent = "👑 Fichas da Mesa";
+                btnFichasMesa.textContent = "Fichas da Mesa";
             }
         });
     }
@@ -1018,7 +1026,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error(erro);
                 mostrarNotificacao("Erro ao buscar jogadores.", 'erro');
             } finally {
-                btnGerenciarJogadores.innerHTML = "👥 Jogadores";
+                btnGerenciarJogadores.textContent = "Jogadores";
             }
         });
     }

@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.btn-jogar').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const idCampanha = e.target.getAttribute('data-id');
-                    
+
                     const rawMestre = e.target.getAttribute('data-mestre');
                     const isMestre = rawMestre === 'true' || rawMestre === true || rawMestre === '1';
 
@@ -83,11 +83,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     sessionStorage.setItem('isMestreAtivo', isMestre);
 
                     const socketAtivo = typeof socket !== 'undefined' ? socket : (window.socket || window.meuSocket);
-                    
+
                     if (socketAtivo) {
                         socketAtivo.emit('entrar-na-campanha', {
                             campanhaId: idCampanha,
-                            token: sessionStorage.getItem('token') 
+                            token: sessionStorage.getItem('token')
                         });
                     } else {
                         console.error("⚠️ Socket não encontrado! O multiplayer não vai funcionar.");
@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const papel = isMestre ? 'Mestre' : 'Jogador';
                     mostrarNotificacao(`Conectado como ${papel}! Suas rolagens agora pertencem a esta mesa.`);
-                    
+
                     modalCampanhas.classList.remove('show');
                     window.location.reload();
                 });
@@ -106,92 +106,86 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // ==========================================
-            // LÓGICA DE EXCLUSÃO DE MESA 
-            // ==========================================
-            const modalDeleteCamp = document.getElementById('delete-camp-modal');
-            const inputDeleteCamp = document.getElementById('delete-camp-input');
-            const btnConfirmDeleteCamp = document.getElementById('btn-confirm-delete-camp');
-            const btnCancelDeleteCamp = document.getElementById('btn-cancel-delete-camp');
-            const targetNameCamp = document.getElementById('delete-camp-target-name');
-            let campanhaIdParaDeletar = null;
+        // LÓGICA DE EXCLUSÃO DE MESA 
+        // ==========================================
+        const modalDeleteCamp = document.getElementById('delete-camp-modal');
+        const inputDeleteCamp = document.getElementById('delete-camp-input');
+        const btnConfirmDeleteCamp = document.getElementById('btn-confirm-delete-camp');
+        const btnCancelDeleteCamp = document.getElementById('btn-cancel-delete-camp');
+        const targetNameCamp = document.getElementById('delete-camp-target-name');
 
-            document.querySelectorAll('.btn-excluir-campanha').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const targetBtn = e.target.closest('.btn-excluir-campanha');
-                    
-                    campanhaIdParaDeletar = targetBtn.getAttribute('data-id');
-                    const nomeDaCampanha = targetBtn.getAttribute('data-nome');
+        let campanhaIdParaDeletar = null;
+        let nomeDaCampanhaLimpo = '';
 
-                    targetNameCamp.textContent = nomeDaCampanha;
-                    inputDeleteCamp.value = '';
+
+        document.querySelectorAll('.btn-excluir-campanha').forEach(btn => {
+            btn.onclick = (e) => {
+                const targetBtn = e.target.closest('.btn-excluir-campanha');
+                campanhaIdParaDeletar = targetBtn.getAttribute('data-id');
+                const nomeDaCampanhaCru = targetBtn.getAttribute('data-nome') || '';
+
+                nomeDaCampanhaLimpo = nomeDaCampanhaCru.trim().toLowerCase() || 'sem nome';
+                targetNameCamp.textContent = nomeDaCampanhaLimpo;
+
+                inputDeleteCamp.value = '';
+                btnConfirmDeleteCamp.disabled = true;
+                btnConfirmDeleteCamp.classList.add('opacity-50', 'cursor-not-allowed');
+
+                modalDeleteCamp.classList.add('show');
+            };
+        });
+
+        if (inputDeleteCamp) {
+            inputDeleteCamp.oninput = (e) => {
+                const textoDigitado = e.target.value.trim().toLowerCase();
+                if (textoDigitado === nomeDaCampanhaLimpo) {
+                    btnConfirmDeleteCamp.disabled = false;
+                    btnConfirmDeleteCamp.classList.remove('opacity-50', 'cursor-not-allowed');
+                } else {
                     btnConfirmDeleteCamp.disabled = true;
                     btnConfirmDeleteCamp.classList.add('opacity-50', 'cursor-not-allowed');
+                }
+            };
+        }
 
-                    modalDeleteCamp.classList.add('show');
-                });
-            });
+        if (btnCancelDeleteCamp) {
+            btnCancelDeleteCamp.onclick = () => {
+                modalDeleteCamp.classList.remove('show');
+                campanhaIdParaDeletar = null;
+            };
+        }
 
-            if(inputDeleteCamp) {
-                const novoInputDelete = inputDeleteCamp.cloneNode(true);
-                inputDeleteCamp.parentNode.replaceChild(novoInputDelete, inputDeleteCamp);
+        if (btnConfirmDeleteCamp) {
+            btnConfirmDeleteCamp.onclick = async () => {
+                if (!campanhaIdParaDeletar) return;
+                const usuarioLogadoId = sessionStorage.getItem('usuarioId');
+                const iconeOriginal = btnConfirmDeleteCamp.innerHTML;
+                btnConfirmDeleteCamp.innerHTML = "Destruindo...";
 
-                novoInputDelete.addEventListener('input', (e) => {
-                    if (e.target.value === targetNameCamp.textContent) {
-                        btnConfirmDeleteCamp.disabled = false;
-                        btnConfirmDeleteCamp.classList.remove('opacity-50', 'cursor-not-allowed');
-                    } else {
-                        btnConfirmDeleteCamp.disabled = true;
-                        btnConfirmDeleteCamp.classList.add('opacity-50', 'cursor-not-allowed');
-                    }
-                });
-            }
-
-            if(btnCancelDeleteCamp) {
-                const novoBtnCancel = btnCancelDeleteCamp.cloneNode(true);
-                btnCancelDeleteCamp.parentNode.replaceChild(novoBtnCancel, btnCancelDeleteCamp);
-                
-                novoBtnCancel.addEventListener('click', () => {
-                    modalDeleteCamp.classList.remove('show');
-                    campanhaIdParaDeletar = null;
-                });
-            }
-
-            if(btnConfirmDeleteCamp) {
-                const novoBtnConfirm = btnConfirmDeleteCamp.cloneNode(true);
-                btnConfirmDeleteCamp.parentNode.replaceChild(novoBtnConfirm, btnConfirmDeleteCamp);
-
-                novoBtnConfirm.addEventListener('click', async () => {
-                    if (!campanhaIdParaDeletar) return;
-                    const usuarioLogadoId = sessionStorage.getItem('usuarioId');
-
-                    const iconeOriginal = novoBtnConfirm.innerHTML;
-                    novoBtnConfirm.innerHTML = "Destruindo...";
-                    
-                    try {
-                        const resposta = await fetch(`${API_URL}/campanhas/${campanhaIdParaDeletar}`, {
-                            method: 'DELETE',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${sessionStorage.getItem('token')}` 
-                            }
-                        });
-                        
-                        const dados = await resposta.json();
-                        
-                        if (resposta.ok) {
-                            mostrarNotificacao(dados.mensagem, 'sucesso');
-                            modalDeleteCamp.classList.remove('show');
-                            carregarMinhasCampanhas(usuarioLogadoId); 
-                        } else {
-                            mostrarNotificacao(dados.erro, 'erro');
+                try {
+                    const resposta = await fetch(`${API_URL}/campanhas/${campanhaIdParaDeletar}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${sessionStorage.getItem('token')}`
                         }
-                    } catch (err) {
-                        mostrarNotificacao("Erro ao excluir mesa.", 'erro');
-                    } finally {
-                        novoBtnConfirm.innerHTML = iconeOriginal;
+                    });
+                    const dados = await resposta.json();
+
+                    if (resposta.ok) {
+                        mostrarNotificacao(dados.mensagem, 'sucesso');
+                        modalDeleteCamp.classList.remove('show');
+                        carregarMinhasCampanhas(usuarioLogadoId);
+                    } else {
+                        mostrarNotificacao(dados.erro, 'erro');
                     }
-                });
-            }
+                } catch (err) {
+                    mostrarNotificacao("Erro ao excluir mesa.", 'erro');
+                } finally {
+                    btnConfirmDeleteCamp.innerHTML = iconeOriginal;
+                }
+            };
+        }
     }
 
     // Puxa os personagens da galeria principal para o select de entrada
@@ -222,11 +216,11 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const resposta = await fetch(`${API_URL}/campanhas`, {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${sessionStorage.getItem('token')}` 
+                    'Authorization': `Bearer ${sessionStorage.getItem('token')}`
                 },
-                body: JSON.stringify({ nome }) 
+                body: JSON.stringify({ nome })
             });
             const dados = await resposta.json();
 
@@ -257,11 +251,11 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const resposta = await fetch(`${API_URL}/campanhas/entrar`, {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${sessionStorage.getItem('token')}` 
+                    'Authorization': `Bearer ${sessionStorage.getItem('token')}`
                 },
-                body: JSON.stringify({ codigo_convite, personagem_id }) 
+                body: JSON.stringify({ codigo_convite, personagem_id })
             });
             const dados = await resposta.json();
 
