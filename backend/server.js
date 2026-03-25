@@ -187,6 +187,18 @@ app.post('/registro', async (req, res) => {
         return res.status(400).json({ erro: 'Usuário, e-mail e senha são obrigatórios.' });
     }
 
+    const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!regexEmail.test(email)) {
+        console.warn(`🚨 HACKER BARRADO: Tentativa de injeção no E-mail detectada: ${email}`);
+        return res.status(400).json({ erro: 'Formato de e-mail inválido ou contendo código malicioso.' });
+    }
+
+    const regexUsername = /^[a-zA-Z0-9_.-]+$/;
+    if (!regexUsername.test(usernameLowerCase)) {
+        console.warn(`🚨 HACKER BARRADO: Tentativa de injeção no Nome detectada: ${usernameLowerCase}`);
+        return res.status(400).json({ erro: 'O nome de usuário deve conter apenas letras, números, _ ou -' });
+    }
+
     try {
         const salt = await bcrypt.genSalt(10);
         const senhaHash = await bcrypt.hash(password, salt);
@@ -491,7 +503,7 @@ app.get('/personagem/:id', verificarToken, async (req, res) => {
         if (resultado.rows.length === 0) {
             return res.status(404).json({ erro: 'Personagem não encontrado.' });
         }
-        
+
         res.json(resultado.rows[0]);
     } catch (erro) {
         console.error('❌ Erro ao carregar ficha:', erro);
