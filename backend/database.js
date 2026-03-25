@@ -30,7 +30,8 @@ async function criarTabelas() {
             nome_personagem VARCHAR(255),
             ocupacao VARCHAR(255),
             foto TEXT,
-            dados_ficha JSONB
+            dados_ficha JSONB,
+            created_at TIMESTAMPTZ DEFAULT now() 
         );
 
         CREATE TABLE IF NOT EXISTS campanhas (

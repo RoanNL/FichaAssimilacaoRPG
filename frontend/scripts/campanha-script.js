@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     : `<span class="badge-jogador"><i data-lucide="swords" class="w-8 h-8"></i> Jogador</span>`;
 
                 const btnExcluir = camp.is_mestre
-                    ? `<button class="btn-excluir-campanha" data-id="${camp.id}" style="background-color: #8b0000; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; margin-top: 5px; font-weight: bold; font-family: 'Special Elite', monospace;">Apagar Mesa</button>`
+                    ? `<button class="btn-excluir-campanha flex items-center justify-center gap-1 w-full mt-2" data-id="${camp.id}" data-nome="${camp.nome}" style="background-color: #8b0000; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold; font-family: 'Special Elite', monospace;"><i data-lucide="flame" class="w-4 h-4"></i> Apagar Mesa</button>`
                     : '';
 
                 card.innerHTML = `
@@ -105,38 +105,93 @@ document.addEventListener('DOMContentLoaded', () => {
             listaCampanhas.innerHTML = '<p style="color: #a04040;">Erro ao carregar campanhas.</p>';
         }
 
-        document.querySelectorAll('.btn-excluir-campanha').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    const idCampanha = e.target.getAttribute('data-id');
-                    const usuarioLogadoId = sessionStorage.getItem('usuarioId');
+        // ==========================================
+            // LÓGICA DE EXCLUSÃO DE MESA 
+            // ==========================================
+            const modalDeleteCamp = document.getElementById('delete-camp-modal');
+            const inputDeleteCamp = document.getElementById('delete-camp-input');
+            const btnConfirmDeleteCamp = document.getElementById('btn-confirm-delete-camp');
+            const btnCancelDeleteCamp = document.getElementById('btn-cancel-delete-camp');
+            const targetNameCamp = document.getElementById('delete-camp-target-name');
+            let campanhaIdParaDeletar = null;
 
-                    const confirmacao = confirm('🔥 ALERTA CRÍTICO 🔥\n\nTem certeza que deseja APAGAR esta mesa? Todos os jogadores serão expulsos e o histórico será perdido. Isso NÃO tem volta!');
+            document.querySelectorAll('.btn-excluir-campanha').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const targetBtn = e.target.closest('.btn-excluir-campanha');
+                    
+                    campanhaIdParaDeletar = targetBtn.getAttribute('data-id');
+                    const nomeDaCampanha = targetBtn.getAttribute('data-nome');
 
-                    if (confirmacao) {
-                        e.target.textContent = "Apagando...";
-                        try {
-                            const resposta = await fetch(`${API_URL}/campanhas/${idCampanha}`, {
-                                method: 'DELETE',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'Authorization': `Bearer ${sessionStorage.getItem('token')}` 
-                                }
-                            });
-                            
-                            const dados = await resposta.json();
-                            
-                            if (resposta.ok) {
-                                mostrarNotificacao(dados.mensagem, 'sucesso');
-                                carregarMinhasCampanhas(usuarioLogadoId); 
-                            } else {
-                                mostrarNotificacao(dados.erro, 'erro');
-                            }
-                        } catch (err) {
-                            mostrarNotificacao("Erro ao excluir mesa.", 'erro');
-                        }
-                    }
+                    targetNameCamp.textContent = nomeDaCampanha;
+                    inputDeleteCamp.value = '';
+                    btnConfirmDeleteCamp.disabled = true;
+                    btnConfirmDeleteCamp.classList.add('opacity-50', 'cursor-not-allowed');
+
+                    modalDeleteCamp.classList.add('show');
                 });
             });
+
+            if(inputDeleteCamp) {
+                const novoInputDelete = inputDeleteCamp.cloneNode(true);
+                inputDeleteCamp.parentNode.replaceChild(novoInputDelete, inputDeleteCamp);
+
+                novoInputDelete.addEventListener('input', (e) => {
+                    if (e.target.value === targetNameCamp.textContent) {
+                        btnConfirmDeleteCamp.disabled = false;
+                        btnConfirmDeleteCamp.classList.remove('opacity-50', 'cursor-not-allowed');
+                    } else {
+                        btnConfirmDeleteCamp.disabled = true;
+                        btnConfirmDeleteCamp.classList.add('opacity-50', 'cursor-not-allowed');
+                    }
+                });
+            }
+
+            if(btnCancelDeleteCamp) {
+                const novoBtnCancel = btnCancelDeleteCamp.cloneNode(true);
+                btnCancelDeleteCamp.parentNode.replaceChild(novoBtnCancel, btnCancelDeleteCamp);
+                
+                novoBtnCancel.addEventListener('click', () => {
+                    modalDeleteCamp.classList.remove('show');
+                    campanhaIdParaDeletar = null;
+                });
+            }
+
+            if(btnConfirmDeleteCamp) {
+                const novoBtnConfirm = btnConfirmDeleteCamp.cloneNode(true);
+                btnConfirmDeleteCamp.parentNode.replaceChild(novoBtnConfirm, btnConfirmDeleteCamp);
+
+                novoBtnConfirm.addEventListener('click', async () => {
+                    if (!campanhaIdParaDeletar) return;
+                    const usuarioLogadoId = sessionStorage.getItem('usuarioId');
+
+                    const iconeOriginal = novoBtnConfirm.innerHTML;
+                    novoBtnConfirm.innerHTML = "Destruindo...";
+                    
+                    try {
+                        const resposta = await fetch(`${API_URL}/campanhas/${campanhaIdParaDeletar}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${sessionStorage.getItem('token')}` 
+                            }
+                        });
+                        
+                        const dados = await resposta.json();
+                        
+                        if (resposta.ok) {
+                            mostrarNotificacao(dados.mensagem, 'sucesso');
+                            modalDeleteCamp.classList.remove('show');
+                            carregarMinhasCampanhas(usuarioLogadoId); 
+                        } else {
+                            mostrarNotificacao(dados.erro, 'erro');
+                        }
+                    } catch (err) {
+                        mostrarNotificacao("Erro ao excluir mesa.", 'erro');
+                    } finally {
+                        novoBtnConfirm.innerHTML = iconeOriginal;
+                    }
+                });
+            }
     }
 
     // Puxa os personagens da galeria principal para o select de entrada

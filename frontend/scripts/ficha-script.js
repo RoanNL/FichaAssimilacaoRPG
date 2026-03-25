@@ -703,32 +703,82 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btnSave.addEventListener('click', () => salvarFicha(false));
 
-    // BOTÃO DELETAR
-    btnDelete.addEventListener('click', async () => {
+    // ==========================================
+    // SISTEMA DE EXCLUSÃO DE PERSONAGEM 
+    // ==========================================
+    const modalDeleteChar = document.getElementById('delete-char-modal');
+    const inputDeleteChar = document.getElementById('delete-char-input');
+    const btnConfirmDeleteChar = document.getElementById('btn-confirm-delete-char');
+    const btnCancelDeleteChar = document.getElementById('btn-cancel-delete-char');
+    const targetNameChar = document.getElementById('delete-char-target-name');
+
+    btnDelete.addEventListener('click', async (e) => {
+        e.preventDefault();
         if (!idPersonagemAtual) return mostrarNotificacao('Selecione um personagem para excluir.', 'aviso');
 
-        const confirmacao = confirm('Tem certeza que deseja apagar esta ficha permanentemente?');
-        if (!confirmacao) return;
 
-        try {
-            await fetch(`${API_URL}/personagens/${idPersonagemAtual}`, { 
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` } 
-            });
-            mostrarNotificacao('Ficha deletada com sucesso.', 'sucesso');
+        const nomeDoPersonagem = document.getElementById('nome').value.trim() || 'Sem Nome';
+        
+        targetNameChar.textContent = nomeDoPersonagem;
+        inputDeleteChar.value = '';
+        btnConfirmDeleteChar.disabled = true;
+        btnConfirmDeleteChar.classList.add('opacity-50', 'cursor-not-allowed');
 
-            document.querySelectorAll('form').forEach(f => {
-                if (f.id !== 'auth-form') f.reset();
-            });
-            idPersonagemAtual = null;
-            sessionStorage.removeItem('personagemAtivoId');
-            if (photoPreview) photoPreview.src = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
-
-            await carregarListaPersonagens();
-        } catch (erro) {
-            console.error('Erro ao deletar:', erro);
-        }
+        modalDeleteChar.classList.add('show');
     });
+
+    if (inputDeleteChar) {
+        inputDeleteChar.addEventListener('input', (e) => {
+            if (e.target.value === targetNameChar.textContent) {
+                btnConfirmDeleteChar.disabled = false;
+                btnConfirmDeleteChar.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else {
+                btnConfirmDeleteChar.disabled = true;
+                btnConfirmDeleteChar.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        });
+    }
+
+    if (btnCancelDeleteChar) {
+        btnCancelDeleteChar.addEventListener('click', () => {
+            modalDeleteChar.classList.remove('show');
+        });
+    }
+
+    if (btnConfirmDeleteChar) {
+        btnConfirmDeleteChar.addEventListener('click', async () => {
+            if (!idPersonagemAtual) return;
+
+            const iconeOriginal = btnConfirmDeleteChar.innerHTML;
+            btnConfirmDeleteChar.innerHTML = "Apagando...";
+
+            try {
+                await fetch(`${API_URL}/personagens/${idPersonagemAtual}`, { 
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
+                });
+                
+                mostrarNotificacao('Ficha deletada com sucesso.', 'sucesso');
+
+                document.querySelectorAll('form').forEach(f => {
+                    if (f.id !== 'auth-form' && f.id !== 'recuperar-form') f.reset();
+                });
+                
+                idPersonagemAtual = null;
+                sessionStorage.removeItem('personagemAtivoId');
+                const photoPreview = document.getElementById('char-photo-preview');
+                if (photoPreview) photoPreview.src = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
+
+                modalDeleteChar.classList.remove('show');
+                await carregarListaPersonagens();
+            } catch (erro) {
+                console.error('Erro ao deletar:', erro);
+                mostrarNotificacao('Erro ao deletar ficha.', 'erro');
+            } finally {
+                btnConfirmDeleteChar.innerHTML = iconeOriginal;
+            }
+        });
+    }
 
 
     // ==========================================

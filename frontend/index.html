@@ -559,6 +559,50 @@
         </div>
     </div>
 
+    <div id="delete-char-modal" class="modal z-[99999]">
+        <div class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border-2 border-rpg-red rounded-md p-6 md:p-8 max-w-[500px] w-[90%] text-center shadow-2xl relative">
+            <div class="mx-auto flex items-center justify-center w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 mb-4">
+                <i data-lucide="alert-triangle" class="w-6 h-6 text-rpg-red"></i>
+            </div>
+            <h2 class="text-2xl font-rpg font-black text-rpg-red uppercase mb-2">Excluir Personagem</h2>
+            <p class="mb-4 text-gray-700 dark:text-gray-300 text-sm md:text-base">
+                Esta ação é <strong class="text-rpg-red">irreversível</strong>. Todos os dados desta ficha serão perdidos. Para confirmar, digite o nome exato do personagem abaixo:
+            </p>
+            <div id="delete-char-target-name" class="font-bold text-lg md:text-xl text-black dark:text-white mb-4 bg-gray-200 dark:bg-[#1a1a1a] py-3 rounded tracking-wider select-all border border-gray-300 dark:border-gray-700"></div>
+            
+            <input type="text" id="delete-char-input" placeholder="Digite o nome aqui..." class="w-full p-3 mb-6 bg-white dark:bg-[#242424] border border-gray-400 dark:border-gray-600 rounded outline-none focus:ring-2 focus:ring-rpg-red text-center text-black dark:text-white font-bold transition-colors" autocomplete="off">
+            
+            <div class="flex justify-between gap-4">
+                <button id="btn-cancel-delete-char" class="w-1/2 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 rounded uppercase font-rpg transition-colors">Cancelar</button>
+                <button id="btn-confirm-delete-char" class="w-1/2 bg-rpg-red hover:bg-red-800 text-white font-bold py-3 rounded uppercase font-rpg transition-opacity duration-300 opacity-50 cursor-not-allowed flex justify-center items-center gap-2" disabled>
+                    <i data-lucide="trash-2" class="w-5 h-5"></i> Excluir
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="delete-camp-modal" class="modal z-[99999]">
+        <div class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border-2 border-rpg-red rounded-md p-6 md:p-8 max-w-[500px] w-[90%] text-center shadow-2xl relative">
+            <div class="mx-auto flex items-center justify-center w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 mb-4">
+                <i data-lucide="flame" class="w-6 h-6 text-rpg-red"></i>
+            </div>
+            <h2 class="text-2xl font-rpg font-black text-rpg-red uppercase mb-2">Destruir Mesa</h2>
+            <p class="mb-4 text-gray-700 dark:text-gray-300 text-sm md:text-base">
+                Esta ação é <strong class="text-rpg-red">irreversível</strong>. Todos os jogadores serão expulsos e o histórico será apagado. Para confirmar, digite o nome exato da mesa:
+            </p>
+            <div id="delete-camp-target-name" class="font-bold text-lg md:text-xl text-black dark:text-white mb-4 bg-gray-200 dark:bg-[#1a1a1a] py-3 rounded tracking-wider select-all border border-gray-300 dark:border-gray-700"></div>
+            
+            <input type="text" id="delete-camp-input" placeholder="Digite o nome da mesa aqui..." class="w-full p-3 mb-6 bg-white dark:bg-[#242424] border border-gray-400 dark:border-gray-600 rounded outline-none focus:ring-2 focus:ring-rpg-red text-center text-black dark:text-white font-bold transition-colors" autocomplete="off">
+            
+            <div class="flex justify-between gap-4">
+                <button id="btn-cancel-delete-camp" class="w-1/2 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 rounded uppercase font-rpg transition-colors">Cancelar</button>
+                <button id="btn-confirm-delete-camp" class="w-1/2 bg-rpg-red hover:bg-red-800 text-white font-bold py-3 rounded uppercase font-rpg transition-opacity duration-300 opacity-50 cursor-not-allowed flex justify-center items-center gap-2" disabled>
+                    <i data-lucide="skull" class="w-5 h-5"></i> Destruir
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div id="galeria-modal" class="modal">
         <div class="modal-content bg-[#1a1a1a] border border-[#333] max-w-[900px] w-[95%] p-6 md:p-8 rounded-md relative shadow-2xl">
             <span id="fechar-galeria" class="modal-close absolute top-3 right-5 text-gray-400 hover:text-white text-3xl cursor-pointer">&times;</span>
