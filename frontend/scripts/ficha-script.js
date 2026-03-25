@@ -650,19 +650,25 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!usuarioLogadoId) return;
 
         const dadosFicha = coletarDadosFicha();
-        const nomePersonagem = nomeInput.value || 'INFECTADO';
+        
+        const nomePersonagem = nomeInput.value.trim();
         const foto = dadosFicha['char-photo'] || null;
+
+        if (!nomePersonagem || nomePersonagem === "") {
+            return mostrarNotificacao("O personagem precisa de pelo menos um Nome para ser salvo!", "aviso");
+        }
 
         const payload = {
             usuarioId: usuarioLogadoId,
             personagemId: idPersonagemAtual,
-            nome: nomePersonagem,
+            nome: nomePersonagem, 
             ocupacao: document.getElementById('ocupacao').value,
             dadosFicha: dadosFicha,
             foto: foto
         };
 
         if (!silencioso) btnSave.textContent = 'Salvando...';
+        
 
         try {
             const resposta = await fetch(`${API_URL}/personagens`, {
