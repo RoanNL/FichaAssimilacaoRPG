@@ -151,8 +151,8 @@
                 </a>
             </li>
             <li>
-                <a href="#" id="btn-toggle-tema" class="block text-gray-600 dark:text-gray-400 py-4 px-[22px] text-base font-bold uppercase transition-all duration-300 border-b-[3px] border-transparent hover:text-black dark:hover:text-orange-500 cursor-pointer hover:border-b-[#8c3a3a] dark:hover:border-b-[#3a7c8c]">
-                    🌙 Tema Escuro
+                <a href="#" id="btn-toggle-tema" class="flex items-center gap-2 text-gray-600 dark:text-gray-400 py-4 px-[22px] text-base font-bold uppercase transition-all duration-300 border-b-[3px] border-transparent hover:text-black dark:hover:text-orange-500 cursor-pointer hover:border-b-[#8c3a3a] dark:hover:border-b-[#3a7c8c]">
+                    <i data-lucide="moon" class="w-5 h-5"></i> Tema Escuro
                 </a>
             </li>
             <li>
@@ -177,12 +177,12 @@
                     Personagens
                 </button>
                 
-                <button id="btn-fichas-mesa" style="display: none; background-color: #ff9800;" class="font-rpg text-base py-2.5 px-4 rounded border-none font-bold text-white uppercase cursor-pointer transition-colors duration-200 hover:brightness-90">
-                    👑 Fichas da Mesa
+                <button id="btn-fichas-mesa" style="display: none; background-color: #ff9800;" class="flex items-center justify-center gap-2 font-rpg text-base py-2.5 px-4 rounded border-none font-bold text-white uppercase cursor-pointer transition-colors duration-200 hover:brightness-90">
+                    <i data-lucide="crown" class="w-5 h-5"></i> Fichas da Mesa
                 </button>
                 
-                <button id="btn-gerenciar-jogadores" style="display: none; background-color: #d9534f;" class="font-rpg text-base py-2.5 px-4 rounded border-none font-bold text-white uppercase cursor-pointer transition-colors duration-200 hover:brightness-90">
-                    👥 Jogadores
+                <button id="btn-gerenciar-jogadores" style="display: none; background-color: #d9534f;" class="flex items-center justify-center gap-2 font-rpg text-base py-2.5 px-4 rounded border-none font-bold text-white uppercase cursor-pointer transition-colors duration-200 hover:brightness-90">
+                    <i data-lucide="users" class="w-5 h-5"></i> Jogadores
                 </button>
                 
                 <button id="btn-save-char" class="font-rpg text-base py-2.5 px-4 rounded border-none font-bold text-white uppercase cursor-pointer transition-colors duration-200 bg-rpg-green hover:bg-green-900">
@@ -242,7 +242,7 @@
                 <h2>APTIDÕES</h2>
                 
                 <div class="grupo-aptidoes">
-                    <h3>INSTINTOS <span style="filter: grayscale(1); filter:opacity(70%);">⬛</span></h3>
+                    <h3>INSTINTOS <i data-lucide="square" class="w-4 h-4 inline-block fill-current opacity-70 text-gray-500"></i></h3>
                     <div class="aptidoes-grid">
                         <div class="aptidao-box">
                             <label>Influência</label>
@@ -272,7 +272,7 @@
                 </div>
 
                 <div class="grupo-aptidoes">
-                    <h3>CONHECIMENTOS <span style="filter: grayscale(1)">🔷</span></h3>
+                    <h3>CONHECIMENTOS <i data-lucide="diamond" class="w-4 h-4 inline-block fill-current opacity-70 text-blue-500"></i></h3>
                     <div class="aptidoes-grid">
                         <div class="aptidao-box"><label>Biologia</label><div class="dots-track"><input type="checkbox" id="bio-1"><input type="checkbox" id="bio-2"><input type="checkbox" id="bio-3"><input type="checkbox" id="bio-4"><input type="checkbox" id="bio-5"></div></div>
                         <div class="aptidao-box"><label>Erudição</label><div class="dots-track"><input type="checkbox" id="eru-1"><input type="checkbox" id="eru-2"><input type="checkbox" id="eru-3"><input type="checkbox" id="eru-4"><input type="checkbox" id="eru-5"></div></div>
@@ -284,7 +284,7 @@
                 </div>
 
                 <div class="grupo-aptidoes">
-                    <h3>PRÁTICAS <span style="filter: grayscale(1)">🔷</span></h3>
+                    <h3>PRÁTICAS <i data-lucide="diamond" class="w-4 h-4 inline-block fill-current opacity-70 text-blue-500"></i></h3>
                     <div class="aptidoes-grid">
                         <div class="aptidao-box"><label>Armas</label><div class="dots-track"><input type="checkbox" id="arm-1"><input type="checkbox" id="arm-2"><input type="checkbox" id="arm-3"><input type="checkbox" id="arm-4"><input type="checkbox" id="arm-5"></div></div>
                         <div class="aptidao-box"><label>Atletismo</label><div class="dots-track"><input type="checkbox" id="atl-1"><input type="checkbox" id="atl-2"><input type="checkbox" id="atl-3"><input type="checkbox" id="atl-4"><input type="checkbox" id="atl-5"></div></div>
@@ -423,8 +423,8 @@
                     <div class="mb-8">
                         <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
                             <h2 class="text-xl md:text-2xl font-rpg font-black text-white bg-[#6b2c2c] px-4 py-1 rounded-sm shadow-md uppercase tracking-wider text-center md:text-left mx-auto md:mx-0">Características</h2>
-                            <button type="button" id="btn-add-carac" class="w-full md:w-auto bg-[#6b2c2c] hover:bg-red-900 text-white font-bold py-2 px-4 rounded text-sm transition-colors cursor-pointer border-none shadow-md">
-                                + Adicionar
+                            <button type="button" id="btn-add-carac" class="w-full md:w-auto flex items-center justify-center gap-2 bg-[#6b2c2c] hover:bg-red-900 text-white font-bold py-2 px-4 rounded text-sm transition-colors cursor-pointer border-none shadow-md">
+                                <i data-lucide="plus-circle" class="w-4 h-4"></i> Adicionar
                             </button>
                         </div>
                         
@@ -494,7 +494,7 @@
                                 
                                 <div id="anotacoes-preview" class="w-full flex-grow min-h-[200px] p-4 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#2a2a2a] text-black dark:text-white font-sans text-base shadow-inner cursor-pointer hover:ring-2 hover:ring-[#8c7454] transition-all overflow-hidden relative group" title="Clique para expandir e editar">
                                     <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-5 dark:group-hover:bg-opacity-20 transition-all z-10 pointer-events-none"></div>
-                                    <div id="anotacoes-texto-preview" class="font-rpgwhitespace-pre-wrap opacity-90 h-full overflow-hidden" style="display: -webkit-box; -webkit-line-clamp: 10; -webkit-box-orient: vertical;">
+                                    <div id="anotacoes-texto-preview" class="font-rpg whitespace-pre-wrap opacity-90 h-full overflow-hidden" style="display: -webkit-box; -webkit-line-clamp: 10; -webkit-box-orient: vertical;">
                                         <span class="font-rpg text-gray-400 dark:text-gray-500 italic font-bold">Clique aqui para escrever suas anotações...</span>
                                     </div>
                                 </div>
@@ -546,7 +546,10 @@
                         Histórico da Sessão
                     </h3>
                     
-                    <input type="text" id="filtro-historico" placeholder="🔍 Filtrar jogador..." class="py-2 px-4 rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-[#2a2a2a] text-gray-800 dark:text-white font-sans outline-none focus:ring-2 focus:ring-rpg-blue transition-colors">
+                    <div class="relative w-full md:w-auto">
+                        <i data-lucide="search" class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+                        <input type="text" id="filtro-historico" placeholder="Filtrar jogador..." class="py-2 pl-10 pr-4 rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-[#2a2a2a] text-gray-800 dark:text-white font-sans outline-none focus:ring-2 focus:ring-rpg-blue transition-colors w-full">
+                    </div>
                 </div>
                 
                 <div id="rolador-historico" class="max-h-[250px] overflow-y-auto pr-3">
@@ -560,8 +563,9 @@
         <div class="modal-content bg-[#1a1a1a] border border-[#333] max-w-[900px] w-[95%] p-6 md:p-8 rounded-md relative shadow-2xl">
             <span id="fechar-galeria" class="modal-close absolute top-3 right-5 text-gray-400 hover:text-white text-3xl cursor-pointer">&times;</span>
             
-            <div class="mb-6 mt-2">
-                <input type="text" id="busca-personagem" placeholder="🔍 Buscar personagem..." class="w-full p-3 bg-[#242424] border border-[#333] text-white rounded font-sans text-lg box-border outline-none focus:ring-2 focus:ring-rpg-blue transition-colors shadow-inner">
+            <div class="mb-6 mt-2 relative w-full">
+                <i data-lucide="search" class="w-6 h-6 absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+                <input type="text" id="busca-personagem" placeholder="Buscar personagem..." class="w-full p-3 pl-12 bg-[#242424] border border-[#333] text-white rounded font-sans text-lg box-border outline-none focus:ring-2 focus:ring-rpg-blue transition-colors shadow-inner">
             </div>
 
             <div id="grid-personagens" class="galeria-grid">
@@ -573,8 +577,10 @@
         <div class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark p-0 overflow-hidden max-w-[850px] w-[95%] rounded-md relative shadow-xl border border-gray-300 dark:border-gray-800">
             <span id="fechar-campanhas" class="modal-close absolute top-4 right-6 text-white hover:text-gray-200 text-3xl cursor-pointer z-10">&times;</span>
             
-            <div class="bg-rpg-red text-white p-5 md:px-8 text-center relative">
-                <h2 class="text-white m-0 text-2xl font-black uppercase font-rpg border-none">🎲 Lobby de Campanha</h2>
+            <div class="bg-rpg-red text-white p-5 md:px-8 text-center relative flex flex-col items-center">
+                <h2 class="flex items-center gap-2 text-white m-0 text-2xl font-black uppercase font-rpg border-none">
+                    <i data-lucide="dices" class="w-8 h-8"></i> Lobby de Campanha
+                </h2>
                 <p class="m-0 mt-1 text-sm md:text-base opacity-90">Gerencie suas mesas ou conecte-se a uma nova aventura.</p>
             </div>
             
@@ -588,7 +594,9 @@
                 
                 <div class="flex flex-col gap-6">
                     <div class="bg-white dark:bg-[#1e1e1e] border-t-4 border-t-rpg-green border border-gray-300 dark:border-gray-700 p-5 rounded-lg shadow-sm">
-                        <h4 class="m-0 mb-1 text-lg text-gray-800 dark:text-gray-200 font-bold">⚔️ Entrar em uma Mesa</h4>
+                        <h4 class="flex items-center gap-2 m-0 mb-1 text-lg text-gray-800 dark:text-gray-200 font-bold">
+                            <i data-lucide="swords" class="w-5 h-5"></i> Entrar em uma Mesa
+                        </h4>
                         <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Tem um código de convite? Junte-se à party!</p>
                         <input type="text" id="codigo-convite-input" placeholder="Código (Ex: A7X9P2)" maxlength="6" class="w-full mb-3 p-2.5 bg-gray-50 dark:bg-[#2a2a2a] border border-gray-300 dark:border-gray-600 rounded text-black dark:text-white uppercase outline-none focus:ring-2 focus:ring-rpg-green transition-colors">
                         <select id="char-select-campanha" class="w-full mb-3 p-2.5 bg-gray-50 dark:bg-[#2a2a2a] border border-gray-300 dark:border-gray-600 rounded text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-green transition-colors">
@@ -598,7 +606,9 @@
                     </div>
 
                     <div class="bg-white dark:bg-[#1e1e1e] border-t-4 border-t-rpg-blue border border-gray-300 dark:border-gray-700 p-5 rounded-lg shadow-sm">
-                        <h4 class="m-0 mb-1 text-lg text-gray-800 dark:text-gray-200 font-bold">👑 Criar Nova Mesa</h4>
+                        <h4 class="flex items-center gap-2 m-0 mb-1 text-lg text-gray-800 dark:text-gray-200 font-bold">
+                            <i data-lucide="crown" class="w-5 h-5"></i> Criar Nova Mesa
+                        </h4>
                         <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Seja o Mestre e convide seus jogadores.</p>
                         <input type="text" id="nova-campanha-nome" placeholder="Nome da Campanha..." class="w-full mb-3 p-2.5 bg-gray-50 dark:bg-[#2a2a2a] border border-gray-300 dark:border-gray-600 rounded text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-blue transition-colors">
                         <button id="btn-criar-campanha" class="w-full bg-rpg-blue hover:bg-rpg-blue-hover text-white font-bold py-2.5 rounded transition-colors uppercase font-rpg">Fundar Campanha</button>
@@ -627,7 +637,7 @@
             Ficha Assimilação RPG
             </h3>
             <p class="font-sans text-gray-600 dark:text-gray-400 text-sm md:text-base font-bold mb-3">
-                Desenvolvido com ❤ por <a href="https://www.linkedin.com/in/roannl" target="_blank" class="text-rpg-blue hover:text-rpg-blue-hover dark:text-rpg-blue-hover hover:underline transition-colors">Roan Lisboa</a>
+                Desenvolvido com <i data-lucide="heart" class="w-4 h-4 inline-block text-rpg-red fill-current align-text-bottom"></i> por <a href="https://www.linkedin.com/in/roannl" target="_blank" class="text-rpg-blue hover:text-rpg-blue-hover dark:text-rpg-blue-hover hover:underline transition-colors">Roan Lisboa</a>
             </p>
             <p class="font-sans text-gray-600 dark:text-gray-400 text-sm md:text-base font-bold mb-3">
                 <a href="https://github.com/RoanNL/FichaAssimilacaoRPG" target="_blank" class="text-rpg-blue hover:text-rpg-blue-hover dark:text-rpg-blue-hover hover:underline transition-colors">Github</a>
@@ -638,8 +648,8 @@
         </div>
     </footer>
 
+    <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
-    
     <script src="./scripts/ficha-script.js"></script>
     <script src="./scripts/rolador-script.js"></script>
     <script src="./scripts/campanha-script.js"></script>

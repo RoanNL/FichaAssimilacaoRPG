@@ -1193,4 +1193,12 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault(); 
         });
     });
+
+    // ==========================================
+    // 🔧 INICIALIZAÇÃO DO LUCIDE ICONS
+    // ==========================================
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+            console.log("🔧 Lucide Icons ativados.");
+        }
 });

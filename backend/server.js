@@ -37,10 +37,8 @@ app.use(helmet({
 // 🛡️ MIDDLEWARE ANTI-NAVEGADOR (BLOQUEIA ACESSO DIRETO PELA URL)
 // =========================================================================
 app.use((req, res, next) => {
-    // Verifica se a requisição está pedindo para abrir uma página de navegador (text/html)
     const pediuPeloNavegador = req.headers.accept && req.headers.accept.includes('text/html');
     
-    // Se não for o nosso frontend fazendo um fetch silencioso, levanta a parede!
     if (pediuPeloNavegador) {
         return res.status(403).send(`
             <body style="background-color: #121212; color: #ff9800; font-family: 'Courier New', monospace; text-align: center; padding-top: 20vh;">
@@ -50,8 +48,6 @@ app.use((req, res, next) => {
             </body>
         `);
     }
-    
-    // Se for o fetch do JavaScript, deixa passar para as rotas abaixo
     next();
 });
 
@@ -72,6 +68,9 @@ const io = new Server(server, {
     cors: { origin: '*' }
 });
 app.set('io', io);
+
+// Regex global para validar formato UUID
+const regexUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 io.on('connection', (socket) => {
     console.log('Um jogador conectou! ID:', socket.id);
@@ -118,7 +117,6 @@ io.on('connection', (socket) => {
             const usuarioVerificado = jwt.verify(token, segredo);
             const usuarioIdSeguro = usuarioVerificado.id;
 
-            // 🛡️ A BARREIRA: O cara REALMENTE tá na mesa que ele diz estar?
             const campanhaId = dadosDaRolagem.campanhaId;
             const sqlCheck = `SELECT * FROM membros_campanha WHERE campanha_id = $1 AND usuario_id = $2`;
             const resultCheck = await pool.query(sqlCheck, [campanhaId, usuarioIdSeguro]);
@@ -132,10 +130,10 @@ io.on('connection', (socket) => {
             const salaStr = campanhaId.toString(); 
             socket.to(salaStr).emit('nova-rolagem', dadosDaRolagem);
             
-            const campanhaInt = parseInt(campanhaId, 10);
+            // REMOVIDO: O parseInt(campanhaId, 10). UUID é string!
             await pool.query(
                 `INSERT INTO historico_rolagens (campanha_id, pacote) VALUES ($1, $2)`, 
-                [campanhaInt, dadosDaRolagem] 
+                [campanhaId, dadosDaRolagem] 
             );
         } catch (err) {
             console.error("❌ Tentativa de forjar rolagem bloqueada.");
@@ -156,7 +154,6 @@ function verificarToken(req, res, next) {
 
     try {
         const segredo = process.env.SEGREDO_JWT || 'segredo_super_secreto_rpg';
-        
         const usuarioVerificado = jwt.verify(token, segredo); 
         req.usuario = usuarioVerificado; 
         next(); 
@@ -203,13 +200,12 @@ app.post('/registro', async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const senhaHash = await bcrypt.hash(password, salt);
 
-
         const sql = `INSERT INTO usuarios (username, password, email) VALUES ($1, $2, $3) RETURNING id`;
         const resultado = await pool.query(sql, [usernameLowerCase, senhaHash, email]);
         
         const novoUsuarioId = resultado.rows[0].id;
 
-        const segredo = SEGREDO_JWT || 'segredo_super_secreto_rpg';
+        const segredo = process.env.SEGREDO_JWT || 'segredo_super_secreto_rpg';
         const token = jwt.sign({ id: novoUsuarioId, nome: username }, segredo, { expiresIn: '7d' });
 
         res.status(201).json({
@@ -219,7 +215,7 @@ app.post('/registro', async (req, res) => {
         });
     } catch (erro) {
         if (erro.code === '23505') {
-            if (erro.constraint.includes('email')) {
+            if (erro.constraint && erro.constraint.includes('email')) {
                 return res.status(400).json({ erro: 'Este e-mail já está cadastrado.' });
             }
             return res.status(400).json({ erro: 'Nome de usuário já está em uso.' });
@@ -320,7 +316,6 @@ app.post('/esqueci-senha', async (req, res) => {
             `
         };
 
-        // Teletransporta o e-mail via HTTPS
         const response = await fetch('https://api.brevo.com/v3/smtp/email', {
             method: 'POST',
             headers: {
@@ -400,7 +395,6 @@ app.post('/personagens', verificarToken, async (req, res) => {
         return regexSeguro.test(texto); 
     }
 
-    // Passa os campos pelo detector de metais:
     if (
         !validarTexto(nome, 50) ||
         !validarTexto(ocupacao, 50) ||
@@ -411,7 +405,7 @@ app.post('/personagens', verificarToken, async (req, res) => {
             !validarTexto(dadosFicha['proposito-coletivo'], 100)
         ))
     ) {
-        console.warn(`⚠️ Tentativa de injeção de código ou limite excedido pelo Usuário ID: ${usuarioId}`);
+        console.warn(`⚠️ Tentativa de injeção de código ou limite excedido pelo Usuário ID: ${usuarioIdSeguro}`);
         return res.status(400).json({ 
             erro: "Texto inválido! O texto excedeu o limite ou contém caracteres proibidos de código (< > { } [ ] = ;)." 
         });
@@ -425,7 +419,7 @@ app.post('/personagens', verificarToken, async (req, res) => {
             const buffer = Buffer.from(base64Data, 'base64');
             const extensao = foto.substring(foto.indexOf('/') + 1, foto.indexOf(';base64'));
             
-            const nomeArquivo = `ficha_${usuarioId}_${Date.now()}.${extensao}`;
+            const nomeArquivo = `ficha_${usuarioIdSeguro}_${Date.now()}.${extensao}`;
 
             const { data, error } = await supabase.storage
                 .from('ficha-fotos') 
@@ -470,6 +464,7 @@ app.post('/personagens', verificarToken, async (req, res) => {
         res.status(500).json({ erro: 'Erro interno do banco de dados.' });
     }
 });
+
 // =========================================================================
 // LISTAR TODAS AS FICHAS DO USUÁRIO
 // =========================================================================
@@ -477,12 +472,12 @@ app.get('/personagens/usuario/:usuarioId', verificarToken, async (req, res) => {
     const { usuarioId } = req.params;
     const usuarioSeguroId = req.usuario.id; 
 
-    if (usuarioSeguroId != usuarioId) {
+    if (usuarioSeguroId !== usuarioId) {
         return res.status(403).json({ erro: 'Tentativa de ler personagens de outro jogador bloqueada.' });
     }
 
     try {
-        const sql = `SELECT id, nome_personagem, ocupacao, foto FROM personagens WHERE usuario_id = $1 ORDER BY id DESC`;
+        const sql = `SELECT id, nome_personagem, ocupacao, foto FROM personagens WHERE usuario_id = $1 ORDER BY created_at DESC`;
         const resultado = await pool.query(sql, [usuarioSeguroId]);
         res.json(resultado.rows);
     } catch (erro) {
@@ -496,6 +491,11 @@ app.get('/personagens/usuario/:usuarioId', verificarToken, async (req, res) => {
 app.get('/personagem/:id', verificarToken, async (req, res) => {
     const { id } = req.params;
     
+    // Escudo Anti-Batata: Verifica se a URL contém um UUID válido
+    if (!regexUUID.test(id)) {
+        return res.status(400).json({ erro: 'Formato de ID de personagem inválido.' });
+    }
+
     try {
         const sql = `SELECT * FROM personagens WHERE id = $1`;
         const resultado = await pool.query(sql, [id]);
@@ -516,8 +516,12 @@ app.get('/personagem/:id', verificarToken, async (req, res) => {
 // =========================================================================
 app.delete('/personagens/:id', verificarToken, async (req, res) => {
     const id = req.params.id;
-    try {
 
+    if (!regexUUID.test(id)) {
+        return res.status(400).json({ erro: 'Formato de ID de personagem inválido.' });
+    }
+    
+    try {
         const result = await pool.query('DELETE FROM personagens WHERE id = $1 AND usuario_id = $2 RETURNING id', [id, req.usuario.id]);
         
         if (result.rowCount === 0) {
@@ -583,13 +587,17 @@ app.delete('/campanhas/:id/membros/:usuarioId', verificarToken, async (req, res)
     const usuarioAlvoId = req.params.usuarioId;
     const mestreRequisitanteId = req.usuario.id; 
 
+    if (!regexUUID.test(campanhaId) || !regexUUID.test(usuarioAlvoId)) {
+        return res.status(400).json({ erro: 'ID com formato inválido.' });
+    }
+
     try {
         const sqlCheck = `SELECT mestre_id FROM campanhas WHERE id = $1`;
         const resultCheck = await pool.query(sqlCheck, [campanhaId]);
 
         if (resultCheck.rows.length === 0) return res.status(404).json({ erro: 'Campanha não encontrada.' });
 
-        if (resultCheck.rows[0].mestre_id != mestreRequisitanteId) {
+        if (resultCheck.rows[0].mestre_id !== mestreRequisitanteId) {
             return res.status(403).json({ erro: 'ALERTA: Somente o Mestre pode remover jogadores!' });
         }
 
@@ -600,8 +608,13 @@ app.delete('/campanhas/:id/membros/:usuarioId', verificarToken, async (req, res)
     }
 });
 
-app.get('/campanhas/:id/personagens', async (req, res) => {
+app.get('/campanhas/:id/personagens', verificarToken, async (req, res) => {
     const campanhaId = req.params.id;
+
+    if (!regexUUID.test(campanhaId)) {
+        return res.status(400).json({ erro: 'Formato de ID inválido.' });
+    }
+
     try {
         const sql = `
             SELECT p.id, p.nome_personagem, p.dados_ficha as dados_personagem
@@ -629,6 +642,10 @@ app.get('/campanhas/:id/jogadores', verificarToken, async (req, res) => {
     const campanhaId = req.params.id;
     const mestreIdSeguro = req.usuario.id;
 
+    if (!regexUUID.test(campanhaId)) {
+        return res.status(400).json({ erro: 'Formato de ID inválido.' });
+    }
+
     try {
         const checkMestre = await pool.query(`SELECT mestre_id FROM campanhas WHERE id = $1`, [campanhaId]);
         if (checkMestre.rows.length === 0 || checkMestre.rows[0].mestre_id !== mestreIdSeguro) {
@@ -652,8 +669,7 @@ app.get('/campanhas/:id/jogadores', verificarToken, async (req, res) => {
 app.get('/campanhas/usuario/:usuarioId', verificarToken, async (req, res) => {
     const { usuarioId } = req.params;
 
-    // Se o ID da URL não for o mesmo do Token, bloqueia na hora!
-    if (req.usuario.id != usuarioId) {
+    if (req.usuario.id !== usuarioId) {
         return res.status(403).json({ erro: 'Tentativa de bisbilhotar campanhas alheias bloqueada!' });
     }
 
@@ -679,6 +695,10 @@ app.get('/campanhas/:id/fichas-mesa', verificarToken, async (req, res) => {
     const campanhaId = req.params.id;
     const mestreIdSeguro = req.usuario.id;
 
+    if (!regexUUID.test(campanhaId)) {
+        return res.status(400).json({ erro: 'Formato de ID inválido.' });
+    }
+
     try {
         const checkMestre = await pool.query(`SELECT mestre_id FROM campanhas WHERE id = $1`, [campanhaId]);
         if (checkMestre.rows.length === 0 || checkMestre.rows[0].mestre_id !== mestreIdSeguro) {
@@ -699,16 +719,6 @@ app.get('/campanhas/:id/fichas-mesa', verificarToken, async (req, res) => {
     }
 });
 
-app.delete('/campanhas/:id/membros/:usuarioId', async (req, res) => {
-    const { id, usuarioId } = req.params;
-    try {
-        await pool.query('DELETE FROM membros_campanha WHERE campanha_id = $1 AND usuario_id = $2', [id, usuarioId]);
-        res.status(200).json({ mensagem: 'Membro removido.' });
-    } catch (erro) {
-        res.status(500).json({ erro: 'Erro ao deletar membro.' });
-    }
-});
-
 // =========================================================================
 // ROTA DO MESTRE: Excluir Campanha (Destruir a Mesa)
 // =========================================================================
@@ -716,13 +726,17 @@ app.delete('/campanhas/:id', verificarToken, async (req, res) => {
     const campanhaId = req.params.id;
     const mestreIdSeguro = req.usuario.id; 
 
+    if (!regexUUID.test(campanhaId)) {
+        return res.status(400).json({ erro: 'Formato de ID inválido.' });
+    }
+
     try {
         const sqlCheck = `SELECT mestre_id FROM campanhas WHERE id = $1`;
         const resultCheck = await pool.query(sqlCheck, [campanhaId]);
 
         if (resultCheck.rows.length === 0) return res.status(404).json({ erro: 'Campanha não encontrada.' });
         
-        if (resultCheck.rows[0].mestre_id != mestreIdSeguro) {
+        if (resultCheck.rows[0].mestre_id !== mestreIdSeguro) {
             return res.status(403).json({ erro: 'ALERTA DE SEGURANÇA: Apenas o Mestre pode apagar esta mesa!' });
         }
 

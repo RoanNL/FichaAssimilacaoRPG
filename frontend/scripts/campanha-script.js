@@ -51,8 +51,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 card.className = 'campanha-card';
 
                 const badge = camp.is_mestre
-                    ? `<span class="badge-mestre">👑 Mestre (Código: ${camp.codigo_convite})</span>`
-                    : `<span class="badge-jogador">⚔️ Jogador</span>`;
+                    ? `<span class="badge-mestre"><i data-lucide="crown" class="w-8 h-8"></i> Mestre (Código: ${camp.codigo_convite})</span>`
+                    : `<span class="badge-jogador"><i data-lucide="swords" class="w-8 h-8"></i> Jogador</span>`;
 
                 const btnExcluir = camp.is_mestre
                     ? `<button class="btn-excluir-campanha" data-id="${camp.id}" style="background-color: #8b0000; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; margin-top: 5px; font-weight: bold; font-family: 'Special Elite', monospace;">Apagar Mesa</button>`
