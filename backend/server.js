@@ -461,19 +461,19 @@ app.post('/personagens', verificarToken, async (req, res) => {
 // =========================================================================
 // LISTAR TODAS AS FICHAS DO USUÁRIO
 // =========================================================================
-app.get('/personagens/usuario/:usuarioId', async (req, res) => {
+app.get('/personagens/usuario/:usuarioId', verificarToken, async (req, res) => {
     const { usuarioId } = req.params;
+    const usuarioSeguroId = req.usuario.id; 
 
-    if (usuarioId === 'undefined' || !usuarioId) {
-        return res.json([]);
+    if (usuarioSeguroId != usuarioId) {
+        return res.status(403).json({ erro: 'Tentativa de ler personagens de outro jogador bloqueada.' });
     }
 
     try {
         const sql = `SELECT id, nome_personagem, ocupacao, foto FROM personagens WHERE usuario_id = $1 ORDER BY id DESC`;
-        const resultado = await pool.query(sql, [usuarioId]);
+        const resultado = await pool.query(sql, [usuarioSeguroId]);
         res.json(resultado.rows);
     } catch (erro) {
-        console.error('❌ Erro ao listar personagens:', erro);
         res.status(500).json({ erro: 'Erro ao buscar personagens.' });
     }
 });
@@ -481,8 +481,9 @@ app.get('/personagens/usuario/:usuarioId', async (req, res) => {
 // =========================================================================
 // CARREGAR UMA FICHA ESPECÍFICA 
 // =========================================================================
-app.get('/personagem/:id', async (req, res) => {
+app.get('/personagem/:id', verificarToken, async (req, res) => {
     const { id } = req.params;
+    
     try {
         const sql = `SELECT * FROM personagens WHERE id = $1`;
         const resultado = await pool.query(sql, [id]);
@@ -490,8 +491,7 @@ app.get('/personagem/:id', async (req, res) => {
         if (resultado.rows.length === 0) {
             return res.status(404).json({ erro: 'Personagem não encontrado.' });
         }
-
-        // Retorna a ficha completinha para o front-end
+        
         res.json(resultado.rows[0]);
     } catch (erro) {
         console.error('❌ Erro ao carregar ficha:', erro);

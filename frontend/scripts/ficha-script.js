@@ -1,4 +1,20 @@
 // ==========================================
+// 🛡️ FEITIÇO DE INTIMIDAÇÃO NO CONSOLE
+// ==========================================
+console.log(
+    "%cALERTA CRÍTICO DE SEGURANÇA!", 
+    "color: red; font-size: 40px; font-weight: bold; text-shadow: 2px 2px 0 #000;"
+);
+console.log(
+    "%cEste é um recurso de navegador voltado para desenvolvedores. Se alguém te disse para copiar e colar algo aqui para 'ganhar itens', 'hackear dados' ou 'virar mestre', é um GOLPE (Scam). Colar códigos aqui dará aos invasores acesso à sua conta e suas fichas.", 
+    "color: white; font-size: 16px; background-color: #121212; padding: 10px; border: 2px solid red; border-radius: 5px;"
+);
+console.log(
+    "%cO sistema está monitorando tentativas de injeção.", 
+    "color: #ff9800; font-size: 14px; font-style: italic;"
+);
+
+// ==========================================
 // SISTEMA DE NOTIFICAÇÕES (TOAST) DA FICHA
 // ==========================================
 window.mostrarNotificacao = function (mensagem, tipo = 'sucesso') {
