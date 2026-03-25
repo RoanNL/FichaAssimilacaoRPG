@@ -1,16 +1,23 @@
 document.addEventListener('DOMContentLoaded', () => {
     const leavesContainer = document.getElementById('leaves-container');
-    const numLeaves = 40; 
+    
+    if (!leavesContainer) {
+        console.warn("⚠️ Container de folhas não encontrado. Crie <div id='leaves-container'></div> no HTML.");
+        return; 
+    }
 
-    if (!leavesContainer) return; 
+    const numLeaves = 40; // Quantidade de folhas simultâneas
 
+    // Cria as folhas iniciais
     for (let i = 0; i < numLeaves; i++) {
         createLeaf();
     }
 
     function createLeaf() {
         const leaf = document.createElement('div');
-        leaf.classList.add('leaf');
+        leaf.classList.add('leaf'); // Adiciona a classe que estilizamos no CSS
+
+        // --- SUA LÓGICA DE ALEATORIEDADE (MANTIDA) ---
 
         // Posição horizontal inicial aleatória
         const startX = Math.random() * 100 + 'vw';
@@ -27,13 +34,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // Atraso inicial aleatório (0 a 10 segundos)
         const delay = Math.random() * 10 + 's';
 
-        // Define as variáveis CSS para a animação
+        // Define as variáveis CSS que o nosso @keyframes no CSS vai ler
         leaf.style.setProperty('--start-x', startX);
         leaf.style.setProperty('--end-x-offset', endXOffset);
         leaf.style.setProperty('--rotation', rotation);
         leaf.style.animationDuration = duration;
         leaf.style.animationDelay = delay;
 
+        // Coloca a folha na tela
         leavesContainer.appendChild(leaf);
     }
 });

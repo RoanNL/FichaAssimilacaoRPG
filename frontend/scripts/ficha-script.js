@@ -650,7 +650,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!usuarioLogadoId) return;
 
         const dadosFicha = coletarDadosFicha();
-        const nomePersonagem = nomeInput.value || 'Assimilado';
+        const nomePersonagem = nomeInput.value || 'INFECTADO';
         const foto = dadosFicha['char-photo'] || null;
 
         const payload = {
