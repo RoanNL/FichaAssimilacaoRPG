@@ -425,13 +425,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function carregarPersonagem(id) {
         try {
-            const resposta = await fetch(`${API_URL}/personagem/${id}`);
+            const resposta = await fetch(`${API_URL}/personagem/${id}`, {
+                headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
+            });
             const personagem = await resposta.json();
 
             if (!resposta.ok) {
                 return mostrarNotificacao(personagem.erro || "Erro ao carregar a ficha.", 'erro');
             }
-
 
             document.getElementById('nome').value = personagem.nome_personagem || '';
             document.getElementById('ocupacao').value = personagem.ocupacao || '';
@@ -562,7 +563,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!usuarioLogadoId) return;
 
         try {
-            const resposta = await fetch(`${API_URL}/personagens/usuario/${usuarioLogadoId}`);
+            const resposta = await fetch(`${API_URL}/personagens/usuario/${usuarioLogadoId}`, {
+                headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
+            });
             personagensCarregados = await resposta.json();
 
             const gridPersonagens = document.getElementById('grid-personagens');
