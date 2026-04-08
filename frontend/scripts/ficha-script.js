@@ -552,10 +552,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
-
-        if (typeof window.sincronizarTrilhas === 'function') {
-            window.sincronizarTrilhas();
-        }
     }
 
 
@@ -1252,11 +1248,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    document.querySelectorAll('.determ-check, .assim-check').forEach(chk => {
-        chk.addEventListener('click', (e) => {
-            e.preventDefault(); 
-        });
-    });
 
     // ==========================================
     // 🔧 INICIALIZAÇÃO DO LUCIDE ICONS
