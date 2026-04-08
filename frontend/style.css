@@ -330,29 +330,43 @@ h2 {
     border-color: var(--color-text-dark);
 }
 
-.grupo-aptidoes:first-child .dots-track input[type="checkbox"],
-.grupo-aptidoes:first-child .dots-track-1 input[type="checkbox"] {
-    background-color: var(--color-checkbox-empty-bg);
-    border: 2px solid var(--color-border-dark);
-    border-radius: 2px;
+/* ========================================
+   APTIDÕES: QUADRADOS (INSTINTOS) E LOSANGOS
+   ========================================
+*/
+
+/* 1. SEÇÃO INSTINTOS (Quadrados Padrão) */
+#secao-instintos .dots-track input[type="checkbox"],
+#secao-instintos .dots-track-1 input[type="checkbox"] {
+    background-color: var(--color-checkbox-empty-bg) !important;
+    border: 2px solid var(--color-border-dark) !important;
+    border-radius: 2px !important;
+    clip-path: none !important; 
+    transform: none !important; 
 }
 
-.grupo-aptidoes:first-child .dots-track input[type="checkbox"]:checked,
-.grupo-aptidoes:first-child .dots-track-1 input[type="checkbox"]:checked {
-    background-color: var(--color-text-dark);
-    border-color: var(--color-text-dark);
+/* Mantém o vermelho clássico independentemente do tema ser claro ou escuro! */
+#secao-instintos .dots-track input[type="checkbox"]:checked,
+#secao-instintos .dots-track-1 input[type="checkbox"]:checked {
+    background-color: var(--color-det-red) !important;
+    border-color: var(--color-det-red) !important;
 }
 
-.grupo-aptidoes:not(:first-child) .dots-track input[type="checkbox"],
-.grupo-aptidoes:not(:first-child) .dots-track-1 input[type="checkbox"] {
+/* 2. SEÇÕES CONHECIMENTOS E PRÁTICAS (Losangos) */
+#secao-conhecimentos .dots-track input[type="checkbox"],
+#secao-conhecimentos .dots-track-1 input[type="checkbox"],
+#secao-praticas .dots-track input[type="checkbox"],
+#secao-praticas .dots-track-1 input[type="checkbox"] {
     background-color: var(--color-checkbox-losango-bg);
     border: 1px solid var(--color-border-dark);
     clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
     border-radius: 0;
 }
 
-.grupo-aptidoes:not(:first-child) .dots-track input[type="checkbox"]:checked,
-.grupo-aptidoes:not(:first-child) .dots-track-1 input[type="checkbox"]:checked {
+#secao-conhecimentos .dots-track input[type="checkbox"]:checked,
+#secao-conhecimentos .dots-track-1 input[type="checkbox"]:checked,
+#secao-praticas .dots-track input[type="checkbox"]:checked,
+#secao-praticas .dots-track-1 input[type="checkbox"]:checked {
     background-color: var(--color-det-red);
     border-color: var(--color-det-red);
 }
@@ -460,29 +474,17 @@ h2 {
     margin: 0;
     width: 18px;
     height: 18px;
-    background-color: transparent;
-    cursor: pointer;
     clip-path: none;
     position: relative;
     transform: scale(0.8);
 }
 
 .saude-drops-track input[type="checkbox"]::before {
-    content: "🌢";
-    font-family: "Font Awesome 6 Free";
-    font-weight: 400;
-    color: var(--color-drop-empty);
-    font-size: 25px;
     position: absolute;
     top: 0;
     left: 0;
-    transition: all 0.2s;
 }
 
-.saude-drops-track input[type="checkbox"]:checked::before {
-    font-weight: 900;
-    color: var(--color-drop-full);
-}
 
 .saude-drops-track input[type="checkbox"]:first-child {
     transform: scale(1.1);
@@ -1030,35 +1032,102 @@ main {
 }
 
 /* ==========================================
-   💧 DESIGN DEFINITIVO DAS GOTAS 
+   💧 GOTAS DE SAÚDE DINÂMICAS 
    ========================================== */
+
+/* RESET E BASE (Aplica a todas as gotas, moldando o tamanho e tirando o quadrado) */
 .saude-drops-track input[type="checkbox"] {
-    -webkit-appearance: none !important; 
+    -webkit-appearance: none !important;
     appearance: none !important;
-    
-    /* Define o tamanho da gota */
     width: 24px !important;
     height: 24px !important;
-    cursor: pointer;
+    cursor: pointer !important;
     background-color: transparent !important;
     border: none !important;
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: contain;
-    
-    /* 💧 GOTA VAZIA */
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z'/%3E%3C/svg%3E") !important;
-    
-    transition: all 0.2s ease-in-out;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background-size: contain !important;
+    transition: all 0.2s ease-in-out !important;
     margin: 0 !important; 
     flex-shrink: 0 !important;
     position: relative !important;
 }
 
-/* 💧 GOTA CHEIA  */
+/* 2. TEMA CLARO (Padrão: Ativa se o body NÃO tiver a classe .dark) */
+body:not(.dark) .saude-drops-track input[type="checkbox"] {
+    /* Gota Vazia - Vermelho rpg-red */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238c3a3a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z'/%3E%3C/svg%3E") !important;
+}
+
+body:not(.dark) .saude-drops-track input[type="checkbox"]:checked {
+    /* Gota Cheia - Vermelho rpg-red */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238c3a3a' stroke='%238c3a3a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z'/%3E%3C/svg%3E") !important;
+    transform: scale(1.15) !important;
+}
+
+/* 3. TEMA ESCURO (Ativa se o body TIVER a classe .dark) */
+body.dark .saude-drops-track input[type="checkbox"] {
+    /* Gota Vazia - Azul rpg-blue */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233a7c8c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z'/%3E%3C/svg%3E") !important;
+}
+
+body.dark .saude-drops-track input[type="checkbox"]:checked {
+    /* Gota Cheia - Azul Claro rpg-blue-hover */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234a9cb0' stroke='%234a9cb0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z'/%3E%3C/svg%3E") !important;
+    transform: scale(1.15) !important;
+}
+
+/* Cores para Tema Claro */
+@media (prefers-color-scheme: light) {
+    .saude-drops-track input[type="checkbox"] {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23CC3333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z'/%3E%3C/svg%3E") !important;
+    }
+    
+    /* Gota Marcada (Preenchimento Vermelho) */
+    .saude-drops-track input[type="checkbox"]:checked {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23CC3333' stroke='%23CC3333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z'/%3E%3C/svg%3E") !important;
+    }
+}
+
+/* 3. Cores para Tema Escuro */
+@media (prefers-color-scheme: dark) {
+    /* Gota Não Marcada (Contorno Azul) */
+    .saude-drops-track input[type="checkbox"] {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233366CC' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z'/%3E%3C/svg%3E") !important;
+    }
+    
+    /* Gota Marcada (Preenchimento Ciano) */
+    .saude-drops-track input[type="checkbox"]:checked {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300BFFF' stroke='%2300BFFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z'/%3E%3C/svg%3E") !important;
+    }
+}
+
+/* 4. Feedback Visual (Comum) */
 .saude-drops-track input[type="checkbox"]:checked {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300bfff' stroke='%2300bfff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z'/%3E%3C/svg%3E") !important;
     transform: scale(1.15) !important; 
+}
+
+#instintos-square .dots-track input[type="checkbox"],
+#instintos-square .dots-track-1 input[type="checkbox"] {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    clip-path: none !important; 
+    border-radius: 2px !important; 
+    transform: none !important; 
+}
+
+/* Cores para o Tema Claro (Padrão) - Preenchimento cinza escuro */
+body:not(.dark) #instintos-square .dots-track input[type="checkbox"]:checked,
+body:not(.dark) #instintos-square .dots-track-1 input[type="checkbox"]:checked {
+    background-color: #aaaaaa !important; 
+    border-color: #aaaaaa !important; 
+}
+
+/* Cores para o Tema Escuro (Ativado pela classe .dark no body) - Preenchimento ciano */
+body.dark #instintos-square .dots-track input[type="checkbox"]:checked,
+body.dark #instintos-square .dots-track-1 input[type="checkbox"]:checked {
+    background-color: #00BFFF !important; 
+    border-color: #00BFFF !important; 
 }
 
 /* ==========================================
