@@ -1030,6 +1030,38 @@ main {
 }
 
 /* ==========================================
+   💧 DESIGN DEFINITIVO DAS GOTAS 
+   ========================================== */
+.saude-drops-track input[type="checkbox"] {
+    -webkit-appearance: none !important; 
+    appearance: none !important;
+    
+    /* Define o tamanho da gota */
+    width: 24px !important;
+    height: 24px !important;
+    cursor: pointer;
+    background-color: transparent !important;
+    border: none !important;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    
+    /* 💧 GOTA VAZIA */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z'/%3E%3C/svg%3E") !important;
+    
+    transition: all 0.2s ease-in-out;
+    margin: 0 !important; 
+    flex-shrink: 0 !important;
+    position: relative !important;
+}
+
+/* 💧 GOTA CHEIA  */
+.saude-drops-track input[type="checkbox"]:checked {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300bfff' stroke='%2300bfff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z'/%3E%3C/svg%3E") !important;
+    transform: scale(1.15) !important; 
+}
+
+/* ==========================================
    📱 AJUSTES PARA CELULAR (RESPONSIVIDADE)
    ========================================== */
 @media (max-width: 768px) {
