@@ -341,8 +341,8 @@ h2 {
     background-color: var(--color-checkbox-empty-bg) !important;
     border: 2px solid var(--color-border-dark) !important;
     border-radius: 2px !important;
-    clip-path: none !important; 
-    transform: none !important; 
+    clip-path: none !important;
+    transform: none !important;
 }
 
 /* Mantém o vermelho clássico independentemente do tema ser claro ou escuro! */
@@ -352,23 +352,38 @@ h2 {
     border-color: var(--color-det-red) !important;
 }
 
-/* 2. SEÇÕES CONHECIMENTOS E PRÁTICAS (Losangos) */
 #secao-conhecimentos .dots-track input[type="checkbox"],
 #secao-conhecimentos .dots-track-1 input[type="checkbox"],
 #secao-praticas .dots-track input[type="checkbox"],
 #secao-praticas .dots-track-1 input[type="checkbox"] {
-    background-color: var(--color-checkbox-losango-bg);
-    border: 1px solid var(--color-border-dark);
-    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
-    border-radius: 0;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    width: 15px !important;
+    height: 15px !important;
+    background-color: var(--color-checkbox-empty-bg) !important;
+    border: 2px solid var(--color-border-dark) !important;
+    border-radius: 2px !important;
+    clip-path: none !important;
+    transform: rotate(45deg) !important;
+    margin: 0 4px !important;
 }
 
+/* Cor quando marcado (mantém o Vermelho Sangue) */
 #secao-conhecimentos .dots-track input[type="checkbox"]:checked,
 #secao-conhecimentos .dots-track-1 input[type="checkbox"]:checked,
 #secao-praticas .dots-track input[type="checkbox"]:checked,
 #secao-praticas .dots-track-1 input[type="checkbox"]:checked {
-    background-color: var(--color-det-red);
-    border-color: var(--color-det-red);
+    background-color: var(--color-det-red) !important;
+    border-color: var(--color-det-red) !important;
+}
+
+.dots-track, .dots-track-1 {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin-left: 0 !important; 
+    padding: 12px 0 !important;
+    gap: 8px !important;
 }
 
 .saude-header {
@@ -1048,23 +1063,45 @@ main {
     background-position: center !important;
     background-size: contain !important;
     transition: all 0.2s ease-in-out !important;
-    margin: 0 !important; 
+    margin: 0 !important;
     flex-shrink: 0 !important;
     position: relative !important;
 }
 
-/* 2. TEMA CLARO (Padrão: Ativa se o body NÃO tiver a classe .dark) */
-body:not(.dark) .saude-drops-track input[type="checkbox"] {
-    /* Gota Vazia - Vermelho rpg-red */
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238c3a3a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z'/%3E%3C/svg%3E") !important;
-}
+/* 2. TEMA CLARO (Cores Específicas por Seção de Saúde) */
 
-body:not(.dark) .saude-drops-track input[type="checkbox"]:checked {
-    /* Gota Cheia - Vermelho rpg-red */
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238c3a3a' stroke='%238c3a3a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z'/%3E%3C/svg%3E") !important;
+/* 🟢 GRUPO VERDE (6 Saudável e 5 Escoriado) -> Cor: #6c7a6b */
+body:not(.dark) .saude-drops-track input[id^="saude-6-"],
+body:not(.dark) .saude-drops-track input[id^="saude-5-"] {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236c7a6b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z'/%3E%3C/svg%3E") !important;
+}
+body:not(.dark) .saude-drops-track input[id^="saude-6-"]:checked,
+body:not(.dark) .saude-drops-track input[id^="saude-5-"]:checked {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236c7a6b' stroke='%236c7a6b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z'/%3E%3C/svg%3E") !important;
     transform: scale(1.15) !important;
 }
 
+/* 🟤 GRUPO MARROM (4 Lacerado e 3 Ferido) -> Cor: #a97b53 */
+body:not(.dark) .saude-drops-track input[id^="saude-4-"],
+body:not(.dark) .saude-drops-track input[id^="saude-3-"] {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a97b53' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z'/%3E%3C/svg%3E") !important;
+}
+body:not(.dark) .saude-drops-track input[id^="saude-4-"]:checked,
+body:not(.dark) .saude-drops-track input[id^="saude-3-"]:checked {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a97b53' stroke='%23a97b53' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z'/%3E%3C/svg%3E") !important;
+    transform: scale(1.15) !important;
+}
+
+/* 🔴 GRUPO VERMELHO (2 Arrebentado e 1 Incapacitado) -> Cor: #8c3a3a */
+body:not(.dark) .saude-drops-track input[id^="saude-2-"],
+body:not(.dark) .saude-drops-track input[id^="saude-1-"] {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238c3a3a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z'/%3E%3C/svg%3E") !important;
+}
+body:not(.dark) .saude-drops-track input[id^="saude-2-"]:checked,
+body:not(.dark) .saude-drops-track input[id^="saude-1-"]:checked {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238c3a3a' stroke='%238c3a3a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z'/%3E%3C/svg%3E") !important;
+    transform: scale(1.15) !important;
+}
 /* 3. TEMA ESCURO (Ativa se o body TIVER a classe .dark) */
 body.dark .saude-drops-track input[type="checkbox"] {
     /* Gota Vazia - Azul rpg-blue */
@@ -1082,7 +1119,7 @@ body.dark .saude-drops-track input[type="checkbox"]:checked {
     .saude-drops-track input[type="checkbox"] {
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23CC3333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z'/%3E%3C/svg%3E") !important;
     }
-    
+
     /* Gota Marcada (Preenchimento Vermelho) */
     .saude-drops-track input[type="checkbox"]:checked {
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23CC3333' stroke='%23CC3333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z'/%3E%3C/svg%3E") !important;
@@ -1091,11 +1128,12 @@ body.dark .saude-drops-track input[type="checkbox"]:checked {
 
 /* 3. Cores para Tema Escuro */
 @media (prefers-color-scheme: dark) {
+
     /* Gota Não Marcada (Contorno Azul) */
     .saude-drops-track input[type="checkbox"] {
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233366CC' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z'/%3E%3C/svg%3E") !important;
     }
-    
+
     /* Gota Marcada (Preenchimento Ciano) */
     .saude-drops-track input[type="checkbox"]:checked {
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300BFFF' stroke='%2300BFFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z'/%3E%3C/svg%3E") !important;
@@ -1104,55 +1142,61 @@ body.dark .saude-drops-track input[type="checkbox"]:checked {
 
 /* 4. Feedback Visual (Comum) */
 .saude-drops-track input[type="checkbox"]:checked {
-    transform: scale(1.15) !important; 
+    transform: scale(1.15) !important;
 }
 
 #instintos-square .dots-track input[type="checkbox"],
 #instintos-square .dots-track-1 input[type="checkbox"] {
     -webkit-appearance: none !important;
     appearance: none !important;
-    clip-path: none !important; 
-    border-radius: 2px !important; 
-    transform: none !important; 
+    clip-path: none !important;
+    border-radius: 2px !important;
+    transform: none !important;
 }
 
 /* Cores para o Tema Claro (Padrão) - Preenchimento cinza escuro */
 body:not(.dark) #instintos-square .dots-track input[type="checkbox"]:checked,
 body:not(.dark) #instintos-square .dots-track-1 input[type="checkbox"]:checked {
-    background-color: #aaaaaa !important; 
-    border-color: #aaaaaa !important; 
+    background-color: #aaaaaa !important;
+    border-color: #aaaaaa !important;
 }
 
 /* Cores para o Tema Escuro (Ativado pela classe .dark no body) - Preenchimento ciano */
 body.dark #instintos-square .dots-track input[type="checkbox"]:checked,
 body.dark #instintos-square .dots-track-1 input[type="checkbox"]:checked {
-    background-color: #00BFFF !important; 
-    border-color: #00BFFF !important; 
+    background-color: #00BFFF !important;
+    border-color: #00BFFF !important;
 }
 
 /* ==========================================
    📱 AJUSTES PARA CELULAR (RESPONSIVIDADE)
    ========================================== */
 @media (max-width: 768px) {
-    
+
     /* APTIDÕES: Força 2 colunas e impede que os losangos amassem */
     .aptidoes-grid {
         grid-template-columns: repeat(2, 1fr) !important;
         gap: 8px !important;
     }
+
     .aptidao-box {
         padding: 5px !important;
     }
-    .dots-track, .dots-track-1 {
-        gap: 3px !important;
+
+    .dots-track,
+    .dots-track-1 {
+        gap: 6px !important;
         flex-wrap: wrap !important;
         justify-content: center !important;
+        margin-left: 0 !important;
+        padding: 10px 5px !important;
     }
-    .dots-track input[type="checkbox"], 
+
+    .dots-track input[type="checkbox"],
     .dots-track-1 input[type="checkbox"] {
-        flex-shrink: 0 !important; 
+        flex-shrink: 0 !important;
     }
-    
+
     /* DETERMINAÇÃO E ASSIMILAÇÃO */
     .determinacao-track {
         transform: scale(0.75) !important;
@@ -1163,23 +1207,23 @@ body.dark #instintos-square .dots-track-1 input[type="checkbox"]:checked {
     /*  SAÚDE */
     .saude-grid {
         display: flex !important;
-        flex-direction: column !important; 
+        flex-direction: column !important;
         gap: 15px !important;
     }
-    
+
     .saude-box-container {
         height: auto !important;
         padding-bottom: 15px !important;
     }
-    
+
     .saude-drops-track {
         display: flex !important;
-        flex-wrap: wrap !important; 
+        flex-wrap: wrap !important;
         justify-content: center !important;
         align-items: center !important;
-        gap: 12px !important; 
+        gap: 12px !important;
         height: auto !important;
         padding: 10px !important;
     }
-    
+
 }
