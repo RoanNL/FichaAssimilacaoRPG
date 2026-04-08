@@ -24,7 +24,7 @@ window.mostrarNotificacao = function (mensagem, tipo = 'sucesso') {
         container = document.createElement('div');
         container.id = 'toast-container';
         Object.assign(container.style, {
-            position: 'fixed',
+            position: 'absolute',
             top: '20px',
             right: '20px',
             zIndex: '9999999',
@@ -552,7 +552,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
+        
+        
+        if (typeof window.calcularSaudeMax === 'function') {
+            window.calcularSaudeMax(false); 
+        }
     }
+
+
 
 
     async function carregarListaPersonagens() {
@@ -1248,6 +1255,78 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
+    // ==========================================
+    // 🩸 SISTEMA DE SAÚDE AUTOMÁTICA (POTÊNCIA + RESOLUÇÃO)
+    // ==========================================
+    const inputSaudeMax = document.getElementById('saude-max');
+    
+    // Tranca a bolinha para não ser digitada manualmente
+    if (inputSaudeMax) {
+        inputSaudeMax.readOnly = true;
+        inputSaudeMax.style.cursor = 'default';
+        inputSaudeMax.style.pointerEvents = 'none'; // Impede o clique
+    }
+
+    // A Mágica do Cálculo
+    window.calcularSaudeMax = function(forcarPreenchimento = false) {
+        let pontosPotencia = 0;
+        let pontosResolucao = 0;
+
+        // Conta quantos pontos marcados tem em Potência
+        for (let i = 1; i <= 5; i++) {
+            const pot = document.getElementById(`pot-${i}`);
+            if (pot && pot.checked) pontosPotencia++;
+        }
+
+        // Conta quantos pontos marcados tem em Resolução
+        for (let i = 1; i <= 5; i++) {
+            const res = document.getElementById(`res-${i}`);
+            if (res && res.checked) pontosResolucao++;
+        }
+
+        // A Fórmula Sagrada: 1 + Potência + Resolução
+        const saudeMax = 1 + pontosPotencia + pontosResolucao;
+
+        // Atualiza a bolinha
+        if (inputSaudeMax) {
+            inputSaudeMax.value = saudeMax;
+        }
+
+        //  O Auto-Fill (Só roda quando o jogador "upa" o status, NÃO quando a ficha carrega)
+        if (forcarPreenchimento) {
+            // Passa por todas as 6 caixas de dano (6 Saudável, 5 Escoriado...)
+            for (let caixa = 1; caixa <= 6; caixa++) {
+                // Passa pelas 11 possíveis gotas de cada caixa
+                for (let gota = 1; gota <= 11; gota++) {
+                    const checkGota = document.getElementById(`saude-${caixa}-${gota}`);
+                    if (checkGota) {
+                        // Se a gota for menor ou igual à vida máxima, ela enche. Senão, esvazia.
+                        checkGota.checked = (gota <= saudeMax);
+                    }
+                }
+            }
+        }
+    };
+
+    //  Cria os "Ouvintes" para avisar o sistema sempre que Potência ou Resolução mudarem
+    for (let i = 1; i <= 5; i++) {
+        const potCheck = document.getElementById(`pot-${i}`);
+        const resCheck = document.getElementById(`res-${i}`);
+
+        if (potCheck) {
+            potCheck.addEventListener('change', () => {
+                window.calcularSaudeMax(true); 
+                if (typeof agendarAutosave === 'function') agendarAutosave();
+            });
+        }
+
+        if (resCheck) {
+            resCheck.addEventListener('change', () => {
+                window.calcularSaudeMax(true); 
+                if (typeof agendarAutosave === 'function') agendarAutosave();
+            });
+        }
+    }
 
     // ==========================================
     // 🔧 INICIALIZAÇÃO DO LUCIDE ICONS
