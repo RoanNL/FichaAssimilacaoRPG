@@ -1062,7 +1062,7 @@ main {
     /*  SAÚDE */
     .saude-grid {
         display: flex !important;
-        flex-direction: column !important;
+        flex-direction: column !important; 
         gap: 15px !important;
     }
     
@@ -1073,22 +1073,12 @@ main {
     
     .saude-drops-track {
         display: flex !important;
-        flex-wrap: wrap !important;
+        flex-wrap: wrap !important; 
         justify-content: center !important;
         align-items: center !important;
-        gap: 8px !important;
+        gap: 12px !important; 
         height: auto !important;
         padding: 10px !important;
     }
     
-    .saude-drops-track input[type="checkbox"] {
-        position: relative !important; 
-        margin: 0 !important; 
-        top: auto !important;
-        left: auto !important;
-        right: auto !important;
-        bottom: auto !important;
-        flex-shrink: 0 !important; 
-        display: inline-block !important;
-    }
 }
