@@ -1256,77 +1256,88 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // ==========================================
-    // 🩸 SISTEMA DE SAÚDE AUTOMÁTICA (POTÊNCIA + RESOLUÇÃO)
+    // SISTEMA DE SAÚDE AUTOMÁTICA (TOTAL DE GOTAS)
     // ==========================================
     const inputSaudeMax = document.getElementById('saude-max');
     
-    // Tranca a bolinha para não ser digitada manualmente
+    // 1. Tranca a bolinha para não ser digitada manualmente
     if (inputSaudeMax) {
         inputSaudeMax.readOnly = true;
         inputSaudeMax.style.cursor = 'default';
-        inputSaudeMax.style.pointerEvents = 'none'; // Impede o clique
+        inputSaudeMax.style.pointerEvents = 'none';
     }
 
-    // A Mágica do Cálculo
+    // 2. A Mágica do Cálculo e Preenchimento
     window.calcularSaudeMax = function(forcarPreenchimento = false) {
         let pontosPotencia = 0;
         let pontosResolucao = 0;
 
-        // Conta quantos pontos marcados tem em Potência
+        // Conta quantos pontos marcados tem em Potência e Resolução
         for (let i = 1; i <= 5; i++) {
             const pot = document.getElementById(`pot-${i}`);
             if (pot && pot.checked) pontosPotencia++;
-        }
-
-        // Conta quantos pontos marcados tem em Resolução
-        for (let i = 1; i <= 5; i++) {
+            
             const res = document.getElementById(`res-${i}`);
             if (res && res.checked) pontosResolucao++;
         }
 
-        // A Fórmula Sagrada: 1 + Potência + Resolução
-        const saudeMax = 1 + pontosPotencia + pontosResolucao;
+        // A base por caixa: 1 + Potência + Resolução
+        const gotasPorCaixa = 1 + pontosPotencia + pontosResolucao;
 
-        // Atualiza a bolinha
-        if (inputSaudeMax) {
-            inputSaudeMax.value = saudeMax;
-        }
-
-        //  O Auto-Fill (Só roda quando o jogador "upa" o status, NÃO quando a ficha carrega)
+        // 3. O Auto-Fill (Roda quando upa status, organizando as gotas)
         if (forcarPreenchimento) {
-            // Passa por todas as 6 caixas de dano (6 Saudável, 5 Escoriado...)
             for (let caixa = 1; caixa <= 6; caixa++) {
-                // Passa pelas 11 possíveis gotas de cada caixa
                 for (let gota = 1; gota <= 11; gota++) {
                     const checkGota = document.getElementById(`saude-${caixa}-${gota}`);
                     if (checkGota) {
-                        // Se a gota for menor ou igual à vida máxima, ela enche. Senão, esvazia.
-                        checkGota.checked = (gota <= saudeMax);
+                        checkGota.checked = (gota <= gotasPorCaixa);
                     }
                 }
             }
         }
+
+        // 4. 🔥 A NOVIDADE: Conta todas as gotas marcadas no momento
+        let totalGotasMarcadas = 0;
+        const todasAsGotas = document.querySelectorAll('.saude-drops-track input[type="checkbox"]');
+        todasAsGotas.forEach(gota => {
+            if (gota.checked) {
+                totalGotasMarcadas++;
+            }
+        });
+
+        // Atualiza a bolinha com o total exato (Ex: 24)
+        if (inputSaudeMax) {
+            inputSaudeMax.value = totalGotasMarcadas;
+        }
     };
 
-    //  Cria os "Ouvintes" para avisar o sistema sempre que Potência ou Resolução mudarem
+    // 5. Monitores de Aptidões (Preenche tudo se Potência/Resolução mudar)
     for (let i = 1; i <= 5; i++) {
         const potCheck = document.getElementById(`pot-${i}`);
         const resCheck = document.getElementById(`res-${i}`);
 
         if (potCheck) {
             potCheck.addEventListener('change', () => {
-                window.calcularSaudeMax(true); 
+                window.calcularSaudeMax(true); // true = Força o preenchimento!
                 if (typeof agendarAutosave === 'function') agendarAutosave();
             });
         }
-
         if (resCheck) {
             resCheck.addEventListener('change', () => {
-                window.calcularSaudeMax(true); 
+                window.calcularSaudeMax(true); // true = Força o preenchimento!
                 if (typeof agendarAutosave === 'function') agendarAutosave();
             });
         }
     }
+
+    // 6. 🔥 Monitores de Dano (Atualiza o total se desmarcar/marcar uma gota)
+    const todasAsGotasParaOuvir = document.querySelectorAll('.saude-drops-track input[type="checkbox"]');
+    todasAsGotasParaOuvir.forEach(gota => {
+        gota.addEventListener('change', () => {
+            window.calcularSaudeMax(false); // false = Apenas recalcula o total da bolinha
+            if (typeof agendarAutosave === 'function') agendarAutosave();
+        });
+    });
 
     // ==========================================
     // 🔧 INICIALIZAÇÃO DO LUCIDE ICONS
