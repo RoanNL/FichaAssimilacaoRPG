@@ -1005,29 +1005,76 @@ document.addEventListener('DOMContentLoaded', () => {
                         gridJogadores.appendChild(card);
                     });
 
+                    // --- NOVA LÓGICA DO MODAL DE REMOVER JOGADOR ---
+                    const modalRemoveJogador = document.getElementById('remove-jogador-modal');
+                    const inputRemoveJogador = document.getElementById('remove-jogador-input');
+                    const btnConfirmRemoveJogador = document.getElementById('btn-confirm-remove-jogador');
+                    const btnCancelRemoveJogador = document.getElementById('btn-cancel-remove-jogador');
+                    const targetNameJogador = document.getElementById('remove-jogador-target-name');
+
+                    let jogadorParaRemoverId = null;
+                    let cardJogadorParaRemover = null;
+                    let nomeJogadorLimpo = '';
+
                     document.querySelectorAll('.btn-remover-jogador').forEach(btn => {
                         btn.addEventListener('click', async (event) => {
-                            const usuarioIdRemover = event.target.getAttribute('data-usuario');
+                            jogadorParaRemoverId = event.target.getAttribute('data-usuario');
+                            cardJogadorParaRemover = event.target.closest('.jogador-card-mestre');
+                            
+                            // Pega o nome do h4 do card
+                            const nomeContaStr = cardJogadorParaRemover.querySelector('h4').textContent;
+                            nomeJogadorLimpo = nomeContaStr.trim().toLowerCase();
 
-                            if (confirm("Tem certeza que deseja remover este jogador da campanha?")) {
-                                try {
-                                    const delRes = await fetch(`${API_URL}/campanhas/${campanhaId}/membros/${usuarioIdRemover}`, {
-                                        method: 'DELETE',
-                                        headers: {
-                                            'Authorization': `Bearer ${sessionStorage.getItem('token')}`
-                                        }
-                                    });
-                                    if (delRes.ok) {
-                                        event.target.closest('.jogador-card-mestre').remove();
-                                    } else {
-                                        mostrarNotificacao("Erro ao remover jogador.", 'erro');
-                                    }
-                                } catch (err) {
-                                    mostrarNotificacao("Erro de conexão.", 'erro');
-                                }
-                            }
+                            targetNameJogador.textContent = nomeJogadorLimpo;
+                            inputRemoveJogador.value = '';
+                            btnConfirmRemoveJogador.disabled = true;
+                            btnConfirmRemoveJogador.classList.add('opacity-50', 'cursor-not-allowed');
+
+                            modalRemoveJogador.classList.add('show');
                         });
                     });
+
+                    if (inputRemoveJogador) {
+                        inputRemoveJogador.oninput = (e) => {
+                            if (e.target.value.trim().toLowerCase() === nomeJogadorLimpo) {
+                                btnConfirmRemoveJogador.disabled = false;
+                                btnConfirmRemoveJogador.classList.remove('opacity-50', 'cursor-not-allowed');
+                            } else {
+                                btnConfirmRemoveJogador.disabled = true;
+                                btnConfirmRemoveJogador.classList.add('opacity-50', 'cursor-not-allowed');
+                            }
+                        };
+                    }
+
+                    if (btnCancelRemoveJogador) {
+                        btnCancelRemoveJogador.onclick = () => modalRemoveJogador.classList.remove('show');
+                    }
+
+                    if (btnConfirmRemoveJogador) {
+                        btnConfirmRemoveJogador.onclick = async () => {
+                            if (!jogadorParaRemoverId) return;
+                            const iconeOriginal = btnConfirmRemoveJogador.innerHTML;
+                            btnConfirmRemoveJogador.innerHTML = "Removendo...";
+
+                            try {
+                                const delRes = await fetch(`${API_URL}/campanhas/${campanhaId}/membros/${jogadorParaRemoverId}`, {
+                                    method: 'DELETE',
+                                    headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
+                                });
+                                if (delRes.ok) {
+                                    if(cardJogadorParaRemover) cardJogadorParaRemover.remove();
+                                    mostrarNotificacao("Jogador removido com sucesso.", 'sucesso');
+                                } else {
+                                    mostrarNotificacao("Erro ao remover jogador.", 'erro');
+                                }
+                            } catch (err) {
+                                mostrarNotificacao("Erro de conexão.", 'erro');
+                            } finally {
+                                modalRemoveJogador.classList.remove('show');
+                                btnConfirmRemoveJogador.innerHTML = iconeOriginal;
+                            }
+                        };
+                    }
                 }
 
                 modalGerenciarJogadores.classList.add('show');
@@ -1744,98 +1791,362 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
-    // ⛺ GERENCIADOR DE REFÚGIO E CONSUMO
+    // ⛺ GERENCIADOR DE REFÚGIOS (BANCO DE DADOS)
     // ==========================================
     const modalRefugio = document.getElementById('refugio-modal');
     const btnAbrirRefugio = document.getElementById('btn-abrir-refugio');
     const btnFecharRefugio = document.getElementById('fechar-refugio');
     
+    // Telas do Modal
+    const telaListaRefugios = document.getElementById('tela-lista-refugios');
+    const telaGestaoRefugio = document.getElementById('tela-gestao-refugio');
+    
+    // Botões e Containers
+    const containerListaRefugios = document.getElementById('container-lista-refugios');
+    const btnNovoRefugio = document.getElementById('btn-novo-refugio');
+    const btnVoltarLista = document.getElementById('btn-voltar-lista');
     const btnAvancarSemana = document.getElementById('btn-avancar-semana');
+    
+    // Alertas
     const alertaCrise = document.getElementById('alerta-crise');
     const textoMotivoCrise = document.getElementById('texto-motivo-crise');
 
-    // Abre e Fecha Modal
+    let refugiosData = [];
+    let refugioAtualId = null;
+
+    // --- FUNÇÕES DE API ---
+    async function carregarRefugiosDoBanco() {
+        try {
+            // Usa o API_URL e o sessionStorage do seu sistema de autenticação!
+            const response = await fetch(`${API_URL}/api/refugios`, {
+                headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
+            }); 
+            if (!response.ok) throw new Error('Erro ao buscar refúgios');
+            
+            refugiosData = await response.json();
+            renderizarListaRefugios();
+        } catch (error) {
+            console.error(error);
+            if (containerListaRefugios) {
+                containerListaRefugios.innerHTML = '<p class="text-center text-rpg-red font-bold">Erro ao carregar refúgios do servidor.</p>';
+            }
+        }
+    }
+
+    async function salvarRefugioNoBanco(refugio) {
+        try {
+            const response = await fetch(`${API_URL}/api/refugios/salvar`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${sessionStorage.getItem('token')}`
+                },
+                body: JSON.stringify(refugio)
+            });
+            
+            if (!response.ok) throw new Error('Erro ao salvar no banco');
+            
+            const data = await response.json();
+            if (data.id && refugio.id !== data.id) {
+                refugio.id = data.id; // Atualiza ID se for um insert novo
+            }
+        } catch (error) {
+            console.error("Falha ao salvar refúgio:", error);
+        }
+    }
+
+    async function deletarRefugioDoBanco(id) {
+        try {
+            const response = await fetch(`${API_URL}/api/refugios/deletar/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
+            });
+            if (!response.ok) throw new Error('Erro ao deletar no banco');
+        } catch (error) {
+            console.error("Falha ao deletar refúgio:", error);
+        }
+    }
+
+    // --- RENDERIZAÇÃO E NAVEGAÇÃO ---
+    function renderizarListaRefugios() {
+        if (!containerListaRefugios) return;
+        containerListaRefugios.innerHTML = '';
+        
+        if (refugiosData.length === 0) {
+            containerListaRefugios.innerHTML = '<p class="text-center text-gray-500 italic text-sm">Nenhum refúgio salvo. Crie um novo abrigo!</p>';
+            return;
+        }
+
+        refugiosData.forEach(ref => {
+            const card = document.createElement('div');
+            card.className = 'bg-white dark:bg-[#1a1a1a] p-4 rounded border border-gray-300 dark:border-gray-700 shadow-sm flex justify-between items-center cursor-pointer hover:border-[#6c7a6b] transition-colors';
+            
+            card.innerHTML = `
+                <div class="flex-grow info-click">
+                    <h4 class="font-rpg font-black text-xl text-[#4a5449] dark:text-[#8ba389] uppercase">${escaparHTML(ref.nome) || "Refúgio Sem Nome"}</h4>
+                    <p class="text-xs text-gray-500 font-bold uppercase mt-1">População: ${ref.popAtual}/${ref.popMax} | Defesa: ${ref.defesa} | Moral: ${ref.moral}</p>
+                </div>
+                <button class="text-gray-400 hover:text-red-500 p-2 btn-delete-refugio" data-id="${ref.id}" title="Excluir Refúgio">
+                    <i data-lucide="trash-2" class="w-5 h-5"></i>
+                </button>
+            `;
+            
+            card.querySelector('.info-click').addEventListener('click', () => abrirRefugio(ref.id));
+            
+            // --- NOVA LÓGICA DO MODAL DE DIZIMAR REFÚGIO ---
+            const modalDeleteRefugio = document.getElementById('delete-refugio-modal');
+            const inputDeleteRefugio = document.getElementById('delete-refugio-input');
+            const btnConfirmDeleteRefugio = document.getElementById('btn-confirm-delete-refugio');
+            const btnCancelDeleteRefugio = document.getElementById('btn-cancel-delete-refugio');
+            const targetNameRefugio = document.getElementById('delete-refugio-target-name');
+
+            card.querySelector('.btn-delete-refugio').addEventListener('click', (e) => {
+                e.stopPropagation(); // Evita abrir o card ao clicar na lixeira
+                
+                // Salva os dados do refúgio em atributos globais no botão de confirmação
+                btnConfirmDeleteRefugio.dataset.idRefugio = ref.id;
+                const nomeLimpo = (ref.nome || "Sem Nome").trim().toLowerCase();
+                btnConfirmDeleteRefugio.dataset.nomeLimpo = nomeLimpo;
+
+                targetNameRefugio.textContent = nomeLimpo;
+                inputDeleteRefugio.value = '';
+                btnConfirmDeleteRefugio.disabled = true;
+                btnConfirmDeleteRefugio.classList.add('opacity-50', 'cursor-not-allowed');
+
+                modalDeleteRefugio.classList.add('show');
+            });
+
+            // Validador de digitação do Refúgio
+            if (inputDeleteRefugio) {
+                inputDeleteRefugio.oninput = (e) => {
+                    const nomeCorreto = btnConfirmDeleteRefugio.dataset.nomeLimpo;
+                    if (e.target.value.trim().toLowerCase() === nomeCorreto) {
+                        btnConfirmDeleteRefugio.disabled = false;
+                        btnConfirmDeleteRefugio.classList.remove('opacity-50', 'cursor-not-allowed');
+                    } else {
+                        btnConfirmDeleteRefugio.disabled = true;
+                        btnConfirmDeleteRefugio.classList.add('opacity-50', 'cursor-not-allowed');
+                    }
+                };
+            }
+
+            // Fechar modal do Refúgio
+            if (btnCancelDeleteRefugio) {
+                btnCancelDeleteRefugio.onclick = () => modalDeleteRefugio.classList.remove('show');
+            }
+
+            // Executar destruição do Refúgio
+            if (btnConfirmDeleteRefugio) {
+                btnConfirmDeleteRefugio.onclick = async () => {
+                    const idParaDeletar = btnConfirmDeleteRefugio.dataset.idRefugio;
+                    if (!idParaDeletar) return;
+
+                    const iconeOriginal = btnConfirmDeleteRefugio.innerHTML;
+                    btnConfirmDeleteRefugio.innerHTML = "Dizimando...";
+
+                    refugiosData = refugiosData.filter(r => r.id !== idParaDeletar);
+                    renderizarListaRefugios(); // Tira o card da tela
+                    await deletarRefugioDoBanco(idParaDeletar); // Tira do servidor
+
+                    modalDeleteRefugio.classList.remove('show');
+                    btnConfirmDeleteRefugio.innerHTML = iconeOriginal;
+                };
+            }
+
+            containerListaRefugios.appendChild(card);
+        });
+
+        if (window.lucide) lucide.createIcons();
+    }
+
+    function abrirRefugio(id) {
+        refugioAtualId = id;
+        const ref = refugiosData.find(r => r.id === id);
+        if (!ref) return;
+
+        document.getElementById('ref-nome').value = ref.nome || '';
+        document.getElementById('ref-pop-atual').value = ref.popAtual || 0;
+        document.getElementById('ref-pop-max').value = ref.popMax || 4;
+        document.getElementById('ref-defesa').value = ref.defesa || 0;
+        document.getElementById('ref-moral').value = ref.moral || 4;
+        document.getElementById('ref-mobilidade').value = ref.mobilidade || 0;
+        document.getElementById('ref-beligerancia').value = ref.beligerancia || 0;
+        
+        document.getElementById('ref-agua').value = ref.agua || 0;
+        document.getElementById('ref-fonte-agua').checked = !!ref.temFonteAgua;
+        document.getElementById('ref-alimento').value = ref.alimento || 0;
+        document.getElementById('ref-madeira').value = ref.madeira || 0;
+
+        verificarCrisesRefugio(false); // Atualiza os alertas
+        
+        if(telaListaRefugios && telaGestaoRefugio) {
+            telaListaRefugios.classList.add('hidden');
+            telaGestaoRefugio.classList.remove('hidden');
+            telaGestaoRefugio.classList.add('flex');
+        }
+    }
+
+    function autoSaveRefugioAtual() {
+        if (refugioAtualId === null) return;
+        const index = refugiosData.findIndex(r => r.id === refugioAtualId);
+        if (index === -1) return;
+
+        const refAtualizado = {
+            id: refugioAtualId,
+            nome: document.getElementById('ref-nome').value,
+            popAtual: parseInt(document.getElementById('ref-pop-atual').value) || 0,
+            popMax: parseInt(document.getElementById('ref-pop-max').value) || 1,
+            defesa: parseInt(document.getElementById('ref-defesa').value) || 0,
+            moral: parseInt(document.getElementById('ref-moral').value) || 0,
+            mobilidade: parseInt(document.getElementById('ref-mobilidade').value) || 0,
+            beligerancia: parseInt(document.getElementById('ref-beligerancia').value) || 0,
+            agua: parseInt(document.getElementById('ref-agua').value) || 0,
+            temFonteAgua: document.getElementById('ref-fonte-agua').checked,
+            alimento: parseInt(document.getElementById('ref-alimento').value) || 0,
+            madeira: parseInt(document.getElementById('ref-madeira').value) || 0
+        };
+
+        refugiosData[index] = refAtualizado;
+        salvarRefugioNoBanco(refAtualizado); // Salva no Postgres em background
+    }
+
+    // Escuta alterações nos inputs para o autosave
+    document.querySelectorAll('.auto-save-refugio, #ref-nome').forEach(input => {
+        input.addEventListener('input', () => {
+            autoSaveRefugioAtual();
+            verificarCrisesRefugio(false);
+        });
+        input.addEventListener('change', () => {
+            autoSaveRefugioAtual();
+            verificarCrisesRefugio(false);
+        });
+    });
+
+    // --- INTERAÇÕES DE BOTÕES ---
     if(btnAbrirRefugio && modalRefugio) {
-        btnAbrirRefugio.addEventListener('click', (e) => {
+        btnAbrirRefugio.addEventListener('click', async (e) => {
             e.preventDefault();
+            await carregarRefugiosDoBanco(); // Puxa do banco toda vez que abre o modal
+            
+            if (telaListaRefugios && telaGestaoRefugio) {
+                telaListaRefugios.classList.remove('hidden');
+                telaGestaoRefugio.classList.add('hidden');
+                telaGestaoRefugio.classList.remove('flex');
+            }
             modalRefugio.classList.add('show');
         });
+        
         btnFecharRefugio.addEventListener('click', () => {
             modalRefugio.classList.remove('show');
         });
     }
 
-    // Lógica do Consumo Semanal
-    if(btnAvancarSemana) {
-        btnAvancarSemana.addEventListener('click', () => {
-            const popAtual = parseInt(document.getElementById('ref-pop-atual').value) || 0;
-            const popMax = parseInt(document.getElementById('ref-pop-max').value) || 1;
-            
-            const inputAgua = document.getElementById('ref-agua');
-            const inputAlimento = document.getElementById('ref-alimento');
-            const inputMadeira = document.getElementById('ref-madeira');
-            const temFonteAgua = document.getElementById('ref-fonte-agua').checked;
-
-            let agua = parseInt(inputAgua.value) || 0;
-            let alimento = parseInt(inputAlimento.value) || 0;
-            let madeira = parseInt(inputMadeira.value) || 0;
-
-            let emCrise = false;
-            let motivosCrise = [];
-
-            // Regra 1: População acima do teto gera Crise
-            if (popAtual > popMax) {
-                emCrise = true;
-                motivosCrise.push(`A População (${popAtual}) ultrapassou o teto máximo de conforto (${popMax}).`);
+    if(btnVoltarLista) {
+        btnVoltarLista.addEventListener('click', () => {
+            autoSaveRefugioAtual();
+            renderizarListaRefugios();
+            if (telaListaRefugios && telaGestaoRefugio) {
+                telaGestaoRefugio.classList.add('hidden');
+                telaGestaoRefugio.classList.remove('flex');
+                telaListaRefugios.classList.remove('hidden');
             }
+        });
+    }
 
-            // Regra 2: Consumo (1 nível por nível de população)
+    if(btnNovoRefugio) {
+        btnNovoRefugio.addEventListener('click', async () => {
+            btnNovoRefugio.disabled = true;
+            const textoOriginal = btnNovoRefugio.innerHTML;
+            btnNovoRefugio.innerHTML = 'Criando...';
+
+            const novoId = Date.now().toString(); // ID Temporário
+            const novoRefugio = {
+                id: novoId, nome: "Novo Refúgio", popAtual: 2, popMax: 4, 
+                defesa: 1, moral: 4, mobilidade: 0, beligerancia: 1, 
+                agua: 5, temFonteAgua: false, alimento: 5, madeira: 5
+            };
+            
+            refugiosData.push(novoRefugio);
+            await salvarRefugioNoBanco(novoRefugio); // Vai atualizar o ID pro UUID do banco!
+            
+            renderizarListaRefugios();
+            abrirRefugio(novoRefugio.id);
+            
+            btnNovoRefugio.disabled = false;
+            btnNovoRefugio.innerHTML = textoOriginal;
+        });
+    }
+
+    // --- MATEMÁTICA DA SOBREVIVÊNCIA ---
+    function verificarCrisesRefugio(deduzirConsumo = false) {
+        let popAtual = parseInt(document.getElementById('ref-pop-atual').value) || 0;
+        let popMax = parseInt(document.getElementById('ref-pop-max').value) || 1;
+        
+        const inputAgua = document.getElementById('ref-agua');
+        const inputAlimento = document.getElementById('ref-alimento');
+        const inputMadeira = document.getElementById('ref-madeira');
+        const temFonteAgua = document.getElementById('ref-fonte-agua').checked;
+
+        let agua = parseInt(inputAgua.value) || 0;
+        let alimento = parseInt(inputAlimento.value) || 0;
+        let madeira = parseInt(inputMadeira.value) || 0;
+
+        let emCrise = false;
+        let motivosCrise = [];
+
+        // Verifica Teto Populacional
+        if (popAtual > popMax) {
+            emCrise = true;
+            motivosCrise.push(`A População (${popAtual}) ultrapassou o teto máximo (${popMax}).`);
+        }
+
+        // Lógica de Consumo Semanal
+        if (deduzirConsumo) {
             if (!temFonteAgua) {
                 agua -= popAtual;
-                if (agua < 0) {
-                    agua = 0;
-                    emCrise = true;
-                    motivosCrise.push("Falta de Água nas reservas.");
-                }
+                if (agua < 0) { agua = 0; emCrise = true; motivosCrise.push("Falta de Água nas reservas."); }
             }
-            
             alimento -= popAtual;
-            if (alimento < 0) {
-                alimento = 0;
-                emCrise = true;
-                motivosCrise.push("Falta de Alimentos nas reservas.");
-            }
+            if (alimento < 0) { alimento = 0; emCrise = true; motivosCrise.push("Falta de Alimentos nas reservas."); }
 
             madeira -= popAtual;
-            if (madeira < 0) {
-                madeira = 0;
-                emCrise = true;
-                motivosCrise.push("Falta de Madeira nas reservas.");
-            }
+            if (madeira < 0) { madeira = 0; emCrise = true; motivosCrise.push("Falta de Madeira nas reservas."); }
 
-            // Atualiza os inputs com os novos valores após o consumo
             inputAgua.value = agua;
             inputAlimento.value = alimento;
             inputMadeira.value = madeira;
+            
+            autoSaveRefugioAtual(); // Salva a dedução
+        } else {
+            // Apenas verifica estoques secos
+            if (!temFonteAgua && agua <= 0) { emCrise = true; motivosCrise.push("As reservas de Água estão zeradas!"); }
+            if (alimento <= 0) { emCrise = true; motivosCrise.push("As reservas de Alimento estão zeradas!"); }
+            if (madeira <= 0) { emCrise = true; motivosCrise.push("As reservas de Madeira estão zeradas!"); }
+        }
 
-            // Exibe ou esconde o alerta
-            if (emCrise) {
-                textoMotivoCrise.innerHTML = motivosCrise.join("<br>• ");
-                alertaCrise.classList.remove('hidden');
-                
-                // Feedback visual de erro no botão
+        // Interface de Alerta
+        if (emCrise && alertaCrise) {
+            textoMotivoCrise.innerHTML = motivosCrise.join("<br>• ");
+            alertaCrise.classList.remove('hidden');
+        } else if (alertaCrise) {
+            alertaCrise.classList.add('hidden');
+            if (textoMotivoCrise) textoMotivoCrise.innerHTML = "";
+        }
+        
+        return emCrise;
+    }
+
+    if(btnAvancarSemana) {
+        btnAvancarSemana.addEventListener('click', () => {
+            const entrouEmCrise = verificarCrisesRefugio(true); // true = faz a dedução matemática
+            
+            if (entrouEmCrise) {
                 btnAvancarSemana.classList.replace('bg-[#6c7a6b]', 'bg-rpg-red');
                 setTimeout(() => btnAvancarSemana.classList.replace('bg-rpg-red', 'bg-[#6c7a6b]'), 500);
             } else {
-                alertaCrise.classList.add('hidden');
-                textoMotivoCrise.innerHTML = "";
-                
-                // Feedback visual de sucesso no botão
                 btnAvancarSemana.classList.replace('bg-[#6c7a6b]', 'bg-green-600');
                 setTimeout(() => btnAvancarSemana.classList.replace('bg-green-600', 'bg-[#6c7a6b]'), 500);
             }
-
-            if(typeof agendarAutosave === 'function') agendarAutosave();
         });
     }
 });

@@ -832,8 +832,8 @@
     </div>
 
     <!-- ==========================================
-         MODAL: GERENCIADOR DE REFÚGIOS (COM SAVE)
-         ========================================== -->
+        MODAL: GERENCIADOR DE REFÚGIOS (COM SAVE)
+        ========================================== -->
     <div id="refugio-modal" class="modal z-[99999]">
         <div class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border-2 border-[#6c7a6b] rounded-md p-6 max-w-[800px] w-[95%] max-h-[90vh] overflow-y-auto relative shadow-[0_0_40px_rgba(108,122,107,0.3)]">
             
@@ -945,6 +945,42 @@
                 </button>
             </div>
 
+        </div>
+    </div>
+
+    <!-- ==========================================
+        MODAL: CONFIRMAR REMOÇÃO DE JOGADOR
+        ========================================== -->
+    <div id="remove-jogador-modal" class="modal z-[999999]">
+        <div class="modal-content bg-rpg-paper dark:bg-[#1a1a1a] border-2 border-rpg-red rounded-md p-6 max-w-[400px] w-[90%] text-center shadow-[0_0_30px_rgba(140,58,58,0.6)]">
+            <h3 class="text-2xl font-rpg font-black text-rpg-red uppercase mb-2 flex justify-center items-center gap-2">
+                <i data-lucide="user-x" class="w-8 h-8"></i> Remover Jogador
+            </h3>
+            <p class="text-gray-700 dark:text-gray-300 mb-4 font-bold">Para expulsar este jogador da mesa, digite o nome da conta dele abaixo:</p>
+            <p id="remove-jogador-target-name" class="text-rpg-red dark:text-red-400 font-black text-xl mb-4 uppercase select-none"></p>
+            <input type="text" id="remove-jogador-input" placeholder="Digite o nome..." class="w-full bg-white dark:bg-[#242424] border border-gray-400 dark:border-gray-600 rounded p-2 text-center text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-red mb-4 font-bold" autocomplete="off">
+            <div class="flex justify-center gap-4">
+                <button id="btn-cancel-remove-jogador" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition-colors w-full uppercase font-rpg tracking-widest">Cancelar</button>
+                <button id="btn-confirm-remove-jogador" class="bg-rpg-red hover:bg-red-800 text-white font-bold py-2 px-4 rounded transition-colors w-full opacity-50 cursor-not-allowed uppercase font-rpg tracking-widest" disabled>Remover</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+        MODAL: CONFIRMAR DESTRUIÇÃO DE REFÚGIO
+        ========================================== -->
+    <div id="delete-refugio-modal" class="modal z-[999999]">
+        <div class="modal-content bg-rpg-paper dark:bg-[#1a1a1a] border-2 border-rpg-red rounded-md p-6 max-w-[400px] w-[90%] text-center shadow-[0_0_30px_rgba(140,58,58,0.6)]">
+            <h3 class="text-2xl font-rpg font-black text-rpg-red uppercase mb-2 flex justify-center items-center gap-2">
+                <i data-lucide="alert-triangle" class="w-8 h-8"></i> Dizimar Refúgio
+            </h3>
+            <p class="text-gray-700 dark:text-gray-300 mb-4 font-bold">Esta ação é irreversível. Para confirmar a destruição, digite o nome do refúgio abaixo:</p>
+            <p id="delete-refugio-target-name" class="text-rpg-red dark:text-red-400 font-black text-xl mb-4 uppercase select-none"></p>
+            <input type="text" id="delete-refugio-input" placeholder="Digite o nome..." class="w-full bg-white dark:bg-[#242424] border border-gray-400 dark:border-gray-600 rounded p-2 text-center text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-red mb-4 font-bold" autocomplete="off">
+            <div class="flex justify-center gap-4">
+                <button id="btn-cancel-delete-refugio" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition-colors w-full uppercase font-rpg tracking-widest">Cancelar</button>
+                <button id="btn-confirm-delete-refugio" class="bg-rpg-red hover:bg-red-800 text-white font-bold py-2 px-4 rounded transition-colors w-full opacity-50 cursor-not-allowed uppercase font-rpg tracking-widest" disabled>Dizimar</button>
+            </div>
         </div>
     </div>
 
