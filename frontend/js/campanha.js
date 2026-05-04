@@ -287,12 +287,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // 6. FERRAMENTAS DO MESTRE & AUTOSAVE
     // ==========================================
-    const containerAmeacas = document.getElementById('container-ameacas');
-    const containerObjetivos = document.getElementById('container-objetivos');
-    const containerRefugios = document.getElementById('container-refugios');
-
+    
+    // --- FUNÇÕES DE CRIAÇÃO VISUAL ---
     function criarAmeaca(nome = '', desc = '') {
+        const containerAmeacas = document.getElementById('container-ameacas');
         if(!containerAmeacas) return;
+
         const bloco = document.createElement('div');
         bloco.className = 'ameaca-item bg-white dark:bg-[#2a2a2a] p-4 rounded-md shadow-inner border border-gray-300 dark:border-gray-600 mb-3 focus-within:ring-2 focus-within:ring-rpg-red transition-all relative';
         bloco.innerHTML = `
@@ -306,10 +306,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function criarObjetivo(nome = '', atual = 0, max = 10, desc = '') {
+        const containerObjetivos = document.getElementById('container-objetivos');
         if(!containerObjetivos) return;
+
         const bloco = document.createElement('div');
         bloco.className = 'objetivo-item bg-white dark:bg-[#2a2a2a] p-4 rounded-md shadow-inner border border-gray-300 dark:border-gray-600 mb-3 focus-within:ring-2 focus-within:ring-rpg-blue transition-all relative';
         const porcentagem = Math.min(100, Math.max(0, (atual / max) * 100)) || 0;
+        
         bloco.innerHTML = `
             <div class="flex justify-between items-center mb-2 border-b-2 border-blue-900 pb-1">
                 <input type="text" class="item-nome w-full font-bold p-1 bg-transparent text-black dark:text-white text-base outline-none" placeholder="Novo Objetivo" value="${window.escaparHTML(nome)}">
@@ -329,28 +332,7 @@ document.addEventListener('DOMContentLoaded', () => {
         containerObjetivos.appendChild(bloco);
     }
 
-    function criarRefugio(nome = '', seg = '', rec = '', desc = '') {
-        if(!containerRefugios) return;
-        const bloco = document.createElement('div');
-        bloco.className = 'refugio-item bg-white dark:bg-[#2a2a2a] p-4 rounded-md shadow-inner border border-gray-300 dark:border-gray-600 mb-3 focus-within:ring-2 focus-within:ring-rpg-green transition-all relative';
-        bloco.innerHTML = `
-            <div class="flex justify-between items-center mb-2 border-b-2 border-green-900 pb-1">
-                <div class="flex items-center gap-2 w-full">
-                    <i data-lucide="tent" class="w-5 h-5 text-rpg-green"></i>
-                    <input type="text" class="item-nome w-full font-bold p-1 bg-transparent text-black dark:text-white text-base outline-none" placeholder="Nome do Refúgio" value="${window.escaparHTML(nome)}">
-                </div>
-                <button type="button" class="btn-del-item ml-2 bg-red-800 hover:bg-red-900 text-white text-xs font-bold py-1 px-2 rounded cursor-pointer transition-colors shadow-sm border-none"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-            </div>
-            <div class="grid grid-cols-2 gap-2 mb-2">
-                <input type="text" class="ref-seguranca p-1 bg-gray-100 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 rounded text-sm text-black dark:text-white outline-none w-full" placeholder="Segurança" value="${window.escaparHTML(seg)}">
-                <input type="text" class="ref-recursos p-1 bg-gray-100 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 rounded text-sm text-black dark:text-white outline-none w-full" placeholder="Recursos" value="${window.escaparHTML(rec)}">
-            </div>
-            <textarea rows="2" class="item-desc w-full p-1 bg-transparent text-black dark:text-gray-300 outline-none resize-y text-sm" placeholder="Anotações do local...">${window.escaparHTML(desc)}</textarea>
-        `;
-        containerRefugios.appendChild(bloco);
-    }
-
-    // --- EVENTOS DOS BOTÕES DE "ADICIONAR" (Blindagem Máxima contra IDs diferentes) ---
+    // --- EVENTOS DOS BOTÕES (Apenas Partitura!) ---
     const ligarBotao = (ids, funcao) => {
         ids.forEach(id => {
             const btn = document.getElementById(id);
@@ -360,7 +342,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     ligarBotao(['btn-add-ameaca', 'btn-criar-ameaca', 'btn-nova-ameaca'], criarAmeaca);
     ligarBotao(['btn-add-objetivo', 'btn-criar-objetivo', 'btn-novo-objetivo'], criarObjetivo);
-    ligarBotao(['btn-add-refugio', 'btn-criar-refugio', 'btn-novo-refugio'], criarRefugio);
+    // REMOVIDA A INTERFERÊNCIA COM O BOTÃO DE REFÚGIO!
 
     // --- AUTOSAVE E LÓGICA DA BARRA ---
     let timeoutPartitura;
@@ -376,23 +358,24 @@ document.addEventListener('DOMContentLoaded', () => {
         bloco.querySelector('.obj-bar').style.width = `${porcentagem}%`;
     }
 
-    [containerAmeacas, containerObjetivos, containerRefugios].forEach(container => {
-        if (!container) return;
+    // Delegação de Eventos Segura
+    document.addEventListener('input', (e) => {
+        if (!e.target.closest('#container-ameacas') && !e.target.closest('#container-objetivos')) return;
         
-        container.addEventListener('input', (e) => {
-            if (e.target.classList.contains('obj-atual') || e.target.classList.contains('obj-max')) {
-                atualizarBarraObjetivo(e.target.closest('.objetivo-item'));
-            }
-            agendarAutosavePartitura();
-        });
+        if (e.target.classList.contains('obj-atual') || e.target.classList.contains('obj-max')) {
+            atualizarBarraObjetivo(e.target.closest('.objetivo-item'));
+        }
+        agendarAutosavePartitura();
+    });
 
-        container.addEventListener('click', (e) => {
-            const btnDel = e.target.closest('.btn-del-item');
-            if (btnDel) {
-                btnDel.closest('.ameaca-item, .objetivo-item, .refugio-item').remove();
-                agendarAutosavePartitura();
-            }
-        });
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('#container-ameacas') && !e.target.closest('#container-objetivos')) return;
+
+        const btnDel = e.target.closest('.btn-del-item');
+        if (btnDel) {
+            btnDel.closest('.ameaca-item, .objetivo-item').remove();
+            agendarAutosavePartitura();
+        }
     });
 
     // --- ENVIAR PARA O BANCO ---
@@ -400,7 +383,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const campanhaId = sessionStorage.getItem('campanhaAtiva');
         if (!campanhaId) return;
 
-        const dados = { ameacas: [], objetivos: [], refugios: [] };
+        const dados = { ameacas: [], objetivos: [] };
 
         document.querySelectorAll('#container-ameacas .ameaca-item').forEach(el => {
             dados.ameacas.push({ nome: el.querySelector('.item-nome').value, desc: el.querySelector('.item-desc').value });
@@ -408,10 +391,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.querySelectorAll('#container-objetivos .objetivo-item').forEach(el => {
             dados.objetivos.push({ nome: el.querySelector('.item-nome').value, atual: el.querySelector('.obj-atual').value, max: el.querySelector('.obj-max').value, desc: el.querySelector('.item-desc').value });
-        });
-
-        document.querySelectorAll('#container-refugios .refugio-item').forEach(el => {
-            dados.refugios.push({ nome: el.querySelector('.item-nome').value, seguranca: el.querySelector('.ref-seguranca').value, recursos: el.querySelector('.ref-recursos').value, desc: el.querySelector('.item-desc').value });
         });
 
         try {
@@ -427,9 +406,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- CARREGAR DO BANCO (BLINDADO) ---
     async function carregarPartituraDoBanco(campanhaId) {
+        const containerAmeacas = document.getElementById('container-ameacas');
+        const containerObjetivos = document.getElementById('container-objetivos');
+        
         if (containerAmeacas) containerAmeacas.innerHTML = '';
         if (containerObjetivos) containerObjetivos.innerHTML = '';
-        if (containerRefugios) containerRefugios.innerHTML = '';
 
         try {
             const res = await fetch(`${window.API_URL}/campanhas/${campanhaId}/partitura`, {
@@ -439,10 +420,8 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (dadosStr) {
                 const dados = JSON.parse(dadosStr);
-                
                 if (dados.ameacas) dados.ameacas.forEach(a => criarAmeaca(a.nome, a.desc));
                 if (dados.objetivos) dados.objetivos.forEach(o => criarObjetivo(o.nome, o.atual, o.max, o.desc));
-                if (dados.refugios) dados.refugios.forEach(r => criarRefugio(r.nome, r.seguranca, r.recursos, r.desc));
             }
             if(window.lucide) lucide.createIcons();
             

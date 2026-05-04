@@ -695,7 +695,7 @@ app.get('/campanhas/:id/jogadores', verificarToken, async (req, res) => {
             SELECT m.usuario_id, u.username, u.avatar, p.nome_personagem 
             FROM membros_campanha m
             JOIN usuarios u ON m.usuario_id = u.id
-            LEFT JOIN personagens p ON p.id = m.personagem_ativo_id
+            LEFT JOIN personagens p ON p.id = m.personagem_id
             WHERE m.campanha_id = $1
         `, [req.params.id]);
         res.json(result.rows);
@@ -735,7 +735,7 @@ app.get('/campanhas/:id/fichas-mesa', verificarToken, async (req, res) => {
         const result = await pool.query(`
             SELECT p.*, u.username as nome_conta, u.avatar 
             FROM personagens p
-            JOIN membros_campanha m ON p.id = m.personagem_ativo_id
+            JOIN membros_campanha m ON p.id = m.personagem_id
             JOIN usuarios u ON u.id = m.usuario_id
             WHERE m.campanha_id = $1
         `, [req.params.id]);
