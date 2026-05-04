@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ==========================================
-    // 3. RENDERIZAR FICHAS DOS ALIADOS (COM FOTO)
+    // 3. RENDERIZAR FICHAS DA MESA (COM PRIVACIDADE POR ESCOLHA)
     // ==========================================
     async function carregarFichasDaMesa(campanhaId, isMestre) {
         const gridFichas = document.getElementById('grid-fichas-mesa-view');
@@ -76,8 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
         gridFichas.innerHTML = '<p class="text-gray-500 italic animate-pulse">Procurando sobreviventes...</p>';
 
         try {
-            const endpoint = isMestre ? `/campanhas/${campanhaId}/fichas-mesa` : `/campanhas/${campanhaId}/personagens`;
-            const resposta = await fetch(`${window.API_URL}${endpoint}`, {
+            const resposta = await fetch(`${window.API_URL}/campanhas/${campanhaId}/fichas-mesa`, {
                 headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
             });
             
@@ -99,8 +98,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 card.className = 'flex flex-row h-[130px] w-[300px] min-w-[300px] flex-shrink-0 bg-white dark:bg-[#242424] rounded-lg overflow-hidden border border-gray-300 dark:border-[#333] hover:-translate-y-1 hover:shadow-lg transition-all cursor-default snap-start relative';
 
                 const imgSrc = (char.foto && !char.foto.includes('R0lGODlhAQAB')) ? char.foto : './assets/icon.jpg';
-                const nomeJogador = isMestre ? char.nome_conta : "Aliado";
-                const avatarJogador = (char.avatar && !char.avatar.includes('R0lGODlhAQAB')) ? char.avatar : './assets/icon.jpg';
+                const ocupacao = char.ocupacao || 'Desconhecido';
+                
+                // 🔥 O JUIZ DA PRIVACIDADE 🔥
+                const isDonoDaFicha = (char.usuario_id == meuId);
+                const isFichaPrivada = char.is_privada === true;
+                
+                // Só inspeciona se for Mestre, se for o Dono, ou se a Ficha for Pública!
+                const podeInspecionar = isMestre || isDonoDaFicha || !isFichaPrivada;
+
+                const controleInspecionarHtml = podeInspecionar
+                    ? `<button class="btn-inspecionar-ficha mt-auto w-max bg-rpg-blue hover:bg-[#2c6270] text-white px-3 py-1.5 rounded text-xs font-bold font-rpg uppercase shadow transition-colors z-10" data-id="${char.id}">
+                            Inspecionar
+                       </button>`
+                    : `<div class="mt-auto w-max bg-gray-200 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 text-gray-500 px-3 py-1.5 rounded text-[10px] font-bold uppercase shadow-inner z-10 flex items-center gap-1 cursor-not-allowed" title="O jogador ocultou esta ficha">
+                            <i data-lucide="lock" class="w-3 h-3 text-rpg-red"></i> Sigilo
+                       </div>`;
 
                 card.innerHTML = `
                     <img src="${imgSrc}" class="w-[110px] h-[130px] min-h-[130px] object-cover flex-shrink-0 border-r border-gray-300 dark:border-[#333] bg-black" alt="Foto">
@@ -108,19 +121,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         <h3 class="text-gray-800 dark:text-white font-bold text-[15px] m-0 truncate" title="${window.escaparHTML(char.nome_personagem)}">
                             ${window.escaparHTML(char.nome_personagem) || 'Sem Nome'}
                         </h3>
-                        
-                        <div class="flex items-center gap-1.5 mt-1">
-                            <img src="${avatarJogador}" class="w-5 h-5 rounded-full object-cover border border-gray-400 dark:border-gray-600 shadow-sm">
-                            <p class="text-rpg-red dark:text-orange-500 font-bold text-[10px] uppercase m-0 truncate">${window.escaparHTML(nomeJogador)}</p>
-                        </div>
-                        
-                        <button class="btn-inspecionar-ficha mt-auto w-max bg-rpg-blue hover:bg-[#2c6270] text-white px-3 py-1.5 rounded text-xs font-bold font-rpg uppercase shadow transition-colors z-10" data-id="${char.id}">
-                            Inspecionar
-                        </button>
+                        <p class="text-rpg-red dark:text-orange-500 font-bold text-[10px] uppercase m-0 mt-1 truncate">${window.escaparHTML(ocupacao)}</p>
+                        ${controleInspecionarHtml}
                     </div>
                 `;
                 gridFichas.appendChild(card);
             });
+
+            if(window.lucide) lucide.createIcons();
 
             document.querySelectorAll('.btn-inspecionar-ficha').forEach(btn => {
                 btn.addEventListener('click', async (e) => {
@@ -128,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (typeof window.carregarPersonagem === 'function') {
                         await window.carregarPersonagem(fichaId);
                         Router.navigate('ficha');
-                        window.mostrarNotificacao('Modo Inspeção: Ficha do aliado carregada.', 'aviso');
+                        window.mostrarNotificacao('Modo Inspeção: Ficha carregada.', 'aviso');
                     }
                 });
             });
@@ -137,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
             gridFichas.innerHTML = '<p class="text-rpg-red">Falha na varredura da área.</p>';
         }
     }
-
+    
     // ==========================================
     // 4. GERENCIAR JOGADORES (Somente Mestre)
     // ==========================================
@@ -285,10 +293,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
-    // 6. FERRAMENTAS DO MESTRE & AUTOSAVE
+    // 6. FERRAMENTAS DO MESTRE & AUTOSAVE (REFÚGIO RESTAURADO)
     // ==========================================
-    
-    // --- FUNÇÕES DE CRIAÇÃO VISUAL ---
     function criarAmeaca(nome = '', desc = '') {
         const containerAmeacas = document.getElementById('container-ameacas');
         if(!containerAmeacas) return;
@@ -300,7 +306,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <input type="text" class="item-nome w-full font-bold p-1 bg-transparent text-black dark:text-white text-base outline-none" placeholder="Nome da Ameaça" value="${window.escaparHTML(nome)}">
                 <button type="button" class="btn-del-item ml-2 bg-red-800 hover:bg-red-900 text-white text-xs font-bold py-1 px-2 rounded cursor-pointer transition-colors shadow-sm border-none"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
             </div>
-            <textarea rows="2" class="item-desc w-full p-1 bg-transparent text-black dark:text-gray-300 outline-none resize-y text-sm" placeholder="Descrição e Status do Relógio...">${window.escaparHTML(desc)}</textarea>
+            <textarea rows="2" class="item-desc w-full p-1 bg-transparent text-black dark:text-gray-300 outline-none resize-y text-sm" placeholder="Descrição e Status da Ameaça...">${window.escaparHTML(desc)}</textarea>
         `;
         containerAmeacas.appendChild(bloco);
     }
@@ -332,7 +338,30 @@ document.addEventListener('DOMContentLoaded', () => {
         containerObjetivos.appendChild(bloco);
     }
 
-    // --- EVENTOS DOS BOTÕES (Apenas Partitura!) ---
+    // 🔥 O REFÚGIO DA PARTITURA VOLTOU! 🔥
+    function criarRefugio(nome = '', seg = '', rec = '', desc = '') {
+        const containerRefugios = document.getElementById('container-refugios');
+        if(!containerRefugios) return;
+
+        const bloco = document.createElement('div');
+        bloco.className = 'refugio-item bg-white dark:bg-[#2a2a2a] p-4 rounded-md shadow-inner border border-gray-300 dark:border-gray-600 mb-3 focus-within:ring-2 focus-within:ring-rpg-green transition-all relative';
+        bloco.innerHTML = `
+            <div class="flex justify-between items-center mb-2 border-b-2 border-green-900 pb-1">
+                <div class="flex items-center gap-2 w-full">
+                    <i data-lucide="tent" class="w-5 h-5 text-rpg-green"></i>
+                    <input type="text" class="item-nome w-full font-bold p-1 bg-transparent text-black dark:text-white text-base outline-none" placeholder="Nome do Refúgio" value="${window.escaparHTML(nome)}">
+                </div>
+                <button type="button" class="btn-del-item ml-2 bg-red-800 hover:bg-red-900 text-white text-xs font-bold py-1 px-2 rounded cursor-pointer transition-colors shadow-sm border-none"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+            </div>
+            <div class="grid grid-cols-2 gap-2 mb-2">
+                <input type="text" class="ref-seguranca p-1 bg-gray-100 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 rounded text-sm text-black dark:text-white outline-none w-full" placeholder="Segurança" value="${window.escaparHTML(seg)}">
+                <input type="text" class="ref-recursos p-1 bg-gray-100 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 rounded text-sm text-black dark:text-white outline-none w-full" placeholder="Recursos" value="${window.escaparHTML(rec)}">
+            </div>
+            <textarea rows="2" class="item-desc w-full p-1 bg-transparent text-black dark:text-gray-300 outline-none resize-y text-sm" placeholder="Anotações do local...">${window.escaparHTML(desc)}</textarea>
+        `;
+        containerRefugios.appendChild(bloco);
+    }
+
     const ligarBotao = (ids, funcao) => {
         ids.forEach(id => {
             const btn = document.getElementById(id);
@@ -342,9 +371,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     ligarBotao(['btn-add-ameaca', 'btn-criar-ameaca', 'btn-nova-ameaca'], criarAmeaca);
     ligarBotao(['btn-add-objetivo', 'btn-criar-objetivo', 'btn-novo-objetivo'], criarObjetivo);
-    // REMOVIDA A INTERFERÊNCIA COM O BOTÃO DE REFÚGIO!
+    ligarBotao(['btn-add-refugio', 'btn-criar-refugio', 'btn-novo-refugio'], criarRefugio); // Ligado de volta!
 
-    // --- AUTOSAVE E LÓGICA DA BARRA ---
     let timeoutPartitura;
     function agendarAutosavePartitura() {
         clearTimeout(timeoutPartitura);
@@ -358,9 +386,9 @@ document.addEventListener('DOMContentLoaded', () => {
         bloco.querySelector('.obj-bar').style.width = `${porcentagem}%`;
     }
 
-    // Delegação de Eventos Segura
     document.addEventListener('input', (e) => {
-        if (!e.target.closest('#container-ameacas') && !e.target.closest('#container-objetivos')) return;
+        // Agora escuta os 3 containers!
+        if (!e.target.closest('#container-ameacas') && !e.target.closest('#container-objetivos') && !e.target.closest('#container-refugios')) return;
         
         if (e.target.classList.contains('obj-atual') || e.target.classList.contains('obj-max')) {
             atualizarBarraObjetivo(e.target.closest('.objetivo-item'));
@@ -369,11 +397,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.addEventListener('click', (e) => {
-        if (!e.target.closest('#container-ameacas') && !e.target.closest('#container-objetivos')) return;
+        if (!e.target.closest('#container-ameacas') && !e.target.closest('#container-objetivos') && !e.target.closest('#container-refugios')) return;
 
         const btnDel = e.target.closest('.btn-del-item');
         if (btnDel) {
-            btnDel.closest('.ameaca-item, .objetivo-item').remove();
+            btnDel.closest('.ameaca-item, .objetivo-item, .refugio-item').remove();
             agendarAutosavePartitura();
         }
     });
@@ -383,7 +411,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const campanhaId = sessionStorage.getItem('campanhaAtiva');
         if (!campanhaId) return;
 
-        const dados = { ameacas: [], objetivos: [] };
+        const dados = { ameacas: [], objetivos: [], refugios: [] };
 
         document.querySelectorAll('#container-ameacas .ameaca-item').forEach(el => {
             dados.ameacas.push({ nome: el.querySelector('.item-nome').value, desc: el.querySelector('.item-desc').value });
@@ -391,6 +419,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.querySelectorAll('#container-objetivos .objetivo-item').forEach(el => {
             dados.objetivos.push({ nome: el.querySelector('.item-nome').value, atual: el.querySelector('.obj-atual').value, max: el.querySelector('.obj-max').value, desc: el.querySelector('.item-desc').value });
+        });
+
+        document.querySelectorAll('#container-refugios .refugio-item').forEach(el => {
+            dados.refugios.push({ nome: el.querySelector('.item-nome').value, seguranca: el.querySelector('.ref-seguranca').value, recursos: el.querySelector('.ref-recursos').value, desc: el.querySelector('.item-desc').value });
         });
 
         try {
@@ -408,9 +440,11 @@ document.addEventListener('DOMContentLoaded', () => {
     async function carregarPartituraDoBanco(campanhaId) {
         const containerAmeacas = document.getElementById('container-ameacas');
         const containerObjetivos = document.getElementById('container-objetivos');
+        const containerRefugios = document.getElementById('container-refugios');
         
         if (containerAmeacas) containerAmeacas.innerHTML = '';
         if (containerObjetivos) containerObjetivos.innerHTML = '';
+        if (containerRefugios) containerRefugios.innerHTML = '';
 
         try {
             const res = await fetch(`${window.API_URL}/campanhas/${campanhaId}/partitura`, {
@@ -422,6 +456,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const dados = JSON.parse(dadosStr);
                 if (dados.ameacas) dados.ameacas.forEach(a => criarAmeaca(a.nome, a.desc));
                 if (dados.objetivos) dados.objetivos.forEach(o => criarObjetivo(o.nome, o.atual, o.max, o.desc));
+                if (dados.refugios) dados.refugios.forEach(r => criarRefugio(r.nome, r.seguranca, r.recursos, r.desc));
             }
             if(window.lucide) lucide.createIcons();
             

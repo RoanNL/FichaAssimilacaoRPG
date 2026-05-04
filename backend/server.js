@@ -426,7 +426,7 @@ app.get('/usuarios/me', verificarToken, async (req, res) => {
 });
 
 // =========================================================================
-// SALVAR OU ATUALIZAR FICHA 
+// SALVAR OU ATUALIZAR FICHA (COM PRIVACIDADE)
 // =========================================================================
 app.post('/personagens', verificarToken, async (req, res) => {
     const usuarioIdSeguro = req.usuario.id; 
@@ -436,6 +436,9 @@ app.post('/personagens', verificarToken, async (req, res) => {
     const ocupacao = req.body.ocupacao || '';
     const dadosFicha = req.body.dadosFicha || req.body.dados_ficha || req.body.dados_personagem || {};
     let foto = req.body.foto || null; 
+    
+    // 🔥 RECEBE A OPÇÃO DO JOGADOR
+    const isPrivada = req.body.isPrivada || false; 
 
     const regexSeguro = /^[^<>{}\[\]=;]*$/;
 
@@ -446,48 +449,22 @@ app.post('/personagens', verificarToken, async (req, res) => {
         return regexSeguro.test(texto); 
     }
 
-    if (
-        !validarTexto(nome, 50) ||
-        !validarTexto(ocupacao, 50) ||
-        (dadosFicha && (
-            !validarTexto(dadosFicha['evento'], 80) ||
-            !validarTexto(dadosFicha['geracao'], 30) ||
-            !validarTexto(dadosFicha['proposito-pessoal'], 100) ||
-            !validarTexto(dadosFicha['proposito-coletivo'], 100)
-        ))
-    ) {
-        console.warn(`⚠️ Tentativa de injeção de código ou limite excedido pelo Usuário ID: ${usuarioIdSeguro}`);
-        return res.status(400).json({ 
-            erro: "Texto inválido! O texto excedeu o limite ou contém caracteres proibidos de código (< > { } [ ] = ;)." 
-        });
+    if (!validarTexto(nome, 50) || !validarTexto(ocupacao, 50)) {
+        return res.status(400).json({ erro: "Texto inválido ou com caracteres proibidos." });
     }
 
     if (supabase && foto && foto.startsWith('data:image')) {
         try {
-            console.log("☁️ Subindo nova imagem para o Supabase...");
-            
             const base64Data = foto.replace(/^data:image\/\w+;base64,/, "");
             const buffer = Buffer.from(base64Data, 'base64');
             const extensao = foto.substring(foto.indexOf('/') + 1, foto.indexOf(';base64'));
-            
             const nomeArquivo = `ficha_${usuarioIdSeguro}_${Date.now()}.${extensao}`;
 
-            const { data, error } = await supabase.storage
-                .from('ficha-fotos') 
-                .upload(nomeArquivo, buffer, {
-                    contentType: `image/${extensao}`,
-                    upsert: true
-                });
-
+            const { data, error } = await supabase.storage.from('ficha-fotos').upload(nomeArquivo, buffer, { contentType: `image/${extensao}`, upsert: true });
             if (error) throw error;
 
-            const { data: publicUrlData } = supabase.storage
-                .from('ficha-fotos')
-                .getPublicUrl(nomeArquivo);
-
+            const { data: publicUrlData } = supabase.storage.from('ficha-fotos').getPublicUrl(nomeArquivo);
             foto = publicUrlData.publicUrl; 
-            console.log("✅ Imagem hospedada com sucesso:", foto);
-
         } catch (err) {
             console.error("❌ Erro ao enviar imagem pro Supabase:", err);
         }
@@ -498,20 +475,17 @@ app.post('/personagens', verificarToken, async (req, res) => {
 
     try {
         if (isUpdate) {
-            const sql = `UPDATE personagens SET nome_personagem = $1, ocupacao = $2, dados_ficha = $3, foto = $4 WHERE id = $5 AND usuario_id = $6 RETURNING id`;
-            const result = await pool.query(sql, [nome, ocupacao, fichaParaOBanco, foto, personagemId, usuarioIdSeguro]);
+            const sql = `UPDATE personagens SET nome_personagem = $1, ocupacao = $2, dados_ficha = $3, foto = $4, is_privada = $5 WHERE id = $6 AND usuario_id = $7 RETURNING id`;
+            const result = await pool.query(sql, [nome, ocupacao, fichaParaOBanco, foto, isPrivada, personagemId, usuarioIdSeguro]);
             
-            if (result.rowCount === 0) {
-                return res.status(403).json({ erro: 'Tentativa de invasão detectada. Você não é o dono desta ficha.' });
-            }
+            if (result.rowCount === 0) return res.status(403).json({ erro: 'Acesso negado.' });
             res.json({ mensagem: 'Ficha atualizada com sucesso!', id: personagemId });
         } else {
-            const sql = `INSERT INTO personagens (usuario_id, nome_personagem, ocupacao, dados_ficha, foto) VALUES ($1, $2, $3, $4, $5) RETURNING id`;
-            const resultado = await pool.query(sql, [usuarioIdSeguro, nome, ocupacao, fichaParaOBanco, foto]);
-            res.json({ mensagem: 'Nova ficha salva no banco com sucesso!', id: resultado.rows[0].id });
+            const sql = `INSERT INTO personagens (usuario_id, nome_personagem, ocupacao, dados_ficha, foto, is_privada) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`;
+            const resultado = await pool.query(sql, [usuarioIdSeguro, nome, ocupacao, fichaParaOBanco, foto, isPrivada]);
+            res.json({ mensagem: 'Nova ficha salva no banco!', id: resultado.rows[0].id });
         }
     } catch (erro) {
-        console.error('❌ Erro SQL ao salvar:', erro);
         res.status(500).json({ erro: 'Erro interno do banco de dados.' });
     }
 });

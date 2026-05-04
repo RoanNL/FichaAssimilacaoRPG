@@ -79,6 +79,7 @@ async function criarTabelas() {
         await pool.query(query);
         await pool.query('ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS avatar TEXT;');
         await pool.query('ALTER TABLE campanhas ADD COLUMN IF NOT EXISTS dados_partitura TEXT;');
+        await pool.query('ALTER TABLE personagens ADD COLUMN IF NOT EXISTS is_privada BOOLEAN DEFAULT false;');
         console.log('✅ Tabelas do PostgreSQL verificadas/criadas com sucesso (Versão UUID)!');
     } catch (err) {
         console.error('❌ Erro ao criar tabelas:', err);

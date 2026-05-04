@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // 1. CARREGAR E LIMPAR FICHA
     // ==========================================
-    window.carregarPersonagem = async function(id) {
+    window.carregarPersonagem = async function (id) {
         try {
             const resposta = await fetch(`${window.API_URL}/personagem/${id}`, {
                 headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    window.limparFicha = function() {
+    window.limparFicha = function () {
         window.idPersonagemAtual = null;
         sessionStorage.removeItem('personagemAtivoId');
 
@@ -67,12 +67,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const caracContainer = document.getElementById('caracteristicas-container');
         if (caracContainer) {
             caracContainer.innerHTML = '';
-            for(let i = 0; i < 6; i++) window.adicionarCaracteristicaDOM();
+            for (let i = 0; i < 6; i++) window.adicionarCaracteristicaDOM();
         }
 
         if (typeof window.calcularSaudeMax === 'function') window.calcularSaudeMax(true);
         if (typeof window.atualizarPreviewAnotacoes === 'function') window.atualizarPreviewAnotacoes();
-        
+
         const spanNomeFicha = document.getElementById('nome-usuario-logado-ficha');
         if (spanNomeFicha) spanNomeFicha.textContent = `Nova Ficha`;
     };
@@ -175,12 +175,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 else el.value = dados[key];
             }
         }
-        
-        if (typeof window.calcularSaudeMax === 'function') window.calcularSaudeMax(false); 
+
+        if (typeof window.calcularSaudeMax === 'function') window.calcularSaudeMax(false);
         if (typeof window.sincronizarTrilhas === 'function') window.sincronizarTrilhas();
     }
 
-    window.salvarFicha = async function(silencioso = false) {
+    window.salvarFicha = async function (silencioso = false) {
         const usuarioLogadoId = sessionStorage.getItem('usuarioId');
         if (!usuarioLogadoId) return;
 
@@ -197,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const payload = {
             usuarioId: usuarioLogadoId,
             personagemId: window.idPersonagemAtual,
-            nome: nomePersonagem, 
+            nome: nomePersonagem,
             ocupacao: ocupacao,
             dadosFicha: dadosFicha,
             foto: foto
@@ -205,18 +205,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const btnSaveNav = document.getElementById('btn-save-char-nav');
         const iconOriginal = btnSaveNav ? btnSaveNav.innerHTML : '';
-        
+
         if (!silencioso && btnSaveNav) {
             btnSaveNav.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Salvando...';
-            if(window.lucide) lucide.createIcons();
+            if (window.lucide) lucide.createIcons();
         }
 
         try {
             const resposta = await fetch(`${window.API_URL}/personagens`, {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${sessionStorage.getItem('token')}` 
+                    'Authorization': `Bearer ${sessionStorage.getItem('token')}`
                 },
                 body: JSON.stringify(payload)
             });
@@ -232,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!silencioso) {
                     window.mostrarNotificacao(resultado.mensagem, 'sucesso');
                     // Atualiza a listagem lá no dashboard em background
-                    if(typeof window.carregarListaPersonagens === 'function') window.carregarListaPersonagens();
+                    if (typeof window.carregarListaPersonagens === 'function') window.carregarListaPersonagens();
                 }
             } else {
                 if (!silencioso) window.mostrarNotificacao(resultado.erro || "Erro desconhecido.", 'erro');
@@ -243,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } finally {
             if (!silencioso && btnSaveNav) {
                 btnSaveNav.innerHTML = iconOriginal;
-                if(window.lucide) lucide.createIcons();
+                if (window.lucide) lucide.createIcons();
             }
         }
     };
@@ -277,19 +277,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnConfirmDeleteChar = document.getElementById('btn-confirm-delete-char');
     const btnCancelDeleteChar = document.getElementById('btn-cancel-delete-char');
     const targetNameChar = document.getElementById('delete-char-target-name');
-    
+
     let nomePersonagemLimpo = '';
 
     // Modificamos a forma de chamar o delete (talvez adicionar um botão "Excluir" dentro da própria ficha ou no menu superior depois)
-    window.abrirModalDeletarPersonagem = function() {
+    window.abrirModalDeletarPersonagem = function () {
         if (!window.idPersonagemAtual) return window.mostrarNotificacao('Salve a ficha antes de excluí-la.', 'aviso');
 
         const nomePersonagemCru = document.getElementById('nome').value || '';
         nomePersonagemLimpo = nomePersonagemCru.trim().toLowerCase() || 'sem nome';
-        
+
         if (targetNameChar) targetNameChar.textContent = nomePersonagemLimpo;
         if (inputDeleteChar) inputDeleteChar.value = '';
-        
+
         if (btnConfirmDeleteChar) {
             btnConfirmDeleteChar.disabled = true;
             btnConfirmDeleteChar.classList.add('opacity-50', 'cursor-not-allowed');
@@ -323,12 +323,12 @@ document.addEventListener('DOMContentLoaded', () => {
             btnConfirmDeleteChar.innerHTML = "Apagando...";
 
             try {
-                const res = await fetch(`${window.API_URL}/personagens/${window.idPersonagemAtual}`, { 
+                const res = await fetch(`${window.API_URL}/personagens/${window.idPersonagemAtual}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
                 });
-                
-                if(res.ok) {
+
+                if (res.ok) {
                     window.mostrarNotificacao('Ficha deletada com sucesso.', 'sucesso');
                     window.limparFicha();
                     modalDeleteChar.classList.remove('show');
@@ -350,11 +350,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // 6. CARACTERÍSTICAS DINÂMICAS
     // ==========================================
     window.contadorCarac = 0;
-    window.adicionarCaracteristicaDOM = function() {
+    window.adicionarCaracteristicaDOM = function () {
         window.contadorCarac++;
         const indice = window.contadorCarac;
         const container = document.getElementById('caracteristicas-container');
-        if(!container) return;
+        if (!container) return;
 
         const bloco = document.createElement('div');
         bloco.className = 'carac-item flex flex-col w-full mb-2 bg-white dark:bg-[#2a2a2a] p-3 rounded-md shadow-inner border border-gray-300 dark:border-gray-600 focus-within:ring-2 focus-within:ring-rpg-blue transition-all';
@@ -371,11 +371,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         bloco.querySelector('input').addEventListener('input', agendarAutosave);
         bloco.querySelector('textarea').addEventListener('input', agendarAutosave);
-        if(window.lucide) lucide.createIcons();
+        if (window.lucide) lucide.createIcons();
     };
 
     document.getElementById('btn-add-carac')?.addEventListener('click', (e) => {
-        e.preventDefault(); 
+        e.preventDefault();
         window.adicionarCaracteristicaDOM();
     });
 
@@ -384,7 +384,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnRemover) {
             e.preventDefault();
             btnRemover.closest('.carac-item').remove();
-            agendarAutosave(); 
+            agendarAutosave();
         }
     });
 
@@ -394,10 +394,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const anotacoesTextoPreview = document.getElementById('anotacoes-texto-preview');
     const textareaAnotacoes = document.getElementById('anotacoes');
 
-    window.atualizarPreviewAnotacoes = function() {
+    window.atualizarPreviewAnotacoes = function () {
         if (!anotacoesTextoPreview || !textareaAnotacoes) return;
         const texto = textareaAnotacoes.value.trim();
-        
+
         if (texto === '') {
             anotacoesTextoPreview.innerHTML = '<span class="font-rpg text-gray-400 dark:text-gray-500 italic font-bold">Clique aqui para escrever suas anotações...</span>';
         } else {
@@ -417,7 +417,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // 8. SINCRONIZAÇÃO DET / ASSIM
     // ==========================================
-    window.sincronizarTrilhas = function() {
+    window.sincronizarTrilhas = function () {
         const detNum = parseInt(document.getElementById('det-num').value) || 0;
         for (let i = 1; i <= 10; i++) {
             const check = document.getElementById(`det-${i}`);
@@ -437,22 +437,22 @@ document.addEventListener('DOMContentLoaded', () => {
     if (inputDetNum) {
         inputDetNum.addEventListener('input', () => {
             let val = parseInt(inputDetNum.value) || 0;
-            if(val > 10) val = 10; if(val < 0) val = 0;   
+            if (val > 10) val = 10; if (val < 0) val = 0;
             inputDetNum.value = val;
             if (inputAssimNum) inputAssimNum.value = 10 - val;
             window.sincronizarTrilhas();
-            agendarAutosave(); 
+            agendarAutosave();
         });
     }
 
     if (inputAssimNum) {
         inputAssimNum.addEventListener('input', () => {
             let val = parseInt(inputAssimNum.value) || 0;
-            if(val > 10) val = 10; if(val < 0) val = 0;
+            if (val > 10) val = 10; if (val < 0) val = 0;
             inputAssimNum.value = val;
             if (inputDetNum) inputDetNum.value = 10 - val;
             window.sincronizarTrilhas();
-            agendarAutosave(); 
+            agendarAutosave();
         });
     }
 
@@ -466,7 +466,7 @@ document.addEventListener('DOMContentLoaded', () => {
         inputSaudeMax.style.pointerEvents = 'none';
     }
 
-    window.calcularSaudeMax = function(forcarPreenchimento = false) {
+    window.calcularSaudeMax = function (forcarPreenchimento = false) {
         let pontosPotencia = 0;
         let pontosResolucao = 0;
 
@@ -551,16 +551,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnPuxarCartas = document.getElementById('btn-puxar-cartas');
     const containerCartas = document.getElementById('container-cartas');
 
-    if(btnPuxarCartas) {
+    if (btnPuxarCartas) {
         btnPuxarCartas.addEventListener('click', () => {
             const qtdA = parseInt(document.getElementById('sorteio-a').value) || 0;
             const qtdB = parseInt(document.getElementById('sorteio-b').value) || 0;
             const qtdC = parseInt(document.getElementById('sorteio-c').value) || 0;
             const qtdI = parseInt(document.getElementById('sorteio-i').value) || 0;
 
-            containerCartas.innerHTML = ''; 
+            containerCartas.innerHTML = '';
 
-            if(qtdA === 0 && qtdB === 0 && qtdC === 0 && qtdI === 0) {
+            if (qtdA === 0 && qtdB === 0 && qtdC === 0 && qtdI === 0) {
                 containerCartas.innerHTML = '<p class="text-center text-gray-500">Insira valores maiores que 0 para sortear.</p>';
                 return;
             }
@@ -570,7 +570,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const drawCards = (qtd, baralho, bgClass, borderClass, textClass, icon, label) => {
-                for(let i=0; i<qtd; i++) {
+                for (let i = 0; i < qtd; i++) {
                     const carta = puxarCartaAleatoria(baralho);
                     containerCartas.innerHTML += `
                         <div class="${bgClass} border-l-4 ${borderClass} p-4 rounded shadow-sm">
@@ -595,14 +595,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!window.idPersonagemAtual) {
         const caracContainer = document.getElementById('caracteristicas-container');
         if (caracContainer && caracContainer.children.length === 0) {
-            for(let i = 0; i < 6; i++) window.adicionarCaracteristicaDOM();
+            for (let i = 0; i < 6; i++) window.adicionarCaracteristicaDOM();
         }
     }
 
     // ==========================================
     // LIGAÇÃO DOS BOTÕES SUPERIORES DA FICHA
     // ==========================================
-    
+
     // Liga o botão de Excluir
     const btnDeleteCharNav = document.getElementById('btn-delete-char-nav');
     if (btnDeleteCharNav) {
@@ -621,7 +621,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const nomeInput = document.getElementById('nome');
         const nomePersonagem = nomeInput ? nomeInput.value.trim() : '';
         
-        // Se for um autosave e não tiver nome, só ignora silenciosamente. Se for manual, avisa!
         if (!nomePersonagem || nomePersonagem === "") {
             if (!silencioso) window.mostrarNotificacao("O personagem precisa de pelo menos um Nome para ser salvo!", "aviso");
             return; 
@@ -631,22 +630,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const ocupacao = document.getElementById('ocupacao') ? document.getElementById('ocupacao').value : '';
         const foto = dadosFicha['char-photo'] || null;
 
+        // 🔥 LÊ A ESCOLHA DO JOGADOR
+        const checkboxPrivacidade = document.getElementById('char-is-private');
+        const isPrivada = checkboxPrivacidade ? checkboxPrivacidade.checked : false;
+
         const payload = {
             usuarioId: usuarioLogadoId,
             personagemId: window.idPersonagemAtual,
             nome: nomePersonagem, 
             ocupacao: ocupacao,
             dadosFicha: dadosFicha,
-            foto: foto
+            foto: foto,
+            isPrivada: isPrivada // 🔥 MANDA PRO SERVIDOR
         };
 
         const btnSaveNav = document.getElementById('btn-save-char-nav');
         const btnDeleteCharNav = document.getElementById('btn-delete-char-nav');
-        
-        // Guardamos o HTML original manualmente para evitar bugs caso o jogador digite muito rápido
         const htmlPadrao = '<i data-lucide="save" class="w-4 h-4"></i> <span class="hidden md:inline">Salvar</span>';
         
-        // AGORA A MÁGICA SEMPRE ACONTECE (Manual ou Autosave)
         if (btnSaveNav) {
             btnSaveNav.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> <span class="hidden md:inline">Salvando...</span>';
             if(window.lucide) lucide.createIcons();
@@ -655,10 +656,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const resposta = await fetch(`${window.API_URL}/personagens`, {
                 method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${sessionStorage.getItem('token')}` 
-                },
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionStorage.getItem('token')}` },
                 body: JSON.stringify(payload)
             });
 
@@ -671,13 +669,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (btnDeleteCharNav) btnDeleteCharNav.classList.remove('hidden');
                 }
 
-                // O Pop-up verde chato continua aparecendo SÓ se clicar no botão
                 if (!silencioso) {
                     window.mostrarNotificacao(resultado.mensagem, 'sucesso');
                     if(typeof window.carregarListaPersonagens === 'function') window.carregarListaPersonagens();
                 }
                 
-                // 🔥 MAS O EFEITO DE "SALVO!" NO BOTÃO AGORA RODA SEMPRE 🔥
                 if (btnSaveNav) {
                     btnSaveNav.classList.remove('bg-rpg-green', 'hover:bg-green-700');
                     btnSaveNav.classList.add('bg-blue-600', 'hover:bg-blue-700');
@@ -691,21 +687,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         if(window.lucide) lucide.createIcons();
                     }, 2000);
                 }
-                
             } else {
-                if (!silencioso) window.mostrarNotificacao(resultado.erro || "Erro desconhecido.", 'erro');
-                if (btnSaveNav) {
-                    btnSaveNav.innerHTML = htmlPadrao;
-                    if(window.lucide) lucide.createIcons();
-                }
+                if (!silencioso) window.mostrarNotificacao(resultado.erro || "Erro.", 'erro');
+                if (btnSaveNav) btnSaveNav.innerHTML = htmlPadrao;
             }
         } catch (erro) {
-            console.error("❌ Erro ao salvar ficha:", erro);
-            if (!silencioso) window.mostrarNotificacao("Erro de comunicação com o servidor!", 'erro');
-            if (btnSaveNav) {
-                btnSaveNav.innerHTML = htmlPadrao;
-                if(window.lucide) lucide.createIcons();
-            }
+            if (!silencioso) window.mostrarNotificacao("Erro de comunicação!", 'erro');
+            if (btnSaveNav) btnSaveNav.innerHTML = htmlPadrao;
         } 
     };
 
