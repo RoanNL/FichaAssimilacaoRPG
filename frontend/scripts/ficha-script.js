@@ -1346,4 +1346,496 @@ document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             console.log("🔧 Lucide Icons ativados.");
         }
+
+    // ==========================================
+    // 🎲 ROLADOR INTELIGENTE (MONTAGEM, ASSIMILAÇÃO E FEEDBACK)
+    // ==========================================
+    const labelsAptidoes = document.querySelectorAll('.aptidao-box label');
+    const roladorInput = document.getElementById('rolador-input');
+    const btnLimpar = document.getElementById('rolador-btn-limpar');
+
+    // 1. Cria a mensagem de aviso dramática escondida no HTML dinamicamente
+    let avisoAssimilada = document.getElementById('aviso-assimilada');
+    if (!avisoAssimilada && roladorInput) {
+        avisoAssimilada = document.createElement('div');
+        avisoAssimilada.id = 'aviso-assimilada';
+        // Classes do Tailwind para deixar vermelho, em negrito e piscando!
+        avisoAssimilada.className = 'hidden w-full text-center text-rpg-red dark:text-red-500 font-black font-rpg text-lg md:text-xl mb-3 animate-pulse uppercase tracking-widest';
+        avisoAssimilada.innerHTML = '<i data-lucide="flame" class="w-6 h-6 inline-block align-text-bottom"></i> Rolagem Assimilada! Deixe seus instintos fluírem! <i data-lucide="flame" class="w-6 h-6 inline-block align-text-bottom"></i>';
+        roladorInput.parentNode.insertBefore(avisoAssimilada, roladorInput);
+
+        if (window.lucide) lucide.createIcons();
+    }
+
+    labelsAptidoes.forEach(label => {
+        label.addEventListener('click', function() {
+            const box = this.closest('.aptidao-box');
+            const checkedCount = box.querySelectorAll('input[type="checkbox"]:checked').length;
+            
+            if (checkedCount === 0) return; 
+
+            // 2. Feedback Visual: Deixa o botão "iluminado/pressionado"
+            this.classList.add('label-selecionado');
+
+            let diceType = 'd10'; 
+            if (this.closest('#secao-instintos')) {
+                diceType = 'd6';
+            }
+
+            if (roladorInput) {
+                let currentVal = roladorInput.value.trim();
+
+                // 🔥 ROLAGEM ASSIMILADA 🔥
+                if (diceType === 'd6' && (currentVal.includes('d6') || currentVal.includes('d12'))) {
+                    
+                    currentVal = currentVal.replace(/\b\d+d10\b/g, '').replace(/\s+/g, ' ').trim();
+                    currentVal = currentVal.replace(/d6/g, 'd12');
+                    diceType = 'd12'; 
+
+                    // 3. Exibe o aviso Épico na tela!
+                    if (avisoAssimilada) {
+                        avisoAssimilada.classList.remove('hidden');
+                    }
+                    
+                    // 4. Se ele tinha clicado em Conhecimento/Prática antes, apaga a luz deles
+                    // (Já que a Rolagem Assimilada substitui as práticas/conhecimentos[cite: 1])
+                    labelsAptidoes.forEach(lbl => {
+                        if (!lbl.closest('#secao-instintos')) {
+                            lbl.classList.remove('label-selecionado');
+                        }
+                    });
+                }
+
+                const diceString = `${checkedCount}${diceType}`;
+                
+                if (currentVal !== '') {
+                    roladorInput.value = currentVal + ' ' + diceString;
+                } else {
+                    roladorInput.value = diceString;
+                }
+
+                roladorInput.classList.add('ring-4', 'ring-rpg-red', 'scale-105');
+                setTimeout(() => {
+                    roladorInput.classList.remove('ring-4', 'ring-rpg-red', 'scale-105');
+                }, 200);
+            }
+        });
+    });
+
+    // ==========================================
+    // 🧹 LIMPANDO A PILHA E OS FEEDBACKS
+    // ==========================================
+    if (btnLimpar) {
+        btnLimpar.addEventListener('click', () => {
+            // Remove a luz de todos os botões de aptidão
+            labelsAptidoes.forEach(label => {
+                label.classList.remove('label-selecionado');
+            });
+            // Esconde o aviso de Rolagem Assimilada
+            if (avisoAssimilada) {
+                avisoAssimilada.classList.add('hidden');
+            }
+        });
+    }
+
+    // ==========================================
+    // 🧠 RASTREADOR DE PERDA DO EGO
+    // ==========================================
+    const egoChecks = document.querySelectorAll('.ego-check');
+    const avisoPerdaEgo = document.getElementById('aviso-perda-ego');
+
+    egoChecks.forEach(check => {
+        check.addEventListener('change', () => {
+            const pressoesAcumuladas = document.querySelectorAll('.ego-check:checked').length;
+            // Se as 10 pressões (C) forem marcadas, o parasita assume!
+            if (pressoesAcumuladas >= 10) {
+                avisoPerdaEgo.classList.remove('hidden');
+            } else {
+                avisoPerdaEgo.classList.add('hidden');
+            }
+            if (typeof agendarAutosave === 'function') agendarAutosave();
+        });
+    });
+
+    // ==========================================
+    // 🧬 SORTEADOR DE MUTAÇÕES (CARTAS)
+    // ==========================================
+    
+    // BANCO DE DADOS DAS CARTAS (Extraído do Livro de Regras)
+    const baralhoEvolutivas = [
+        { nome: "Assimilação Sensitiva", desc: "Desenvolve percepção intuitiva para criaturas assimiladas e eventos futuros. Sexto sentido aguçado." },
+        { nome: "Assimilação Reativa", desc: "Reflexos se tornam cada vez mais precisos, reagindo de forma instintiva a perigos ou situações inusitadas." },
+        { nome: "Assimilação Vigorosa", desc: "A resiliência física e mental é reforçada. Corpo e mente capazes de resistir a pressões extremas." }
+    ];
+
+    const baralhoAdaptativas = [
+        { nome: "Assimilação Anatômica", desc: "Transformações físicas profundas. Pode criar presas ou alterar membros, mas distorce a motricidade fina." },
+        { nome: "Assimilação Cutânea", desc: "A pele ganha novas capacidades (ex: aderência ou controle térmico), dificultando sua interação com o ambiente natural." },
+        { nome: "Assimilação Óssea", desc: "Mutações no sistema ósseo, excedendo limites humanos, mas impondo desafios anatômicos dolorosos." }
+    ];
+
+    const baralhoInoportunas = [
+        { nome: "Assimilação Atrofiante", desc: "Músculos e tendões definham. O corpo se move em esforço contido, sempre à beira de ruir." },
+        { nome: "Assimilação Neuropática", desc: "Nervos disparam sinais confusos: dor fantasma, tremores e reflexos tardios. O corpo vira marionete de si." },
+        { nome: "Assimilação Devoradora", desc: "O metabolismo exige alimento constante. Se negado, devora reservas internas corroendo a carne e a sanidade." }
+    ];
+
+    const baralhoSingulares = [
+        { nome: "Adaptação Biológica Local", desc: "Seu corpo se ajusta perfeitamente ao clima ou terreno da região atual, ignorando penalidades de deslocamento ou temperatura extrema." },
+        { nome: "Camuflagem Endêmica", desc: "A cor e textura da sua pele copiam os padrões da flora e fauna predominantes do local, garantindo vantagem absurda em furtividade neste bioma." },
+        { nome: "Metabolismo Regional", desc: "Permite extrair nutrientes e água de fontes locais que seriam tóxicas para outros, como plantas venenosas ou água contaminada." }
+    ];
+
+    // Lógica do Modal
+    const modalSorteador = document.getElementById('sorteador-modal');
+    const btnAbrirSorteador = document.getElementById('btn-abrir-sorteador');
+    const btnFecharSorteador = document.getElementById('fechar-sorteador');
+    const btnPuxarCartas = document.getElementById('btn-puxar-cartas');
+    const containerCartas = document.getElementById('container-cartas');
+
+    if(btnAbrirSorteador && modalSorteador) {
+        btnAbrirSorteador.addEventListener('click', () => {
+            modalSorteador.classList.add('show');
+        });
+
+        btnFecharSorteador.addEventListener('click', () => {
+            modalSorteador.classList.remove('show');
+            containerCartas.innerHTML = ''; // Limpa as cartas ao fechar
+        });
+    }
+
+    // Função de Sortear Cartas
+    if(btnPuxarCartas) {
+        btnPuxarCartas.addEventListener('click', () => {
+            const qtdA = parseInt(document.getElementById('sorteio-a').value) || 0;
+            const qtdB = parseInt(document.getElementById('sorteio-b').value) || 0;
+            const qtdC = parseInt(document.getElementById('sorteio-c').value) || 0;
+            const qtdI = parseInt(document.getElementById('sorteio-i').value) || 0;
+
+            containerCartas.innerHTML = ''; // Limpa resultados anteriores
+
+            if(qtdA === 0 && qtdB === 0 && qtdC === 0 && qtdI === 0) {
+                containerCartas.innerHTML = '<p class="text-center text-gray-500">Insira valores maiores que 0 para sortear.</p>';
+                return;
+            }
+
+            // Função auxiliar para puxar carta aleatória de um baralho
+            function puxarCartaAleatoria(baralho) {
+                const index = Math.floor(Math.random() * baralho.length);
+                return baralho[index];
+            }
+
+            // Puxando Evolutivas (A) 
+            for(let i=0; i<qtdA; i++) {
+                const carta = puxarCartaAleatoria(baralhoEvolutivas);
+                containerCartas.innerHTML += `
+                    <div class="bg-green-100 dark:bg-green-900/30 border-l-4 border-green-500 p-4 rounded shadow-sm">
+                        <h4 class="font-black font-rpg text-green-800 dark:text-green-400 text-lg uppercase mb-1 flex items-center gap-1">
+                            <i data-lucide="leaf" class="w-5 h-5"></i> ${carta.nome} <span class="text-sm font-sans font-bold ml-auto">Evolutiva (A)</span>
+                        </h4>
+                        <p class="text-gray-700 dark:text-gray-300">${carta.desc}</p>
+                    </div>`;
+            }
+
+            // Puxando Adaptativas (B) 
+            for(let i=0; i<qtdB; i++) {
+                const carta = puxarCartaAleatoria(baralhoAdaptativas);
+                containerCartas.innerHTML += `
+                    <div class="bg-blue-100 dark:bg-blue-900/30 border-l-4 border-blue-500 p-4 rounded shadow-sm">
+                        <h4 class="font-black font-rpg text-blue-800 dark:text-blue-400 text-lg uppercase mb-1 flex items-center gap-1">
+                            <i data-lucide="settings" class="w-5 h-5"></i> ${carta.nome} <span class="text-sm font-sans font-bold ml-auto">Adaptativa (B)</span>
+                        </h4>
+                        <p class="text-gray-700 dark:text-gray-300">${carta.desc}</p>
+                    </div>`;
+            }
+
+            // Puxando Inoportunas (C) 
+            for(let i=0; i<qtdC; i++) {
+                const carta = puxarCartaAleatoria(baralhoInoportunas);
+                containerCartas.innerHTML += `
+                    <div class="bg-red-100 dark:bg-red-900/30 border-l-4 border-rpg-red p-4 rounded shadow-sm">
+                        <h4 class="font-black font-rpg text-rpg-red dark:text-red-400 text-lg uppercase mb-1 flex items-center gap-1">
+                            <i data-lucide="droplet" class="w-5 h-5"></i> ${carta.nome} <span class="text-sm font-sans font-bold ml-auto">Inoportuna (C)</span>
+                        </h4>
+                        <p class="text-gray-700 dark:text-gray-300">${carta.desc}</p>
+                    </div>`;
+            }
+
+            // Puxando Singulares (I) 
+            for(let i=0; i<qtdI; i++) {
+                const carta = puxarCartaAleatoria(baralhoSingulares);
+                containerCartas.innerHTML += `
+                    <div class="bg-amber-100 dark:bg-amber-900/30 border-l-4 border-amber-500 p-4 rounded shadow-sm">
+                        <h4 class="font-black font-rpg text-amber-800 dark:text-amber-400 text-lg uppercase mb-1 flex items-center gap-1">
+                            <i data-lucide="mountain" class="w-5 h-5"></i> ${carta.nome} <span class="text-sm font-sans font-bold ml-auto">Singular (I)</span>
+                        </h4>
+                        <p class="text-gray-700 dark:text-gray-300">${carta.desc}</p>
+                    </div>`;
+            }
+
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        });
+    }
+
+    // ==========================================
+    // ⚔️ PARTITURA DE CONFLITO (PAINEL DO MESTRE)
+    // ==========================================
+    const modalPartitura = document.getElementById('partitura-modal');
+    const btnAbrirPartitura = document.getElementById('btn-abrir-partitura');
+    const btnFecharPartitura = document.getElementById('fechar-partitura');
+    
+    const btnAddObjetivo = document.getElementById('btn-add-objetivo');
+    const containerObjetivos = document.getElementById('container-objetivos');
+    const emptyObjetivos = document.getElementById('empty-objetivos');
+
+    const btnAddAmeaca = document.getElementById('btn-add-ameaca');
+    const containerAmeacas = document.getElementById('container-ameacas');
+    const emptyAmeacas = document.getElementById('empty-ameacas');
+
+    // Abre e Fecha o Modal
+    if(btnAbrirPartitura && modalPartitura) {
+        btnAbrirPartitura.addEventListener('click', (e) => {
+            e.preventDefault();
+            modalPartitura.classList.add('show');
+        });
+        btnFecharPartitura.addEventListener('click', () => {
+            modalPartitura.classList.remove('show');
+        });
+    }
+
+    // --- LÓGICA DE OBJETIVOS ---
+    let objCount = 0;
+    if(btnAddObjetivo) {
+        btnAddObjetivo.addEventListener('click', () => {
+            if(emptyObjetivos) emptyObjetivos.style.display = 'none';
+            objCount++;
+            
+            const objDiv = document.createElement('div');
+            objDiv.className = 'bg-gray-50 dark:bg-[#242424] border border-gray-300 dark:border-gray-600 rounded p-4 flex flex-col md:flex-row items-center gap-4 relative shadow-inner';
+            
+            // Layout do Card de Objetivo (Com Barra de Progresso Interativa)
+            objDiv.innerHTML = `
+                <button class="absolute top-2 right-2 text-gray-400 hover:text-red-500 transition-colors btn-remover-obj" title="Remover"><i data-lucide="x" class="w-5 h-5"></i></button>
+                <div class="flex-grow w-full">
+                    <input type="text" placeholder="Nome do Objetivo (Ex: Fugir pela floresta)" class="w-full bg-transparent font-bold text-lg text-black dark:text-white outline-none border-b border-gray-300 dark:border-gray-600 mb-2 pb-1 font-rpg">
+                    
+                    <!-- Barra de Progresso Customizada -->
+                    <div class="flex items-center gap-3 w-full mt-2">
+                        <button class="bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-black dark:text-white w-8 h-8 rounded-full font-black text-xl flex items-center justify-center btn-minus-obj">-</button>
+                        
+                        <div class="flex-grow bg-gray-300 dark:bg-gray-700 h-6 rounded-full overflow-hidden relative border border-gray-400 dark:border-gray-600 shadow-inner">
+                            <div class="h-full bg-green-500 transition-all duration-300 barra-obj" style="width: 0%;"></div>
+                            <div class="absolute inset-0 flex items-center justify-center text-xs font-black text-black drop-shadow-md">
+                                <span class="val-atual">0</span> / <input type="number" value="10" min="1" class="val-max w-8 bg-transparent text-center outline-none border-b border-black">
+                            </div>
+                        </div>
+
+                        <button class="bg-green-600 hover:bg-green-700 text-white w-8 h-8 rounded-full font-black text-xl flex items-center justify-center shadow-md btn-plus-obj">+</button>
+                    </div>
+                </div>
+            `;
+            
+            containerObjetivos.appendChild(objDiv);
+            if(window.lucide) lucide.createIcons();
+
+            // Interatividade da Barra
+            const btnMinus = objDiv.querySelector('.btn-minus-obj');
+            const btnPlus = objDiv.querySelector('.btn-plus-obj');
+            const barra = objDiv.querySelector('.barra-obj');
+            const valAtualSpan = objDiv.querySelector('.val-atual');
+            const valMaxInput = objDiv.querySelector('.val-max');
+            const btnRemover = objDiv.querySelector('.btn-remover-obj');
+
+            let atual = 0;
+
+            const updateBarra = () => {
+                const max = parseInt(valMaxInput.value) || 1;
+                let perc = (atual / max) * 100;
+                if(perc > 100) perc = 100;
+                barra.style.width = `${perc}%`;
+                valAtualSpan.textContent = atual;
+                if(atual >= max) {
+                    barra.classList.replace('bg-green-500', 'bg-yellow-400');
+                    barra.classList.add('animate-pulse');
+                } else {
+                    barra.classList.replace('bg-yellow-400', 'bg-green-500');
+                    barra.classList.remove('animate-pulse');
+                }
+            };
+
+            btnPlus.addEventListener('click', () => { atual++; updateBarra(); });
+            btnMinus.addEventListener('click', () => { if(atual > 0) atual--; updateBarra(); });
+            valMaxInput.addEventListener('change', updateBarra);
+
+            btnRemover.addEventListener('click', () => {
+                objDiv.remove();
+                if(containerObjetivos.children.length === 1) emptyObjetivos.style.display = 'block';
+            });
+        });
+    }
+
+    // --- LÓGICA DE AMEAÇAS E MODAL DE NOTAS ---
+    const modalNotasAmeaca = document.getElementById('notas-ameaca-modal');
+    const textoNotasAmeaca = document.getElementById('texto-notas-ameaca');
+    const btnSalvarNotas = document.getElementById('btn-salvar-notas');
+    let ameacaAtualParaNotas = null; // Guarda qual ameaça está sendo editada
+
+    // Botão de salvar dentro do Modal de Notas
+    if(btnSalvarNotas) {
+        btnSalvarNotas.addEventListener('click', () => {
+            if(ameacaAtualParaNotas) {
+                // Salva o texto digitado em um atributo invisível na div da ameaça
+                ameacaAtualParaNotas.dataset.notas = textoNotasAmeaca.value;
+                
+                // Feedback visual: Se tiver texto, o botão fica levemente avermelhado para indicar que há anotações
+                const btnAbrir = ameacaAtualParaNotas.querySelector('.btn-abrir-notas');
+                if(textoNotasAmeaca.value.trim() !== '') {
+                    btnAbrir.classList.add('border-rpg-red', 'dark:border-red-500', 'text-rpg-red', 'dark:text-red-400');
+                } else {
+                    btnAbrir.classList.remove('border-rpg-red', 'dark:border-red-500', 'text-rpg-red', 'dark:text-red-400');
+                }
+            }
+            modalNotasAmeaca.classList.remove('show');
+            ameacaAtualParaNotas = null;
+        });
+    }
+
+    // Criador de Ameaças
+    if(btnAddAmeaca) {
+        btnAddAmeaca.addEventListener('click', () => {
+            if(emptyAmeacas) emptyAmeacas.style.display = 'none';
+            
+            const ameacaDiv = document.createElement('div');
+            ameacaDiv.className = 'bg-gray-50 dark:bg-[#242424] border-l-4 border-rpg-red border-y border-r border-gray-300 dark:border-gray-600 rounded p-4 relative shadow-sm';
+            ameacaDiv.dataset.notas = ""; // Onde as anotações ficam salvas secretamente
+            
+            // O textarea foi substituído pelo botão de abrir as notas
+            ameacaDiv.innerHTML = `
+                <button class="absolute top-2 right-2 text-gray-400 hover:text-red-500 transition-colors btn-remover-ameaca" title="Remover"><i data-lucide="x" class="w-5 h-5"></i></button>
+                <input type="text" placeholder="Nome da Ameaça..." class="w-[85%] bg-transparent font-bold text-lg text-rpg-red dark:text-red-400 outline-none border-b border-gray-300 dark:border-gray-600 mb-3 pb-1 font-rpg uppercase">
+                
+                <button class="w-full bg-white dark:bg-[#1a1a1a] hover:bg-gray-100 dark:hover:bg-[#333] text-gray-700 dark:text-gray-300 font-bold py-2 rounded text-sm flex items-center justify-center gap-2 transition-colors btn-abrir-notas mb-3 shadow-sm border border-gray-300 dark:border-gray-600">
+                    <i data-lucide="file-edit" class="w-4 h-4"></i> Ver / Editar Notas
+                </button>
+                
+                <div class="flex items-center gap-2">
+                    <input type="text" placeholder="Rolagem (Ex: 2d12)" class="w-full bg-white dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 rounded p-2 text-sm text-black dark:text-white outline-none focus:ring-1 focus:ring-rpg-red text-center font-bold">
+                </div>
+            `;
+            
+            containerAmeacas.appendChild(ameacaDiv);
+            if(window.lucide) lucide.createIcons();
+
+            // Lógica de Remover a Ameaça
+            ameacaDiv.querySelector('.btn-remover-ameaca').addEventListener('click', () => {
+                ameacaDiv.remove();
+                if(containerAmeacas.children.length === 1) emptyAmeacas.style.display = 'block';
+            });
+
+            // Lógica de Abrir o Sub-modal
+            ameacaDiv.querySelector('.btn-abrir-notas').addEventListener('click', () => {
+                ameacaAtualParaNotas = ameacaDiv;
+                textoNotasAmeaca.value = ameacaDiv.dataset.notas; // Carrega as notas salvas
+                modalNotasAmeaca.classList.add('show');
+            });
+        });
+    }
+
+    // ==========================================
+    // ⛺ GERENCIADOR DE REFÚGIO E CONSUMO
+    // ==========================================
+    const modalRefugio = document.getElementById('refugio-modal');
+    const btnAbrirRefugio = document.getElementById('btn-abrir-refugio');
+    const btnFecharRefugio = document.getElementById('fechar-refugio');
+    
+    const btnAvancarSemana = document.getElementById('btn-avancar-semana');
+    const alertaCrise = document.getElementById('alerta-crise');
+    const textoMotivoCrise = document.getElementById('texto-motivo-crise');
+
+    // Abre e Fecha Modal
+    if(btnAbrirRefugio && modalRefugio) {
+        btnAbrirRefugio.addEventListener('click', (e) => {
+            e.preventDefault();
+            modalRefugio.classList.add('show');
+        });
+        btnFecharRefugio.addEventListener('click', () => {
+            modalRefugio.classList.remove('show');
+        });
+    }
+
+    // Lógica do Consumo Semanal
+    if(btnAvancarSemana) {
+        btnAvancarSemana.addEventListener('click', () => {
+            const popAtual = parseInt(document.getElementById('ref-pop-atual').value) || 0;
+            const popMax = parseInt(document.getElementById('ref-pop-max').value) || 1;
+            
+            const inputAgua = document.getElementById('ref-agua');
+            const inputAlimento = document.getElementById('ref-alimento');
+            const inputMadeira = document.getElementById('ref-madeira');
+            const temFonteAgua = document.getElementById('ref-fonte-agua').checked;
+
+            let agua = parseInt(inputAgua.value) || 0;
+            let alimento = parseInt(inputAlimento.value) || 0;
+            let madeira = parseInt(inputMadeira.value) || 0;
+
+            let emCrise = false;
+            let motivosCrise = [];
+
+            // Regra 1: População acima do teto gera Crise
+            if (popAtual > popMax) {
+                emCrise = true;
+                motivosCrise.push(`A População (${popAtual}) ultrapassou o teto máximo de conforto (${popMax}).`);
+            }
+
+            // Regra 2: Consumo (1 nível por nível de população)
+            if (!temFonteAgua) {
+                agua -= popAtual;
+                if (agua < 0) {
+                    agua = 0;
+                    emCrise = true;
+                    motivosCrise.push("Falta de Água nas reservas.");
+                }
+            }
+            
+            alimento -= popAtual;
+            if (alimento < 0) {
+                alimento = 0;
+                emCrise = true;
+                motivosCrise.push("Falta de Alimentos nas reservas.");
+            }
+
+            madeira -= popAtual;
+            if (madeira < 0) {
+                madeira = 0;
+                emCrise = true;
+                motivosCrise.push("Falta de Madeira nas reservas.");
+            }
+
+            // Atualiza os inputs com os novos valores após o consumo
+            inputAgua.value = agua;
+            inputAlimento.value = alimento;
+            inputMadeira.value = madeira;
+
+            // Exibe ou esconde o alerta
+            if (emCrise) {
+                textoMotivoCrise.innerHTML = motivosCrise.join("<br>• ");
+                alertaCrise.classList.remove('hidden');
+                
+                // Feedback visual de erro no botão
+                btnAvancarSemana.classList.replace('bg-[#6c7a6b]', 'bg-rpg-red');
+                setTimeout(() => btnAvancarSemana.classList.replace('bg-rpg-red', 'bg-[#6c7a6b]'), 500);
+            } else {
+                alertaCrise.classList.add('hidden');
+                textoMotivoCrise.innerHTML = "";
+                
+                // Feedback visual de sucesso no botão
+                btnAvancarSemana.classList.replace('bg-[#6c7a6b]', 'bg-green-600');
+                setTimeout(() => btnAvancarSemana.classList.replace('bg-green-600', 'bg-[#6c7a6b]'), 500);
+            }
+
+            if(typeof agendarAutosave === 'function') agendarAutosave();
+        });
+    }
 });

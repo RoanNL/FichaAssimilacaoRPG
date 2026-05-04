@@ -753,6 +753,107 @@ app.delete('/campanhas/:id', verificarToken, async (req, res) => {
     }
 });
 
+// =========================================================================
+// ⛺ ROTAS DE GERENCIAMENTO DE REFÚGIOS
+// =========================================================================
+
+// 1. LISTAR REFÚGIOS DO USUÁRIO
+app.get('/api/refugios', verificarToken, async (req, res) => {
+    const usuarioIdSeguro = req.usuario.id;
+
+    try {
+        const sql = `SELECT * FROM refugios WHERE usuario_id = $1 ORDER BY criado_em DESC`;
+        const result = await pool.query(sql, [usuarioIdSeguro]);
+        
+        // Formata os dados de snake_case (Banco) para camelCase (Frontend)
+        const refugios = result.rows.map(row => ({
+            id: row.id,
+            nome: row.nome,
+            popAtual: row.pop_atual,
+            popMax: row.pop_max,
+            defesa: row.defesa,
+            moral: row.moral,
+            mobilidade: row.mobilidade,
+            beligerancia: row.beligerancia,
+            agua: row.agua,
+            temFonteAgua: row.tem_fonte_agua,
+            alimento: row.alimento,
+            madeira: row.madeira
+        }));
+
+        res.json(refugios);
+    } catch (erro) {
+        console.error('❌ Erro ao buscar refúgios:', erro);
+        res.status(500).json({ erro: 'Erro ao buscar refúgios na base de dados.' });
+    }
+});
+
+// 2. SALVAR OU ATUALIZAR UM REFÚGIO
+app.post('/api/refugios/salvar', verificarToken, async (req, res) => {
+    const usuarioIdSeguro = req.usuario.id;
+    const ref = req.body;
+
+    // Se o ID for um UUID válido do Postgres, é um Update.
+    // Se for um número temporário do frontend (ex: Date.now().toString()), é um Insert.
+    const isUpdate = ref.id && regexUUID.test(ref.id);
+
+    try {
+        if (isUpdate) {
+            const sql = `
+                UPDATE refugios 
+                SET nome = $1, pop_atual = $2, pop_max = $3, defesa = $4, moral = $5, mobilidade = $6, beligerancia = $7, agua = $8, tem_fonte_agua = $9, alimento = $10, madeira = $11, atualizado_em = now()
+                WHERE id = $12 AND usuario_id = $13 RETURNING id
+            `;
+            const result = await pool.query(sql, [
+                ref.nome, ref.popAtual, ref.popMax, ref.defesa, ref.moral, ref.mobilidade, ref.beligerancia, ref.agua, ref.temFonteAgua, ref.alimento, ref.madeira,
+                ref.id, usuarioIdSeguro
+            ]);
+
+            if (result.rowCount === 0) {
+                return res.status(403).json({ erro: 'Tentativa de invasão. Você não é dono deste refúgio.' });
+            }
+            res.json({ mensagem: 'Refúgio atualizado com sucesso!', id: ref.id });
+            
+        } else {
+            const sql = `
+                INSERT INTO refugios (usuario_id, nome, pop_atual, pop_max, defesa, moral, mobilidade, beligerancia, agua, tem_fonte_agua, alimento, madeira)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING id
+            `;
+            const result = await pool.query(sql, [
+                usuarioIdSeguro, ref.nome, ref.popAtual, ref.popMax, ref.defesa, ref.moral, ref.mobilidade, ref.beligerancia, ref.agua, ref.temFonteAgua, ref.alimento, ref.madeira
+            ]);
+            
+            // Retorna o UUID gerado pelo banco para o frontend substituir o ID temporário!
+            res.json({ mensagem: 'Refúgio criado no banco com sucesso!', id: result.rows[0].id });
+        }
+    } catch (erro) {
+        console.error('❌ Erro ao salvar refúgio:', erro);
+        res.status(500).json({ erro: 'Erro interno ao salvar refúgio.' });
+    }
+});
+
+// 3. EXCLUIR UM REFÚGIO
+app.delete('/api/refugios/deletar/:id', verificarToken, async (req, res) => {
+    const id = req.params.id;
+    const usuarioIdSeguro = req.usuario.id;
+
+    if (!regexUUID.test(id)) {
+        return res.status(400).json({ erro: 'ID de refúgio inválido.' });
+    }
+
+    try {
+        const result = await pool.query('DELETE FROM refugios WHERE id = $1 AND usuario_id = $2 RETURNING id', [id, usuarioIdSeguro]);
+        
+        if (result.rowCount === 0) {
+            return res.status(403).json({ erro: 'Acesso negado. Refúgio não pertence a você.' });
+        }
+        res.status(200).json({ mensagem: 'Refúgio dizimado.' });
+    } catch (erro) {
+        console.error('❌ Erro ao deletar refúgio:', erro);
+        res.status(500).json({ erro: 'Erro ao deletar refúgio.' });
+    }
+});
+
 server.listen(PORT, () => {
     console.log(`Servidor a correr na porta http://localhost:${PORT}`);
 });

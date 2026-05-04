@@ -55,6 +55,24 @@ async function criarTabelas() {
             pacote JSONB NOT NULL,
             criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
+
+        CREATE TABLE IF NOT EXISTS refugios (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            usuario_id UUID REFERENCES usuarios(id) ON DELETE CASCADE,
+            nome VARCHAR(255) DEFAULT 'Novo Refúgio',
+            pop_atual INT DEFAULT 2,
+            pop_max INT DEFAULT 4,
+            defesa INT DEFAULT 1,
+            moral INT DEFAULT 4,
+            mobilidade INT DEFAULT 0,
+            beligerancia INT DEFAULT 1,
+            agua INT DEFAULT 5,
+            tem_fonte_agua BOOLEAN DEFAULT FALSE,
+            alimento INT DEFAULT 5,
+            madeira INT DEFAULT 5,
+            criado_em TIMESTAMPTZ DEFAULT now(),
+            atualizado_em TIMESTAMPTZ DEFAULT now()
+        );
     `;
 
     try {

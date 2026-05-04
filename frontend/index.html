@@ -140,6 +140,8 @@
                     Rolador de Dados
                 </a>
             </li>
+
+            
     
             <li>
                 <a href="#" id="nav-btn-campanhas" class="block text-gray-600 dark:text-gray-400 py-4 px-[22px] text-base font-bold uppercase transition-all duration-300 border-b-[3px] border-transparent hover:text-black dark:hover:text-orange-500 hover:border-b-[#8c3a3a] dark:hover:border-b-[#3a7c8c]">
@@ -187,6 +189,14 @@
                 
                 <button id="btn-delete-char" class="font-rpg text-base py-2.5 px-4 rounded border-none font-bold text-white uppercase cursor-pointer transition-colors duration-200 bg-rpg-red hover:bg-rpg-red-hover">
                     Excluir Personagem
+                </button>
+
+                <button id="btn-abrir-partitura" class="flex items-center justify-center gap-2 font-rpg text-base py-2.5 px-4 rounded border-none font-bold text-white uppercase cursor-pointer transition-colors duration-200 bg-purple-700 hover:bg-purple-900 shadow-md">
+                    <i data-lucide="swords" class="w-5 h-5"></i> Partitura de Conflito
+                </button>
+
+                <button id="btn-abrir-refugio" class="flex items-center justify-center gap-2 font-rpg text-base py-2.5 px-4 rounded border-none font-bold text-white uppercase cursor-pointer transition-colors duration-200 bg-[#6c7a6b] hover:bg-[#4a5449] shadow-md">
+                    <i data-lucide="tent" class="w-5 h-5"></i> Gerenciar Refúgio
                 </button>
             </div>
         </div>
@@ -389,6 +399,37 @@
                     <input type="number" id="assim-num" value="1" class="w-10 h-10 p-0 m-0 leading-none rounded-full border-2 border-rpg-blue bg-transparent text-center text-xl font-black text-rpg-blue outline-none shadow-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"> 
                     Assimilação
                 </h3>
+            </section>
+
+            <!-- ==========================================
+            //RASTREADOR DE PERDA DO EGO E MUTAÇÕES
+            //========================================== -->
+            <section class="md:col-span-2 bg-rpg-paper dark:bg-rpg-paper-dark border border-gray-300 dark:border-gray-800 border-t-[3px] border-t-purple-600 rounded p-4 md:px-8 flex flex-col items-center gap-3 mt-4">
+                <h3 class="m-0 text-xl font-black text-purple-700 dark:text-purple-500 uppercase tracking-widest text-center">
+                    Perda do Ego <span class="text-sm block text-gray-500 font-sans normal-case">(Limite: 10 Pressões Acumuladas)</span>
+                </h3>
+                
+                <div class="flex flex-wrap justify-center gap-2 my-2" id="ego-track">
+                    <!-- 10 Marcas de Pressão -->
+                    <input type="checkbox" class="ego-check appearance-none w-8 h-8 border-2 border-purple-800 dark:border-purple-500 rounded-sm cursor-pointer checked:bg-purple-800 dark:checked:bg-purple-500 checked:after:content-['C'] checked:after:text-white checked:after:font-black checked:after:flex checked:after:justify-center checked:after:items-center transition-all">
+                    <input type="checkbox" class="ego-check appearance-none w-8 h-8 border-2 border-purple-800 dark:border-purple-500 rounded-sm cursor-pointer checked:bg-purple-800 dark:checked:bg-purple-500 checked:after:content-['C'] checked:after:text-white checked:after:font-black checked:after:flex checked:after:justify-center checked:after:items-center transition-all">
+                    <input type="checkbox" class="ego-check appearance-none w-8 h-8 border-2 border-purple-800 dark:border-purple-500 rounded-sm cursor-pointer checked:bg-purple-800 dark:checked:bg-purple-500 checked:after:content-['C'] checked:after:text-white checked:after:font-black checked:after:flex checked:after:justify-center checked:after:items-center transition-all">
+                    <input type="checkbox" class="ego-check appearance-none w-8 h-8 border-2 border-purple-800 dark:border-purple-500 rounded-sm cursor-pointer checked:bg-purple-800 dark:checked:bg-purple-500 checked:after:content-['C'] checked:after:text-white checked:after:font-black checked:after:flex checked:after:justify-center checked:after:items-center transition-all">
+                    <input type="checkbox" class="ego-check appearance-none w-8 h-8 border-2 border-purple-800 dark:border-purple-500 rounded-sm cursor-pointer checked:bg-purple-800 dark:checked:bg-purple-500 checked:after:content-['C'] checked:after:text-white checked:after:font-black checked:after:flex checked:after:justify-center checked:after:items-center transition-all">
+                    <input type="checkbox" class="ego-check appearance-none w-8 h-8 border-2 border-purple-800 dark:border-purple-500 rounded-sm cursor-pointer checked:bg-purple-800 dark:checked:bg-purple-500 checked:after:content-['C'] checked:after:text-white checked:after:font-black checked:after:flex checked:after:justify-center checked:after:items-center transition-all">
+                    <input type="checkbox" class="ego-check appearance-none w-8 h-8 border-2 border-purple-800 dark:border-purple-500 rounded-sm cursor-pointer checked:bg-purple-800 dark:checked:bg-purple-500 checked:after:content-['C'] checked:after:text-white checked:after:font-black checked:after:flex checked:after:justify-center checked:after:items-center transition-all">
+                    <input type="checkbox" class="ego-check appearance-none w-8 h-8 border-2 border-purple-800 dark:border-purple-500 rounded-sm cursor-pointer checked:bg-purple-800 dark:checked:bg-purple-500 checked:after:content-['C'] checked:after:text-white checked:after:font-black checked:after:flex checked:after:justify-center checked:after:items-center transition-all">
+                    <input type="checkbox" class="ego-check appearance-none w-8 h-8 border-2 border-purple-800 dark:border-purple-500 rounded-sm cursor-pointer checked:bg-purple-800 dark:checked:bg-purple-500 checked:after:content-['C'] checked:after:text-white checked:after:font-black checked:after:flex checked:after:justify-center checked:after:items-center transition-all">
+                    <input type="checkbox" class="ego-check appearance-none w-8 h-8 border-2 border-rpg-red dark:border-red-500 rounded-sm cursor-pointer checked:bg-rpg-red dark:checked:bg-red-500 checked:after:content-['C'] checked:after:text-white checked:after:font-black checked:after:flex checked:after:justify-center checked:after:items-center transition-all shadow-[0_0_10px_rgba(140,58,58,0.5)]">
+                </div>
+                
+                <p id="aviso-perda-ego" class="hidden text-rpg-red dark:text-red-500 font-bold font-rpg text-lg animate-pulse flex items-center justify-center gap-2">
+                    <i data-lucide="alert-triangle" class="w-6 h-6"></i> ALERTA: O PARASITA ASSUMIU O CONTROLE! <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+                </p>
+
+                <button type="button" id="btn-abrir-sorteador" class="mt-2 bg-purple-700 hover:bg-purple-900 text-white font-bold py-2.5 px-6 rounded font-rpg uppercase transition-colors shadow-md flex items-center justify-center gap-2">
+                    <i data-lucide="dna" class="w-5 h-5"></i> Sortear Mutações
+                </button>
             </section>
 
         </form>
@@ -668,6 +709,242 @@
                 <div id="grid-jogadores-mesa" class="flex flex-wrap gap-4 justify-start">
                     </div>
             </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+    MODAL: SORTEADOR DE MUTAÇÕES
+    ========================================== -->
+    <div id="sorteador-modal" class="modal">
+        <div class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border-2 border-purple-700 rounded-md p-6 max-w-[700px] w-[95%] max-h-[85vh] overflow-y-auto relative shadow-[0_0_30px_rgba(126,34,206,0.3)]">
+            
+            <span id="fechar-sorteador" class="absolute top-4 right-6 text-gray-500 hover:text-purple-700 dark:text-gray-400 dark:hover:text-purple-400 text-4xl font-bold cursor-pointer transition-colors">&times;</span>
+            
+            <h2 class="text-center text-purple-700 dark:text-purple-400 font-rpg font-black text-2xl mb-2 uppercase tracking-widest">
+                Baralho de Assimilação
+            </h2>
+            <p class="text-center text-sm text-gray-600 dark:text-gray-400 font-bold mb-6">Insira os resultados do seu Teste de Assimilação:</p>
+            
+            <div class="flex flex-wrap justify-center gap-4 mb-6">
+                <!-- Sucessos (A) -->
+                <div class="flex flex-col items-center bg-[#e8f5e9] dark:bg-[#1a2e1e] p-3 rounded border border-green-500 w-24">
+                    <span class="font-black text-green-700 dark:text-green-400 text-xl mb-1">A</span>
+                    <label class="text-[10px] font-bold text-gray-600 dark:text-gray-400 mb-2 uppercase text-center">Evolutivas</label>
+                    <input type="number" id="sorteio-a" value="0" min="0" class="w-full h-10 text-center font-bold text-xl rounded border border-gray-400 outline-none bg-white dark:bg-[#2a2a2a] text-black dark:text-white">
+                </div>
+                <!-- Adaptações (B) -->
+                <div class="flex flex-col items-center bg-[#e3f2fd] dark:bg-[#1a2633] p-3 rounded border border-blue-500 w-24">
+                    <span class="font-black text-blue-700 dark:text-blue-400 text-xl mb-1">B</span>
+                    <label class="text-[10px] font-bold text-gray-600 dark:text-gray-400 mb-2 uppercase text-center">Adaptativas</label>
+                    <input type="number" id="sorteio-b" value="0" min="0" class="w-full h-10 text-center font-bold text-xl rounded border border-gray-400 outline-none bg-white dark:bg-[#2a2a2a] text-black dark:text-white">
+                </div>
+                <!-- Pressões (C) -->
+                <div class="flex flex-col items-center bg-[#ffebee] dark:bg-[#331a1a] p-3 rounded border border-rpg-red w-24">
+                    <span class="font-black text-rpg-red dark:text-red-400 text-xl mb-1">C</span>
+                    <label class="text-[10px] font-bold text-gray-600 dark:text-gray-400 mb-2 uppercase text-center">Inoportunas</label>
+                    <input type="number" id="sorteio-c" value="0" min="0" class="w-full h-10 text-center font-bold text-xl rounded border border-gray-400 outline-none bg-white dark:bg-[#2a2a2a] text-black dark:text-white">
+                </div>
+                <!-- Singulares (I) -->
+                <div class="flex flex-col items-center bg-[#fff8e1] dark:bg-[#332b1a] p-3 rounded border border-amber-500 w-24">
+                    <span class="font-black text-amber-700 dark:text-amber-400 text-xl mb-1">I</span>
+                    <label class="text-[10px] font-bold text-gray-600 dark:text-gray-400 mb-2 uppercase text-center">Singulares</label>
+                    <input type="number" id="sorteio-i" value="0" min="0" class="w-full h-10 text-center font-bold text-xl rounded border border-gray-400 outline-none bg-white dark:bg-[#2a2a2a] text-black dark:text-white">
+                </div>
+            </div>
+
+            <button id="btn-puxar-cartas" class="w-full bg-purple-700 hover:bg-purple-900 text-white font-bold py-3 rounded uppercase font-rpg transition-colors shadow-md text-lg">
+                Puxar Cartas
+            </button>
+
+            <!-- Container das Cartas Sorteadas -->
+            <div id="container-cartas" class="mt-6 flex flex-col gap-4">
+                <!-- Cartas aparecerão aqui -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+    MODAL: PARTITURA DE CONFLITO (Mestre)
+    ========================================== -->
+    <div id="partitura-modal" class="modal z-[99999]">
+        <div class="modal-content bg-rpg-bg-light dark:bg-rpg-bg-dark border-2 border-purple-700 rounded-md p-6 md:p-8 max-w-[1000px] w-[95%] h-[85vh] flex flex-col relative shadow-[0_0_40px_rgba(126,34,206,0.2)]">
+            
+            <span id="fechar-partitura" class="absolute top-4 right-6 text-gray-500 hover:text-purple-700 dark:text-gray-400 dark:hover:text-purple-400 text-4xl font-bold cursor-pointer transition-colors z-10">&times;</span>
+            
+            <h2 class="text-center text-white font-rpg font-black text-2xl md:text-3xl mb-6 uppercase tracking-widest bg-purple-800 py-3 px-8 rounded-sm shadow-md mx-auto flex items-center gap-3 w-max">
+                <i data-lucide="swords" class="w-8 h-8"></i> Partitura de Conflito
+            </h2>
+
+            <div class="flex-grow overflow-y-auto pr-2 flex flex-col gap-8">
+                
+                <!-- SEÇÃO 1: OBJETIVOS -->
+                <div class="bg-white dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 p-5 rounded-lg shadow-sm">
+                    <div class="flex justify-between items-center mb-4 border-b-2 border-green-600 pb-2">
+                        <h3 class="text-xl font-black font-rpg text-green-700 dark:text-green-500 uppercase flex items-center gap-2 m-0">
+                            <i data-lucide="target" class="w-6 h-6"></i> Objetivos (Sucessos)
+                        </h3>
+                        <button id="btn-add-objetivo" class="bg-green-600 hover:bg-green-800 text-white font-bold py-1.5 px-4 rounded text-sm flex items-center gap-1 transition-colors">
+                            <i data-lucide="plus" class="w-4 h-4"></i> Novo
+                        </button>
+                    </div>
+                    <div id="container-objetivos" class="flex flex-col gap-4">
+                        <p class="text-gray-500 italic text-sm text-center" id="empty-objetivos">Nenhum objetivo ativo. Crie um para os jogadores focarem seus Sucessos (A).</p>
+                    </div>
+                </div>
+
+                <!-- SEÇÃO 2: AMEAÇAS -->
+                <div class="bg-white dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 p-5 rounded-lg shadow-sm">
+                    <div class="flex justify-between items-center mb-4 border-b-2 border-rpg-red pb-2">
+                        <h3 class="text-xl font-black font-rpg text-rpg-red dark:text-red-500 uppercase flex items-center gap-2 m-0">
+                            <i data-lucide="skull" class="w-6 h-6"></i> Ameaças (Inimigos)
+                        </h3>
+                        <button id="btn-add-ameaca" class="bg-rpg-red hover:bg-red-800 text-white font-bold py-1.5 px-4 rounded text-sm flex items-center gap-1 transition-colors">
+                            <i data-lucide="plus" class="w-4 h-4"></i> Nova
+                        </button>
+                    </div>
+                    <div id="container-ameacas" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <p class="text-gray-500 italic text-sm text-center md:col-span-2" id="empty-ameacas">Nenhuma ameaça ativa. Crie inimigos ou perigos ambientais.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+        MODAL: NOTAS DA AMEAÇA (Sub-modal)
+        ========================================== -->
+    <div id="notas-ameaca-modal" class="modal z-[999999]">
+        <div class="modal-content bg-gray-100 dark:bg-[#1a1a1a] border-2 border-rpg-red rounded-md p-6 max-w-[500px] w-[90%] shadow-[0_0_30px_rgba(140,58,58,0.4)] relative">
+            
+            <h3 class="text-xl font-rpg font-black text-rpg-red uppercase mb-4 flex items-center gap-2 border-b border-rpg-red pb-2">
+                <i data-lucide="file-edit" class="w-5 h-5"></i> Status e Notas da Ameaça
+            </h3>
+            
+            <textarea id="texto-notas-ameaca" rows="6" placeholder="Descreva os status, vida, habilidades ou anotações táticas desta ameaça..." class="w-full bg-white dark:bg-[#242424] border border-gray-300 dark:border-gray-700 rounded p-3 text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-red resize-none font-medium"></textarea>
+            
+            <div class="flex justify-end mt-4">
+                <button id="btn-salvar-notas" class="bg-rpg-red hover:bg-red-800 text-white font-bold py-2 px-6 rounded uppercase font-rpg transition-colors shadow-md flex items-center gap-2">
+                    <i data-lucide="check" class="w-5 h-5"></i> Salvar e Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         MODAL: GERENCIADOR DE REFÚGIOS (COM SAVE)
+         ========================================== -->
+    <div id="refugio-modal" class="modal z-[99999]">
+        <div class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border-2 border-[#6c7a6b] rounded-md p-6 max-w-[800px] w-[95%] max-h-[90vh] overflow-y-auto relative shadow-[0_0_40px_rgba(108,122,107,0.3)]">
+            
+            <span id="fechar-refugio" class="absolute top-4 right-6 text-gray-500 hover:text-[#6c7a6b] dark:text-gray-400 text-4xl font-bold cursor-pointer transition-colors z-10">&times;</span>
+            
+            <!-- 🗺️ TELA 1: LISTA DE REFÚGIOS -->
+            <div id="tela-lista-refugios">
+                <h2 class="text-center text-[#4a5449] dark:text-[#8ba389] font-rpg font-black text-2xl md:text-3xl mb-6 uppercase tracking-widest flex items-center justify-center gap-3">
+                    <i data-lucide="map" class="w-8 h-8"></i> Meus Refúgios
+                </h2>
+                
+                <div id="container-lista-refugios" class="flex flex-col gap-3 mb-6">
+                    <!-- Os cards dos refúgios salvos aparecerão aqui via JS -->
+                </div>
+
+                <button id="btn-novo-refugio" class="w-full bg-[#6c7a6b] hover:bg-[#4a5449] text-white font-black py-3 rounded uppercase font-rpg transition-colors shadow-md flex items-center justify-center gap-2 text-lg">
+                    <i data-lucide="plus-circle" class="w-6 h-6"></i> Criar Novo Refúgio
+                </button>
+            </div>
+
+            <!-- 🏰 TELA 2: GESTÃO DO REFÚGIO -->
+            <div id="tela-gestao-refugio" class="hidden flex flex-col gap-2">
+                
+                <button id="btn-voltar-lista" class="text-gray-500 hover:text-gray-800 dark:hover:text-white flex items-center gap-1 font-bold text-sm w-max transition-colors mb-2">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar para Lista
+                </button>
+
+                <!-- Nome do Refúgio -->
+                <input type="text" id="ref-nome" placeholder="Nome do Refúgio..." class="w-full text-center text-[#4a5449] dark:text-[#8ba389] font-rpg font-black text-3xl mb-4 bg-transparent border-b-2 border-dashed border-[#6c7a6b] outline-none placeholder-gray-400">
+
+                <!-- Alerta de Crise -->
+                <div id="alerta-crise" class="hidden bg-red-100 dark:bg-red-900/40 border-l-4 border-rpg-red p-4 mb-4 rounded shadow-sm animate-pulse">
+                    <h3 class="text-rpg-red dark:text-red-400 font-rpg font-black text-xl uppercase flex items-center gap-2">
+                        <i data-lucide="siren" class="w-6 h-6"></i> O Refúgio está em Crise!
+                    </h3>
+                    <p id="texto-motivo-crise" class="text-gray-800 dark:text-gray-200 font-bold mt-1"></p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Painel de População -->
+                    <div class="bg-white dark:bg-[#1a1a1a] p-4 rounded border border-gray-300 dark:border-gray-700 shadow-sm">
+                        <h3 class="font-rpg font-black text-lg text-gray-700 dark:text-gray-300 uppercase mb-3 flex items-center gap-2 border-b border-gray-200 dark:border-gray-600 pb-1">
+                            <i data-lucide="users" class="w-5 h-5"></i> População (Níveis)
+                        </h3>
+                        <div class="flex items-center gap-4 justify-center">
+                            <div class="flex flex-col items-center">
+                                <label class="text-xs font-bold text-gray-500 uppercase">Atual</label>
+                                <input type="number" id="ref-pop-atual" value="0" min="0" class="w-16 h-10 text-center font-bold text-xl rounded border border-gray-400 outline-none bg-gray-50 dark:bg-[#2a2a2a] text-black dark:text-white auto-save-refugio">
+                            </div>
+                            <span class="text-2xl font-black text-gray-400">/</span>
+                            <div class="flex flex-col items-center">
+                                <label class="text-xs font-bold text-gray-500 uppercase">Teto Máx.</label>
+                                <input type="number" id="ref-pop-max" value="0" min="1" class="w-16 h-10 text-center font-bold text-xl rounded border border-gray-400 outline-none bg-gray-50 dark:bg-[#2a2a2a] text-black dark:text-white auto-save-refugio">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Painel de Estatísticas -->
+                    <div class="bg-white dark:bg-[#1a1a1a] p-4 rounded border border-gray-300 dark:border-gray-700 shadow-sm grid grid-cols-2 gap-2">
+                        <div class="flex flex-col">
+                            <label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1"><i data-lucide="shield" class="w-3 h-3"></i> Defesa</label>
+                            <input type="number" id="ref-defesa" value="0" min="0" class="w-full h-8 px-2 font-bold rounded border border-gray-300 outline-none bg-transparent text-black dark:text-white auto-save-refugio">
+                        </div>
+                        <div class="flex flex-col">
+                            <label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1"><i data-lucide="smile" class="w-3 h-3"></i> Moral</label>
+                            <input type="number" id="ref-moral" value="4" min="0" max="6" class="w-full h-8 px-2 font-bold rounded border border-gray-300 outline-none bg-transparent text-black dark:text-white auto-save-refugio">
+                        </div>
+                        <div class="flex flex-col">
+                            <label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1"><i data-lucide="truck" class="w-3 h-3"></i> Mobilidade</label>
+                            <input type="number" id="ref-mobilidade" value="0" min="0" class="w-full h-8 px-2 font-bold rounded border border-gray-300 outline-none bg-transparent text-black dark:text-white auto-save-refugio">
+                        </div>
+                        <div class="flex flex-col">
+                            <label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1"><i data-lucide="swords" class="w-3 h-3"></i> Beligerância</label>
+                            <input type="number" id="ref-beligerancia" value="0" min="0" class="w-full h-8 px-2 font-bold rounded border border-gray-300 outline-none bg-transparent text-black dark:text-white auto-save-refugio">
+                        </div>
+                    </div>
+
+                    <!-- Painel de Recursos -->
+                    <div class="bg-white dark:bg-[#1a1a1a] p-4 rounded border border-gray-300 dark:border-gray-700 shadow-sm md:col-span-2">
+                        <h3 class="font-rpg font-black text-lg text-blue-700 dark:text-blue-500 uppercase mb-3 flex items-center gap-2 border-b border-gray-200 dark:border-gray-600 pb-1">
+                            <i data-lucide="package" class="w-5 h-5"></i> Recursos (Consumo Semanal)
+                        </h3>
+                        
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="flex flex-col items-center bg-blue-50 dark:bg-blue-900/20 p-2 rounded border border-blue-200 dark:border-blue-800 relative">
+                                <i data-lucide="droplet" class="w-6 h-6 text-blue-500 mb-1"></i>
+                                <label class="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase">Água</label>
+                                <input type="number" id="ref-agua" value="0" min="0" class="w-16 h-8 text-center font-bold mt-1 rounded border border-gray-300 outline-none bg-white dark:bg-[#2a2a2a] text-black dark:text-white auto-save-refugio">
+                                <label class="text-[10px] text-gray-500 mt-1 cursor-pointer flex items-center gap-1"><input type="checkbox" id="ref-fonte-agua" class="auto-save-refugio">Tem Fonte?</label>
+                            </div>
+
+                            <div class="flex flex-col items-center bg-green-50 dark:bg-green-900/20 p-2 rounded border border-green-200 dark:border-green-800">
+                                <i data-lucide="wheat" class="w-6 h-6 text-green-500 mb-1"></i>
+                                <label class="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase">Alimento</label>
+                                <input type="number" id="ref-alimento" value="0" min="0" class="w-16 h-8 text-center font-bold mt-1 rounded border border-gray-300 outline-none bg-white dark:bg-[#2a2a2a] text-black dark:text-white auto-save-refugio">
+                            </div>
+
+                            <div class="flex flex-col items-center bg-amber-50 dark:bg-amber-900/20 p-2 rounded border border-amber-200 dark:border-amber-800">
+                                <i data-lucide="tree-pine" class="w-6 h-6 text-amber-600 mb-1"></i>
+                                <label class="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase">Madeira</label>
+                                <input type="number" id="ref-madeira" value="0" min="0" class="w-16 h-8 text-center font-bold mt-1 rounded border border-gray-300 outline-none bg-white dark:bg-[#2a2a2a] text-black dark:text-white auto-save-refugio">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="btn-avancar-semana" class="mt-4 w-full bg-[#6c7a6b] hover:bg-[#4a5449] text-white font-black py-4 rounded uppercase font-rpg transition-colors shadow-md text-xl flex items-center justify-center gap-2">
+                    <i data-lucide="calendar-fast" class="w-6 h-6"></i> Avançar 1 Semana
+                </button>
+            </div>
+
         </div>
     </div>
 
