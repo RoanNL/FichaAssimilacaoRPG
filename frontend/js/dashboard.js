@@ -1,5 +1,3 @@
-// js/dashboard.js
-
 // Função global para evitar Injeção de Código (XSS)
 window.escaparHTML = function(texto) {
     if (!texto) return '';
@@ -188,8 +186,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     sessionStorage.setItem('campanhaCodigo', codigoCampanha);
 
                     if (typeof window.carregarLobbyCampanha === 'function') window.carregarLobbyCampanha();
-                    if (data.pendente) { mostrarNotificacao(data.mensagem); } else { Router.navigate('campanha'); }
-                    window.mostrarNotificacao(`Conectado à mesa: ${nomeCampanha}`);
+                    Router.navigate('campanha'); 
+                    window.mostrarNotificacao(`Conectado à mesa: ${nomeCampanha}`, 'sucesso');
                 });
             });
 
