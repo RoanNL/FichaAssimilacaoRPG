@@ -634,7 +634,7 @@ app.delete('/campanhas/:id/membros/:usuarioId', verificarToken, async (req, res)
 });
 
 // =========================================================================
-// Buscar jogadores (ATUALIZADA PARA MOSTRAR A COROA DO MESTRE)
+// Buscar jogadores para o painel de Gerenciamento 
 // =========================================================================
 app.get('/campanhas/:id/jogadores', verificarToken, async (req, res) => {
     try {
@@ -643,11 +643,12 @@ app.get('/campanhas/:id/jogadores', verificarToken, async (req, res) => {
             FROM membros_campanha m
             JOIN usuarios u ON m.usuario_id = u.id
             JOIN campanhas c ON c.id = m.campanha_id
-            LEFT JOIN personagens p ON p.id = m.personagem_ativo_id
+            LEFT JOIN personagens p ON p.id = m.personagem_id
             WHERE m.campanha_id = $1
         `, [req.params.id]);
         res.json(result.rows);
     } catch (erro) {
+        console.error("❌ Erro na Rota Jogadores:", erro);
         res.status(500).json({ erro: 'Erro ao buscar jogadores.' });
     }
 });

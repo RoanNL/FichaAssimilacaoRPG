@@ -159,7 +159,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const gridJogadores = document.getElementById('grid-jogadores-mesa-view');
         if(!gridJogadores) return;
         
-        // 🔥 FORÇANDO O GRID CSS PELO JAVASCRIPT 🔥
         gridJogadores.className = "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 w-full";
         gridJogadores.innerHTML = '<p class="text-gray-500 italic animate-pulse col-span-full">Analisando conexões...</p>';
 
@@ -167,7 +166,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const resposta = await fetch(`${window.API_URL}/campanhas/${campanhaId}/jogadores`, {
                 headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
             });
-            if (!resposta.ok) throw new Error("Erro");
+            
+            if (!resposta.ok) throw new Error("O Servidor recusou a conexão (Erro 500). Verifique o terminal do Node!");
+            
             const jogadores = await resposta.json();
 
             gridJogadores.innerHTML = '';
@@ -183,17 +184,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const nomeChar = jog.nome_personagem || 'Sem personagem ativo';
                 const avatarJogador = (jog.avatar && !jog.avatar.includes('R0lGODlhAQAB')) ? jog.avatar : './assets/icon.jpg'; 
                 
-                const isEsteOMestre = (jog.usuario_id === jog.mestre_id); // Compara se este card é o Mestre!
+                const isEsteOMestre = (jog.usuario_id === jog.mestre_id); 
 
-                // LÓGICA DE PODER:
                 let controleHtml = '';
                 if (isEsteOMestre) {
                     controleHtml = `<span class="text-orange-500 font-bold text-sm flex items-center justify-center gap-1 mt-3 w-full border-t border-gray-300 dark:border-gray-700 pt-2"><i data-lucide="crown" class="w-4 h-4"></i> Mestre</span>`;
                 } else if (isMestreAtivo) {
-                    // O logado é Mestre, e o Card é um jogador: Mostra botão de chutar!
                     controleHtml = `<button class="btn-remover-jogador-mesa mt-3 bg-rpg-red hover:bg-red-800 text-white font-bold py-1.5 px-3 rounded text-xs uppercase font-rpg w-full transition-colors flex justify-center items-center gap-1" data-usuario="${jog.usuario_id}"><i data-lucide="user-x" class="w-4 h-4"></i> Expulsar</button>`;
                 } else if (jog.usuario_id == meuId) {
-                    // O logado é Jogador, e o Card é dele mesmo:
                     controleHtml = `<span class="text-rpg-blue font-bold text-sm flex items-center justify-center gap-1 mt-3 w-full border-t border-gray-300 dark:border-gray-700 pt-2"><i data-lucide="user" class="w-4 h-4"></i> Você</span>`;
                 }
 
@@ -221,7 +219,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             });
         } catch (erro) {
-            gridJogadores.innerHTML = '<p class="text-rpg-red col-span-full">Erro.</p>';
+            console.error("❌ Erro ao renderizar Jogadores:", erro);
+            gridJogadores.innerHTML = `<p class="text-rpg-red col-span-full">${erro.message}</p>`;
         }
     }
 
