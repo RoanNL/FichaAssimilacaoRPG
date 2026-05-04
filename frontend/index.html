@@ -346,6 +346,10 @@
                         
                         <!-- Coloquei os botões da Partitura e Refúgio aqui no canto inferior direito para ficar estiloso! -->
                         <div id="painel-mestre-botoes" class="hidden flex gap-2">
+                            <button onclick="document.getElementById('modal-pedidos-mesa').classList.add('show'); window.carregarPedidosMesa();" class="relative bg-gray-800 hover:bg-black dark:bg-gray-200 dark:hover:bg-white text-white dark:text-black font-bold py-2 px-4 rounded text-sm uppercase font-rpg transition-colors flex items-center gap-2 shadow-sm">
+                                <i data-lucide="bell" class="w-4 h-4"></i> Pedidos
+                                <span id="badge-pedidos" class="hidden absolute -top-2 -right-2 bg-rpg-red text-white text-[10px] font-black px-2 py-0.5 rounded-full animate-bounce shadow">0</span>
+                            </button>
                             <button onclick="document.getElementById('partitura-modal').classList.add('show')" class="bg-gray-800 hover:bg-black dark:bg-gray-200 dark:hover:bg-white text-white dark:text-black font-bold py-2 px-4 rounded text-sm uppercase font-rpg transition-colors flex items-center gap-2 shadow-sm">
                                 <i data-lucide="music" class="w-4 h-4"></i> Conflito
                             </button>
@@ -1048,6 +1052,19 @@
                     onclick="document.getElementById('modal-entrar-campanha').classList.remove('show')">Cancelar</button>
                 <button id="btn-entrar-campanha"
                     class="bg-rpg-green text-white font-bold py-2 px-4 rounded w-1/2">Entrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE PEDIDOS DE ENTRADA -->
+    <div id="modal-pedidos-mesa" class="modal z-[999999]">
+        <div class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border border-gray-300 dark:border-gray-800 rounded-md p-6 max-w-[500px] w-[95%] shadow-2xl relative">
+            <span class="absolute top-4 right-6 text-gray-500 hover:text-rpg-red text-3xl font-bold cursor-pointer transition-colors" onclick="document.getElementById('modal-pedidos-mesa').classList.remove('show')">&times;</span>
+            <h2 class="text-2xl font-black font-rpg text-gray-800 dark:text-white uppercase mb-4 border-b border-gray-300 dark:border-gray-700 pb-2 flex items-center gap-2">
+                <i data-lucide="door-open" class="w-6 h-6 text-rpg-blue"></i> Portões da Mesa
+            </h2>
+            <div id="lista-pedidos-container" class="flex flex-col gap-3 max-h-[60vh] overflow-y-auto pr-2">
+                <!-- Preenchido via JS -->
             </div>
         </div>
     </div>

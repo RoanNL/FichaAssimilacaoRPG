@@ -584,6 +584,9 @@ app.post('/campanhas', verificarToken, async (req, res) => {
     }
 });
 
+// =========================================================================
+// SOLICITAR ENTRADA NA CAMPANHA (BATER NA PORTA)
+// =========================================================================
 app.post('/campanhas/entrar', verificarToken, async (req, res) => {
     const { codigo_convite, personagem_id } = req.body;
     const usuarioIdSeguro = req.usuario.id; 
@@ -598,12 +601,63 @@ app.post('/campanhas/entrar', verificarToken, async (req, res) => {
 
         const campanhaId = resultBusca.rows[0].id;
 
-        const sqlInsert = `INSERT INTO membros_campanha (campanha_id, usuario_id, personagem_id) VALUES ($1, $2, $3)`;
-        await pool.query(sqlInsert, [campanhaId, usuarioIdSeguro, personagem_id]);
+        // 1. Verifica se já é membro
+        const checkMembro = await pool.query('SELECT * FROM membros_campanha WHERE campanha_id = $1 AND usuario_id = $2', [campanhaId, usuarioIdSeguro]);
+        if (checkMembro.rows.length > 0) return res.status(400).json({ erro: 'Você já está nesta mesa!' });
 
-        res.json({ mensagem: 'Você entrou na campanha com sucesso!', campanha_id: campanhaId });
+        // 2. Verifica se já tem um pedido pendente
+        const checkPedido = await pool.query('SELECT * FROM pedidos_campanha WHERE campanha_id = $1 AND usuario_id = $2', [campanhaId, usuarioIdSeguro]);
+        if (checkPedido.rows.length > 0) return res.status(400).json({ erro: 'Você já enviou um pedido! Aguarde o Mestre aprovar.' });
+
+        // 3. Cria o pedido na sala de espera
+        await pool.query(`INSERT INTO pedidos_campanha (campanha_id, usuario_id, personagem_id) VALUES ($1, $2, $3)`, [campanhaId, usuarioIdSeguro, personagem_id]);
+
+        // 4. Avisa o Mestre em tempo real (se ele estiver na mesa)
+        const io = req.app.get('io');
+        if (io) io.to(campanhaId.toString()).emit('novo-pedido-entrada');
+
+        // Retorna "pendente" para o frontend saber que não é pra entrar na mesa ainda
+        res.json({ pendente: true, mensagem: 'Pedido enviado! Aguarde o Mestre permitir sua entrada.' });
     } catch (erro) {
-        res.status(400).json({ erro: 'Você já está nesta campanha ou ocorreu um erro.' });
+        res.status(500).json({ erro: 'Erro ao processar convite.' });
+    }
+});
+
+// =========================================================================
+// ROTAS DO MESTRE: GERENCIAR PEDIDOS DE ENTRADA
+// =========================================================================
+app.get('/campanhas/:id/pedidos', verificarToken, async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT p.id as pedido_id, u.username, u.avatar, char.nome_personagem, p.personagem_id, p.usuario_id
+            FROM pedidos_campanha p
+            JOIN usuarios u ON p.usuario_id = u.id
+            LEFT JOIN personagens char ON p.personagem_id = char.id
+            WHERE p.campanha_id = $1
+        `, [req.params.id]);
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ erro: 'Erro ao buscar pedidos.' });
+    }
+});
+
+app.post('/campanhas/:id/pedidos/responder', verificarToken, async (req, res) => {
+    const { pedido_id, aprovado, usuario_id, personagem_id } = req.body;
+    const campanhaId = req.params.id;
+
+    try {
+        if (aprovado) {
+            await pool.query(`INSERT INTO membros_campanha (campanha_id, usuario_id, personagem_id) VALUES ($1, $2, $3)`, [campanhaId, usuario_id, personagem_id]);
+        }
+
+        await pool.query(`DELETE FROM pedidos_campanha WHERE id = $1`, [pedido_id]);
+
+        const io = req.app.get('io');
+        if (io) io.to(campanhaId.toString()).emit('atualizar-jogadores');
+
+        res.json({ mensagem: aprovado ? 'Jogador aprovado na mesa!' : 'Jogador barrado com sucesso.' });
+    } catch (err) {
+        res.status(500).json({ erro: 'Erro ao responder pedido.' });
     }
 });
 

@@ -526,4 +526,112 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Erro ao puxar a partitura antiga.");
         }
     }
+
+    // ==========================================
+    // EXTRA: SISTEMA DE PEDIDOS DE ENTRADA (PORTARIA)
+    // ==========================================
+    
+    // Escuta quando alguém bate na porta (em tempo real)
+    window.socket.on('novo-pedido-entrada', () => {
+        const isMestre = sessionStorage.getItem('isMestreAtivo') === 'true';
+        if (isMestre) {
+            window.mostrarNotificacao("🔔 Alguém está pedindo para entrar na mesa!", 'aviso');
+            window.carregarPedidosMesa(); // Recarrega a lista para atualizar o número no balãozinho vermelho
+        }
+    });
+
+    // Escuta quando o mestre aprova alguém, para recarregar as fichas de todo mundo
+    window.socket.on('atualizar-jogadores', async () => {
+        const campanhaId = sessionStorage.getItem('campanhaAtiva');
+        const isMestre = sessionStorage.getItem('isMestreAtivo') === 'true';
+        if(campanhaId) {
+            await carregarFichasDaMesa(campanhaId, isMestre);
+            await carregarJogadoresDaMesa(campanhaId, isMestre);
+        }
+    });
+
+    // Função que o Mestre usa para ver os pedidos
+    window.carregarPedidosMesa = async function() {
+        const campanhaId = sessionStorage.getItem('campanhaAtiva');
+        const containerPedidos = document.getElementById('lista-pedidos-container');
+        const badge = document.getElementById('badge-pedidos');
+        
+        if(!campanhaId || !containerPedidos) return;
+
+        try {
+            const res = await fetch(`${window.API_URL}/campanhas/${campanhaId}/pedidos`, {
+                headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
+            });
+            const pedidos = await res.json();
+
+            // Atualiza a bolinha vermelha de notificação
+            if (badge) {
+                if (pedidos.length > 0) {
+                    badge.textContent = pedidos.length;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            }
+
+            containerPedidos.innerHTML = '';
+
+            if (pedidos.length === 0) {
+                containerPedidos.innerHTML = '<p class="text-gray-500 italic text-center py-4">Não há ninguém batendo nos portões.</p>';
+                return;
+            }
+
+            pedidos.forEach(ped => {
+                const imgAvatar = (ped.avatar && !ped.avatar.includes('R0lGODlhAQAB')) ? ped.avatar : './assets/icon.jpg';
+                const charName = ped.nome_personagem || 'Nenhum Personagem Selecionado';
+
+                const div = document.createElement('div');
+                div.className = 'bg-gray-100 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 p-3 rounded flex items-center justify-between shadow-sm';
+                div.innerHTML = `
+                    <div class="flex items-center gap-3 overflow-hidden">
+                        <img src="${imgAvatar}" class="w-10 h-10 rounded-full border border-gray-400 object-cover shadow-sm">
+                        <div>
+                            <h4 class="text-black dark:text-white font-bold text-sm m-0">${window.escaparHTML(ped.username)}</h4>
+                            <p class="text-gray-500 text-[10px] uppercase font-bold truncate">Acompanhado de: <span class="text-rpg-blue">${window.escaparHTML(charName)}</span></p>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 ml-2">
+                        <button onclick="window.responderPedido(${ped.pedido_id}, true, '${ped.usuario_id}', '${ped.personagem_id}')" class="bg-rpg-green hover:bg-green-700 text-white p-2 rounded shadow transition-colors" title="Aprovar">
+                            <i data-lucide="check" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="window.responderPedido(${ped.pedido_id}, false, null, null)" class="bg-rpg-red hover:bg-red-800 text-white p-2 rounded shadow transition-colors" title="Rejeitar">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                `;
+                containerPedidos.appendChild(div);
+            });
+            if(window.lucide) lucide.createIcons();
+
+        } catch (e) {
+            containerPedidos.innerHTML = '<p class="text-rpg-red">Erro ao carregar a portaria.</p>';
+        }
+    };
+
+    // Função que despacha a resposta do Mestre para o Servidor
+    window.responderPedido = async function(pedidoId, aprovado, usuarioId, personagemId) {
+        const campanhaId = sessionStorage.getItem('campanhaAtiva');
+        try {
+            const res = await fetch(`${window.API_URL}/campanhas/${campanhaId}/pedidos/responder`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionStorage.getItem('token')}` },
+                body: JSON.stringify({ pedido_id: pedidoId, aprovado: aprovado, usuario_id: usuarioId, personagem_id: personagemId })
+            });
+            const data = await res.json();
+            
+            if (res.ok) {
+                window.mostrarNotificacao(data.mensagem, aprovado ? 'sucesso' : 'aviso');
+                window.carregarPedidosMesa(); // Atualiza a lista
+            } else {
+                window.mostrarNotificacao(data.erro, 'erro');
+            }
+        } catch (e) {
+            window.mostrarNotificacao("Erro de conexão.", 'erro');
+        }
+    };
 });

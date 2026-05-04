@@ -188,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     sessionStorage.setItem('campanhaCodigo', codigoCampanha);
 
                     if (typeof window.carregarLobbyCampanha === 'function') window.carregarLobbyCampanha();
-                    Router.navigate('campanha');
+                    if (data.pendente) { mostrarNotificacao(data.mensagem); } else { Router.navigate('campanha'); }
                     window.mostrarNotificacao(`Conectado à mesa: ${nomeCampanha}`);
                 });
             });

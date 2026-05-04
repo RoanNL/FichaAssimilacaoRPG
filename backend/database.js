@@ -73,6 +73,15 @@ async function criarTabelas() {
             criado_em TIMESTAMPTZ DEFAULT now(),
             atualizado_em TIMESTAMPTZ DEFAULT now()
         );
+
+        CREATE TABLE IF NOT EXISTS pedidos_campanha (
+                id SERIAL PRIMARY KEY,
+                campanha_id UUID REFERENCES campanhas(id) ON DELETE CASCADE,
+                usuario_id UUID REFERENCES usuarios(id) ON DELETE CASCADE,
+                personagem_id UUID REFERENCES personagens(id) ON DELETE CASCADE,
+                criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(campanha_id, usuario_id)
+            );
     `;
 
     try {
