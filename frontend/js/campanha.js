@@ -42,9 +42,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const painelMestre = document.getElementById('painel-mestre-botoes');
         if (isMestre) {
-            painelMestre.classList.remove('hidden');
+            if(painelMestre) painelMestre.classList.remove('hidden');
         } else {
-            painelMestre.classList.add('hidden');
+            if(painelMestre) painelMestre.classList.add('hidden');
         }
 
         if (window.socket.connected) {
@@ -56,21 +56,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
         await carregarFichasDaMesa(campanhaId, isMestre);
         
-        const secaoJogadores = document.getElementById('grid-jogadores-mesa-view').parentElement;
+        const secaoJogadores = document.getElementById('grid-jogadores-mesa-view')?.parentElement;
         if (isMestre) {
-            secaoJogadores.style.display = 'block'; 
+            if(secaoJogadores) secaoJogadores.style.display = 'block'; 
             await carregarJogadoresDaMesa(campanhaId);
             await carregarPartituraDoBanco(campanhaId); 
         } else {
-            secaoJogadores.style.display = 'none'; 
+            if(secaoJogadores) secaoJogadores.style.display = 'none'; 
         }
     };
 
     // ==========================================
-    // 3. RENDERIZAR FICHAS DOS ALIADOS (COM FOTO DO JOGADOR)
+    // 3. RENDERIZAR FICHAS DOS ALIADOS (COM FOTO)
     // ==========================================
     async function carregarFichasDaMesa(campanhaId, isMestre) {
         const gridFichas = document.getElementById('grid-fichas-mesa-view');
+        if(!gridFichas) return;
+        
         gridFichas.innerHTML = '<p class="text-gray-500 italic animate-pulse">Procurando sobreviventes...</p>';
 
         try {
@@ -98,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const imgSrc = (char.foto && !char.foto.includes('R0lGODlhAQAB')) ? char.foto : './assets/icon.jpg';
                 const nomeJogador = isMestre ? char.nome_conta : "Aliado";
-                const avatarJogador = (char.avatar && !char.avatar.includes('R0lGODlhAQAB')) ? char.avatar : './assets/icon.jpg'; // Puxa o Avatar!
+                const avatarJogador = (char.avatar && !char.avatar.includes('R0lGODlhAQAB')) ? char.avatar : './assets/icon.jpg';
 
                 card.innerHTML = `
                     <img src="${imgSrc}" class="w-[110px] h-[130px] min-h-[130px] object-cover flex-shrink-0 border-r border-gray-300 dark:border-[#333] bg-black" alt="Foto">
@@ -107,7 +109,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             ${window.escaparHTML(char.nome_personagem) || 'Sem Nome'}
                         </h3>
                         
-                        <!-- 🔥 AQUI ENTRA A FOTO E O NOME DO JOGADOR NAS FICHAS DA MESA 🔥 -->
                         <div class="flex items-center gap-1.5 mt-1">
                             <img src="${avatarJogador}" class="w-5 h-5 rounded-full object-cover border border-gray-400 dark:border-gray-600 shadow-sm">
                             <p class="text-rpg-red dark:text-orange-500 font-bold text-[10px] uppercase m-0 truncate">${window.escaparHTML(nomeJogador)}</p>
@@ -138,10 +139,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
-    // 4. GERENCIAR JOGADORES (Somente Mestre) COM AVATARES
+    // 4. GERENCIAR JOGADORES (Somente Mestre)
     // ==========================================
     async function carregarJogadoresDaMesa(campanhaId) {
         const gridJogadores = document.getElementById('grid-jogadores-mesa-view');
+        if(!gridJogadores) return;
+        
         gridJogadores.innerHTML = '<p class="text-gray-500 italic animate-pulse">Analisando conexões vitais...</p>';
 
         try {
@@ -164,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const nomeConta = jog.username || 'Operador Desconhecido';
                 const nomeChar = jog.nome_personagem || 'Sem personagem ativo';
-                const avatarJogador = (jog.avatar && !jog.avatar.includes('R0lGODlhAQAB')) ? jog.avatar : './assets/icon.jpg'; // Puxa o Avatar!
+                const avatarJogador = (jog.avatar && !jog.avatar.includes('R0lGODlhAQAB')) ? jog.avatar : './assets/icon.jpg'; 
                 
                 const meuId = sessionStorage.getItem('usuarioId');
                 const isEsteOMestre = jog.usuario_id == meuId;
@@ -173,7 +176,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     ? `<span class="text-orange-500 font-bold text-sm flex items-center justify-center gap-1 mt-3 w-full border-t border-gray-300 dark:border-gray-700 pt-2"><i data-lucide="crown" class="w-4 h-4"></i> Mestre</span>`
                     : `<button class="btn-remover-jogador-mesa mt-3 bg-rpg-red hover:bg-red-800 text-white font-bold py-1.5 px-3 rounded text-xs uppercase font-rpg w-full transition-colors flex justify-center items-center gap-1" data-usuario="${jog.usuario_id}"><i data-lucide="user-x" class="w-4 h-4"></i> Expulsar</button>`;
 
-                // 🔥 AQUI ENTRA A FOTO E O NOME DO JOGADOR NO CARD DE CONEXÃO 🔥
                 card.innerHTML = `
                     <div class="flex items-center gap-3 mb-2 border-b border-gray-300 dark:border-gray-700 pb-2">
                         <img src="${avatarJogador}" class="w-10 h-10 rounded-full border border-gray-400 object-cover shadow-sm">
@@ -226,12 +228,13 @@ document.addEventListener('DOMContentLoaded', () => {
         cardJogadorParaRemover = card;
         campanhaIdAtual = campId;
 
-        targetNameJogador.textContent = nomeJogadorLimpo;
-        inputRemoveJogador.value = '';
-        btnConfirmRemoveJogador.disabled = true;
-        btnConfirmRemoveJogador.classList.add('opacity-50', 'cursor-not-allowed');
-
-        modalRemoveJogador.classList.add('show');
+        if(targetNameJogador) targetNameJogador.textContent = nomeJogadorLimpo;
+        if(inputRemoveJogador) inputRemoveJogador.value = '';
+        if(btnConfirmRemoveJogador) {
+            btnConfirmRemoveJogador.disabled = true;
+            btnConfirmRemoveJogador.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+        if(modalRemoveJogador) modalRemoveJogador.classList.add('show');
     };
 
     if (inputRemoveJogador) {
@@ -289,6 +292,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const containerRefugios = document.getElementById('container-refugios');
 
     function criarAmeaca(nome = '', desc = '') {
+        if(!containerAmeacas) return;
         const bloco = document.createElement('div');
         bloco.className = 'ameaca-item bg-white dark:bg-[#2a2a2a] p-4 rounded-md shadow-inner border border-gray-300 dark:border-gray-600 mb-3 focus-within:ring-2 focus-within:ring-rpg-red transition-all relative';
         bloco.innerHTML = `
@@ -302,6 +306,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function criarObjetivo(nome = '', atual = 0, max = 10, desc = '') {
+        if(!containerObjetivos) return;
         const bloco = document.createElement('div');
         bloco.className = 'objetivo-item bg-white dark:bg-[#2a2a2a] p-4 rounded-md shadow-inner border border-gray-300 dark:border-gray-600 mb-3 focus-within:ring-2 focus-within:ring-rpg-blue transition-all relative';
         const porcentagem = Math.min(100, Math.max(0, (atual / max) * 100)) || 0;
@@ -325,6 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function criarRefugio(nome = '', seg = '', rec = '', desc = '') {
+        if(!containerRefugios) return;
         const bloco = document.createElement('div');
         bloco.className = 'refugio-item bg-white dark:bg-[#2a2a2a] p-4 rounded-md shadow-inner border border-gray-300 dark:border-gray-600 mb-3 focus-within:ring-2 focus-within:ring-rpg-green transition-all relative';
         bloco.innerHTML = `
@@ -344,15 +350,17 @@ document.addEventListener('DOMContentLoaded', () => {
         containerRefugios.appendChild(bloco);
     }
 
-    // --- EVENTOS DOS BOTÕES DE "ADICIONAR" (Com blindagem de IDs) ---
-    const ligarBotao = (idPrimario, idSecundario, funcao) => {
-        const btn = document.getElementById(idPrimario) || document.getElementById(idSecundario);
-        if (btn) btn.addEventListener('click', () => { funcao(); if(window.lucide) lucide.createIcons(); agendarAutosavePartitura(); });
+    // --- EVENTOS DOS BOTÕES DE "ADICIONAR" (Blindagem Máxima contra IDs diferentes) ---
+    const ligarBotao = (ids, funcao) => {
+        ids.forEach(id => {
+            const btn = document.getElementById(id);
+            if (btn) btn.addEventListener('click', () => { funcao(); if(window.lucide) lucide.createIcons(); agendarAutosavePartitura(); });
+        });
     };
 
-    ligarBotao('btn-add-ameaca', 'btn-criar-ameaca', criarAmeaca);
-    ligarBotao('btn-add-objetivo', 'btn-criar-objetivo', criarObjetivo);
-    ligarBotao('btn-add-refugio', 'btn-criar-refugio', criarRefugio); // O problema do Refúgio estava aqui, agora ele aceita qualquer ID!
+    ligarBotao(['btn-add-ameaca', 'btn-criar-ameaca', 'btn-nova-ameaca'], criarAmeaca);
+    ligarBotao(['btn-add-objetivo', 'btn-criar-objetivo', 'btn-novo-objetivo'], criarObjetivo);
+    ligarBotao(['btn-add-refugio', 'btn-criar-refugio', 'btn-novo-refugio'], criarRefugio);
 
     // --- AUTOSAVE E LÓGICA DA BARRA ---
     let timeoutPartitura;
@@ -417,13 +425,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- CARREGAR DO BANCO ---
+    // --- CARREGAR DO BANCO (BLINDADO) ---
     async function carregarPartituraDoBanco(campanhaId) {
-        if (!containerAmeacas) return;
-        
-        containerAmeacas.innerHTML = '';
-        containerObjetivos.innerHTML = '';
-        containerRefugios.innerHTML = '';
+        if (containerAmeacas) containerAmeacas.innerHTML = '';
+        if (containerObjetivos) containerObjetivos.innerHTML = '';
+        if (containerRefugios) containerRefugios.innerHTML = '';
 
         try {
             const res = await fetch(`${window.API_URL}/campanhas/${campanhaId}/partitura`, {

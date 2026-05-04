@@ -692,7 +692,7 @@ app.get('/campanhas/:id/personagens', verificarToken, async (req, res) => {
 app.get('/campanhas/:id/jogadores', verificarToken, async (req, res) => {
     try {
         const result = await pool.query(`
-            SELECT m.usuario_id, u.username, u.avatar, p.nome as nome_personagem 
+            SELECT m.usuario_id, u.username, u.avatar, p.nome_personagem 
             FROM membros_campanha m
             JOIN usuarios u ON m.usuario_id = u.id
             LEFT JOIN personagens p ON p.id = m.personagem_ativo_id
@@ -700,6 +700,7 @@ app.get('/campanhas/:id/jogadores', verificarToken, async (req, res) => {
         `, [req.params.id]);
         res.json(result.rows);
     } catch (erro) {
+        console.error("❌ Erro na Rota Jogadores:", erro);
         res.status(500).json({ erro: 'Erro ao buscar jogadores.' });
     }
 });
@@ -731,7 +732,6 @@ app.get('/campanhas/usuario/:usuarioId', verificarToken, async (req, res) => {
 // =========================================================================
 app.get('/campanhas/:id/fichas-mesa', verificarToken, async (req, res) => {
     try {
-        // Seleciona a ficha, mas também puxa o nome e a foto (avatar) de quem é o dono!
         const result = await pool.query(`
             SELECT p.*, u.username as nome_conta, u.avatar 
             FROM personagens p
@@ -741,6 +741,7 @@ app.get('/campanhas/:id/fichas-mesa', verificarToken, async (req, res) => {
         `, [req.params.id]);
         res.json(result.rows);
     } catch (erro) {
+        console.error("❌ Erro na Rota Fichas Mesa:", erro);
         res.status(500).json({ erro: 'Erro ao buscar fichas da mesa.' });
     }
 });
