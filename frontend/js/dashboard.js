@@ -17,11 +17,34 @@ document.addEventListener('DOMContentLoaded', () => {
     window.personagensCarregados = [];
 
     // ==========================================
+    // 0. BOTÃO DE CRIAR NOVO PERSONAGEM
+    // ==========================================
+    const btnNovoPersonagem = document.getElementById('btn-novo-personagem-dash');
+    if (btnNovoPersonagem) {
+        btnNovoPersonagem.addEventListener('click', () => {
+            sessionStorage.removeItem('personagemAtivoId');
+            if (typeof window.limparFicha === 'function') window.limparFicha();
+            Router.navigate('ficha');
+        });
+    }
+
+    // ==========================================
     // 1. CARREGAR E EXIBIR PERSONAGENS
     // ==========================================
     window.carregarListaPersonagens = async function() {
         const usuarioLogadoId = sessionStorage.getItem('usuarioId');
         if (!usuarioLogadoId) return;
+
+        if (gridPersonagens) {
+            // 🔥 LOADING ANIMADO COM A LOGO
+            gridPersonagens.className = 'flex flex-row gap-4 overflow-x-auto pb-4 pt-2 px-1 snap-x';
+            gridPersonagens.innerHTML = `
+                <div class="col-span-full w-full flex flex-col items-center justify-center p-8">
+                    <img src="./assets/icon.jpg" class="w-14 h-14 rounded-full animate-spin mb-4 shadow-lg border-2 border-rpg-red">
+                    <p class="text-gray-500 dark:text-gray-400 italic font-bold font-rpg uppercase tracking-widest animate-pulse">Buscando registros vitais...</p>
+                </div>
+            `;
+        }
 
         try {
             const resposta = await fetch(`${window.API_URL}/personagens/usuario/${usuarioLogadoId}`, {
@@ -43,30 +66,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (gridPersonagens) {
-                // 🔥 BLINDAGEM DO CONTAINER: Força o layout horizontal tipo "Galeria"
-                gridPersonagens.className = 'flex flex-row gap-4 overflow-x-auto pb-4 pt-2 px-1 snap-x';
-                gridPersonagens.style = ''; // Remove CSS inline conflitante
                 gridPersonagens.innerHTML = '';
                 
-                // 🔥 CARD: CRIAR NOVO PERSONAGEM
-                const cardNovo = document.createElement('div');
-                // Classes super estritas para manter o card com 130px de altura e na horizontal
-                cardNovo.className = 'flex flex-row h-[130px] w-[300px] min-w-[300px] flex-shrink-0 bg-transparent rounded-lg overflow-hidden border-2 border-dashed border-gray-400 dark:border-gray-600 hover:border-rpg-green transition-colors cursor-pointer snap-start';
-                cardNovo.innerHTML = `
-                    <div class="w-[110px] h-full flex flex-shrink-0 items-center justify-center bg-gray-200 dark:bg-[#111] border-r border-dashed border-gray-400 dark:border-gray-600">
-                        <i data-lucide="plus" class="w-10 h-10 text-gray-500"></i>
-                    </div>
-                    <div class="flex flex-col justify-center p-4 flex-grow">
-                        <h3 class="text-rpg-green font-black text-xl m-0 font-rpg uppercase">Criar Novo</h3>
-                        <p class="text-gray-500 text-sm m-0">Ficha em branco</p>
-                    </div>
-                `;
-                cardNovo.addEventListener('click', () => {
-                    sessionStorage.removeItem('personagemAtivoId');
-                    if (typeof window.limparFicha === 'function') window.limparFicha();
-                    Router.navigate('ficha');
-                });
-                gridPersonagens.appendChild(cardNovo);
+                if (window.personagensCarregados.length === 0) {
+                    gridPersonagens.innerHTML = '<p class="text-gray-500 italic p-4 w-full text-center border border-dashed border-gray-300 dark:border-gray-600 rounded">Nenhum personagem encontrado. Crie um novo para começar!</p>';
+                    return;
+                }
 
                 // 🔥 CARDS DOS PERSONAGENS SALVOS
                 window.personagensCarregados.forEach(char => {
@@ -76,7 +81,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     const imgSrc = (fotoBase64 && !fotoBase64.includes('R0lGODlhAQAB')) ? fotoBase64 : placeholderInterno;
 
                     const card = document.createElement('div');
-                    // Classes super estritas contra vazamento de imagens gigantes
                     card.className = 'flex flex-row h-[130px] w-[300px] min-w-[300px] flex-shrink-0 bg-white dark:bg-[#242424] rounded-lg overflow-hidden border border-gray-300 dark:border-[#333] hover:-translate-y-1 hover:shadow-[0_8px_20px_rgba(0,0,0,0.4)] transition-all cursor-default snap-start relative group';
                     
                     card.innerHTML = `
@@ -120,7 +124,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const usuarioLogadoId = sessionStorage.getItem('usuarioId');
         if (!usuarioLogadoId || !gridCampanhas) return;
 
-        gridCampanhas.innerHTML = '<p class="text-gray-500 italic md:col-span-3 text-center py-6 border border-dashed border-gray-300 dark:border-gray-600 rounded animate-pulse">Buscando conexões no servidor...</p>';
+        // 🔥 LOADING ANIMADO COM A LOGO
+        gridCampanhas.innerHTML = `
+            <div class="md:col-span-3 w-full flex flex-col items-center justify-center p-8">
+                <img src="./assets/icon.jpg" class="w-14 h-14 rounded-full animate-spin mb-4 shadow-lg border-2 border-rpg-blue">
+                <p class="text-gray-500 dark:text-gray-400 italic font-bold font-rpg uppercase tracking-widest animate-pulse">Conectando aos servidores...</p>
+            </div>
+        `;
         
         try {
             const resposta = await fetch(`${window.API_URL}/campanhas/usuario/${usuarioLogadoId}`, {
@@ -136,17 +146,16 @@ document.addEventListener('DOMContentLoaded', () => {
             gridCampanhas.innerHTML = '';
             campanhas.forEach(camp => {
                 const card = document.createElement('div');
-                card.className = 'bg-white dark:bg-[#242424] border border-gray-300 dark:border-gray-700 p-5 rounded-lg shadow-sm hover:border-rpg-blue hover:shadow-lg transition-all flex flex-col justify-between h-[180px] relative overflow-hidden';
+                card.className = 'bg-white dark:bg-[#242424] border border-gray-300 dark:border-gray-700 p-5 rounded-lg shadow-sm hover:border-rpg-blue hover:shadow-lg transition-all flex flex-col justify-between h-[190px] relative overflow-hidden';
 
                 const badge = camp.is_mestre
                     ? `<span class="bg-rpg-blue text-white px-2 py-1 rounded text-xs font-bold inline-flex items-center gap-1 mt-2 w-max shadow-sm"><i data-lucide="crown" class="w-3 h-3"></i> Mestre (Cód: ${camp.codigo_convite})</span>`
                     : `<span class="bg-rpg-green text-white px-2 py-1 rounded text-xs font-bold inline-flex items-center gap-1 mt-2 w-max shadow-sm"><i data-lucide="swords" class="w-3 h-3"></i> Jogador</span>`;
 
                 const btnExcluir = camp.is_mestre
-                    ? `<button class="btn-excluir-campanha flex items-center justify-center gap-2 w-full mt-2 bg-rpg-red hover:bg-red-800 text-white font-bold py-2 rounded text-xs uppercase font-rpg transition-colors shadow-sm" data-id="${camp.id}" data-nome="${camp.nome}"><i data-lucide="flame" class="w-4 h-4"></i> Destruir Mesa</button>`
+                    ? `<button class="btn-excluir-campanha flex items-center justify-center gap-2 w-full mt-2 mb-1 bg-rpg-red hover:bg-red-800 text-white font-bold py-2 rounded text-xs uppercase font-rpg transition-colors shadow-sm" data-id="${camp.id}" data-nome="${camp.nome}"><i data-lucide="flame" class="w-4 h-4"></i> Destruir Mesa</button>`
                     : '';
 
-                // Borda indicadora colorida no topo do card
                 const bordaTopo = camp.is_mestre ? 'border-t-4 border-t-rpg-blue' : 'border-t-4 border-t-rpg-green';
 
                 card.innerHTML = `
@@ -155,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <h4 class="text-xl font-black text-gray-800 dark:text-white m-0 truncate" title="${window.escaparHTML(camp.nome)}">${window.escaparHTML(camp.nome)}</h4>
                         ${badge}
                     </div>
-                    <div class="flex flex-col gap-2 mt-auto">
+                    <div class="flex flex-col mt-auto pt-2">
                         <button class="btn-jogar-campanha bg-gray-800 dark:bg-gray-100 text-white dark:text-black hover:bg-black dark:hover:bg-white font-bold py-2.5 rounded text-sm uppercase font-rpg transition-colors flex justify-center items-center gap-2 shadow-sm" data-id="${camp.id}" data-mestre="${camp.is_mestre}" data-nome="${window.escaparHTML(camp.nome)}" data-codigo="${camp.codigo_convite}">
                             <i data-lucide="play" class="w-4 h-4 fill-current"></i> Entrar na Mesa
                         </button>
@@ -356,5 +365,4 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-
 });

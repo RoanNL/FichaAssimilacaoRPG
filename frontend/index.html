@@ -156,9 +156,12 @@
 
             <!-- Controles à Direita (Tema, Salvar Ficha, Perfil, Sair) -->
             <div class="flex items-center gap-3 md:gap-4">
-                <!-- Botão de Salvar a Ficha (Aparece só na tela da ficha) -->
+                <!-- Botões da Ficha -->
                 <button id="btn-save-char-nav" class="hidden font-rpg text-xs md:text-sm py-1.5 px-3 rounded font-bold text-white uppercase cursor-pointer transition-colors duration-200 bg-rpg-green hover:bg-green-700 flex items-center gap-1 shadow-sm">
                     <i data-lucide="save" class="w-4 h-4"></i> <span class="hidden md:inline">Salvar</span>
+                </button>
+                <button id="btn-delete-char-nav" class="hidden font-rpg text-xs md:text-sm py-1.5 px-3 rounded font-bold text-white uppercase cursor-pointer transition-colors duration-200 bg-rpg-red hover:bg-red-800 flex items-center gap-1 shadow-sm">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i> <span class="hidden md:inline">Excluir</span>
                 </button>
                 
                 <button id="btn-toggle-tema" class="text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white transition-colors cursor-pointer">
@@ -201,7 +204,7 @@
                 <div class="bg-rpg-paper dark:bg-[#1e293b] p-6 rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm">
                     <div class="flex justify-between items-center border-b border-gray-300 dark:border-gray-600 pb-3 mb-5">
                         <h2 class="text-2xl font-rpg font-black uppercase m-0 flex items-center gap-2 text-rpg-red dark:text-orange-500 border-none"><i data-lucide="users" class="w-6 h-6"></i> Meus Personagens</h2>
-                        <button class="bg-rpg-blue hover:bg-[#2c6270] text-white px-4 py-2 rounded font-bold font-rpg uppercase text-sm flex items-center gap-2 shadow transition-colors"><i data-lucide="plus" class="w-4 h-4"></i> Criar Novo</button>
+                    <button id="btn-novo-personagem-dash" class="bg-rpg-blue hover:bg-[#2c6270] text-white px-4 py-2 rounded font-bold font-rpg uppercase text-sm flex items-center gap-2 shadow transition-colors"><i data-lucide="plus" class="w-4 h-4"></i> Criar Novo</button>
                     </div>
                     <!-- Grid da Galeria (Igual ao que você tinha) -->
                     <div id="grid-meus-personagens" class="galeria-grid" style="max-height: auto; overflow-y: visible;">

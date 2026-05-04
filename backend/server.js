@@ -690,27 +690,14 @@ app.get('/campanhas/:id/personagens', verificarToken, async (req, res) => {
 // Buscar jogadores para o painel de Gerenciamento 
 // =========================================================================
 app.get('/campanhas/:id/jogadores', verificarToken, async (req, res) => {
-    const campanhaId = req.params.id;
-    const mestreIdSeguro = req.usuario.id;
-
-    if (!regexUUID.test(campanhaId)) {
-        return res.status(400).json({ erro: 'Formato de ID inválido.' });
-    }
-
     try {
-        const checkMestre = await pool.query(`SELECT mestre_id FROM campanhas WHERE id = $1`, [campanhaId]);
-        if (checkMestre.rows.length === 0 || checkMestre.rows[0].mestre_id !== mestreIdSeguro) {
-            return res.status(403).json({ erro: 'ALERTA: Apenas o verdadeiro Mestre pode ver os jogadores!' });
-        }
-
-        const sql = `
-            SELECT m.usuario_id, u.username, 
-                   (SELECT nome_personagem FROM personagens WHERE usuario_id = u.id LIMIT 1) as nome_personagem
+        const result = await pool.query(`
+            SELECT m.usuario_id, u.username, u.avatar, p.nome as nome_personagem 
             FROM membros_campanha m
             JOIN usuarios u ON m.usuario_id = u.id
+            LEFT JOIN personagens p ON p.id = m.personagem_ativo_id
             WHERE m.campanha_id = $1
-        `;
-        const result = await pool.query(sql, [campanhaId]);
+        `, [req.params.id]);
         res.json(result.rows);
     } catch (erro) {
         res.status(500).json({ erro: 'Erro ao buscar jogadores.' });
@@ -743,27 +730,15 @@ app.get('/campanhas/usuario/:usuarioId', verificarToken, async (req, res) => {
 // ROTA DO MESTRE: Ver todas as fichas da mesa 
 // =========================================================================
 app.get('/campanhas/:id/fichas-mesa', verificarToken, async (req, res) => {
-    const campanhaId = req.params.id;
-    const mestreIdSeguro = req.usuario.id;
-
-    if (!regexUUID.test(campanhaId)) {
-        return res.status(400).json({ erro: 'Formato de ID inválido.' });
-    }
-
     try {
-        const checkMestre = await pool.query(`SELECT mestre_id FROM campanhas WHERE id = $1`, [campanhaId]);
-        if (checkMestre.rows.length === 0 || checkMestre.rows[0].mestre_id !== mestreIdSeguro) {
-            return res.status(403).json({ erro: 'ALERTA: Apenas o verdadeiro Mestre pode ver as fichas ocultas!' });
-        }
-
-        const sql = `
-            SELECT p.*, u.username as nome_conta
+        // Seleciona a ficha, mas também puxa o nome e a foto (avatar) de quem é o dono!
+        const result = await pool.query(`
+            SELECT p.*, u.username as nome_conta, u.avatar 
             FROM personagens p
-            JOIN usuarios u ON p.usuario_id = u.id
-            JOIN membros_campanha m ON m.usuario_id = p.usuario_id
+            JOIN membros_campanha m ON p.id = m.personagem_ativo_id
+            JOIN usuarios u ON u.id = m.usuario_id
             WHERE m.campanha_id = $1
-        `;
-        const result = await pool.query(sql, [campanhaId]);
+        `, [req.params.id]);
         res.json(result.rows);
     } catch (erro) {
         res.status(500).json({ erro: 'Erro ao buscar fichas da mesa.' });
@@ -902,6 +877,28 @@ app.delete('/api/refugios/deletar/:id', verificarToken, async (req, res) => {
     } catch (erro) {
         console.error('❌ Erro ao deletar refúgio:', erro);
         res.status(500).json({ erro: 'Erro ao deletar refúgio.' });
+    }
+});
+
+// =========================================================================
+// ROTAS DA PARTITURA DO MESTRE (AUTOSAVE)
+// =========================================================================
+app.get('/campanhas/:id/partitura', verificarToken, async (req, res) => {
+    try {
+        const result = await pool.query('SELECT dados_partitura FROM campanhas WHERE id = $1', [req.params.id]);
+        res.json(result.rows[0] ? result.rows[0].dados_partitura : null);
+    } catch (erro) {
+        res.status(500).json({ erro: 'Erro ao buscar partitura da mesa.' });
+    }
+});
+
+app.post('/campanhas/:id/partitura', verificarToken, async (req, res) => {
+    try {
+        const dados = req.body.dados;
+        await pool.query('UPDATE campanhas SET dados_partitura = $1 WHERE id = $2', [dados, req.params.id]);
+        res.json({ mensagem: 'Partitura salva em segurança!' });
+    } catch (erro) {
+        res.status(500).json({ erro: 'Erro ao salvar a partitura.' });
     }
 });
 

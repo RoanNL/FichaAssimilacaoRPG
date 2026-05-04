@@ -599,4 +599,114 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // ==========================================
+    // LIGAÇÃO DOS BOTÕES SUPERIORES DA FICHA
+    // ==========================================
+    
+    // Liga o botão de Excluir
+    const btnDeleteCharNav = document.getElementById('btn-delete-char-nav');
+    if (btnDeleteCharNav) {
+        btnDeleteCharNav.addEventListener('click', () => {
+            if (typeof window.abrirModalDeletarPersonagem === 'function') {
+                window.abrirModalDeletarPersonagem();
+            }
+        });
+    }
+
+    const funcaoSalvarOriginal = window.salvarFicha;
+    window.salvarFicha = async function(silencioso = false) {
+        const usuarioLogadoId = sessionStorage.getItem('usuarioId');
+        if (!usuarioLogadoId) return;
+
+        const nomeInput = document.getElementById('nome');
+        const nomePersonagem = nomeInput ? nomeInput.value.trim() : '';
+        
+        // Se for um autosave e não tiver nome, só ignora silenciosamente. Se for manual, avisa!
+        if (!nomePersonagem || nomePersonagem === "") {
+            if (!silencioso) window.mostrarNotificacao("O personagem precisa de pelo menos um Nome para ser salvo!", "aviso");
+            return; 
+        }
+
+        const dadosFicha = coletarDadosFicha();
+        const ocupacao = document.getElementById('ocupacao') ? document.getElementById('ocupacao').value : '';
+        const foto = dadosFicha['char-photo'] || null;
+
+        const payload = {
+            usuarioId: usuarioLogadoId,
+            personagemId: window.idPersonagemAtual,
+            nome: nomePersonagem, 
+            ocupacao: ocupacao,
+            dadosFicha: dadosFicha,
+            foto: foto
+        };
+
+        const btnSaveNav = document.getElementById('btn-save-char-nav');
+        const btnDeleteCharNav = document.getElementById('btn-delete-char-nav');
+        
+        // Guardamos o HTML original manualmente para evitar bugs caso o jogador digite muito rápido
+        const htmlPadrao = '<i data-lucide="save" class="w-4 h-4"></i> <span class="hidden md:inline">Salvar</span>';
+        
+        // AGORA A MÁGICA SEMPRE ACONTECE (Manual ou Autosave)
+        if (btnSaveNav) {
+            btnSaveNav.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> <span class="hidden md:inline">Salvando...</span>';
+            if(window.lucide) lucide.createIcons();
+        }
+
+        try {
+            const resposta = await fetch(`${window.API_URL}/personagens`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${sessionStorage.getItem('token')}` 
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const resultado = await resposta.json();
+
+            if (resposta.ok) {
+                if (resultado.id) {
+                    window.idPersonagemAtual = resultado.id;
+                    sessionStorage.setItem('personagemAtivoId', resultado.id);
+                    if (btnDeleteCharNav) btnDeleteCharNav.classList.remove('hidden');
+                }
+
+                // O Pop-up verde chato continua aparecendo SÓ se clicar no botão
+                if (!silencioso) {
+                    window.mostrarNotificacao(resultado.mensagem, 'sucesso');
+                    if(typeof window.carregarListaPersonagens === 'function') window.carregarListaPersonagens();
+                }
+                
+                // 🔥 MAS O EFEITO DE "SALVO!" NO BOTÃO AGORA RODA SEMPRE 🔥
+                if (btnSaveNav) {
+                    btnSaveNav.classList.remove('bg-rpg-green', 'hover:bg-green-700');
+                    btnSaveNav.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                    btnSaveNav.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4"></i> <span class="hidden md:inline">Salvo!</span>';
+                    if(window.lucide) lucide.createIcons();
+                    
+                    setTimeout(() => {
+                        btnSaveNav.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                        btnSaveNav.classList.add('bg-rpg-green', 'hover:bg-green-700');
+                        btnSaveNav.innerHTML = htmlPadrao;
+                        if(window.lucide) lucide.createIcons();
+                    }, 2000);
+                }
+                
+            } else {
+                if (!silencioso) window.mostrarNotificacao(resultado.erro || "Erro desconhecido.", 'erro');
+                if (btnSaveNav) {
+                    btnSaveNav.innerHTML = htmlPadrao;
+                    if(window.lucide) lucide.createIcons();
+                }
+            }
+        } catch (erro) {
+            console.error("❌ Erro ao salvar ficha:", erro);
+            if (!silencioso) window.mostrarNotificacao("Erro de comunicação com o servidor!", 'erro');
+            if (btnSaveNav) {
+                btnSaveNav.innerHTML = htmlPadrao;
+                if(window.lucide) lucide.createIcons();
+            }
+        } 
+    };
+
 });
