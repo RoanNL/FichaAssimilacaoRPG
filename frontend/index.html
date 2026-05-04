@@ -325,37 +325,37 @@
 
             <!-- 🏰 TELA 3: LOBBY DA CAMPANHA -->
             <div id="tela-campanha" class="hidden">
-                <!-- Capa e Título -->
-                <div
-                    class="w-full h-48 md:h-64 bg-gray-800 rounded-lg mb-8 relative overflow-hidden flex items-end p-6 md:p-8 shadow-md group">
-                    <!-- Substitua o src abaixo por uma imagem de background real se quiser -->
-                    <img src="./assets/icon.jpg"
-                        class="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:scale-105 transition-transform duration-700">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-90 z-0"></div>
-
-                    <div class="z-10 w-full flex justify-between items-end">
+                <!-- ================= BANNER DA CAMPANHA ================= -->
+            <div class="relative w-full h-[250px] md:h-[300px] rounded-lg overflow-hidden mb-6 group shadow-lg">
+                <!-- Imagem do Banner -->
+                <img id="campanha-banner-img" src="./assets/icon.jpg" class="w-full h-full object-cover transition-opacity" alt="Banner da Campanha">
+                
+                <!-- Input invisível e botão do Mestre -->
+                <input type="file" id="input-banner-campanha" accept="image/*" class="hidden">
+                <button id="btn-editar-banner" onclick="document.getElementById('input-banner-campanha').click()" class="hidden absolute top-4 right-4 bg-gray-900/80 hover:bg-black text-white px-3 py-2 rounded cursor-pointer font-bold font-rpg uppercase text-sm flex items-center gap-2 shadow transition-colors z-10 backdrop-blur-sm">
+                    <i data-lucide="camera" class="w-4 h-4"></i> Trocar Arte
+                </button>
+                
+                <!-- Degradê Escuro para os textos ficarem legíveis -->
+                <div class="absolute inset-0 bg-gradient-to-t from-[#121212] via-black/50 to-transparent flex flex-col justify-end p-6 md:p-8">
+                    <div class="flex justify-between items-end">
                         <div>
-                            <h1 id="campanha-titulo-view"
-                                class="text-3xl md:text-5xl font-black font-rpg text-white m-0 border-none text-left drop-shadow-md">
-                                Nome da Campanha</h1>
-                            <p class="text-gray-300 font-bold mt-1 uppercase flex items-center gap-2"><i
-                                    data-lucide="hash" class="w-4 h-4"></i> Código: <span id="campanha-codigo-view"
-                                    class="text-orange-400">---</span></p>
+                            <h1 id="campanha-titulo-view" class="text-4xl md:text-5xl font-black font-rpg text-white m-0 uppercase tracking-wide shadow-black drop-shadow-lg">Carregando...</h1>
+                            <p id="campanha-codigo-view" class="text-gray-300 font-bold mt-1 tracking-widest uppercase text-sm drop-shadow-md"># ---</p>
+                        </div>
+                        
+                        <!-- Coloquei os botões da Partitura e Refúgio aqui no canto inferior direito para ficar estiloso! -->
+                        <div id="painel-mestre-botoes" class="hidden flex gap-2">
+                            <button onclick="document.getElementById('algum-id-da-partitura').classList.add('show')" class="bg-gray-800 hover:bg-black dark:bg-gray-200 dark:hover:bg-white text-white dark:text-black font-bold py-2 px-4 rounded text-sm uppercase font-rpg transition-colors flex items-center gap-2 shadow-sm">
+                                <i data-lucide="music" class="w-4 h-4"></i> Partitura
+                            </button>
+                            <button onclick="window.abrirGerenciadorRefugios()" class="bg-gray-800 hover:bg-black dark:bg-gray-200 dark:hover:bg-white text-white dark:text-black font-bold py-2 px-4 rounded text-sm uppercase font-rpg transition-colors flex items-center gap-2 shadow-sm">
+                                <i data-lucide="tent" class="w-4 h-4"></i> Refúgio
+                            </button>
                         </div>
                     </div>
-
-                    <!-- Botões Mestre (Injetados via JS se isMestre === true) -->
-                    <div id="painel-mestre-botoes" class="absolute top-4 right-4 z-10 flex gap-2 hidden">
-                        <button
-                            class="bg-purple-700 hover:bg-purple-900 text-white px-3 py-2 rounded font-bold flex items-center gap-2 shadow text-sm uppercase font-rpg transition-colors"
-                            onclick="document.getElementById('partitura-modal').classList.add('show')"><i
-                                data-lucide="music" class="w-4 h-4"></i> Partitura</button>
-                        <button onclick="window.abrirGerenciadorRefugios()"
-                            class="bg-gray-800 hover:bg-black dark:bg-gray-200 dark:hover:bg-white text-white dark:text-black font-bold py-2 px-4 rounded text-sm uppercase font-rpg transition-colors flex items-center gap-2 shadow-sm">
-                            <i data-lucide="tent" class="w-4 h-4"></i> REFÚGIO
-                        </button>
-                    </div>
                 </div>
+            </div>
 
                 <!-- Seção de Jogadores na Mesa -->
                 <div

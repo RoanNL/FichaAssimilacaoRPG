@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ==========================================
-    // 2. CARREGAR LOBBY DA CAMPANHA
+    // 2. CARREGAR LOBBY E BANNER
     // ==========================================
     window.carregarLobbyCampanha = async function() {
         const campanhaId = sessionStorage.getItem('campanhaAtiva');
@@ -35,51 +35,68 @@ document.addEventListener('DOMContentLoaded', () => {
         const nomeCampanha = sessionStorage.getItem('campanhaNome');
         const codigoCampanha = sessionStorage.getItem('campanhaCodigo');
 
+        const codigoCampanhaTexto = `Código: ${codigoCampanha}`
+
         if (!campanhaId) return;
 
         document.getElementById('campanha-titulo-view').textContent = nomeCampanha || 'Mesa Desconhecida';
-        document.getElementById('campanha-codigo-view').textContent = codigoCampanha || '---';
+        document.getElementById('campanha-codigo-view').textContent = codigoCampanhaTexto || '---';
 
         const painelMestre = document.getElementById('painel-mestre-botoes');
+        const btnEditarBanner = document.getElementById('btn-editar-banner');
+        
         if (isMestre) {
             if(painelMestre) painelMestre.classList.remove('hidden');
+            if(btnEditarBanner) btnEditarBanner.classList.remove('hidden'); // Libera o botão de foto!
+            if(btnEditarBanner) btnEditarBanner.style.display = 'flex';
         } else {
             if(painelMestre) painelMestre.classList.add('hidden');
+            if(btnEditarBanner) btnEditarBanner.classList.add('hidden');
         }
+
+        // 🔥 PUXAR A FOTO DO BANNER 🔥
+        try {
+            const resBanner = await fetch(`${window.API_URL}/campanhas/${campanhaId}/info`, {
+                headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
+            });
+            const dataBanner = await resBanner.json();
+            const imgBanner = document.getElementById('campanha-banner-img');
+            if(imgBanner && dataBanner.banner) {
+                imgBanner.src = dataBanner.banner;
+            } else if (imgBanner) {
+                imgBanner.src = './assets/banner-default.jpg'; // Coloque uma imagem bonita padrão na sua pasta assets!
+            }
+        } catch (e) { console.log("Erro ao carregar banner"); }
 
         if (window.socket.connected) {
-            window.socket.emit('entrar-na-campanha', {
-                campanhaId: campanhaId,
-                token: sessionStorage.getItem('token')
-            });
+            window.socket.emit('entrar-na-campanha', { campanhaId: campanhaId, token: sessionStorage.getItem('token') });
         }
 
-        await carregarFichasDaMesa(campanhaId, isMestre);
-        
+        // 🔥 LIBERA A LISTA DE JOGADORES PARA TODO MUNDO 🔥
         const secaoJogadores = document.getElementById('grid-jogadores-mesa-view')?.parentElement;
-        if (isMestre) {
-            if(secaoJogadores) secaoJogadores.style.display = 'block'; 
-            await carregarJogadoresDaMesa(campanhaId);
-            await carregarPartituraDoBanco(campanhaId); 
-        } else {
-            if(secaoJogadores) secaoJogadores.style.display = 'none'; 
-        }
+        if(secaoJogadores) secaoJogadores.style.display = 'block'; 
+
+        await carregarFichasDaMesa(campanhaId, isMestre);
+        await carregarJogadoresDaMesa(campanhaId, isMestre);
+        
+        if (isMestre) await carregarPartituraDoBanco(campanhaId); 
     };
 
     // ==========================================
-    // 3. RENDERIZAR FICHAS DA MESA (COM PRIVACIDADE POR ESCOLHA)
+    // 3. RENDERIZAR FICHAS DA MESA (GRID 3x INFINITO)
     // ==========================================
     async function carregarFichasDaMesa(campanhaId, isMestre) {
         const gridFichas = document.getElementById('grid-fichas-mesa-view');
         if(!gridFichas) return;
         
-        gridFichas.innerHTML = '<p class="text-gray-500 italic animate-pulse">Procurando sobreviventes...</p>';
+        // 🔥 FORÇANDO O GRID CSS PELO JAVASCRIPT 🔥
+        gridFichas.className = "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 w-full";
+        gridFichas.innerHTML = '<p class="text-gray-500 italic animate-pulse col-span-full">Procurando sobreviventes...</p>';
 
         try {
             const resposta = await fetch(`${window.API_URL}/campanhas/${campanhaId}/fichas-mesa`, {
                 headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
             });
-            
             if (!resposta.ok) throw new Error("Erro ao buscar fichas");
             let fichas = await resposta.json();
 
@@ -89,45 +106,36 @@ document.addEventListener('DOMContentLoaded', () => {
             gridFichas.innerHTML = '';
 
             if (fichas.length === 0) {
-                gridFichas.innerHTML = '<p class="text-gray-500 italic">Nenhum jogador aliado detectado.</p>';
+                gridFichas.innerHTML = '<p class="text-gray-500 italic col-span-full">Nenhum jogador aliado detectado.</p>';
                 return;
             }
 
             fichas.forEach(char => {
                 const card = document.createElement('div');
-                card.className = 'flex flex-row h-[130px] w-[300px] min-w-[300px] flex-shrink-0 bg-white dark:bg-[#242424] rounded-lg overflow-hidden border border-gray-300 dark:border-[#333] hover:-translate-y-1 hover:shadow-lg transition-all cursor-default snap-start relative';
+                // 🔥 REMOVIDO o w-[300px] para ele preencher o Grid Perfeitamente 🔥
+                card.className = 'flex flex-row h-[130px] w-full bg-white dark:bg-[#242424] rounded-lg overflow-hidden border border-gray-300 dark:border-[#333] hover:-translate-y-1 hover:shadow-lg transition-all relative shadow-sm';
 
                 const imgSrc = (char.foto && !char.foto.includes('R0lGODlhAQAB')) ? char.foto : './assets/icon.jpg';
                 const ocupacao = char.ocupacao || 'Desconhecido';
                 
-                // 🔥 O JUIZ DA PRIVACIDADE 🔥
                 const isDonoDaFicha = (char.usuario_id == meuId);
                 const isFichaPrivada = char.is_privada === true;
-                
-                // Só inspeciona se for Mestre, se for o Dono, ou se a Ficha for Pública!
                 const podeInspecionar = isMestre || isDonoDaFicha || !isFichaPrivada;
 
                 const controleInspecionarHtml = podeInspecionar
-                    ? `<button class="btn-inspecionar-ficha mt-auto w-max bg-rpg-blue hover:bg-[#2c6270] text-white px-3 py-1.5 rounded text-xs font-bold font-rpg uppercase shadow transition-colors z-10" data-id="${char.id}">
-                            Inspecionar
-                       </button>`
-                    : `<div class="mt-auto w-max bg-gray-200 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 text-gray-500 px-3 py-1.5 rounded text-[10px] font-bold uppercase shadow-inner z-10 flex items-center gap-1 cursor-not-allowed" title="O jogador ocultou esta ficha">
-                            <i data-lucide="lock" class="w-3 h-3 text-rpg-red"></i> Sigilo
-                       </div>`;
+                    ? `<button class="btn-inspecionar-ficha mt-auto w-max bg-rpg-blue hover:bg-[#2c6270] text-white px-3 py-1.5 rounded text-xs font-bold font-rpg uppercase shadow transition-colors z-10" data-id="${char.id}">Inspecionar</button>`
+                    : `<div class="mt-auto w-max bg-gray-200 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 text-gray-500 px-3 py-1.5 rounded text-[10px] font-bold uppercase shadow-inner z-10 flex items-center gap-1 cursor-not-allowed" title="Oculto"><i data-lucide="lock" class="w-3 h-3 text-rpg-red"></i> Sigilo</div>`;
 
                 card.innerHTML = `
-                    <img src="${imgSrc}" class="w-[110px] h-[130px] min-h-[130px] object-cover flex-shrink-0 border-r border-gray-300 dark:border-[#333] bg-black" alt="Foto">
+                    <img src="${imgSrc}" class="w-[110px] h-[130px] object-cover flex-shrink-0 border-r border-gray-300 dark:border-[#333] bg-black">
                     <div class="flex flex-col justify-start p-3 flex-grow overflow-hidden">
-                        <h3 class="text-gray-800 dark:text-white font-bold text-[15px] m-0 truncate" title="${window.escaparHTML(char.nome_personagem)}">
-                            ${window.escaparHTML(char.nome_personagem) || 'Sem Nome'}
-                        </h3>
+                        <h3 class="text-gray-800 dark:text-white font-bold text-[15px] m-0 truncate" title="${window.escaparHTML(char.nome_personagem)}">${window.escaparHTML(char.nome_personagem) || 'Sem Nome'}</h3>
                         <p class="text-rpg-red dark:text-orange-500 font-bold text-[10px] uppercase m-0 mt-1 truncate">${window.escaparHTML(ocupacao)}</p>
                         ${controleInspecionarHtml}
                     </div>
                 `;
                 gridFichas.appendChild(card);
             });
-
             if(window.lucide) lucide.createIcons();
 
             document.querySelectorAll('.btn-inspecionar-ficha').forEach(btn => {
@@ -136,53 +144,58 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (typeof window.carregarPersonagem === 'function') {
                         await window.carregarPersonagem(fichaId);
                         Router.navigate('ficha');
-                        window.mostrarNotificacao('Modo Inspeção: Ficha carregada.', 'aviso');
                     }
                 });
             });
-
         } catch (erro) {
-            gridFichas.innerHTML = '<p class="text-rpg-red">Falha na varredura da área.</p>';
+            gridFichas.innerHTML = '<p class="text-rpg-red col-span-full">Falha na varredura.</p>';
         }
     }
-    
+
     // ==========================================
-    // 4. GERENCIAR JOGADORES (Somente Mestre)
+    // 4. GERENCIAR JOGADORES (GRID 3x INFINITO E PROTEÇÃO DE PODER)
     // ==========================================
-    async function carregarJogadoresDaMesa(campanhaId) {
+    async function carregarJogadoresDaMesa(campanhaId, isMestreAtivo) {
         const gridJogadores = document.getElementById('grid-jogadores-mesa-view');
         if(!gridJogadores) return;
         
-        gridJogadores.innerHTML = '<p class="text-gray-500 italic animate-pulse">Analisando conexões vitais...</p>';
+        // 🔥 FORÇANDO O GRID CSS PELO JAVASCRIPT 🔥
+        gridJogadores.className = "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 w-full";
+        gridJogadores.innerHTML = '<p class="text-gray-500 italic animate-pulse col-span-full">Analisando conexões...</p>';
 
         try {
             const resposta = await fetch(`${window.API_URL}/campanhas/${campanhaId}/jogadores`, {
                 headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
             });
-            if (!resposta.ok) throw new Error("Erro ao buscar jogadores");
+            if (!resposta.ok) throw new Error("Erro");
             const jogadores = await resposta.json();
 
             gridJogadores.innerHTML = '';
+            if (jogadores.length === 0) return gridJogadores.innerHTML = '<p class="text-gray-500 italic col-span-full">Vazio.</p>';
 
-            if (jogadores.length === 0) {
-                gridJogadores.innerHTML = '<p class="text-gray-500 italic">Nenhum jogador na mesa ainda.</p>';
-                return;
-            }
+            const meuId = sessionStorage.getItem('usuarioId');
 
             jogadores.forEach(jog => {
                 const card = document.createElement('div');
-                card.className = 'bg-gray-100 dark:bg-[#1a1a1a] border border-gray-300 dark:border-[#333] rounded-md p-4 w-[200px] min-w-[200px] flex-shrink-0 flex flex-col justify-between shadow-sm';
+                card.className = 'bg-gray-100 dark:bg-[#1a1a1a] border border-gray-300 dark:border-[#333] rounded-md p-4 w-full flex flex-col justify-between shadow-sm relative';
 
-                const nomeConta = jog.username || 'Operador Desconhecido';
+                const nomeConta = jog.username || 'Desconhecido';
                 const nomeChar = jog.nome_personagem || 'Sem personagem ativo';
                 const avatarJogador = (jog.avatar && !jog.avatar.includes('R0lGODlhAQAB')) ? jog.avatar : './assets/icon.jpg'; 
                 
-                const meuId = sessionStorage.getItem('usuarioId');
-                const isEsteOMestre = jog.usuario_id == meuId;
+                const isEsteOMestre = (jog.usuario_id === jog.mestre_id); // Compara se este card é o Mestre!
 
-                const controleHtml = isEsteOMestre 
-                    ? `<span class="text-orange-500 font-bold text-sm flex items-center justify-center gap-1 mt-3 w-full border-t border-gray-300 dark:border-gray-700 pt-2"><i data-lucide="crown" class="w-4 h-4"></i> Mestre</span>`
-                    : `<button class="btn-remover-jogador-mesa mt-3 bg-rpg-red hover:bg-red-800 text-white font-bold py-1.5 px-3 rounded text-xs uppercase font-rpg w-full transition-colors flex justify-center items-center gap-1" data-usuario="${jog.usuario_id}"><i data-lucide="user-x" class="w-4 h-4"></i> Expulsar</button>`;
+                // LÓGICA DE PODER:
+                let controleHtml = '';
+                if (isEsteOMestre) {
+                    controleHtml = `<span class="text-orange-500 font-bold text-sm flex items-center justify-center gap-1 mt-3 w-full border-t border-gray-300 dark:border-gray-700 pt-2"><i data-lucide="crown" class="w-4 h-4"></i> Mestre</span>`;
+                } else if (isMestreAtivo) {
+                    // O logado é Mestre, e o Card é um jogador: Mostra botão de chutar!
+                    controleHtml = `<button class="btn-remover-jogador-mesa mt-3 bg-rpg-red hover:bg-red-800 text-white font-bold py-1.5 px-3 rounded text-xs uppercase font-rpg w-full transition-colors flex justify-center items-center gap-1" data-usuario="${jog.usuario_id}"><i data-lucide="user-x" class="w-4 h-4"></i> Expulsar</button>`;
+                } else if (jog.usuario_id == meuId) {
+                    // O logado é Jogador, e o Card é dele mesmo:
+                    controleHtml = `<span class="text-rpg-blue font-bold text-sm flex items-center justify-center gap-1 mt-3 w-full border-t border-gray-300 dark:border-gray-700 pt-2"><i data-lucide="user" class="w-4 h-4"></i> Você</span>`;
+                }
 
                 card.innerHTML = `
                     <div class="flex items-center gap-3 mb-2 border-b border-gray-300 dark:border-gray-700 pb-2">
@@ -191,9 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <h4 class="text-gray-800 dark:text-white font-bold text-base m-0 truncate" title="${window.escaparHTML(nomeConta)}">${window.escaparHTML(nomeConta)}</h4>
                         </div>
                     </div>
-                    <div>
-                        <p class="text-gray-500 text-xs font-bold uppercase m-0 mt-1 truncate" title="${window.escaparHTML(nomeChar)}"><i data-lucide="user" class="w-3 h-3 inline"></i> ${window.escaparHTML(nomeChar)}</p>
-                    </div>
+                    <div><p class="text-gray-500 text-xs font-bold uppercase m-0 mt-1 truncate" title="${window.escaparHTML(nomeChar)}"><i data-lucide="swords" class="w-3 h-3 inline"></i> ${window.escaparHTML(nomeChar)}</p></div>
                     ${controleHtml}
                 `;
                 gridJogadores.appendChild(card);
@@ -206,14 +217,66 @@ document.addEventListener('DOMContentLoaded', () => {
                     const usuarioIdRemover = event.currentTarget.getAttribute('data-usuario');
                     const cardJogador = event.currentTarget.closest('div');
                     const nomeContaStr = cardJogador.querySelector('h4').textContent;
-                    
                     window.prepararExpulsaoJogador(usuarioIdRemover, nomeContaStr.trim().toLowerCase(), cardJogador, campanhaId);
                 });
             });
-
         } catch (erro) {
-            gridJogadores.innerHTML = '<p class="text-rpg-red">Erro ao buscar jogadores na matriz.</p>';
+            gridJogadores.innerHTML = '<p class="text-rpg-red col-span-full">Erro.</p>';
         }
+    }
+
+    // ==========================================
+    // EXTRA: MOTOR DE UPLOAD DO BANNER
+    // ==========================================
+    const inputBanner = document.getElementById('input-banner-campanha');
+    if (inputBanner) {
+        inputBanner.addEventListener('change', function () {
+            const file = this.files[0];
+            if (!file) return;
+
+            const btnBanner = document.getElementById('btn-editar-banner');
+            const iconOriginal = btnBanner.innerHTML;
+            btnBanner.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Enviando...';
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const img = new Image();
+                img.onload = async function () {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    // Otimiza para Banner panorâmico
+                    const maxW = 1200; 
+                    const proporcao = img.width / img.height;
+                    canvas.width = maxW;
+                    canvas.height = maxW / proporcao;
+                    
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    const base64Foto = canvas.toDataURL('image/webp', 0.8);
+                    
+                    document.getElementById('campanha-banner-img').src = base64Foto;
+
+                    try {
+                        const campanhaId = sessionStorage.getItem('campanhaAtiva');
+                        const res = await fetch(`${window.API_URL}/campanhas/${campanhaId}/banner`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionStorage.getItem('token')}` },
+                            body: JSON.stringify({ foto: base64Foto })
+                        });
+                        const data = await res.json();
+                        if (res.ok) window.mostrarNotificacao(data.mensagem, 'sucesso');
+                        else window.mostrarNotificacao(data.erro, 'erro');
+                    } catch (err) {
+                        window.mostrarNotificacao('Erro na transmissão.', 'erro');
+                    } finally {
+                        btnBanner.innerHTML = iconOriginal;
+                        if(window.lucide) lucide.createIcons();
+                    }
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
     }
 
     // ==========================================

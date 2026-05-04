@@ -633,30 +633,66 @@ app.delete('/campanhas/:id/membros/:usuarioId', verificarToken, async (req, res)
     }
 });
 
-app.get('/campanhas/:id/personagens', verificarToken, async (req, res) => {
-    const campanhaId = req.params.id;
-
-    if (!regexUUID.test(campanhaId)) {
-        return res.status(400).json({ erro: 'Formato de ID inválido.' });
+// =========================================================================
+// Buscar jogadores (ATUALIZADA PARA MOSTRAR A COROA DO MESTRE)
+// =========================================================================
+app.get('/campanhas/:id/jogadores', verificarToken, async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT m.usuario_id, u.username, u.avatar, p.nome_personagem, c.mestre_id 
+            FROM membros_campanha m
+            JOIN usuarios u ON m.usuario_id = u.id
+            JOIN campanhas c ON c.id = m.campanha_id
+            LEFT JOIN personagens p ON p.id = m.personagem_ativo_id
+            WHERE m.campanha_id = $1
+        `, [req.params.id]);
+        res.json(result.rows);
+    } catch (erro) {
+        res.status(500).json({ erro: 'Erro ao buscar jogadores.' });
     }
+});
+
+// =========================================================================
+// ROTAS DO BANNER DA CAMPANHA
+// =========================================================================
+app.get('/campanhas/:id/info', verificarToken, async (req, res) => {
+    try {
+        const result = await pool.query('SELECT banner FROM campanhas WHERE id = $1', [req.params.id]);
+        res.json(result.rows[0]);
+    } catch (err) {
+        res.status(500).json({ erro: 'Erro ao buscar info.' });
+    }
+});
+
+app.post('/campanhas/:id/banner', verificarToken, async (req, res) => {
+    let foto = req.body.foto;
+    const campanhaId = req.params.id;
+    const mestreIdSeguro = req.usuario.id;
 
     try {
-        const sql = `
-            SELECT p.id, p.nome_personagem, p.dados_ficha as dados_personagem
-            FROM membros_campanha m
-            JOIN personagens p ON m.personagem_id = p.id
-            WHERE m.campanha_id = $1
-        `;
-        const result = await pool.query(sql, [campanhaId]);
+        // Trava de segurança: Só o mestre pode trocar o banner!
+        const resultCheck = await pool.query('SELECT mestre_id FROM campanhas WHERE id = $1', [campanhaId]);
+        if (resultCheck.rows.length === 0 || resultCheck.rows[0].mestre_id !== mestreIdSeguro) {
+            return res.status(403).json({erro: 'Apenas o Mestre pode alterar o banner.'});
+        }
 
-        const personagensFormatados = result.rows.map(row => {
-            row.nome_jogador = "Membro da Mesa";
-            return row;
-        });
+        if (supabase && foto && foto.startsWith('data:image')) {
+            const base64Data = foto.replace(/^data:image\/\w+;base64,/, "");
+            const buffer = Buffer.from(base64Data, 'base64');
+            const extensao = foto.substring(foto.indexOf('/') + 1, foto.indexOf(';base64'));
+            const nomeArquivo = `banner_${campanhaId}_${Date.now()}.${extensao}`;
 
-        res.json(personagensFormatados);
-    } catch (erro) {
-        res.status(500).json({ erro: 'Erro ao buscar personagens da mesa.' });
+            const { error } = await supabase.storage.from('ficha-fotos').upload(nomeArquivo, buffer, { contentType: `image/${extensao}`, upsert: true });
+            if (error) throw error;
+            
+            const { data: publicUrlData } = supabase.storage.from('ficha-fotos').getPublicUrl(nomeArquivo);
+            foto = publicUrlData.publicUrl;
+        }
+
+        await pool.query('UPDATE campanhas SET banner = $1 WHERE id = $2', [foto, campanhaId]);
+        res.json({ mensagem: 'Banner épico atualizado!', banner: foto });
+    } catch (err) {
+        res.status(500).json({erro: 'Erro ao atualizar banner.'});
     }
 });
 
