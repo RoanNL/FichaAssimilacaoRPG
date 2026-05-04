@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ficha - Assimilação RPG</title>
+    <title>Assimilação RPG - VTT</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./css/styles.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -36,481 +35,527 @@
         }
     </script>
     <link rel="shortcut icon" href="./assets/icon.jpg" type="image/x-icon">
-    
 </head>
-<body>
+<body class="bg-[#f7f4f0] dark:bg-[#0f172a] text-gray-800 dark:text-gray-200 transition-colors duration-300">
+
     <div id="leaves-container"></div>
-    <div id="auth-container" class="max-w-[400px] mx-auto mt-[10vh] text-center p-8 bg-rpg-paper dark:bg-rpg-paper-dark border border-gray-300 dark:border-gray-800 rounded-lg shadow-xl relative z-10 transition-colors duration-300 mx-4 md:mx-auto">
-    
-        <button id="auth-theme-toggle" type="button" title="Trocar Tema" class="absolute top-4 right-5 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white transition-colors cursor-pointer text-2xl bg-transparent border-none outline-none">
-            <i class="fas fa-moon"></i>
-        </button>
-        <h1 id="auth-title" class="text-3xl font-black font-rpg text-rpg-text-dark dark:text-orange-500 uppercase border-b-2 border-rpg-red pb-3 mb-2 mt-0">
-            Acesso Restrito
-        </h1>
-        <p class="auth-subtitle text-gray-500 dark:text-gray-400 mb-6 font-rpg text-sm md:text-base">
-            Identifique-se para acessar a Ficha.
-        </p>
-        
-        <form id="auth-form">
-            <div id="auth-email-container" class="text-left mb-4">
-                <label for="auth-email" class="block font-bold text-gray-700 dark:text-gray-300 mb-1 font-rpg">E-mail</label>
-                <input type="email" id="auth-email" autocomplete="email" required class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-[#f0f3f5] dark:bg-[#2a2a2a] text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-blue transition-colors font-sans">
-            </div>
+    <div id="toast-container" class="fixed top-5 right-5 z-[9999999] flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- ==========================================
+         TELA 0: AUTENTICAÇÃO (LOGIN/REGISTRO)
+         ========================================== -->
+    <section id="view-auth" class="min-h-screen flex items-center justify-center relative z-10">
+        <div id="auth-container" class="max-w-[400px] w-full mx-auto text-center p-8 bg-rpg-paper dark:bg-rpg-paper-dark border border-gray-300 dark:border-gray-800 rounded-lg shadow-xl relative transition-colors duration-300">
             
-            <div id="auth-username-container" class="text-left mb-4" style="display: none;">
-                <label for="auth-username" class="block font-bold text-gray-700 dark:text-gray-300 mb-1 font-rpg">Nome do Infectado</label>
-                <input type="text" id="auth-username" autocomplete="off" class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-[#f0f3f5] dark:bg-[#2a2a2a] text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-blue transition-colors font-sans">
-            </div>
-            
-            <div class="text-left mb-2 relative">
-                <label for="auth-password" class="block font-bold text-gray-700 dark:text-gray-300 mb-1 font-rpg">Senha</label>
-                <div class="relative">
-                    <input type="password" id="auth-password" required class="w-full px-3 py-2.5 pr-10 border border-gray-300 dark:border-gray-600 rounded bg-[#f0f3f5] dark:bg-[#2a2a2a] text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-blue transition-colors font-sans">
-                    <i class="fas fa-eye absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors" id="toggle-auth-password"></i>
-                </div>
-            </div>
-            
-            <div id="auth-confirm-container" class="text-left mb-2 relative" style="display: none;">
-                <label for="auth-confirm-password" class="block font-bold text-gray-700 dark:text-gray-300 mb-1 font-rpg">Confirmar Senha</label>
-                <div class="relative">
-                    <input type="password" id="auth-confirm-password" class="w-full px-3 py-2.5 pr-10 border border-gray-300 dark:border-gray-600 rounded bg-[#f0f3f5] dark:bg-[#2a2a2a] text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-blue transition-colors font-sans">
-                    <i class="fas fa-eye absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors" id="toggle-auth-confirm"></i>
-                </div>
-            </div>
-            
-            <div class="text-right mb-5" id="esqueci-senha-wrapper">
-                <span id="btn-esqueci-senha" class="text-sm text-rpg-blue hover:text-rpg-blue-hover dark:text-orange-400 dark:hover:text-orange-300 cursor-pointer underline font-bold transition-colors">Esqueci minha senha</span>
-            </div>
-            
-            <button type="submit" id="auth-submit-btn" class="w-full bg-rpg-blue hover:bg-rpg-blue-hover text-white font-bold font-rpg py-3 rounded uppercase transition-colors shadow-md cursor-pointer border-none text-lg">
-                Entrar no Sistema
+            <button id="auth-theme-toggle" type="button" title="Trocar Tema" class="absolute top-4 right-5 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white transition-colors cursor-pointer text-2xl bg-transparent border-none outline-none">
+                <i data-lucide="moon" class="w-6 h-6"></i>
             </button>
-        </form>
-
-        <form id="recuperar-form" style="display: none;">
-            <div id="recuperar-email-step" class="text-left mb-4">
-                <label for="recuperar-email" class="block font-bold text-gray-700 dark:text-gray-300 mb-1 font-rpg">Qual e-mail você cadastrou?</label>
-                <input type="email" id="recuperar-email" class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-[#f0f3f5] dark:bg-[#2a2a2a] text-black dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-colors font-sans">
+            <h1 id="auth-title" class="text-3xl font-black font-rpg text-gray-800 dark:text-orange-500 uppercase border-b-2 border-rpg-red pb-3 mb-2 mt-0">
+                Acesso Restrito
+            </h1>
+            <p class="auth-subtitle text-gray-500 dark:text-gray-400 mb-6 font-rpg text-sm md:text-base">
+                Identifique-se para acessar o VTT.
+            </p>
+            
+            <form id="auth-form">
+                <div id="auth-email-container" class="text-left mb-4">
+                    <label for="auth-email" class="block font-bold text-gray-700 dark:text-gray-300 mb-1 font-rpg">E-mail</label>
+                    <input type="email" id="auth-email" autocomplete="email" required class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-[#f0f3f5] dark:bg-[#2a2a2a] text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-blue transition-colors font-sans">
+                </div>
                 
-                <button type="button" id="btn-enviar-codigo" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold font-rpg py-3 rounded uppercase transition-colors shadow-md cursor-pointer border-none text-lg mt-4">
-                    Receber Código
+                <div id="auth-username-container" class="text-left mb-4" style="display: none;">
+                    <label for="auth-username" class="block font-bold text-gray-700 dark:text-gray-300 mb-1 font-rpg">Nome do Infectado</label>
+                    <input type="text" id="auth-username" autocomplete="off" class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-[#f0f3f5] dark:bg-[#2a2a2a] text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-blue transition-colors font-sans">
+                </div>
+                
+                <div class="text-left mb-2 relative">
+                    <label for="auth-password" class="block font-bold text-gray-700 dark:text-gray-300 mb-1 font-rpg">Senha</label>
+                    <div class="relative">
+                        <input type="password" id="auth-password" required class="w-full px-3 py-2.5 pr-10 border border-gray-300 dark:border-gray-600 rounded bg-[#f0f3f5] dark:bg-[#2a2a2a] text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-blue transition-colors font-sans">
+                        <i data-lucide="eye" class="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors" id="toggle-auth-password"></i>
+                    </div>
+                </div>
+                
+                <div id="auth-confirm-container" class="text-left mb-2 relative" style="display: none;">
+                    <label for="auth-confirm-password" class="block font-bold text-gray-700 dark:text-gray-300 mb-1 font-rpg">Confirmar Senha</label>
+                    <div class="relative">
+                        <input type="password" id="auth-confirm-password" class="w-full px-3 py-2.5 pr-10 border border-gray-300 dark:border-gray-600 rounded bg-[#f0f3f5] dark:bg-[#2a2a2a] text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-blue transition-colors font-sans">
+                        <i data-lucide="eye" class="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors" id="toggle-auth-confirm"></i>
+                    </div>
+                </div>
+                
+                <div class="text-right mb-5" id="esqueci-senha-wrapper">
+                    <span id="btn-esqueci-senha" class="text-sm text-rpg-blue hover:text-rpg-blue-hover dark:text-orange-400 dark:hover:text-orange-300 cursor-pointer underline font-bold transition-colors">Esqueci minha senha</span>
+                </div>
+                
+                <button type="submit" id="auth-submit-btn" class="w-full bg-rpg-blue hover:bg-rpg-blue-hover text-white font-bold font-rpg py-3 rounded uppercase transition-colors shadow-md cursor-pointer border-none text-lg">
+                    Entrar no Sistema
                 </button>
-            </div>
+            </form>
 
-            <div id="recuperar-codigo-step" class="text-left mb-4" style="display: none;">
-                <label for="recuperar-token" class="block font-bold text-gray-700 dark:text-gray-300 mb-1 font-rpg text-center">Código de 6 dígitos</label>
-                <input type="text" id="recuperar-token" placeholder="Ex: 123456" maxlength="6" class="w-full mb-4 px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-[#f0f3f5] dark:bg-[#2a2a2a] text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-green transition-colors font-sans text-center tracking-widest text-2xl font-black">
-
-                <label for="recuperar-nova-senha" class="block font-bold text-gray-700 dark:text-gray-300 mb-1 font-rpg">Nova Senha</label>
-                <div class="relative mb-3">
-                    <input type="password" id="recuperar-nova-senha" class="w-full px-3 py-2.5 pr-10 border border-gray-300 dark:border-gray-600 rounded bg-[#f0f3f5] dark:bg-[#2a2a2a] text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-green transition-colors font-sans">
-                    <i class="fas fa-eye absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors" id="toggle-recuperar-senha"></i>
+            <form id="recuperar-form" style="display: none;">
+                <div id="recuperar-email-step" class="text-left mb-4">
+                    <label for="recuperar-email" class="block font-bold text-gray-700 dark:text-gray-300 mb-1 font-rpg">Qual e-mail você cadastrou?</label>
+                    <input type="email" id="recuperar-email" class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-[#f0f3f5] dark:bg-[#2a2a2a] text-black dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-colors font-sans">
+                    <button type="button" id="btn-enviar-codigo" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold font-rpg py-3 rounded uppercase transition-colors shadow-md cursor-pointer border-none text-lg mt-4">
+                        Receber Código
+                    </button>
                 </div>
 
-                <label for="recuperar-confirmar-senha" class="block font-bold text-gray-700 dark:text-gray-300 mb-1 font-rpg">Confirmar Nova Senha</label>
-                <div class="relative">
-                    <input type="password" id="recuperar-confirmar-senha" class="w-full px-3 py-2.5 pr-10 border border-gray-300 dark:border-gray-600 rounded bg-[#f0f3f5] dark:bg-[#2a2a2a] text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-green transition-colors font-sans">
-                    <i class="fas fa-eye absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors" id="toggle-recuperar-confirmar"></i>
+                <div id="recuperar-codigo-step" class="text-left mb-4" style="display: none;">
+                    <label for="recuperar-token" class="block font-bold text-gray-700 dark:text-gray-300 mb-1 font-rpg text-center">Código de 6 dígitos</label>
+                    <input type="text" id="recuperar-token" placeholder="Ex: 123456" maxlength="6" class="w-full mb-4 px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-[#f0f3f5] dark:bg-[#2a2a2a] text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-green transition-colors font-sans text-center tracking-widest text-2xl font-black">
+
+                    <label for="recuperar-nova-senha" class="block font-bold text-gray-700 dark:text-gray-300 mb-1 font-rpg">Nova Senha</label>
+                    <div class="relative mb-3">
+                        <input type="password" id="recuperar-nova-senha" class="w-full px-3 py-2.5 pr-10 border border-gray-300 dark:border-gray-600 rounded bg-[#f0f3f5] dark:bg-[#2a2a2a] text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-green transition-colors font-sans">
+                        <i data-lucide="eye" class="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" id="toggle-recuperar-senha"></i>
+                    </div>
+
+                    <label for="recuperar-confirmar-senha" class="block font-bold text-gray-700 dark:text-gray-300 mb-1 font-rpg">Confirmar Nova Senha</label>
+                    <div class="relative">
+                        <input type="password" id="recuperar-confirmar-senha" class="w-full px-3 py-2.5 pr-10 border border-gray-300 dark:border-gray-600 rounded bg-[#f0f3f5] dark:bg-[#2a2a2a] text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-green transition-colors font-sans">
+                        <i data-lucide="eye" class="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" id="toggle-recuperar-confirmar"></i>
+                    </div>
+
+                    <button type="button" id="btn-salvar-nova-senha" class="w-full bg-rpg-green hover:bg-green-600 text-white font-bold font-rpg py-3 rounded uppercase transition-colors shadow-md cursor-pointer border-none text-lg mt-5">
+                        Redefinir Senha
+                    </button>
                 </div>
 
-                <button type="button" id="btn-salvar-nova-senha" class="w-full bg-rpg-green hover:bg-green-600 text-white font-bold font-rpg py-3 rounded uppercase transition-colors shadow-md cursor-pointer border-none text-lg mt-5">
-                    Redefinir Senha
-                </button>
-            </div>
-
-            <div class="text-center mt-6">
-                <span id="btn-voltar-login" class="text-sm text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white cursor-pointer underline transition-colors font-bold">← Voltar para o Login</span>
-            </div>
-        </form>
-        
-        <p id="auth-mensagem" class="font-bold mt-4 min-h-[20px] text-rpg-red dark:text-red-400"></p>
-        
-        <p id="auth-toggle-text" class="mt-4 text-sm text-gray-600 dark:text-gray-400 font-rpg">
-            Não possui conta? 
-            <span id="auth-toggle-link" class="text-rpg-red hover:text-rpg-red-hover dark:text-orange-500 dark:hover:text-orange-400 cursor-pointer underline font-bold transition-colors">Criar nova conta</span>
-        </p>
-    </div>
-
-    <div id="app-container" style="display: none;">
-    <nav class="w-full bg-rpg-paper dark:bg-rpg-paper-dark border-b border-gray-300 dark:border-gray-800 shadow-sm transition-colors duration-300">
-        <ul class="flex flex-wrap list-none mx-auto p-0 justify-center max-w-[1100px]">
-            <li>
-                <a href="#" id="nav-btn-rolador" class="block text-gray-600 dark:text-gray-400 py-4 px-[22px] text-base font-bold uppercase transition-all duration-300 border-b-[3px] border-transparent hover:text-black dark:hover:text-orange-500 hover:border-b-[#8c3a3a] dark:hover:border-b-[#3a7c8c]">
-                    Rolador de Dados
-                </a>
-            </li>
-
+                <div class="text-center mt-6">
+                    <span id="btn-voltar-login" class="text-sm text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white cursor-pointer underline transition-colors font-bold">← Voltar para o Login</span>
+                </div>
+            </form>
             
-    
-            <li>
-                <a href="#" id="nav-btn-campanhas" class="block text-gray-600 dark:text-gray-400 py-4 px-[22px] text-base font-bold uppercase transition-all duration-300 border-b-[3px] border-transparent hover:text-black dark:hover:text-orange-500 hover:border-b-[#8c3a3a] dark:hover:border-b-[#3a7c8c]">
-                    Campanhas
-                </a>
-            </li>
-            <li>
-                <a href="#" id="btn-toggle-tema" class="flex items-center gap-2 text-gray-600 dark:text-gray-400 py-4 px-[22px] text-base font-bold uppercase transition-all duration-300 border-b-[3px] border-transparent hover:text-black dark:hover:text-orange-500 cursor-pointer hover:border-b-[#8c3a3a] dark:hover:border-b-[#3a7c8c]">
-                    <i data-lucide="moon" class="w-5 h-5"></i> Tema Escuro
-                </a>
-            </li>
-            <li>
-                <a href="#" id="btn-sair" class="block text-rpg-red dark:text-red-400 py-4 px-[22px] text-base font-bold uppercase transition-all duration-300 border-b-[3px] border-transparent hover:text-black dark:hover:text-orange-500 hover:border-b-[#8c3a3a] dark:hover:border-b-[#3a7c8c]">
-                    Desconectar
-                </a>
-            </li>
-        </ul>
-    </nav>
-
-    <div class="bg-rpg-paper dark:bg-rpg-paper-dark border border-gray-300 dark:border-gray-800 rounded-md p-6 shadow-sm transition-colors duration-300 mb-6">
+            <p id="auth-mensagem" class="font-bold mt-4 min-h-[20px] text-rpg-red dark:text-red-400"></p>
             
-            <h2 class="text-center mt-0 mb-5 pb-3 border-b-2 border-gray-300 dark:border-gray-800 text-rpg-text-dark dark:text-orange-500 text-2xl font-black uppercase font-rpg">
-                Gerenciar Personagens
-            </h2>
-            
-            <div class="flex flex-wrap justify-center items-center gap-4 manager-controls">
-                
-                <button id="btn-load-char" style="display: none;">Carregar</button> 
-                
-                <button id="btn-abrir-galeria" class="font-rpg text-base py-2.5 px-4 rounded border-none font-bold text-white uppercase cursor-pointer transition-colors duration-200 bg-sky-600 hover:bg-sky-800">
-                    Personagens
-                </button>
-                
-                <button id="btn-fichas-mesa" style="display: none; background-color: #ff9800;" class="flex items-center justify-center gap-2 font-rpg text-base py-2.5 px-4 rounded border-none font-bold text-white uppercase cursor-pointer transition-colors duration-200 hover:brightness-90">
-                    <i data-lucide="crown" class="w-5 h-5"></i> Fichas da Mesa
-                </button>
-                
-                <button id="btn-gerenciar-jogadores" style="display: none; background-color: #d9534f;" class="flex items-center justify-center gap-2 font-rpg text-base py-2.5 px-4 rounded border-none font-bold text-white uppercase cursor-pointer transition-colors duration-200 hover:brightness-90">
-                    <i data-lucide="users" class="w-5 h-5"></i> Jogadores
-                </button>
-                
-                <button id="btn-save-char" class="font-rpg text-base py-2.5 px-4 rounded border-none font-bold text-white uppercase cursor-pointer transition-colors duration-200 bg-rpg-green hover:bg-green-900">
-                    Salvar
-                </button>
-                
-                <button id="btn-delete-char" class="font-rpg text-base py-2.5 px-4 rounded border-none font-bold text-white uppercase cursor-pointer transition-colors duration-200 bg-rpg-red hover:bg-rpg-red-hover">
-                    Excluir Personagem
-                </button>
-
-                <button id="btn-abrir-partitura" class="flex items-center justify-center gap-2 font-rpg text-base py-2.5 px-4 rounded border-none font-bold text-white uppercase cursor-pointer transition-colors duration-200 bg-purple-700 hover:bg-purple-900 shadow-md">
-                    <i data-lucide="swords" class="w-5 h-5"></i> Partitura de Conflito
-                </button>
-
-                <button id="btn-abrir-refugio" class="flex items-center justify-center gap-2 font-rpg text-base py-2.5 px-4 rounded border-none font-bold text-white uppercase cursor-pointer transition-colors duration-200 bg-[#6c7a6b] hover:bg-[#4a5449] shadow-md">
-                    <i data-lucide="tent" class="w-5 h-5"></i> Gerenciar Refúgio
-                </button>
-            </div>
+            <p id="auth-toggle-text" class="mt-4 text-sm text-gray-600 dark:text-gray-400 font-rpg">
+                Não possui conta? 
+                <span id="auth-toggle-link" class="text-rpg-red hover:text-rpg-red-hover dark:text-orange-500 dark:hover:text-orange-400 cursor-pointer underline font-bold transition-colors">Criar nova conta</span>
+            </p>
         </div>
+    </section>
 
-    <main class="container">
-        <form class="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-5 items-start">
-            <section class="md:col-span-2 bg-white dark:bg-[#1e1e1e] p-4 md:px-8 md:py-5 rounded border border-gray-300 dark:border-gray-800 w-full overflow-hidden">
-                
-                <div class="flex flex-col md:flex-row items-center md:items-start gap-5 text-center md:text-left mb-6">
-                    <img src="./assets/icon.jpg" alt="Logo" class="max-w-[100px] md:max-w-[120px] h-auto rounded-lg shadow-sm">
-                    <div class="flex flex-col md:pt-3">
-                        <h1 class="text-gray-800 dark:text-gray-200 text-lg md:text-xl font-black font-rpg m-0 border-none pb-0 text-center md:text-left tracking-wider">Assimilação RPG</h1>
-                        <span id="nome-usuario-logado" class="block text-rpg-red dark:text-orange-500 font-bold text-2xl md:text-3xl font-rpg mt-1 text-center md:text-left capitalize"></span>
-                    </div>
+    <!-- ==========================================
+         APLICATIVO PRINCIPAL (LOGADO)
+         ========================================== -->
+    <section id="view-app" class="hidden min-h-screen flex flex-col z-20 relative">
+        
+        <!-- MENU SUPERIOR GLOBAL -->
+        <nav class="w-full bg-white dark:bg-[#1e293b] border-b border-gray-300 dark:border-gray-700 shadow-sm flex justify-between items-center px-4 md:px-6 py-3 sticky top-0 z-40 transition-colors">
+            <div class="flex items-center gap-4 md:gap-8">
+                <div class="font-rpg font-black text-xl text-rpg-red flex items-center gap-2 cursor-pointer" onclick="Router.navigate('landing')">
+                    <i data-lucide="biohazard" class="w-6 h-6"></i> <span class="hidden md:inline">Assimilação</span>
                 </div>
-                
-                <div class="flex flex-col md:flex-row md:items-center mb-4 w-full">
-                    <label for="nome" class="text-lg font-bold text-gray-600 dark:text-gray-400 md:min-w-[180px] mb-1 md:mb-0 text-left">Nome:</label>
-                    <input type="text" id="nome" maxlength="20" class="w-full font-rpg text-lg px-2 py-1 text-black dark:text-white bg-[#f0f3f5] dark:bg-[#2a2a2a] focus:bg-[#e8eef1] dark:focus:bg-[#333] border-b-2 border-rpg-brown dark:border-[#c59b76] outline-none transition-colors">
-                </div>
-                
-                <div class="flex flex-col md:flex-row md:items-center mb-4 w-full">
-                    <label for="evento" class="text-lg font-bold text-gray-600 dark:text-gray-400 md:min-w-[180px] mb-1 md:mb-0 text-left">Evento Marcante:</label>
-                    <input type="text" id="evento" maxlength="50" class="w-full font-rpg text-lg px-2 py-1 text-black dark:text-white bg-[#f0f3f5] dark:bg-[#2a2a2a] focus:bg-[#e8eef1] dark:focus:bg-[#333] border-b-2 border-rpg-brown dark:border-[#c59b76] outline-none transition-colors">
-                </div>
-                
-                <div class="flex flex-col md:flex-row md:items-center mb-4 w-full">
-                    <label for="ocupacao" class="text-lg font-bold text-gray-600 dark:text-gray-400 md:min-w-[180px] mb-1 md:mb-0 text-left">Ocupação:</label>
-                    <input type="text" id="ocupacao" maxlength="20" class="w-full font-rpg text-lg px-2 py-1 text-black dark:text-white bg-[#f0f3f5] dark:bg-[#2a2a2a] focus:bg-[#e8eef1] dark:focus:bg-[#333] border-b-2 border-rpg-brown dark:border-[#c59b76] outline-none transition-colors">
-                </div>
-                
-                <div class="flex flex-col md:flex-row md:items-center mb-4 w-full">
-                    <label for="geracao" class="text-lg font-bold text-gray-600 dark:text-gray-400 md:min-w-[180px] mb-1 md:mb-0 text-left">Geração:</label>
-                    <input type="text" id="geracao" maxlength="20" class="w-full font-rpg text-lg px-2 py-1 text-black dark:text-white bg-[#f0f3f5] dark:bg-[#2a2a2a] focus:bg-[#e8eef1] dark:focus:bg-[#333] border-b-2 border-rpg-brown dark:border-[#c59b76] outline-none transition-colors">
-                </div>
-                
-                <div class="flex flex-col md:flex-row md:items-center mb-4 w-full">
-                    <label for="proposito-pessoal" class="text-lg font-bold text-gray-600 dark:text-gray-400 md:min-w-[180px] mb-1 md:mb-0 text-left">Propósitos Pessoais:</label>
-                    <input type="text" id="proposito-pessoal" maxlength="100" class="w-full font-rpg text-lg px-2 py-1 text-black dark:text-white bg-[#f0f3f5] dark:bg-[#2a2a2a] focus:bg-[#e8eef1] dark:focus:bg-[#333] border-b-2 border-rpg-brown dark:border-[#c59b76] outline-none transition-colors">
-                </div>
-                
-                <div class="flex flex-col md:flex-row md:items-center mb-4 w-full">
-                    <label for="proposito-coletivo" class="text-lg font-bold text-gray-600 dark:text-gray-400 md:min-w-[180px] mb-1 md:mb-0 text-left">Propósito Coletivo:</label>
-                    <input type="text" id="proposito-coletivo" maxlength="100" class="w-full font-rpg text-lg px-2 py-1 text-black dark:text-white bg-[#f0f3f5] dark:bg-[#2a2a2a] focus:bg-[#e8eef1] dark:focus:bg-[#333] border-b-2 border-rpg-brown dark:border-[#c59b76] outline-none transition-colors">
-                </div>
-            </section>
+                <ul class="flex gap-4 md:gap-6 list-none m-0 p-0 font-bold uppercase text-sm font-rpg">
+                    <li><button onclick="Router.navigate('landing')" class="hover:text-rpg-blue dark:hover:text-orange-500 transition-colors flex items-center gap-1"><i data-lucide="book-open" class="w-4 h-4"></i> Início</button></li>
+                    <li><button onclick="Router.navigate('dashboard')" class="hover:text-rpg-blue dark:hover:text-orange-500 transition-colors flex items-center gap-1"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Jogar</button></li>
+                </ul>
+            </div>
 
-            <section class="col-span-1 self-start">
-                <h2>APTIDÕES</h2>
-                
-                <div class="grupo-aptidoes" id="secao-instintos">
-                    <h3>INSTINTOS <i data-lucide="square" class="w-4 h-4 inline-block opacity-70 text-gray-500"></i></h3>
-                    <div class="aptidoes-grid">
-                        <div class="aptidao-box">
-                            <label>Influência</label>
-                            <div class="dots-track-1"><input type="checkbox" id="inf-1" checked><input type="checkbox" id="inf-2"><input type="checkbox" id="inf-3"><input type="checkbox" id="inf-4"><input type="checkbox" id="inf-5"></div>
-                        </div>
-                        <div class="aptidao-box">
-                            <label>Percepção</label>
-                            <div class="dots-track-1"><input type="checkbox" id="per-1" checked><input type="checkbox" id="per-2"><input type="checkbox" id="per-3"><input type="checkbox" id="per-4"><input type="checkbox" id="per-5"></div>
-                        </div>
-                        <div class="aptidao-box">
-                            <label>Potência</label>
-                            <div class="dots-track-1"><input type="checkbox" id="pot-1" checked><input type="checkbox" id="pot-2"><input type="checkbox" id="pot-3"><input type="checkbox" id="pot-4"><input type="checkbox" id="pot-5"></div>
-                        </div>
-                        <div class="aptidao-box">
-                            <label>Reação</label>
-                            <div class="dots-track-1"><input type="checkbox" id="rea-1" checked><input type="checkbox" id="rea-2"><input type="checkbox" id="rea-3"><input type="checkbox" id="rea-4"><input type="checkbox" id="rea-5"></div>
-                        </div>
-                        <div class="aptidao-box">
-                            <label>Resolução</label>
-                            <div class="dots-track-1"><input type="checkbox" id="res-1" checked><input type="checkbox" id="res-2"><input type="checkbox" id="res-3"><input type="checkbox" id="res-4"><input type="checkbox" id="res-5"></div>
-                        </div>
-                        <div class="aptidao-box">
-                            <label>Sagacidade</label>
-                            <div class="dots-track-1"><input type="checkbox" id="sag-1" checked><input type="checkbox" id="sag-2"><input type="checkbox" id="sag-3"><input type="checkbox" id="sag-4"><input type="checkbox" id="sag-5"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="grupo-aptidoes" id="secao-conhecimentos">
-                    <h3>CONHECIMENTOS <i data-lucide="diamond" class="w-4 h-4 inline-block opacity-70 text-blue-500"></i></h3>
-                    <div class="aptidoes-grid">
-                        <div class="aptidao-box"><label>Biologia</label><div class="dots-track"><input type="checkbox" id="bio-1"><input type="checkbox" id="bio-2"><input type="checkbox" id="bio-3"><input type="checkbox" id="bio-4"><input type="checkbox" id="bio-5"></div></div>
-                        <div class="aptidao-box"><label>Erudição</label><div class="dots-track"><input type="checkbox" id="eru-1"><input type="checkbox" id="eru-2"><input type="checkbox" id="eru-3"><input type="checkbox" id="eru-4"><input type="checkbox" id="eru-5"></div></div>
-                        <div class="aptidao-box"><label>Engenharia</label><div class="dots-track"><input type="checkbox" id="eng-1"><input type="checkbox" id="eng-2"><input type="checkbox" id="eng-3"><input type="checkbox" id="eng-4"><input type="checkbox" id="eng-5"></div></div>
-                        <div class="aptidao-box"><label>Geografia</label><div class="dots-track"><input type="checkbox" id="geo-1"><input type="checkbox" id="geo-2"><input type="checkbox" id="geo-3"><input type="checkbox" id="geo-4"><input type="checkbox" id="geo-5"></div></div>
-                        <div class="aptidao-box"><label>Medicina</label><div class="dots-track"><input type="checkbox" id="med-1"><input type="checkbox" id="med-2"><input type="checkbox" id="med-3"><input type="checkbox" id="med-4"><input type="checkbox" id="med-5"></div></div>
-                        <div class="aptidao-box"><label>Segurança</label><div class="dots-track"><input type="checkbox" id="seg-1"><input type="checkbox" id="seg-2"><input type="checkbox" id="seg-3"><input type="checkbox" id="seg-4"><input type="checkbox" id="seg-5"></div></div>
-                    </div>
-                </div>
-
-                <div class="grupo-aptidoes" id="secao-praticas">
-                    <h3>PRÁTICAS <i data-lucide="diamond" class="w-4 h-4 inline-block opacity-70 text-blue-500"></i></h3>
-                    <div class="aptidoes-grid">
-                        <div class="aptidao-box"><label>Armas</label><div class="dots-track"><input type="checkbox" id="arm-1"><input type="checkbox" id="arm-2"><input type="checkbox" id="arm-3"><input type="checkbox" id="arm-4"><input type="checkbox" id="arm-5"></div></div>
-                        <div class="aptidao-box"><label>Atletismo</label><div class="dots-track"><input type="checkbox" id="atl-1"><input type="checkbox" id="atl-2"><input type="checkbox" id="atl-3"><input type="checkbox" id="atl-4"><input type="checkbox" id="atl-5"></div></div>
-                        <div class="aptidao-box"><label>Expressão</label><div class="dots-track"><input type="checkbox" id="exp-1"><input type="checkbox" id="exp-2"><input type="checkbox" id="exp-3"><input type="checkbox" id="exp-4"><input type="checkbox" id="exp-5"></div></div>
-                        <div class="aptidao-box"><label>Furtividade</label><div class="dots-track"><input type="checkbox" id="fur-1"><input type="checkbox" id="fur-2"><input type="checkbox" id="fur-3"><input type="checkbox" id="fur-4"><input type="checkbox" id="fur-5"></div></div>
-                        <div class="aptidao-box"><label>Manufaturas</label><div class="dots-track"><input type="checkbox" id="man-1"><input type="checkbox" id="man-2"><input type="checkbox" id="man-3"><input type="checkbox" id="man-4"><input type="checkbox" id="man-5"></div></div>
-                        <div class="aptidao-box"><label>Sobrevivência</label><div class="dots-track"><input type="checkbox" id="sob-1"><input type="checkbox" id="sob-2"><input type="checkbox" id="sob-3"><input type="checkbox" id="sob-4"><input type="checkbox" id="sob-5"></div></div>
-                    </div>
-                </div>
-            </section>
-
-            <section class="col-span-1 self-start">
-                <div class="saude-header">
-                    <input type="number" class="saude-num-input" value="1" id="saude-max">
-                    <h2>SAÚDE</h2>
-                    <span class="saude-formula">1 + Potência + Resolução</span>
-                </div>
-                
-                <div class="saude-legenda" style="border-left: #6c7a6b 2px solid; border-top: #6c7a6b 2px solid; border-right: #6c7a6b 2px solid;">Ativa Recuperação após cada repouso completo</div> 
-                <div class="saude-grid">
-                    <div class="saude-box-container">
-                        <div class="saude-box" style="--cor-saude: #6c7a6b;"><span>6</span> Saudável</div>
-                        <div class="saude-drops-track"><input type="checkbox" id="saude-6-1"><input type="checkbox" id="saude-6-2"><input type="checkbox" id="saude-6-3"><input type="checkbox" id="saude-6-4"><input type="checkbox" id="saude-6-5"><input type="checkbox" id="saude-6-6"><input type="checkbox" id="saude-6-7"><input type="checkbox" id="saude-6-8"><input type="checkbox" id="saude-6-9"><input type="checkbox" id="saude-6-10"><input type="checkbox" id="saude-6-11"></div>
-                    </div>
-                    <div class="saude-box-container">
-                        <div class="saude-box" style="--cor-saude: #6c7a6b;"><span>5</span> Escoriado</div>
-                        <div class="saude-drops-track"><input type="checkbox" id="saude-5-1"><input type="checkbox" id="saude-5-2"><input type="checkbox" id="saude-5-3"><input type="checkbox" id="saude-5-4"><input type="checkbox" id="saude-5-5"><input type="checkbox" id="saude-5-6"><input type="checkbox" id="saude-5-7"><input type="checkbox" id="saude-5-8"><input type="checkbox" id="saude-5-9"><input type="checkbox" id="saude-5-10"><input type="checkbox" id="saude-5-10"></div>
-                    </div>
-                </div>
-
-                <div class="saude-legenda" style="border-left: #a97b53 2px solid; border-top: #a97b53 2px solid; border-right: #a97b53 2px solid;">Ativa a Recuperação após uma semana</div> 
-                <div class="saude-grid">
-                    <div class="saude-box-container">
-                        <div class="saude-box" style="--cor-saude: #a97b53;"><span>4</span> Lacerado</div>
-                        <div class="saude-drops-track"><input type="checkbox" id="saude-4-1"><input type="checkbox" id="saude-4-2"><input type="checkbox" id="saude-4-3"><input type="checkbox" id="saude-4-4"><input type="checkbox" id="saude-4-5"><input type="checkbox" id="saude-4-6"><input type="checkbox" id="saude-4-7"><input type="checkbox" id="saude-4-8"><input type="checkbox" id="saude-4-9"><input type="checkbox" id="saude-4-10"><input type="checkbox" id="saude-4-11"></div>
-                    </div>
-                    <div class="saude-box-container">
-                        <div class="saude-box" style="--cor-saude: #a97b53;"><span>3</span> Ferido</div>
-                        <div class="saude-drops-track"><input type="checkbox" id="saude-3-1"><input type="checkbox" id="saude-3-2"><input type="checkbox" id="saude-3-3"><input type="checkbox" id="saude-3-4"><input type="checkbox" id="saude-3-5"><input type="checkbox" id="saude-3-6"><input type="checkbox" id="saude-3-7"><input type="checkbox" id="saude-3-8"><input type="checkbox" id="saude-3-9"><input type="checkbox" id="saude-3-10"><input type="checkbox" id="saude-3-11"></div>
-                    </div>
-                </div>
-                <div class="flex justify-center items-center gap-1 text-sm font-bold text-gray-600 dark:text-gray-400 mt-4 mb-6">
-                    Menos 
-                    <img src="./assets/sucesso.png" alt="Sucesso" class="w-5 h-5 object-contain dark:hidden">
-                    <img src="./assets/sucesso-branco.png" alt="Sucesso" class="w-5 h-5 object-contain hidden dark:block"> 
-                    em todos os testes.
-                </div>
-                
-                <div class="saude-legenda" style="border-left: #8c3a3a 2px solid; border-top: #8c3a3a 2px solid; border-right: #8c3a3a 2px solid;">Dano dessa gravidade não regenera naturalmente. Será necessário tratamento médico</div> 
-
-                <div class="saude-grid">
-                    <div class="saude-box-container">
-                        <div class="saude-box" style="--cor-saude: #8c3a3a;"><span>2</span> Arrebentado</div>
-                        <div class="saude-drops-track"><input type="checkbox" id="saude-2-1"><input type="checkbox" id="saude-2-2"><input type="checkbox" id="saude-2-3"><input type="checkbox" id="saude-2-4"><input type="checkbox" id="saude-2-5"><input type="checkbox" id="saude-2-6"><input type="checkbox" id="saude-2-7"><input type="checkbox" id="saude-2-8"><input type="checkbox" id="saude-2-9"><input type="checkbox" id="saude-2-10"><input type="checkbox" id="saude-2-11"></div>
-                    </div>
-                    <div class="saude-box-container">
-                        <div class="saude-box" style="--cor-saude: #8c3a3a;"><span>1</span> Incapacitado</div>
-                        <div class="saude-drops-track"><input type="checkbox" id="saude-1-1"><input type="checkbox" id="saude-1-2"><input type="checkbox" id="saude-1-3"><input type="checkbox" id="saude-1-4"><input type="checkbox" id="saude-1-5"><input type="checkbox" id="saude-1-6"><input type="checkbox" id="saude-1-7"><input type="checkbox" id="saude-1-8"><input type="checkbox" id="saude-1-9"><input type="checkbox" id="saude-1-10"><input type="checkbox" id="saude-1-11"></div>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-2 text-[0.8em] font-bold text-gray-600 dark:text-gray-400 mt-4 text-center">
-                    <div class="flex flex-col items-center justify-start">
-                        <span>Incapaz de agir, mas mantém a consciência.</span>
-                        <span class="mt-1 block">
-                            Menos 
-                            <img src="./assets/sucesso.png" class="w-4 h-4 inline-block align-middle mx-[2px] dark:hidden">
-                            <img src="./assets/sucesso-branco.png" class="w-4 h-4 hidden dark:inline-block align-middle mx-[2px]">
-                            <img src="./assets/sucesso.png" class="w-4 h-4 inline-block align-middle mr-1 dark:hidden">
-                            <img src="./assets/sucesso-branco.png" class="w-4 h-4 hidden dark:inline-block align-middle mr-1">
-                            em todos os testes.
-                        </span>
-                    </div>
-                    <div class="flex flex-col items-center justify-start">
-                        <span>Inconsciente.</span>
-                        <span class="mt-1 block">
-                            Qualquer ação exige 
-                            <img src="./assets/adaptacao.png" class="w-4 h-4 inline-block align-middle mx-[2px] dark:hidden">
-                            <img src="./assets/adaptacao-branco.png" class="w-4 h-4 hidden dark:inline-block align-middle mx-[2px]">
-                            <img src="./assets/adaptacao.png" class="w-4 h-4 inline-block align-middle mr-1 dark:hidden">
-                            <img src="./assets/adaptacao-branco.png" class="w-4 h-4 hidden dark:inline-block align-middle mr-1">
-                            para ativar.
-                        </span>
-                    </div>
-                </div>
-
-            </section>
-
-            <section class="md:col-span-2 bg-rpg-paper dark:bg-rpg-paper-dark border border-gray-300 dark:border-gray-800 border-t-[3px] border-t-rpg-blue border-b-[3px] border-b-rpg-red rounded p-4 md:px-8 flex flex-col md:flex-row justify-between items-center gap-3">
-                <h3 class="flex items-center justify-center gap-2 m-0 text-xl font-black text-rpg-red uppercase flex-shrink-0">
-                    Determinação 
-                    <input type="number" id="det-num" value="9" class="w-10 h-10 p-0 m-0 leading-none rounded-full border-2 border-rpg-red bg-transparent text-center text-xl font-black text-rpg-red outline-none shadow-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
-                </h3>
-                <div class="determinacao-track">
-                    <input type="checkbox" class="determ-check" id="det-1"><input type="checkbox" class="assim-check" id="assim-1">
-                    <input type="checkbox" class="determ-check" id="det-2"><input type="checkbox" class="assim-check" id="assim-2">
-                    <input type="checkbox" class="determ-check" id="det-3"><input type="checkbox" class="assim-check" id="assim-3">
-                    <input type="checkbox" class="determ-check" id="det-4"><input type="checkbox" class="assim-check" id="assim-4">
-                    <input type="checkbox" class="determ-check" id="det-5"><input type="checkbox" class="assim-check" id="assim-5">
-                    <input type="checkbox" class="determ-check" id="det-6"><input type="checkbox" class="assim-check" id="assim-6">
-                    <input type="checkbox" class="determ-check" id="det-7"><input type="checkbox" class="assim-check" id="assim-7">
-                    <input type="checkbox" class="determ-check" id="det-8"><input type="checkbox" class="assim-check" id="assim-8">
-                    <input type="checkbox" class="determ-check" id="det-9"><input type="checkbox" class="assim-check" id="assim-9">
-                    <input type="checkbox" class="determ-check" id="det-10"><input type="checkbox" class="assim-check" id="assim-10">
-                </div>
-                <h3 class="flex items-center justify-center gap-2 m-0 text-xl font-black text-rpg-blue uppercase flex-shrink-0">
-                    <input type="number" id="assim-num" value="1" class="w-10 h-10 p-0 m-0 leading-none rounded-full border-2 border-rpg-blue bg-transparent text-center text-xl font-black text-rpg-blue outline-none shadow-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"> 
-                    Assimilação
-                </h3>
-            </section>
-
-            <!-- ==========================================
-            //RASTREADOR DE PERDA DO EGO E MUTAÇÕES
-            //========================================== -->
-            <section class="md:col-span-2 bg-rpg-paper dark:bg-rpg-paper-dark border border-gray-300 dark:border-gray-800 border-t-[3px] border-t-purple-600 rounded p-4 md:px-8 flex flex-col items-center gap-3 mt-4">
-                <h3 class="m-0 text-xl font-black text-purple-700 dark:text-purple-500 uppercase tracking-widest text-center">
-                    Perda do Ego <span class="text-sm block text-gray-500 font-sans normal-case">(Limite: 10 Pressões Acumuladas)</span>
-                </h3>
-                
-                <div class="flex flex-wrap justify-center gap-2 my-2" id="ego-track">
-                    <!-- 10 Marcas de Pressão -->
-                    <input type="checkbox" class="ego-check appearance-none w-8 h-8 border-2 border-purple-800 dark:border-purple-500 rounded-sm cursor-pointer checked:bg-purple-800 dark:checked:bg-purple-500 checked:after:content-['C'] checked:after:text-white checked:after:font-black checked:after:flex checked:after:justify-center checked:after:items-center transition-all">
-                    <input type="checkbox" class="ego-check appearance-none w-8 h-8 border-2 border-purple-800 dark:border-purple-500 rounded-sm cursor-pointer checked:bg-purple-800 dark:checked:bg-purple-500 checked:after:content-['C'] checked:after:text-white checked:after:font-black checked:after:flex checked:after:justify-center checked:after:items-center transition-all">
-                    <input type="checkbox" class="ego-check appearance-none w-8 h-8 border-2 border-purple-800 dark:border-purple-500 rounded-sm cursor-pointer checked:bg-purple-800 dark:checked:bg-purple-500 checked:after:content-['C'] checked:after:text-white checked:after:font-black checked:after:flex checked:after:justify-center checked:after:items-center transition-all">
-                    <input type="checkbox" class="ego-check appearance-none w-8 h-8 border-2 border-purple-800 dark:border-purple-500 rounded-sm cursor-pointer checked:bg-purple-800 dark:checked:bg-purple-500 checked:after:content-['C'] checked:after:text-white checked:after:font-black checked:after:flex checked:after:justify-center checked:after:items-center transition-all">
-                    <input type="checkbox" class="ego-check appearance-none w-8 h-8 border-2 border-purple-800 dark:border-purple-500 rounded-sm cursor-pointer checked:bg-purple-800 dark:checked:bg-purple-500 checked:after:content-['C'] checked:after:text-white checked:after:font-black checked:after:flex checked:after:justify-center checked:after:items-center transition-all">
-                    <input type="checkbox" class="ego-check appearance-none w-8 h-8 border-2 border-purple-800 dark:border-purple-500 rounded-sm cursor-pointer checked:bg-purple-800 dark:checked:bg-purple-500 checked:after:content-['C'] checked:after:text-white checked:after:font-black checked:after:flex checked:after:justify-center checked:after:items-center transition-all">
-                    <input type="checkbox" class="ego-check appearance-none w-8 h-8 border-2 border-purple-800 dark:border-purple-500 rounded-sm cursor-pointer checked:bg-purple-800 dark:checked:bg-purple-500 checked:after:content-['C'] checked:after:text-white checked:after:font-black checked:after:flex checked:after:justify-center checked:after:items-center transition-all">
-                    <input type="checkbox" class="ego-check appearance-none w-8 h-8 border-2 border-purple-800 dark:border-purple-500 rounded-sm cursor-pointer checked:bg-purple-800 dark:checked:bg-purple-500 checked:after:content-['C'] checked:after:text-white checked:after:font-black checked:after:flex checked:after:justify-center checked:after:items-center transition-all">
-                    <input type="checkbox" class="ego-check appearance-none w-8 h-8 border-2 border-purple-800 dark:border-purple-500 rounded-sm cursor-pointer checked:bg-purple-800 dark:checked:bg-purple-500 checked:after:content-['C'] checked:after:text-white checked:after:font-black checked:after:flex checked:after:justify-center checked:after:items-center transition-all">
-                    <input type="checkbox" class="ego-check appearance-none w-8 h-8 border-2 border-rpg-red dark:border-red-500 rounded-sm cursor-pointer checked:bg-rpg-red dark:checked:bg-red-500 checked:after:content-['C'] checked:after:text-white checked:after:font-black checked:after:flex checked:after:justify-center checked:after:items-center transition-all shadow-[0_0_10px_rgba(140,58,58,0.5)]">
-                </div>
-                
-                <p id="aviso-perda-ego" class="hidden text-rpg-red dark:text-red-500 font-bold font-rpg text-lg animate-pulse flex items-center justify-center gap-2">
-                    <i data-lucide="alert-triangle" class="w-6 h-6"></i> ALERTA: O PARASITA ASSUMIU O CONTROLE! <i data-lucide="alert-triangle" class="w-6 h-6"></i>
-                </p>
-
-                <button type="button" id="btn-abrir-sorteador" class="mt-2 bg-purple-700 hover:bg-purple-900 text-white font-bold py-2.5 px-6 rounded font-rpg uppercase transition-colors shadow-md flex items-center justify-center gap-2">
-                    <i data-lucide="dna" class="w-5 h-5"></i> Sortear Mutações
+            <!-- Controles à Direita (Tema, Salvar Ficha, Perfil, Sair) -->
+            <div class="flex items-center gap-3 md:gap-4">
+                <!-- Botão de Salvar a Ficha (Aparece só na tela da ficha) -->
+                <button id="btn-save-char-nav" class="hidden font-rpg text-xs md:text-sm py-1.5 px-3 rounded font-bold text-white uppercase cursor-pointer transition-colors duration-200 bg-rpg-green hover:bg-green-700 flex items-center gap-1 shadow-sm">
+                    <i data-lucide="save" class="w-4 h-4"></i> <span class="hidden md:inline">Salvar</span>
                 </button>
-            </section>
-
-        </form>
-
-        <section class="pt-12">
-            <form class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-rpg-paper dark:bg-rpg-paper-dark border border-gray-300 dark:border-gray-800 rounded-md p-6 shadow-sm">
                 
-                <section class="col-span-1 flex flex-col items-center">
-                    <h2 class="text-left text-rpg-red font-black text-xl border-b-2 border-rpg-red pb-1 mb-3 w-full uppercase font-rpg mt-0">Foto do Personagem</h2>
-                    <img id="char-photo-preview" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="Pré-visualização" class="w-full min-h-[250px] bg-gray-200 dark:bg-[#242424] border border-gray-300 dark:border-gray-600 rounded object-cover mb-4 cursor-pointer hover:scale-[1.03] transition-transform duration-200">
-                    <label for="char-photo-input" class="font-bold text-gray-600 dark:text-orange-500 self-start mb-1">Carregar imagem:</label>
-                    <input type="file" id="char-photo-input" accept="image/*" class="font-rpg border border-gray-300 dark:border-gray-600 rounded p-2 w-full text-black dark:text-white bg-white dark:bg-[#2a2a2a] outline-none">
-                </section>
+                <button id="btn-toggle-tema" class="text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white transition-colors cursor-pointer">
+                    <i data-lucide="moon" class="w-5 h-5"></i>
+                </button>
+                <div class="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-rpg-red overflow-hidden cursor-pointer hover:scale-105 transition-transform bg-gray-200" onclick="Router.abrirPerfil()">
+                    <img id="nav-avatar-img" src="./assets/icon.jpg" alt="Perfil" class="w-full h-full object-cover">
+                </div>
+                <button id="btn-sair" class="text-rpg-red hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition-colors cursor-pointer font-bold font-rpg uppercase text-sm ml-2 hidden md:block">
+                    Sair
+                </button>
+            </div>
+        </nav>
 
-                <section class="col-span-1 md:col-span-2 flex flex-col gap-5">
-                    <div>
-                        <h2 class="text-left text-rpg-red font-black text-xl border-b-2 border-rpg-red pb-1 mb-3 w-full uppercase font-rpg mt-0">Descrição</h2>
-                        <textarea id="char-descricao" rows="4" placeholder="Aparência, personalidade, etc..." class="w-full box-border font-rpg text-lg leading-relaxed p-3 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-[#2a2a2a] text-black dark:text-white resize-y outline-none focus:ring-2 focus:ring-rpg-blue transition-colors shadow-inner"></textarea>
+        <!-- ÁREA DINÂMICA (As telas aparecem aqui) -->
+        <main id="main-content" class="flex-grow p-4 md:p-8 max-w-[1200px] mx-auto w-full">
+            
+            <!-- 🗺️ TELA 1: LANDING PAGE -->
+            <div id="tela-landing" class="hidden">
+                <div class="text-center mb-10">
+                    <h1 class="text-3xl md:text-5xl font-rpg font-black uppercase text-gray-800 dark:text-white mb-2 border-none">Bem-vindo ao Colapso</h1>
+                    <p class="text-gray-600 dark:text-gray-400 font-bold max-w-2xl mx-auto">Explore as mecânicas de sobrevivência, corrupção e desespero. Conheça as regras antes de montar sua base ou desafiar as criaturas.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white dark:bg-[#1e293b] p-6 rounded-lg border border-gray-300 dark:border-gray-700 shadow-md">
+                        <h2 class="text-rpg-red font-rpg font-black text-2xl flex items-center gap-2 mb-4 uppercase border-b border-gray-200 dark:border-gray-600 pb-2"><i data-lucide="brain-circuit"></i> Perda de Ego</h2>
+                        <p class="text-gray-700 dark:text-gray-300">A perda de Ego é a mecânica central da corrupção do seu personagem. Cada vez que a pressão psicológica ou as mutações forem excessivas, marque uma caixa vermelha. Ao atingir o limite, o Parasita assume o controle.</p>
                     </div>
-                    <div>
-                        <h2 class="text-left text-rpg-red font-black text-xl border-b-2 border-rpg-red pb-1 mb-3 w-full uppercase font-rpg mt-0">História do Personagem</h2>
-                        <textarea id="char-historia" rows="10" placeholder="Escreva o passado do seu personagem..." class="w-full box-border font-rpg text-lg leading-relaxed p-3 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-[#2a2a2a] text-black dark:text-white resize-y outline-none focus:ring-2 focus:ring-rpg-blue transition-colors shadow-inner"></textarea>
+                    <div class="bg-white dark:bg-[#1e293b] p-6 rounded-lg border border-gray-300 dark:border-gray-700 shadow-md">
+                        <h2 class="text-gray-500 font-rpg font-black text-2xl flex items-center gap-2 mb-4 uppercase border-b border-gray-200 dark:border-gray-600 pb-2"><i data-lucide="circle-dashed"></i> Resultado: Nada</h2>
+                        <p class="text-gray-700 dark:text-gray-300">Os dados virtuais (D6, D10 e D12) possuem faces vazias, representadas por este símbolo no rolador. Elas significam falhas diretas na ação ou total ausência de instinto primitivo no momento do teste.</p>
                     </div>
-                </section>
+                </div>
+            </div>
 
-                <div class="col-span-1 md:col-span-3 w-full border-t-2 border-gray-300 dark:border-gray-800 pt-8 mt-2"> 
+            <!-- 🎲 TELA 2: DASHBOARD (JOGAR) -->
+            <div id="tela-dashboard" class="hidden flex flex-col gap-8">
+                <!-- Seção Personagens -->
+                <div class="bg-rpg-paper dark:bg-[#1e293b] p-6 rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm">
+                    <div class="flex justify-between items-center border-b border-gray-300 dark:border-gray-600 pb-3 mb-5">
+                        <h2 class="text-2xl font-rpg font-black uppercase m-0 flex items-center gap-2 text-rpg-red dark:text-orange-500 border-none"><i data-lucide="users" class="w-6 h-6"></i> Meus Personagens</h2>
+                        <button class="bg-rpg-blue hover:bg-[#2c6270] text-white px-4 py-2 rounded font-bold font-rpg uppercase text-sm flex items-center gap-2 shadow transition-colors"><i data-lucide="plus" class="w-4 h-4"></i> Criar Novo</button>
+                    </div>
+                    <!-- Grid da Galeria (Igual ao que você tinha) -->
+                    <div id="grid-meus-personagens" class="galeria-grid" style="max-height: auto; overflow-y: visible;">
+                        <!-- Cards injetados via JS -->
+                        <div class="char-card text-center text-gray-500 p-8 w-full border-dashed justify-center col-span-full">
+                            Carregando seus personagens...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seção Campanhas -->
+                <div class="bg-rpg-paper dark:bg-[#1e293b] p-6 rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm">
+                    <div class="flex justify-between items-center border-b border-gray-300 dark:border-gray-600 pb-3 mb-5">
+                        <h2 class="text-2xl font-rpg font-black uppercase m-0 flex items-center gap-2 text-rpg-blue dark:text-blue-400 border-none"><i data-lucide="map" class="w-6 h-6"></i> Minhas Campanhas</h2>
+                        <div class="flex gap-2">
+                            <button class="bg-rpg-green hover:bg-green-700 text-white px-4 py-2 rounded font-bold font-rpg uppercase text-sm flex items-center gap-2 shadow transition-colors" onclick="document.getElementById('modal-entrar-campanha').classList.add('show')"><i data-lucide="log-in" class="w-4 h-4"></i> Entrar</button>
+                            <button class="bg-purple-600 hover:bg-purple-800 text-white px-4 py-2 rounded font-bold font-rpg uppercase text-sm flex items-center gap-2 shadow transition-colors" onclick="document.getElementById('modal-criar-campanha').classList.add('show')"><i data-lucide="crown" class="w-4 h-4"></i> Fundar Mesa</button>
+                        </div>
+                    </div>
+                    <div id="grid-minhas-campanhas" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Cards injetados via JS -->
+                        <p class="text-gray-500 italic md:col-span-3 text-center py-6 border border-dashed border-gray-300 dark:border-gray-600 rounded">Você ainda não participa de nenhuma campanha.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 🏰 TELA 3: LOBBY DA CAMPANHA -->
+            <div id="tela-campanha" class="hidden">
+                <!-- Capa e Título -->
+                <div class="w-full h-48 md:h-64 bg-gray-800 rounded-lg mb-8 relative overflow-hidden flex items-end p-6 md:p-8 shadow-md group">
+                    <!-- Substitua o src abaixo por uma imagem de background real se quiser -->
+                    <img src="./assets/icon.jpg" class="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:scale-105 transition-transform duration-700">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-90 z-0"></div>
                     
-                    <div class="mb-8">
-                        <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
-                            <h2 class="text-xl md:text-2xl font-rpg font-black text-white bg-[#6b2c2c] px-4 py-1 rounded-sm shadow-md uppercase tracking-wider text-center md:text-left mx-auto md:mx-0">Características</h2>
-                            <button type="button" id="btn-add-carac" class="w-full md:w-auto flex items-center justify-center gap-2 bg-[#6b2c2c] hover:bg-red-900 text-white font-bold py-2 px-4 rounded text-sm transition-colors cursor-pointer border-none shadow-md">
-                                <i data-lucide="plus-circle" class="w-4 h-4"></i> Adicionar
-                            </button>
+                    <div class="z-10 w-full flex justify-between items-end">
+                        <div>
+                            <h1 id="campanha-titulo-view" class="text-3xl md:text-5xl font-black font-rpg text-white m-0 border-none text-left drop-shadow-md">Nome da Campanha</h1>
+                            <p class="text-gray-300 font-bold mt-1 uppercase flex items-center gap-2"><i data-lucide="hash" class="w-4 h-4"></i> Código: <span id="campanha-codigo-view" class="text-orange-400">---</span></p>
                         </div>
-                        
-                        <div id="caracteristicas-container" class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                            </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full items-start">
+                    <!-- Botões Mestre (Injetados via JS se isMestre === true) -->
+                    <div id="painel-mestre-botoes" class="absolute top-4 right-4 z-10 flex gap-2 hidden">
+                        <button class="bg-purple-700 hover:bg-purple-900 text-white px-3 py-2 rounded font-bold flex items-center gap-2 shadow text-sm uppercase font-rpg transition-colors" onclick="document.getElementById('partitura-modal').classList.add('show')"><i data-lucide="music" class="w-4 h-4"></i> Partitura</button>
+                        <button class="bg-[#6c7a6b] hover:bg-[#4a5449] text-white px-3 py-2 rounded font-bold flex items-center gap-2 shadow text-sm uppercase font-rpg transition-colors" onclick="document.getElementById('refugio-modal').classList.add('show')"><i data-lucide="tent" class="w-4 h-4"></i> Refúgio</button>
+                    </div>
+                </div>
+
+                <!-- Seção de Jogadores na Mesa -->
+                <div class="bg-white dark:bg-[#1e293b] p-6 rounded border border-gray-300 dark:border-gray-700 shadow-sm mb-8">
+                    <h2 class="text-xl font-rpg font-black border-b-2 border-rpg-red dark:border-orange-500 mb-4 pb-2 uppercase text-left w-max">Fichas da Mesa</h2>
+                    <div id="grid-fichas-mesa-view" class="flex gap-4 overflow-x-auto pb-4">
+                        <!-- Fichas injetadas via JS -->
+                        <p class="text-gray-500 italic">Buscando aventureiros...</p>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-[#1e293b] p-6 rounded border border-gray-300 dark:border-gray-700 shadow-sm">
+                    <h2 class="text-xl font-rpg font-black border-b-2 border-rpg-blue dark:border-blue-500 mb-4 pb-2 uppercase text-left w-max">Jogadores Conectados</h2>
+                    <div id="grid-jogadores-mesa-view" class="flex gap-4 overflow-x-auto pb-4">
+                        <!-- Jogadores injetados via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 📝 TELA 4: A FICHA MAGNÍFICA DO PERSONAGEM -->
+            <div id="tela-ficha" class="hidden">
+                <form class="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-5 items-start">
+                    <!-- CABEÇALHO DA FICHA -->
+                    <section class="md:col-span-2 bg-white dark:bg-[#1e1e1e] p-4 md:px-8 md:py-5 rounded border border-gray-300 dark:border-gray-800 w-full overflow-hidden shadow-sm">
+                        <div class="flex flex-col md:flex-row items-center md:items-start gap-5 text-center md:text-left mb-6">
+                            <img src="./assets/icon.jpg" alt="Logo" class="max-w-[100px] md:max-w-[120px] h-auto rounded-lg shadow-sm">
+                            <div class="flex flex-col md:pt-3">
+                                <h1 class="text-gray-800 dark:text-gray-200 text-lg md:text-xl font-black font-rpg m-0 border-none pb-0 text-center md:text-left tracking-wider">Assimilação RPG</h1>
+                                <span id="nome-usuario-logado-ficha" class="block text-rpg-red dark:text-orange-500 font-bold text-2xl md:text-3xl font-rpg mt-1 text-center md:text-left capitalize"></span>
+                            </div>
+                        </div>
                         
-                        <div class="flex flex-col w-full">
-                            <h2 class="text-xl md:text-2xl font-rpg font-black text-white bg-[#2a5b5e] px-4 py-1 rounded-sm shadow-md uppercase mb-6 w-max mx-auto text-center">Assimilações</h2>
-                            
-                            <div class="flex flex-col gap-4 w-full">
-                                <div class="flex border-2 border-[#2a5b5e] rounded-md overflow-hidden min-h-[7rem] shadow-sm bg-white dark:bg-[#2a2a2a] focus-within:ring-2 focus-within:ring-rpg-blue transition-all">
-                                    <textarea id="assimilacao-1" class="flex-grow p-3 bg-transparent text-black dark:text-white outline-none resize-y text-sm"></textarea>
-                                    <div class="bg-[#2a5b5e] flex flex-col justify-evenly items-center w-14 py-2 flex-shrink-0">
-                                        <img src="./assets/sucesso-branco.png" class="w-8 h-8 object-contain mb-1">
-                                        <span class="text-white text-2xl leading-none">&hearts;</span>
-                                    </div>
-                                </div>
+                        <!-- Inputs de Identificação -->
+                        <div class="flex flex-col md:flex-row md:items-center mb-4 w-full">
+                            <label for="nome" class="text-lg font-bold text-gray-600 dark:text-gray-400 md:min-w-[180px] mb-1 md:mb-0 text-left">Nome:</label>
+                            <input type="text" id="nome" maxlength="20" class="w-full font-rpg text-lg px-2 py-1 text-black dark:text-white bg-[#f0f3f5] dark:bg-[#2a2a2a] focus:bg-[#e8eef1] dark:focus:bg-[#333] border-b-2 border-rpg-brown dark:border-[#c59b76] outline-none transition-colors">
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center mb-4 w-full">
+                            <label for="evento" class="text-lg font-bold text-gray-600 dark:text-gray-400 md:min-w-[180px] mb-1 md:mb-0 text-left">Evento Marcante:</label>
+                            <input type="text" id="evento" maxlength="50" class="w-full font-rpg text-lg px-2 py-1 text-black dark:text-white bg-[#f0f3f5] dark:bg-[#2a2a2a] focus:bg-[#e8eef1] dark:focus:bg-[#333] border-b-2 border-rpg-brown dark:border-[#c59b76] outline-none transition-colors">
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center mb-4 w-full">
+                            <label for="ocupacao" class="text-lg font-bold text-gray-600 dark:text-gray-400 md:min-w-[180px] mb-1 md:mb-0 text-left">Ocupação:</label>
+                            <input type="text" id="ocupacao" maxlength="20" class="w-full font-rpg text-lg px-2 py-1 text-black dark:text-white bg-[#f0f3f5] dark:bg-[#2a2a2a] focus:bg-[#e8eef1] dark:focus:bg-[#333] border-b-2 border-rpg-brown dark:border-[#c59b76] outline-none transition-colors">
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center mb-4 w-full">
+                            <label for="geracao" class="text-lg font-bold text-gray-600 dark:text-gray-400 md:min-w-[180px] mb-1 md:mb-0 text-left">Geração:</label>
+                            <input type="text" id="geracao" maxlength="20" class="w-full font-rpg text-lg px-2 py-1 text-black dark:text-white bg-[#f0f3f5] dark:bg-[#2a2a2a] focus:bg-[#e8eef1] dark:focus:bg-[#333] border-b-2 border-rpg-brown dark:border-[#c59b76] outline-none transition-colors">
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center mb-4 w-full">
+                            <label for="proposito-pessoal" class="text-lg font-bold text-gray-600 dark:text-gray-400 md:min-w-[180px] mb-1 md:mb-0 text-left">Propósitos Pessoais:</label>
+                            <input type="text" id="proposito-pessoal" maxlength="100" class="w-full font-rpg text-lg px-2 py-1 text-black dark:text-white bg-[#f0f3f5] dark:bg-[#2a2a2a] focus:bg-[#e8eef1] dark:focus:bg-[#333] border-b-2 border-rpg-brown dark:border-[#c59b76] outline-none transition-colors">
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center mb-4 w-full">
+                            <label for="proposito-coletivo" class="text-lg font-bold text-gray-600 dark:text-gray-400 md:min-w-[180px] mb-1 md:mb-0 text-left">Propósito Coletivo:</label>
+                            <input type="text" id="proposito-coletivo" maxlength="100" class="w-full font-rpg text-lg px-2 py-1 text-black dark:text-white bg-[#f0f3f5] dark:bg-[#2a2a2a] focus:bg-[#e8eef1] dark:focus:bg-[#333] border-b-2 border-rpg-brown dark:border-[#c59b76] outline-none transition-colors">
+                        </div>
+                    </section>
 
-                                <div class="flex border-2 border-[#2a5b5e] rounded-md overflow-hidden min-h-[7rem] shadow-sm bg-white dark:bg-[#2a2a2a] focus-within:ring-2 focus-within:ring-rpg-blue transition-all">
-                                    <textarea id="assimilacao-2" class="flex-grow p-3 bg-transparent text-black dark:text-white outline-none resize-y text-sm"></textarea>
-                                    <div class="bg-[#2a5b5e] flex flex-col justify-evenly items-center w-14 py-2 flex-shrink-0">
-                                        <img src="./assets/adaptacao-branco.png" class="w-8 h-8 object-contain mb-1">
-                                        <span class="text-white text-2xl leading-none">&diams;</span>
-                                    </div>
-                                </div>
-
-                                <div class="flex border-2 border-[#2a5b5e] rounded-md overflow-hidden min-h-[7rem] shadow-sm bg-white dark:bg-[#2a2a2a] focus-within:ring-2 focus-within:ring-rpg-blue transition-all">
-                                    <textarea id="assimilacao-3" class="flex-grow p-3 bg-transparent text-black dark:text-white outline-none resize-y text-sm"></textarea>
-                                    <div class="bg-[#2a5b5e] flex flex-col justify-evenly items-center w-14 py-2 flex-shrink-0">
-                                        <img src="./assets/pressao-branco.png" class="w-8 h-8 object-contain mb-1">
-                                        <span class="text-white text-2xl leading-none">&spades;</span>
-                                    </div>
-                                </div>
-
-                                <div class="flex border-2 border-[#2a5b5e] rounded-md overflow-hidden min-h-[7rem] shadow-sm bg-white dark:bg-[#2a2a2a] focus-within:ring-2 focus-within:ring-rpg-blue transition-all">
-                                    <textarea id="assimilacao-4" class="flex-grow p-3 bg-transparent text-black dark:text-white outline-none resize-y text-sm"></textarea>
-                                    <div class="bg-[#2a5b5e] flex flex-col justify-evenly items-center w-14 py-2 flex-shrink-0">
-                                        <img src="./assets/singulares-branco.png" class="w-8 h-8 object-contain mb-1">
-                                        <span class="text-white text-2xl leading-none">&clubs;</span>
-                                    </div>
-                                </div>
+                    <!-- COLUNA ESQUERDA: APTIDÕES -->
+                    <section class="col-span-1 self-start bg-rpg-paper dark:bg-rpg-paper-dark p-6 rounded shadow-sm border border-gray-300 dark:border-gray-800">
+                        <h2 class="border-none mt-0 mb-4 text-center">Aptidões</h2>
+                        
+                        <div class="grupo-aptidoes" id="secao-instintos">
+                            <h3>Instintos <i data-lucide="square" class="w-4 h-4 inline-block opacity-70 text-gray-500 align-baseline"></i></h3>
+                            <div class="aptidoes-grid">
+                                <div class="aptidao-box"><label>Influência</label><div class="dots-track-1"><input type="checkbox" id="inf-1" checked><input type="checkbox" id="inf-2"><input type="checkbox" id="inf-3"><input type="checkbox" id="inf-4"><input type="checkbox" id="inf-5"></div></div>
+                                <div class="aptidao-box"><label>Percepção</label><div class="dots-track-1"><input type="checkbox" id="per-1" checked><input type="checkbox" id="per-2"><input type="checkbox" id="per-3"><input type="checkbox" id="per-4"><input type="checkbox" id="per-5"></div></div>
+                                <div class="aptidao-box"><label>Potência</label><div class="dots-track-1"><input type="checkbox" id="pot-1" checked><input type="checkbox" id="pot-2"><input type="checkbox" id="pot-3"><input type="checkbox" id="pot-4"><input type="checkbox" id="pot-5"></div></div>
+                                <div class="aptidao-box"><label>Reação</label><div class="dots-track-1"><input type="checkbox" id="rea-1" checked><input type="checkbox" id="rea-2"><input type="checkbox" id="rea-3"><input type="checkbox" id="rea-4"><input type="checkbox" id="rea-5"></div></div>
+                                <div class="aptidao-box"><label>Resolução</label><div class="dots-track-1"><input type="checkbox" id="res-1" checked><input type="checkbox" id="res-2"><input type="checkbox" id="res-3"><input type="checkbox" id="res-4"><input type="checkbox" id="res-5"></div></div>
+                                <div class="aptidao-box"><label>Sagacidade</label><div class="dots-track-1"><input type="checkbox" id="sag-1" checked><input type="checkbox" id="sag-2"><input type="checkbox" id="sag-3"><input type="checkbox" id="sag-4"><input type="checkbox" id="sag-5"></div></div>
                             </div>
                         </div>
 
-                        <div class="flex flex-col gap-6 w-full h-full">
-                            <div class="w-full transition-colors duration-300">
+                        <div class="grupo-aptidoes" id="secao-conhecimentos">
+                            <h3>Conhecimentos <i data-lucide="diamond" class="w-4 h-4 inline-block opacity-70 text-blue-500 align-baseline"></i></h3>
+                            <div class="aptidoes-grid">
+                                <div class="aptidao-box"><label>Biologia</label><div class="dots-track"><input type="checkbox" id="bio-1"><input type="checkbox" id="bio-2"><input type="checkbox" id="bio-3"><input type="checkbox" id="bio-4"><input type="checkbox" id="bio-5"></div></div>
+                                <div class="aptidao-box"><label>Erudição</label><div class="dots-track"><input type="checkbox" id="eru-1"><input type="checkbox" id="eru-2"><input type="checkbox" id="eru-3"><input type="checkbox" id="eru-4"><input type="checkbox" id="eru-5"></div></div>
+                                <div class="aptidao-box"><label>Engenharia</label><div class="dots-track"><input type="checkbox" id="eng-1"><input type="checkbox" id="eng-2"><input type="checkbox" id="eng-3"><input type="checkbox" id="eng-4"><input type="checkbox" id="eng-5"></div></div>
+                                <div class="aptidao-box"><label>Geografia</label><div class="dots-track"><input type="checkbox" id="geo-1"><input type="checkbox" id="geo-2"><input type="checkbox" id="geo-3"><input type="checkbox" id="geo-4"><input type="checkbox" id="geo-5"></div></div>
+                                <div class="aptidao-box"><label>Medicina</label><div class="dots-track"><input type="checkbox" id="med-1"><input type="checkbox" id="med-2"><input type="checkbox" id="med-3"><input type="checkbox" id="med-4"><input type="checkbox" id="med-5"></div></div>
+                                <div class="aptidao-box"><label>Segurança</label><div class="dots-track"><input type="checkbox" id="seg-1"><input type="checkbox" id="seg-2"><input type="checkbox" id="seg-3"><input type="checkbox" id="seg-4"><input type="checkbox" id="seg-5"></div></div>
+                            </div>
+                        </div>
+
+                        <div class="grupo-aptidoes" id="secao-praticas">
+                            <h3>Práticas <i data-lucide="diamond" class="w-4 h-4 inline-block opacity-70 text-blue-500 align-baseline"></i></h3>
+                            <div class="aptidoes-grid">
+                                <div class="aptidao-box"><label>Armas</label><div class="dots-track"><input type="checkbox" id="arm-1"><input type="checkbox" id="arm-2"><input type="checkbox" id="arm-3"><input type="checkbox" id="arm-4"><input type="checkbox" id="arm-5"></div></div>
+                                <div class="aptidao-box"><label>Atletismo</label><div class="dots-track"><input type="checkbox" id="atl-1"><input type="checkbox" id="atl-2"><input type="checkbox" id="atl-3"><input type="checkbox" id="atl-4"><input type="checkbox" id="atl-5"></div></div>
+                                <div class="aptidao-box"><label>Expressão</label><div class="dots-track"><input type="checkbox" id="exp-1"><input type="checkbox" id="exp-2"><input type="checkbox" id="exp-3"><input type="checkbox" id="exp-4"><input type="checkbox" id="exp-5"></div></div>
+                                <div class="aptidao-box"><label>Furtividade</label><div class="dots-track"><input type="checkbox" id="fur-1"><input type="checkbox" id="fur-2"><input type="checkbox" id="fur-3"><input type="checkbox" id="fur-4"><input type="checkbox" id="fur-5"></div></div>
+                                <div class="aptidao-box"><label>Manufaturas</label><div class="dots-track"><input type="checkbox" id="man-1"><input type="checkbox" id="man-2"><input type="checkbox" id="man-3"><input type="checkbox" id="man-4"><input type="checkbox" id="man-5"></div></div>
+                                <div class="aptidao-box"><label>Sobrevivência</label><div class="dots-track"><input type="checkbox" id="sob-1"><input type="checkbox" id="sob-2"><input type="checkbox" id="sob-3"><input type="checkbox" id="sob-4"><input type="checkbox" id="sob-5"></div></div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- COLUNA DIREITA: SAÚDE -->
+                    <!-- COLUNA DIREITA: SAÚDE -->
+                    <section class="col-span-1 self-start bg-rpg-paper dark:bg-rpg-paper-dark p-6 rounded shadow-sm border border-gray-300 dark:border-gray-800">
+                        <div class="saude-header">
+                            <input type="number" class="saude-num-input" value="1" id="saude-max">
+                            <h2>SAÚDE</h2>
+                            <span class="saude-formula">1 + Potência + Resolução</span>
+                        </div>
+                        
+                        <div class="saude-legenda" style="border-left: #6c7a6b 2px solid; border-top: #6c7a6b 2px solid; border-right: #6c7a6b 2px solid;">Ativa Recuperação após cada repouso completo</div> 
+                        <div class="saude-grid">
+                            <div class="saude-box-container">
+                                <div class="saude-box" style="--cor-saude: #6c7a6b;"><span>6</span> Saudável</div>
+                                <div class="saude-drops-track"><input type="checkbox" id="saude-6-1"><input type="checkbox" id="saude-6-2"><input type="checkbox" id="saude-6-3"><input type="checkbox" id="saude-6-4"><input type="checkbox" id="saude-6-5"><input type="checkbox" id="saude-6-6"><input type="checkbox" id="saude-6-7"><input type="checkbox" id="saude-6-8"><input type="checkbox" id="saude-6-9"><input type="checkbox" id="saude-6-10"><input type="checkbox" id="saude-6-11"></div>
+                            </div>
+                            <div class="saude-box-container">
+                                <div class="saude-box" style="--cor-saude: #6c7a6b;"><span>5</span> Escoriado</div>
+                                <div class="saude-drops-track"><input type="checkbox" id="saude-5-1"><input type="checkbox" id="saude-5-2"><input type="checkbox" id="saude-5-3"><input type="checkbox" id="saude-5-4"><input type="checkbox" id="saude-5-5"><input type="checkbox" id="saude-5-6"><input type="checkbox" id="saude-5-7"><input type="checkbox" id="saude-5-8"><input type="checkbox" id="saude-5-9"><input type="checkbox" id="saude-5-10"><input type="checkbox" id="saude-5-11"></div>
+                            </div>
+                        </div>
+
+                        <div class="saude-legenda" style="border-left: #a97b53 2px solid; border-top: #a97b53 2px solid; border-right: #a97b53 2px solid;">Ativa a Recuperação após uma semana</div> 
+                        <div class="saude-grid">
+                            <div class="saude-box-container">
+                                <div class="saude-box" style="--cor-saude: #a97b53;"><span>4</span> Lacerado</div>
+                                <div class="saude-drops-track"><input type="checkbox" id="saude-4-1"><input type="checkbox" id="saude-4-2"><input type="checkbox" id="saude-4-3"><input type="checkbox" id="saude-4-4"><input type="checkbox" id="saude-4-5"><input type="checkbox" id="saude-4-6"><input type="checkbox" id="saude-4-7"><input type="checkbox" id="saude-4-8"><input type="checkbox" id="saude-4-9"><input type="checkbox" id="saude-4-10"><input type="checkbox" id="saude-4-11"></div>
+                            </div>
+                            <div class="saude-box-container">
+                                <div class="saude-box" style="--cor-saude: #a97b53;"><span>3</span> Ferido</div>
+                                <div class="saude-drops-track"><input type="checkbox" id="saude-3-1"><input type="checkbox" id="saude-3-2"><input type="checkbox" id="saude-3-3"><input type="checkbox" id="saude-3-4"><input type="checkbox" id="saude-3-5"><input type="checkbox" id="saude-3-6"><input type="checkbox" id="saude-3-7"><input type="checkbox" id="saude-3-8"><input type="checkbox" id="saude-3-9"><input type="checkbox" id="saude-3-10"><input type="checkbox" id="saude-3-11"></div>
+                            </div>
+                        </div>
+                        <div class="flex justify-center items-center gap-1 text-sm font-bold text-gray-600 dark:text-gray-400 mt-4 mb-6">
+                            Menos 
+                            <img src="./assets/sucesso.png" alt="Sucesso" class="w-5 h-5 object-contain dark:hidden">
+                            <img src="./assets/sucesso-branco.png" alt="Sucesso" class="w-5 h-5 object-contain hidden dark:block"> 
+                            em todos os testes.
+                        </div>
+                        
+                        <div class="saude-legenda" style="border-left: #8c3a3a 2px solid; border-top: #8c3a3a 2px solid; border-right: #8c3a3a 2px solid;">Dano dessa gravidade não regenera naturalmente. Será necessário tratamento médico</div> 
+                        <div class="saude-grid">
+                            <div class="saude-box-container">
+                                <div class="saude-box" style="--cor-saude: #8c3a3a;"><span>2</span> Arrebentado</div>
+                                <div class="saude-drops-track"><input type="checkbox" id="saude-2-1"><input type="checkbox" id="saude-2-2"><input type="checkbox" id="saude-2-3"><input type="checkbox" id="saude-2-4"><input type="checkbox" id="saude-2-5"><input type="checkbox" id="saude-2-6"><input type="checkbox" id="saude-2-7"><input type="checkbox" id="saude-2-8"><input type="checkbox" id="saude-2-9"><input type="checkbox" id="saude-2-10"><input type="checkbox" id="saude-2-11"></div>
+                            </div>
+                            <div class="saude-box-container">
+                                <div class="saude-box" style="--cor-saude: #8c3a3a;"><span>1</span> Incapacitado</div>
+                                <div class="saude-drops-track"><input type="checkbox" id="saude-1-1"><input type="checkbox" id="saude-1-2"><input type="checkbox" id="saude-1-3"><input type="checkbox" id="saude-1-4"><input type="checkbox" id="saude-1-5"><input type="checkbox" id="saude-1-6"><input type="checkbox" id="saude-1-7"><input type="checkbox" id="saude-1-8"><input type="checkbox" id="saude-1-9"><input type="checkbox" id="saude-1-10"><input type="checkbox" id="saude-1-11"></div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-[0.8em] font-bold text-gray-600 dark:text-gray-400 mt-4 text-center">
+                            <div class="flex flex-col items-center justify-start">
+                                <span>Incapaz de agir, mas mantém a consciência.</span>
+                                <span class="mt-1 block">
+                                    Menos 
+                                    <img src="./assets/sucesso.png" class="w-4 h-4 inline-block align-middle mx-[2px] dark:hidden">
+                                    <img src="./assets/sucesso-branco.png" class="w-4 h-4 hidden dark:inline-block align-middle mx-[2px]">
+                                    <img src="./assets/sucesso.png" class="w-4 h-4 inline-block align-middle mr-1 dark:hidden">
+                                    <img src="./assets/sucesso-branco.png" class="w-4 h-4 hidden dark:inline-block align-middle mr-1">
+                                    em todos os testes.
+                                </span>
+                            </div>
+                            <div class="flex flex-col items-center justify-start">
+                                <span>Inconsciente.</span>
+                                <span class="mt-1 block">
+                                    Qualquer ação exige 
+                                    <img src="./assets/adaptacao.png" class="w-4 h-4 inline-block align-middle mx-[2px] dark:hidden">
+                                    <img src="./assets/adaptacao-branco.png" class="w-4 h-4 hidden dark:inline-block align-middle mx-[2px]">
+                                    <img src="./assets/adaptacao.png" class="w-4 h-4 inline-block align-middle mr-1 dark:hidden">
+                                    <img src="./assets/adaptacao-branco.png" class="w-4 h-4 hidden dark:inline-block align-middle mr-1">
+                                    para agir.
+                                </span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- RODAPÉ DA FICHA: DETERMINAÇÃO, ASSIMILAÇÃO E PERDA DO EGO -->
+                    <section class="md:col-span-2 bg-rpg-paper dark:bg-rpg-paper-dark border border-gray-300 dark:border-gray-800 border-t-[3px] border-t-rpg-blue border-b-[3px] border-b-rpg-red rounded p-4 md:px-8 flex flex-col md:flex-row justify-between items-center gap-3">
+                        <h3 class="flex items-center justify-center gap-2 m-0 text-xl font-black text-rpg-red uppercase flex-shrink-0">
+                            Determinação 
+                            <input type="number" id="det-num" value="9" class="w-10 h-10 p-0 m-0 leading-none rounded-full border-2 border-rpg-red bg-transparent text-center text-xl font-black text-rpg-red outline-none shadow-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                        </h3>
+                        <div class="determinacao-track">
+                            <input type="checkbox" class="determ-check" id="det-1"><input type="checkbox" class="assim-check" id="assim-1">
+                            <input type="checkbox" class="determ-check" id="det-2"><input type="checkbox" class="assim-check" id="assim-2">
+                            <input type="checkbox" class="determ-check" id="det-3"><input type="checkbox" class="assim-check" id="assim-3">
+                            <input type="checkbox" class="determ-check" id="det-4"><input type="checkbox" class="assim-check" id="assim-4">
+                            <input type="checkbox" class="determ-check" id="det-5"><input type="checkbox" class="assim-check" id="assim-5">
+                            <input type="checkbox" class="determ-check" id="det-6"><input type="checkbox" class="assim-check" id="assim-6">
+                            <input type="checkbox" class="determ-check" id="det-7"><input type="checkbox" class="assim-check" id="assim-7">
+                            <input type="checkbox" class="determ-check" id="det-8"><input type="checkbox" class="assim-check" id="assim-8">
+                            <input type="checkbox" class="determ-check" id="det-9"><input type="checkbox" class="assim-check" id="assim-9">
+                            <input type="checkbox" class="determ-check" id="det-10"><input type="checkbox" class="assim-check" id="assim-10">
+                        </div>
+                        <h3 class="flex items-center justify-center gap-2 m-0 text-xl font-black text-rpg-blue uppercase flex-shrink-0">
+                            <input type="number" id="assim-num" value="1" class="w-10 h-10 p-0 m-0 leading-none rounded-full border-2 border-rpg-blue bg-transparent text-center text-xl font-black text-rpg-blue outline-none shadow-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"> 
+                            Assimilação
+                        </h3>
+                    </section>
+
+                    <!-- RASTREADOR DE PERDA DO EGO -->
+                    <section class="md:col-span-2 bg-rpg-paper dark:bg-rpg-paper-dark border border-gray-300 dark:border-gray-800 border-t-[3px] border-t-purple-600 rounded p-4 md:px-8 flex flex-col items-center gap-3 mt-4">
+                        <h3 class="m-0 text-xl font-black text-purple-700 dark:text-purple-500 uppercase tracking-widest text-center">
+                            Perda do Ego <span class="text-sm block text-gray-500 font-sans normal-case">(Limite: 10 Pressões Acumuladas)</span>
+                        </h3>
+                        
+                        <div class="flex flex-wrap justify-center gap-2 my-2" id="ego-track">
+                            <!-- 10 Marcas de Pressão -->
+                            <input type="checkbox" class="ego-check appearance-none w-8 h-8 border-2 border-purple-800 dark:border-purple-500 rounded-sm cursor-pointer checked:bg-purple-800 dark:checked:bg-purple-500 checked:after:content-['C'] checked:after:text-white checked:after:font-black checked:after:flex checked:after:justify-center checked:after:items-center transition-all">
+                            <input type="checkbox" class="ego-check appearance-none w-8 h-8 border-2 border-purple-800 dark:border-purple-500 rounded-sm cursor-pointer checked:bg-purple-800 dark:checked:bg-purple-500 checked:after:content-['C'] checked:after:text-white checked:after:font-black checked:after:flex checked:after:justify-center checked:after:items-center transition-all">
+                            <input type="checkbox" class="ego-check appearance-none w-8 h-8 border-2 border-purple-800 dark:border-purple-500 rounded-sm cursor-pointer checked:bg-purple-800 dark:checked:bg-purple-500 checked:after:content-['C'] checked:after:text-white checked:after:font-black checked:after:flex checked:after:justify-center checked:after:items-center transition-all">
+                            <input type="checkbox" class="ego-check appearance-none w-8 h-8 border-2 border-purple-800 dark:border-purple-500 rounded-sm cursor-pointer checked:bg-purple-800 dark:checked:bg-purple-500 checked:after:content-['C'] checked:after:text-white checked:after:font-black checked:after:flex checked:after:justify-center checked:after:items-center transition-all">
+                            <input type="checkbox" class="ego-check appearance-none w-8 h-8 border-2 border-purple-800 dark:border-purple-500 rounded-sm cursor-pointer checked:bg-purple-800 dark:checked:bg-purple-500 checked:after:content-['C'] checked:after:text-white checked:after:font-black checked:after:flex checked:after:justify-center checked:after:items-center transition-all">
+                            <input type="checkbox" class="ego-check appearance-none w-8 h-8 border-2 border-purple-800 dark:border-purple-500 rounded-sm cursor-pointer checked:bg-purple-800 dark:checked:bg-purple-500 checked:after:content-['C'] checked:after:text-white checked:after:font-black checked:after:flex checked:after:justify-center checked:after:items-center transition-all">
+                            <input type="checkbox" class="ego-check appearance-none w-8 h-8 border-2 border-purple-800 dark:border-purple-500 rounded-sm cursor-pointer checked:bg-purple-800 dark:checked:bg-purple-500 checked:after:content-['C'] checked:after:text-white checked:after:font-black checked:after:flex checked:after:justify-center checked:after:items-center transition-all">
+                            <input type="checkbox" class="ego-check appearance-none w-8 h-8 border-2 border-purple-800 dark:border-purple-500 rounded-sm cursor-pointer checked:bg-purple-800 dark:checked:bg-purple-500 checked:after:content-['C'] checked:after:text-white checked:after:font-black checked:after:flex checked:after:justify-center checked:after:items-center transition-all">
+                            <input type="checkbox" class="ego-check appearance-none w-8 h-8 border-2 border-purple-800 dark:border-purple-500 rounded-sm cursor-pointer checked:bg-purple-800 dark:checked:bg-purple-500 checked:after:content-['C'] checked:after:text-white checked:after:font-black checked:after:flex checked:after:justify-center checked:after:items-center transition-all">
+                            <input type="checkbox" class="ego-check appearance-none w-8 h-8 border-2 border-rpg-red dark:border-red-500 rounded-sm cursor-pointer checked:bg-rpg-red dark:checked:bg-red-500 checked:after:content-['C'] checked:after:text-white checked:after:font-black checked:after:flex checked:after:justify-center checked:after:items-center transition-all shadow-[0_0_10px_rgba(140,58,58,0.5)]">
+                        </div>
+                        
+                        <p id="aviso-perda-ego" class="hidden text-rpg-red dark:text-red-500 font-bold font-rpg text-lg animate-pulse flex items-center justify-center gap-2">
+                            <i data-lucide="alert-triangle" class="w-6 h-6"></i> ALERTA: O PARASITA ASSUMIU O CONTROLE! <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+                        </p>
+
+                        <button type="button" id="btn-abrir-sorteador" class="mt-2 bg-purple-700 hover:bg-purple-900 text-white font-bold py-2.5 px-6 rounded font-rpg uppercase transition-colors shadow-md flex items-center justify-center gap-2" onclick="document.getElementById('sorteador-modal').classList.add('show')">
+                            <i data-lucide="dna" class="w-5 h-5"></i> Sortear Mutações
+                        </button>
+                    </section>
+                </form>
+
+                <!-- DADOS SECUNDÁRIOS: FOTO, HISTÓRIA, CARACTERÍSTICAS E INVENTÁRIO -->
+                <section class="pt-12">
+                    <form class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-rpg-paper dark:bg-[#1e1e1e] border border-gray-300 dark:border-gray-800 rounded-md p-6 shadow-sm">
+                        
+                        <section class="col-span-1 flex flex-col items-center">
+                            <h2 class="text-left text-rpg-red font-black text-xl border-b-2 border-rpg-red pb-1 mb-3 w-full uppercase font-rpg mt-0">Foto do Personagem</h2>
+                            <img id="char-photo-preview" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="Pré-visualização" class="w-full min-h-[250px] bg-gray-200 dark:bg-[#242424] border border-gray-300 dark:border-gray-600 rounded object-cover mb-4 cursor-pointer hover:scale-[1.03] transition-transform duration-200">
+                            <label for="char-photo-input" class="font-bold text-gray-600 dark:text-orange-500 self-start mb-1">Carregar imagem:</label>
+                            <input type="file" id="char-photo-input" accept="image/*" class="font-rpg border border-gray-300 dark:border-gray-600 rounded p-2 w-full text-black dark:text-white bg-white dark:bg-[#2a2a2a] outline-none">
+                        </section>
+
+                        <section class="col-span-1 md:col-span-2 flex flex-col gap-5">
+                            <div>
+                                <h2 class="text-left text-rpg-red font-black text-xl border-b-2 border-rpg-red pb-1 mb-3 w-full uppercase font-rpg mt-0">Descrição</h2>
+                                <textarea id="char-descricao" rows="4" placeholder="Aparência, personalidade, etc..." class="w-full box-border font-rpg text-lg leading-relaxed p-3 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-[#2a2a2a] text-black dark:text-white resize-y outline-none focus:ring-2 focus:ring-rpg-blue transition-colors shadow-inner"></textarea>
+                            </div>
+                            <div>
+                                <h2 class="text-left text-rpg-red font-black text-xl border-b-2 border-rpg-red pb-1 mb-3 w-full uppercase font-rpg mt-0">História do Personagem</h2>
+                                <textarea id="char-historia" rows="10" placeholder="Escreva o passado do seu personagem..." class="w-full box-border font-rpg text-lg leading-relaxed p-3 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-[#2a2a2a] text-black dark:text-white resize-y outline-none focus:ring-2 focus:ring-rpg-blue transition-colors shadow-inner"></textarea>
+                            </div>
+                        </section>
+
+                        <div class="col-span-1 md:col-span-3 w-full border-t-2 border-gray-300 dark:border-gray-800 pt-8 mt-2"> 
+                            
+                            <div class="mb-8">
+                                <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
+                                    <h2 class="text-xl md:text-2xl font-rpg font-black text-white bg-[#6b2c2c] px-4 py-1 rounded-sm shadow-md uppercase tracking-wider text-center md:text-left mx-auto md:mx-0">Características</h2>
+                                    <button type="button" id="btn-add-carac" class="w-full md:w-auto flex items-center justify-center gap-2 bg-[#6b2c2c] hover:bg-red-900 text-white font-bold py-2 px-4 rounded text-sm transition-colors cursor-pointer border-none shadow-md">
+                                        <i data-lucide="plus-circle" class="w-4 h-4"></i> Adicionar
+                                    </button>
+                                </div>
+                                
+                                <div id="caracteristicas-container" class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                                    <!-- Campos dinâmicos entram aqui -->
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full items-start">
+                                
+                                <div class="flex flex-col w-full">
+                                    <h2 class="text-xl md:text-2xl font-rpg font-black text-white bg-[#2a5b5e] px-4 py-1 rounded-sm shadow-md uppercase mb-6 w-max mx-auto text-center">Assimilações</h2>
+                                    
+                                    <div class="flex flex-col gap-4 w-full">
+                                        <div class="flex border-2 border-[#2a5b5e] rounded-md overflow-hidden min-h-[7rem] shadow-sm bg-white dark:bg-[#2a2a2a] focus-within:ring-2 focus-within:ring-rpg-blue transition-all">
+                                            <textarea id="assimilacao-1" class="flex-grow p-3 bg-transparent text-black dark:text-white outline-none resize-y text-sm"></textarea>
+                                            <div class="bg-[#2a5b5e] flex flex-col justify-evenly items-center w-14 py-2 flex-shrink-0">
+                                                <img src="./assets/sucesso-branco.png" class="w-8 h-8 object-contain mb-1">
+                                                <span class="text-white text-2xl leading-none">&hearts;</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="flex border-2 border-[#2a5b5e] rounded-md overflow-hidden min-h-[7rem] shadow-sm bg-white dark:bg-[#2a2a2a] focus-within:ring-2 focus-within:ring-rpg-blue transition-all">
+                                            <textarea id="assimilacao-2" class="flex-grow p-3 bg-transparent text-black dark:text-white outline-none resize-y text-sm"></textarea>
+                                            <div class="bg-[#2a5b5e] flex flex-col justify-evenly items-center w-14 py-2 flex-shrink-0">
+                                                <img src="./assets/adaptacao-branco.png" class="w-8 h-8 object-contain mb-1">
+                                                <span class="text-white text-2xl leading-none">&diams;</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="flex border-2 border-[#2a5b5e] rounded-md overflow-hidden min-h-[7rem] shadow-sm bg-white dark:bg-[#2a2a2a] focus-within:ring-2 focus-within:ring-rpg-blue transition-all">
+                                            <textarea id="assimilacao-3" class="flex-grow p-3 bg-transparent text-black dark:text-white outline-none resize-y text-sm"></textarea>
+                                            <div class="bg-[#2a5b5e] flex flex-col justify-evenly items-center w-14 py-2 flex-shrink-0">
+                                                <img src="./assets/pressao-branco.png" class="w-8 h-8 object-contain mb-1">
+                                                <span class="text-white text-2xl leading-none">&spades;</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="flex border-2 border-[#2a5b5e] rounded-md overflow-hidden min-h-[7rem] shadow-sm bg-white dark:bg-[#2a2a2a] focus-within:ring-2 focus-within:ring-rpg-blue transition-all">
+                                            <textarea id="assimilacao-4" class="flex-grow p-3 bg-transparent text-black dark:text-white outline-none resize-y text-sm"></textarea>
+                                            <div class="bg-[#2a5b5e] flex flex-col justify-evenly items-center w-14 py-2 flex-shrink-0">
+                                                <img src="./assets/singulares-branco.png" class="w-8 h-8 object-contain mb-1">
+                                                <span class="text-white text-2xl leading-none">&clubs;</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex flex-col gap-6 w-full h-full">
+                                    <div class="w-full transition-colors duration-300">
                                 <h2 class="text-xl md:text-2xl font-rpg font-black text-white bg-[#8c7454] px-4 py-1 rounded-sm shadow-md uppercase mb-6 w-max mx-auto text-center">Espaços de Inventário</h2>
                                 <div class="grid grid-cols-5 gap-3 max-w-[250px] mx-auto justify-items-center mb-2">
                                     <input type="checkbox" id="inv-1" class="custom-checkbox">
@@ -524,439 +569,258 @@
                                     <input type="checkbox" id="inv-9" class="custom-checkbox">
                                     <input type="checkbox" id="inv-10" class="custom-checkbox">
                                 </div>
-                            </div>
+                                    </div>
 
-                            <div class="flex-grow flex flex-col w-full transition-colors duration-300 mt-2">
-                                <h2 class="text-xl md:text-2xl font-rpg font-black text-white bg-[#8c7454] px-4 py-1 rounded-sm shadow-md uppercase mb-4 w-max mx-auto text-center z-10">Anotações</h2>
-                                
-                                <div id="anotacoes-preview" class="w-full flex-grow min-h-[200px] p-4 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#2a2a2a] text-black dark:text-white font-sans text-base shadow-inner cursor-pointer hover:ring-2 hover:ring-[#8c7454] transition-all overflow-hidden relative group" title="Clique para expandir e editar">
-                                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-5 dark:group-hover:bg-opacity-20 transition-all z-10 pointer-events-none"></div>
-                                    <div id="anotacoes-texto-preview" class="font-rpg whitespace-pre-wrap opacity-90 h-full overflow-hidden" style="display: -webkit-box; -webkit-line-clamp: 10; -webkit-box-orient: vertical;">
-                                        <span class="font-rpg text-gray-400 dark:text-gray-500 italic font-bold">Clique aqui para escrever suas anotações...</span>
+                                    <div class="flex-grow flex flex-col w-full transition-colors duration-300 mt-2">
+                                        <h2 class="text-xl md:text-2xl font-rpg font-black text-white bg-[#8c7454] px-4 py-1 rounded-sm shadow-md uppercase mb-4 w-max mx-auto text-center z-10">Anotações Livres</h2>
+                                        <div id="anotacoes-preview" class="w-full flex-grow min-h-[200px] p-4 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#2a2a2a] text-black dark:text-white font-sans text-base shadow-inner cursor-pointer hover:ring-2 hover:ring-[#8c7454] transition-all overflow-hidden relative group" onclick="document.getElementById('anotacoes-modal').classList.add('show')">
+                                            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-5 dark:group-hover:bg-opacity-20 transition-all z-10 pointer-events-none"></div>
+                                            <div id="anotacoes-texto-preview" class="font-rpg whitespace-pre-wrap opacity-90 h-full overflow-hidden" style="display: -webkit-box; -webkit-line-clamp: 10; -webkit-box-orient: vertical;">
+                                                <span class="font-rpg text-gray-400 dark:text-gray-500 italic font-bold">Clique aqui para escrever suas anotações...</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                </div>
-
-            </form>
-        </section>
-
-        <div id="anotacoes-modal" class="modal z-[9999]">
-            <div class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border border-gray-300 dark:border-gray-800 rounded-md p-6 shadow-2xl max-w-[900px] w-[95%] h-[80vh] flex flex-col relative">
-                <span id="fechar-anotacoes" class="modal-close absolute top-4 right-6 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white text-4xl font-bold cursor-pointer transition-colors">&times;</span>
-                
-                <h2 class="text-center text-xl md:text-3xl font-rpg font-black text-white bg-[#8c7454] px-8 py-2 rounded-sm shadow-md uppercase tracking-widest mb-6 mx-auto w-max">
-                    Anotações
-                </h2>
-                
-                <textarea id="anotacoes" placeholder="Escreva sua anotações, inventário e outras coisas..." class="w-full flex-grow p-4 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#1a1a1a] text-black dark:text-white outline-none resize-none font-rpg text-lg shadow-inner focus:ring-2 focus:ring-[#8c7454] transition-colors leading-relaxed"></textarea>
+                        </div>
+                    </form>
+                </section>
             </div>
-        </div>
-    </main>
+        </main>
+    </section>
 
-    <div id="rolador-modal" class="modal">
+    <!-- ==========================================
+         BOLA FLUTUANTE (FAB) - ROLADOR DE DADOS
+         ========================================== -->
+    <button id="fab-rolador" class="hidden fixed bottom-6 right-6 w-16 h-16 bg-[#1a1a1a] border-2 border-gray-500 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(0,0,0,0.5)] hover:scale-110 hover:border-rpg-red transition-all z-50 overflow-hidden group cursor-pointer" onclick="document.getElementById('rolador-modal').classList.add('show')">
+        <img src="./assets/rolador-bola.png" alt="Rolar Dados" class="w-[120%] h-[120%] object-cover opacity-80 group-hover:opacity-100 transition-opacity">
+    </button>
+
+    <!-- ==========================================
+         MODAIS (OCULTOS POR PADRÃO)
+         ========================================== -->
+
+    <!-- MODAL: TERMINAL DE DADOS -->
+    <div id="rolador-modal" class="modal z-[99999]">
         <div class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border border-gray-300 dark:border-gray-800 rounded-md p-6 shadow-md max-w-[700px] w-[90%] max-h-[85vh] overflow-y-auto relative">
-            
-            <span id="fechar-rolador" class="absolute top-4 right-6 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white text-4xl font-bold cursor-pointer transition-colors">&times;</span>
-            
-            <h2 class="text-center text-rpg-text-dark dark:text-orange-500 font-rpg font-black text-2xl mb-6 uppercase tracking-widest">
-                Terminal de Dados
-            </h2>
+            <span id="fechar-rolador" class="absolute top-4 right-6 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white text-4xl font-bold cursor-pointer transition-colors" onclick="document.getElementById('rolador-modal').classList.remove('show')">&times;</span>
+            <h2 class="text-center text-gray-800 dark:text-orange-500 font-rpg font-black text-2xl mb-6 uppercase tracking-widest">Terminal de Dados</h2>
             
             <div class="text-center mb-6 p-4 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-md flex flex-wrap justify-center items-center gap-3">
                 <input type="text" id="rolador-input" placeholder="2d6 2d12" class="p-3 w-[160px] text-center text-lg border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-[#2a2a2a] text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-blue transition-colors font-rpg shadow-inner">
-                
-                <button id="rolador-btn-rolar" class="bg-rpg-blue hover:bg-rpg-blue-hover text-white border-none py-3 px-6 font-bold rounded cursor-pointer uppercase font-rpg transition-colors shadow-sm">
-                    Rolar
-                </button>
-                
-                <button id="rolador-btn-limpar" class="bg-rpg-red hover:bg-rpg-red-hover text-white border-none py-3 px-6 font-bold rounded cursor-pointer uppercase font-rpg transition-colors shadow-sm">
-                    Limpar
-                </button>
+                <button id="rolador-btn-rolar" class="bg-rpg-blue hover:bg-rpg-blue-hover text-white border-none py-3 px-6 font-bold rounded cursor-pointer uppercase font-rpg transition-colors shadow-sm">Rolar</button>
+                <button id="rolador-btn-limpar" class="bg-rpg-red hover:bg-rpg-red-hover text-white border-none py-3 px-6 font-bold rounded cursor-pointer uppercase font-rpg transition-colors shadow-sm">Limpar</button>
             </div>
-
             <div id="rolador-resultados-atuais"></div>
-
             <div class="mt-8 border-t border-dashed border-gray-300 dark:border-gray-700 pt-5">
                 <div class="flex justify-between items-center mb-5 flex-wrap gap-3">
-                    <h3 class="m-0 text-lg text-rpg-red dark:text-rpg-red-hover font-black uppercase font-rpg">
-                        Histórico da Sessão
-                    </h3>
-                    
+                    <h3 class="m-0 text-lg text-rpg-red dark:text-rpg-red-hover font-black uppercase font-rpg">Histórico da Sessão</h3>
                     <div class="relative w-full md:w-auto">
                         <i data-lucide="search" class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
                         <input type="text" id="filtro-historico" placeholder="Filtrar jogador..." class="py-2 pl-10 pr-4 rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-[#2a2a2a] text-gray-800 dark:text-white font-sans outline-none focus:ring-2 focus:ring-rpg-blue transition-colors w-full">
                     </div>
                 </div>
-                
-                <div id="rolador-historico" class="max-h-[250px] overflow-y-auto pr-3">
-                    </div>
-            </div>
-            
-        </div>
-    </div>
-
-    <div id="delete-char-modal" class="modal z-[99999]">
-        <div class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border-2 border-rpg-red rounded-md p-6 md:p-8 max-w-[500px] w-[90%] text-center shadow-2xl relative">
-            <div class="mx-auto flex items-center justify-center w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 mb-4">
-                <i data-lucide="alert-triangle" class="w-6 h-6 text-rpg-red"></i>
-            </div>
-            <h2 class="text-2xl font-rpg font-black text-rpg-red uppercase mb-2">Excluir Personagem</h2>
-            <p class="mb-4 text-gray-700 dark:text-gray-300 text-sm md:text-base">
-                Esta ação é <strong class="text-rpg-red">irreversível</strong>. Todos os dados desta ficha serão perdidos. Para confirmar, digite o nome exato do personagem abaixo:
-            </p>
-            <div id="delete-char-target-name" class="font-bold text-lg md:text-xl text-black dark:text-white mb-4 bg-gray-200 dark:bg-[#1a1a1a] py-3 rounded tracking-wider select-all border border-gray-300 dark:border-gray-700"></div>
-            
-            <input type="text" id="delete-char-input" placeholder="Digite o nome aqui..." class="w-full p-3 mb-6 bg-white dark:bg-[#242424] border border-gray-400 dark:border-gray-600 rounded outline-none focus:ring-2 focus:ring-rpg-red text-center text-black dark:text-white font-bold transition-colors" autocomplete="off">
-            
-            <div class="flex justify-between gap-4">
-                <button id="btn-cancel-delete-char" class="w-1/2 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 rounded uppercase font-rpg transition-colors">Cancelar</button>
-                <button id="btn-confirm-delete-char" class="w-1/2 bg-rpg-red hover:bg-red-800 text-white font-bold py-3 rounded uppercase font-rpg transition-opacity duration-300 opacity-50 cursor-not-allowed flex justify-center items-center gap-2" disabled>
-                    <i data-lucide="trash-2" class="w-5 h-5"></i> Excluir
-                </button>
+                <div id="rolador-historico" class="max-h-[250px] overflow-y-auto pr-3"></div>
             </div>
         </div>
     </div>
 
-    <div id="delete-camp-modal" class="modal z-[999999]">
-        <div class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border-2 border-rpg-red rounded-md p-6 md:p-8 max-w-[500px] w-[90%] text-center shadow-2xl relative">
-            <div class="mx-auto flex items-center justify-center w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 mb-4">
-                <i data-lucide="flame" class="w-6 h-6 text-rpg-red"></i>
-            </div>
-            <h2 class="text-2xl font-rpg font-black text-rpg-red uppercase mb-2">Destruir Mesa</h2>
-            <p class="mb-4 text-gray-700 dark:text-gray-300 text-sm md:text-base">
-                Esta ação é <strong class="text-rpg-red">irreversível</strong>. Todos os jogadores serão expulsos e o histórico será apagado. Para confirmar, digite o nome exato da mesa:
-            </p>
-            <div id="delete-camp-target-name" class="font-bold text-lg md:text-xl text-black dark:text-white mb-4 bg-gray-200 dark:bg-[#1a1a1a] py-3 rounded tracking-wider select-all border border-gray-300 dark:border-gray-700"></div>
-            
-            <input type="text" id="delete-camp-input" placeholder="Digite o nome da mesa aqui..." class="w-full p-3 mb-6 bg-white dark:bg-[#242424] border border-gray-400 dark:border-gray-600 rounded outline-none focus:ring-2 focus:ring-rpg-red text-center text-black dark:text-white font-bold transition-colors" autocomplete="off">
-            
-            <div class="flex justify-between gap-4">
-                <button id="btn-cancel-delete-camp" class="w-1/2 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 rounded uppercase font-rpg transition-colors">Cancelar</button>
-                <button id="btn-confirm-delete-camp" class="w-1/2 bg-rpg-red hover:bg-red-800 text-white font-bold py-3 rounded uppercase font-rpg transition-opacity duration-300 opacity-50 cursor-not-allowed flex justify-center items-center gap-2" disabled>
-                    <i data-lucide="skull" class="w-5 h-5"></i> Destruir
-                </button>
+    <!-- MODAL: ANOTAÇÕES GRANDES -->
+    <div id="anotacoes-modal" class="modal z-[99999]">
+        <div class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border border-gray-300 dark:border-gray-800 rounded-md p-6 shadow-2xl max-w-[900px] w-[95%] h-[80vh] flex flex-col relative">
+            <span class="modal-close absolute top-4 right-6 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white text-4xl font-bold cursor-pointer transition-colors" onclick="document.getElementById('anotacoes-modal').classList.remove('show')">&times;</span>
+            <h2 class="text-center text-xl md:text-3xl font-rpg font-black text-white bg-[#8c7454] px-8 py-2 rounded-sm shadow-md uppercase tracking-widest mb-6 mx-auto w-max">Anotações</h2>
+            <textarea id="anotacoes" placeholder="Escreva sua anotações, inventário e outras coisas..." class="w-full flex-grow p-4 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#1a1a1a] text-black dark:text-white outline-none resize-none font-rpg text-lg shadow-inner focus:ring-2 focus:ring-[#8c7454] transition-colors leading-relaxed"></textarea>
+        </div>
+    </div>
+
+    <!-- MODAL: CRIAR MESA -->
+    <div id="modal-criar-campanha" class="modal z-[99999]">
+        <div class="modal-content bg-rpg-paper dark:bg-[#1e293b] border-2 border-rpg-blue rounded-md p-6 max-w-[400px] w-[90%] text-center shadow-xl">
+            <h3 class="text-2xl font-rpg font-black text-rpg-blue uppercase mb-2 flex justify-center items-center gap-2"><i data-lucide="crown" class="w-6 h-6"></i> Fundar Mesa</h3>
+            <p class="text-gray-600 dark:text-gray-400 mb-4">Dê um nome épico à sua campanha.</p>
+            <input type="text" id="nova-campanha-nome" placeholder="A Queda de SP..." class="w-full bg-white dark:bg-[#0f172a] border border-gray-400 dark:border-gray-600 rounded p-2 text-center text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-blue mb-4 font-bold">
+            <div class="flex gap-2">
+                <button class="bg-gray-500 text-white font-bold py-2 px-4 rounded w-1/2" onclick="document.getElementById('modal-criar-campanha').classList.remove('show')">Cancelar</button>
+                <button id="btn-criar-campanha" class="bg-rpg-blue text-white font-bold py-2 px-4 rounded w-1/2">Criar</button>
             </div>
         </div>
     </div>
 
-    <div id="galeria-modal" class="modal">
-        <div class="modal-content bg-[#1a1a1a] border border-[#333] max-w-[900px] w-[95%] p-6 md:p-8 rounded-md relative shadow-2xl">
-            <span id="fechar-galeria" class="modal-close absolute top-3 right-5 text-gray-400 hover:text-white text-3xl cursor-pointer">&times;</span>
-            
-            <div class="mb-6 mt-2 relative w-full">
-                <i data-lucide="search" class="w-6 h-6 absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
-                <input type="text" id="busca-personagem" placeholder="Buscar personagem..." class="w-full p-3 pl-12 bg-[#242424] border border-[#333] text-white rounded font-sans text-lg box-border outline-none focus:ring-2 focus:ring-rpg-blue transition-colors shadow-inner">
-            </div>
-
-            <div id="grid-personagens" class="galeria-grid">
-                </div>
-        </div>
-    </div>
-
-    <div id="campanhas-modal" class="modal">
-        <div class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark p-0 overflow-hidden max-w-[850px] w-[95%] rounded-md relative shadow-xl border border-gray-300 dark:border-gray-800">
-            <span id="fechar-campanhas" class="modal-close absolute top-4 right-6 text-white hover:text-gray-200 text-3xl cursor-pointer z-10">&times;</span>
-            
-            <div class="bg-rpg-red text-white p-5 md:px-8 text-center relative flex flex-col items-center">
-                <h2 class="flex items-center gap-2 text-white m-0 text-2xl font-black uppercase font-rpg border-none">
-                    <i data-lucide="dices" class="w-8 h-8"></i> Lobby de Campanha
-                </h2>
-                <p class="m-0 mt-1 text-sm md:text-base opacity-90">Gerencie suas mesas ou conecte-se a uma nova aventura.</p>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-6 md:p-8 bg-rpg-bg-light dark:bg-rpg-bg-dark">
-                <div>
-                    <h3 class="mt-0 text-xl border-b-2 border-gray-300 dark:border-gray-700 pb-2 mb-4 text-gray-800 dark:text-gray-200 font-black uppercase font-rpg text-left">Minhas Mesas</h3>
-                    <div id="lista-campanhas" class="max-h-[420px] overflow-y-auto pr-2">
-                        <p class="text-gray-500 dark:text-gray-400 italic">Carregando campanhas...</p>
-                    </div>
-                </div>
-                
-                <div class="flex flex-col gap-6">
-                    <div class="bg-white dark:bg-[#1e1e1e] border-t-4 border-t-rpg-green border border-gray-300 dark:border-gray-700 p-5 rounded-lg shadow-sm">
-                        <h4 class="flex items-center gap-2 m-0 mb-1 text-lg text-gray-800 dark:text-gray-200 font-bold">
-                            <i data-lucide="swords" class="w-5 h-5"></i> Entrar em uma Mesa
-                        </h4>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Tem um código de convite? Junte-se à party!</p>
-                        <input type="text" id="codigo-convite-input" placeholder="Código (Ex: A7X9P2)" maxlength="6" class="w-full mb-3 p-2.5 bg-gray-50 dark:bg-[#2a2a2a] border border-gray-300 dark:border-gray-600 rounded text-black dark:text-white uppercase outline-none focus:ring-2 focus:ring-rpg-green transition-colors">
-                        <select id="char-select-campanha" class="w-full mb-3 p-2.5 bg-gray-50 dark:bg-[#2a2a2a] border border-gray-300 dark:border-gray-600 rounded text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-green transition-colors">
-                            <option value="">-- Selecione seu Personagem --</option>
-                        </select>
-                        <button id="btn-entrar-campanha" class="w-full bg-rpg-green hover:bg-green-600 text-white font-bold py-2.5 rounded transition-colors uppercase font-rpg">Entrar na Mesa</button>
-                    </div>
-
-                    <div class="bg-white dark:bg-[#1e1e1e] border-t-4 border-t-rpg-blue border border-gray-300 dark:border-gray-700 p-5 rounded-lg shadow-sm">
-                        <h4 class="flex items-center gap-2 m-0 mb-1 text-lg text-gray-800 dark:text-gray-200 font-bold">
-                            <i data-lucide="crown" class="w-5 h-5"></i> Criar Nova Mesa
-                        </h4>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Seja o Mestre e convide seus jogadores.</p>
-                        <input type="text" id="nova-campanha-nome" placeholder="Nome da Campanha..." class="w-full mb-3 p-2.5 bg-gray-50 dark:bg-[#2a2a2a] border border-gray-300 dark:border-gray-600 rounded text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-blue transition-colors">
-                        <button id="btn-criar-campanha" class="w-full bg-rpg-blue hover:bg-rpg-blue-hover text-white font-bold py-2.5 rounded transition-colors uppercase font-rpg">Fundar Campanha</button>
-                    </div>
-                </div>
+    <!-- MODAL: ENTRAR NA MESA -->
+    <div id="modal-entrar-campanha" class="modal z-[99999]">
+        <div class="modal-content bg-rpg-paper dark:bg-[#1e293b] border-2 border-rpg-green rounded-md p-6 max-w-[400px] w-[90%] text-center shadow-xl">
+            <h3 class="text-2xl font-rpg font-black text-rpg-green uppercase mb-2 flex justify-center items-center gap-2"><i data-lucide="log-in" class="w-6 h-6"></i> Entrar na Mesa</h3>
+            <p class="text-gray-600 dark:text-gray-400 mb-4">Insira o código fornecido pelo seu mestre.</p>
+            <input type="text" id="codigo-convite-input" placeholder="EX: A7X9P2" maxlength="6" class="w-full bg-white dark:bg-[#0f172a] border border-gray-400 dark:border-gray-600 rounded p-2 text-center text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-green mb-4 font-black tracking-widest uppercase">
+            <select id="char-select-campanha" class="w-full mb-4 p-2 bg-white dark:bg-[#0f172a] border border-gray-400 dark:border-gray-600 rounded text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-green">
+                <option value="">-- Selecione seu Personagem --</option>
+            </select>
+            <div class="flex gap-2">
+                <button class="bg-gray-500 text-white font-bold py-2 px-4 rounded w-1/2" onclick="document.getElementById('modal-entrar-campanha').classList.remove('show')">Cancelar</button>
+                <button id="btn-entrar-campanha" class="bg-rpg-green text-white font-bold py-2 px-4 rounded w-1/2">Entrar</button>
             </div>
         </div>
     </div>
 
-    <div id="gerenciar-jogadores-modal" class="modal">
-        <div class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark max-w-[650px] w-[95%] rounded-md overflow-hidden relative border border-gray-300 dark:border-gray-800 shadow-xl p-0">
-            <span id="fechar-gerenciar-jogadores" class="modal-close absolute top-4 right-6 text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white text-3xl cursor-pointer transition-colors">&times;</span>
-            <div class="bg-gray-100 dark:bg-[#121212] border-b border-gray-300 dark:border-gray-800 p-5">
-                <h2 class="text-gray-800 dark:text-white text-left m-0 ml-2 text-xl font-black font-rpg uppercase border-none">Jogadores</h2>
-            </div>
-            <div class="p-6 md:p-8 bg-white dark:bg-[#1e1e1e]">
-                <div id="grid-jogadores-mesa" class="flex flex-wrap gap-4 justify-start">
-                    </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==========================================
-    MODAL: SORTEADOR DE MUTAÇÕES
-    ========================================== -->
-    <div id="sorteador-modal" class="modal">
+    <!-- MODAL: SORTEADOR DE MUTAÇÕES -->
+    <div id="sorteador-modal" class="modal z-[99999]">
         <div class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border-2 border-purple-700 rounded-md p-6 max-w-[700px] w-[95%] max-h-[85vh] overflow-y-auto relative shadow-[0_0_30px_rgba(126,34,206,0.3)]">
-            
-            <span id="fechar-sorteador" class="absolute top-4 right-6 text-gray-500 hover:text-purple-700 dark:text-gray-400 dark:hover:text-purple-400 text-4xl font-bold cursor-pointer transition-colors">&times;</span>
-            
-            <h2 class="text-center text-purple-700 dark:text-purple-400 font-rpg font-black text-2xl mb-2 uppercase tracking-widest">
-                Baralho de Assimilação
-            </h2>
+            <span class="absolute top-4 right-6 text-gray-500 hover:text-purple-700 dark:text-gray-400 dark:hover:text-purple-400 text-4xl font-bold cursor-pointer transition-colors" onclick="document.getElementById('sorteador-modal').classList.remove('show')">&times;</span>
+            <h2 class="text-center text-purple-700 dark:text-purple-400 font-rpg font-black text-2xl mb-2 uppercase tracking-widest">Baralho de Assimilação</h2>
             <p class="text-center text-sm text-gray-600 dark:text-gray-400 font-bold mb-6">Insira os resultados do seu Teste de Assimilação:</p>
             
             <div class="flex flex-wrap justify-center gap-4 mb-6">
-                <!-- Sucessos (A) -->
                 <div class="flex flex-col items-center bg-[#e8f5e9] dark:bg-[#1a2e1e] p-3 rounded border border-green-500 w-24">
                     <span class="font-black text-green-700 dark:text-green-400 text-xl mb-1">A</span>
                     <label class="text-[10px] font-bold text-gray-600 dark:text-gray-400 mb-2 uppercase text-center">Evolutivas</label>
                     <input type="number" id="sorteio-a" value="0" min="0" class="w-full h-10 text-center font-bold text-xl rounded border border-gray-400 outline-none bg-white dark:bg-[#2a2a2a] text-black dark:text-white">
                 </div>
-                <!-- Adaptações (B) -->
                 <div class="flex flex-col items-center bg-[#e3f2fd] dark:bg-[#1a2633] p-3 rounded border border-blue-500 w-24">
                     <span class="font-black text-blue-700 dark:text-blue-400 text-xl mb-1">B</span>
                     <label class="text-[10px] font-bold text-gray-600 dark:text-gray-400 mb-2 uppercase text-center">Adaptativas</label>
                     <input type="number" id="sorteio-b" value="0" min="0" class="w-full h-10 text-center font-bold text-xl rounded border border-gray-400 outline-none bg-white dark:bg-[#2a2a2a] text-black dark:text-white">
                 </div>
-                <!-- Pressões (C) -->
                 <div class="flex flex-col items-center bg-[#ffebee] dark:bg-[#331a1a] p-3 rounded border border-rpg-red w-24">
                     <span class="font-black text-rpg-red dark:text-red-400 text-xl mb-1">C</span>
                     <label class="text-[10px] font-bold text-gray-600 dark:text-gray-400 mb-2 uppercase text-center">Inoportunas</label>
                     <input type="number" id="sorteio-c" value="0" min="0" class="w-full h-10 text-center font-bold text-xl rounded border border-gray-400 outline-none bg-white dark:bg-[#2a2a2a] text-black dark:text-white">
                 </div>
-                <!-- Singulares (I) -->
                 <div class="flex flex-col items-center bg-[#fff8e1] dark:bg-[#332b1a] p-3 rounded border border-amber-500 w-24">
                     <span class="font-black text-amber-700 dark:text-amber-400 text-xl mb-1">I</span>
                     <label class="text-[10px] font-bold text-gray-600 dark:text-gray-400 mb-2 uppercase text-center">Singulares</label>
                     <input type="number" id="sorteio-i" value="0" min="0" class="w-full h-10 text-center font-bold text-xl rounded border border-gray-400 outline-none bg-white dark:bg-[#2a2a2a] text-black dark:text-white">
                 </div>
             </div>
-
-            <button id="btn-puxar-cartas" class="w-full bg-purple-700 hover:bg-purple-900 text-white font-bold py-3 rounded uppercase font-rpg transition-colors shadow-md text-lg">
-                Puxar Cartas
-            </button>
-
-            <!-- Container das Cartas Sorteadas -->
-            <div id="container-cartas" class="mt-6 flex flex-col gap-4">
-                <!-- Cartas aparecerão aqui -->
-            </div>
+            <button id="btn-puxar-cartas" class="w-full bg-purple-700 hover:bg-purple-900 text-white font-bold py-3 rounded uppercase font-rpg transition-colors shadow-md text-lg">Puxar Cartas</button>
+            <div id="container-cartas" class="mt-6 flex flex-col gap-4"></div>
         </div>
     </div>
 
-    <!-- ==========================================
-    MODAL: PARTITURA DE CONFLITO (Mestre)
-    ========================================== -->
+    <!-- MODAL: PARTITURA DE CONFLITO -->
     <div id="partitura-modal" class="modal z-[99999]">
+        <!-- Conteúdo idêntico ao que geramos no último passo da partitura -->
         <div class="modal-content bg-rpg-bg-light dark:bg-rpg-bg-dark border-2 border-purple-700 rounded-md p-6 md:p-8 max-w-[1000px] w-[95%] h-[85vh] flex flex-col relative shadow-[0_0_40px_rgba(126,34,206,0.2)]">
-            
-            <span id="fechar-partitura" class="absolute top-4 right-6 text-gray-500 hover:text-purple-700 dark:text-gray-400 dark:hover:text-purple-400 text-4xl font-bold cursor-pointer transition-colors z-10">&times;</span>
-            
-            <h2 class="text-center text-white font-rpg font-black text-2xl md:text-3xl mb-6 uppercase tracking-widest bg-purple-800 py-3 px-8 rounded-sm shadow-md mx-auto flex items-center gap-3 w-max">
-                <i data-lucide="swords" class="w-8 h-8"></i> Partitura de Conflito
-            </h2>
-
+            <span class="absolute top-4 right-6 text-gray-500 hover:text-purple-700 dark:text-gray-400 dark:hover:text-purple-400 text-4xl font-bold cursor-pointer transition-colors z-10" onclick="document.getElementById('partitura-modal').classList.remove('show')">&times;</span>
+            <h2 class="text-center text-white font-rpg font-black text-2xl md:text-3xl mb-6 uppercase tracking-widest bg-purple-800 py-3 px-8 rounded-sm shadow-md mx-auto flex items-center gap-3 w-max"><i data-lucide="swords" class="w-8 h-8"></i> Partitura de Conflito</h2>
             <div class="flex-grow overflow-y-auto pr-2 flex flex-col gap-8">
-                
-                <!-- SEÇÃO 1: OBJETIVOS -->
+                <!-- OBJETIVOS -->
                 <div class="bg-white dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 p-5 rounded-lg shadow-sm">
                     <div class="flex justify-between items-center mb-4 border-b-2 border-green-600 pb-2">
-                        <h3 class="text-xl font-black font-rpg text-green-700 dark:text-green-500 uppercase flex items-center gap-2 m-0">
-                            <i data-lucide="target" class="w-6 h-6"></i> Objetivos (Sucessos)
-                        </h3>
-                        <button id="btn-add-objetivo" class="bg-green-600 hover:bg-green-800 text-white font-bold py-1.5 px-4 rounded text-sm flex items-center gap-1 transition-colors">
-                            <i data-lucide="plus" class="w-4 h-4"></i> Novo
-                        </button>
+                        <h3 class="text-xl font-black font-rpg text-green-700 dark:text-green-500 uppercase flex items-center gap-2 m-0"><i data-lucide="target" class="w-6 h-6"></i> Objetivos (Sucessos)</h3>
+                        <button id="btn-add-objetivo" class="bg-green-600 hover:bg-green-800 text-white font-bold py-1.5 px-4 rounded text-sm flex items-center gap-1 transition-colors"><i data-lucide="plus" class="w-4 h-4"></i> Novo</button>
                     </div>
-                    <div id="container-objetivos" class="flex flex-col gap-4">
-                        <p class="text-gray-500 italic text-sm text-center" id="empty-objetivos">Nenhum objetivo ativo. Crie um para os jogadores focarem seus Sucessos (A).</p>
-                    </div>
+                    <div id="container-objetivos" class="flex flex-col gap-4"><p class="text-gray-500 italic text-sm text-center" id="empty-objetivos">Nenhum objetivo ativo.</p></div>
                 </div>
-
-                <!-- SEÇÃO 2: AMEAÇAS -->
+                <!-- AMEAÇAS -->
                 <div class="bg-white dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 p-5 rounded-lg shadow-sm">
                     <div class="flex justify-between items-center mb-4 border-b-2 border-rpg-red pb-2">
-                        <h3 class="text-xl font-black font-rpg text-rpg-red dark:text-red-500 uppercase flex items-center gap-2 m-0">
-                            <i data-lucide="skull" class="w-6 h-6"></i> Ameaças (Inimigos)
-                        </h3>
-                        <button id="btn-add-ameaca" class="bg-rpg-red hover:bg-red-800 text-white font-bold py-1.5 px-4 rounded text-sm flex items-center gap-1 transition-colors">
-                            <i data-lucide="plus" class="w-4 h-4"></i> Nova
-                        </button>
+                        <h3 class="text-xl font-black font-rpg text-rpg-red dark:text-red-500 uppercase flex items-center gap-2 m-0"><i data-lucide="skull" class="w-6 h-6"></i> Ameaças (Inimigos)</h3>
+                        <button id="btn-add-ameaca" class="bg-rpg-red hover:bg-red-800 text-white font-bold py-1.5 px-4 rounded text-sm flex items-center gap-1 transition-colors"><i data-lucide="plus" class="w-4 h-4"></i> Nova</button>
                     </div>
-                    <div id="container-ameacas" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <p class="text-gray-500 italic text-sm text-center md:col-span-2" id="empty-ameacas">Nenhuma ameaça ativa. Crie inimigos ou perigos ambientais.</p>
-                    </div>
+                    <div id="container-ameacas" class="grid grid-cols-1 md:grid-cols-2 gap-4"><p class="text-gray-500 italic text-sm text-center md:col-span-2" id="empty-ameacas">Nenhuma ameaça ativa.</p></div>
                 </div>
-
             </div>
         </div>
     </div>
 
-    <!-- ==========================================
-        MODAL: NOTAS DA AMEAÇA (Sub-modal)
-        ========================================== -->
+    <!-- SUB-MODAL: NOTAS DA AMEAÇA -->
     <div id="notas-ameaca-modal" class="modal z-[999999]">
         <div class="modal-content bg-gray-100 dark:bg-[#1a1a1a] border-2 border-rpg-red rounded-md p-6 max-w-[500px] w-[90%] shadow-[0_0_30px_rgba(140,58,58,0.4)] relative">
-            
-            <h3 class="text-xl font-rpg font-black text-rpg-red uppercase mb-4 flex items-center gap-2 border-b border-rpg-red pb-2">
-                <i data-lucide="file-edit" class="w-5 h-5"></i> Status e Notas da Ameaça
-            </h3>
-            
-            <textarea id="texto-notas-ameaca" rows="6" placeholder="Descreva os status, vida, habilidades ou anotações táticas desta ameaça..." class="w-full bg-white dark:bg-[#242424] border border-gray-300 dark:border-gray-700 rounded p-3 text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-red resize-none font-medium"></textarea>
-            
+            <h3 class="text-xl font-rpg font-black text-rpg-red uppercase mb-4 flex items-center gap-2 border-b border-rpg-red pb-2"><i data-lucide="file-edit" class="w-5 h-5"></i> Status e Notas da Ameaça</h3>
+            <textarea id="texto-notas-ameaca" rows="6" placeholder="Descreva os status, vida, habilidades..." class="w-full bg-white dark:bg-[#242424] border border-gray-300 dark:border-gray-700 rounded p-3 text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-red resize-none font-medium"></textarea>
             <div class="flex justify-end mt-4">
-                <button id="btn-salvar-notas" class="bg-rpg-red hover:bg-red-800 text-white font-bold py-2 px-6 rounded uppercase font-rpg transition-colors shadow-md flex items-center gap-2">
-                    <i data-lucide="check" class="w-5 h-5"></i> Salvar e Fechar
-                </button>
+                <button id="btn-salvar-notas" class="bg-rpg-red hover:bg-red-800 text-white font-bold py-2 px-6 rounded uppercase font-rpg transition-colors shadow-md flex items-center gap-2"><i data-lucide="check" class="w-5 h-5"></i> Salvar e Fechar</button>
             </div>
         </div>
     </div>
 
-    <!-- ==========================================
-        MODAL: GERENCIADOR DE REFÚGIOS (COM SAVE)
-        ========================================== -->
+    <!-- MODAL: GERENCIADOR DE REFÚGIOS -->
     <div id="refugio-modal" class="modal z-[99999]">
+        <!-- Conteúdo do refúgio idêntico ao último passo, mas com ícones atualizados -->
         <div class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border-2 border-[#6c7a6b] rounded-md p-6 max-w-[800px] w-[95%] max-h-[90vh] overflow-y-auto relative shadow-[0_0_40px_rgba(108,122,107,0.3)]">
+            <span id="fechar-refugio" class="absolute top-4 right-6 text-gray-500 hover:text-[#6c7a6b] dark:text-gray-400 text-4xl font-bold cursor-pointer transition-colors z-10" onclick="document.getElementById('refugio-modal').classList.remove('show')">&times;</span>
             
-            <span id="fechar-refugio" class="absolute top-4 right-6 text-gray-500 hover:text-[#6c7a6b] dark:text-gray-400 text-4xl font-bold cursor-pointer transition-colors z-10">&times;</span>
-            
-            <!-- 🗺️ TELA 1: LISTA DE REFÚGIOS -->
             <div id="tela-lista-refugios">
-                <h2 class="text-center text-[#4a5449] dark:text-[#8ba389] font-rpg font-black text-2xl md:text-3xl mb-6 uppercase tracking-widest flex items-center justify-center gap-3">
-                    <i data-lucide="map" class="w-8 h-8"></i> Meus Refúgios
-                </h2>
-                
-                <div id="container-lista-refugios" class="flex flex-col gap-3 mb-6">
-                    <!-- Os cards dos refúgios salvos aparecerão aqui via JS -->
-                </div>
-
-                <button id="btn-novo-refugio" class="w-full bg-[#6c7a6b] hover:bg-[#4a5449] text-white font-black py-3 rounded uppercase font-rpg transition-colors shadow-md flex items-center justify-center gap-2 text-lg">
-                    <i data-lucide="plus-circle" class="w-6 h-6"></i> Criar Novo Refúgio
-                </button>
+                <h2 class="text-center text-[#4a5449] dark:text-[#8ba389] font-rpg font-black text-2xl md:text-3xl mb-6 uppercase tracking-widest flex items-center justify-center gap-3"><i data-lucide="map" class="w-8 h-8"></i> Meus Refúgios</h2>
+                <div id="container-lista-refugios" class="flex flex-col gap-3 mb-6"></div>
+                <button id="btn-novo-refugio" class="w-full bg-[#6c7a6b] hover:bg-[#4a5449] text-white font-black py-3 rounded uppercase font-rpg transition-colors shadow-md flex items-center justify-center gap-2 text-lg"><i data-lucide="plus-circle" class="w-6 h-6"></i> Criar Novo Refúgio</button>
             </div>
 
-            <!-- 🏰 TELA 2: GESTÃO DO REFÚGIO -->
             <div id="tela-gestao-refugio" class="hidden flex flex-col gap-2">
-                
-                <button id="btn-voltar-lista" class="text-gray-500 hover:text-gray-800 dark:hover:text-white flex items-center gap-1 font-bold text-sm w-max transition-colors mb-2">
-                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar para Lista
-                </button>
-
-                <!-- Nome do Refúgio -->
+                <button id="btn-voltar-lista" class="text-gray-500 hover:text-gray-800 dark:hover:text-white flex items-center gap-1 font-bold text-sm w-max transition-colors mb-2"><i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar para Lista</button>
                 <input type="text" id="ref-nome" placeholder="Nome do Refúgio..." class="w-full text-center text-[#4a5449] dark:text-[#8ba389] font-rpg font-black text-3xl mb-4 bg-transparent border-b-2 border-dashed border-[#6c7a6b] outline-none placeholder-gray-400">
-
-                <!-- Alerta de Crise -->
+                
                 <div id="alerta-crise" class="hidden bg-red-100 dark:bg-red-900/40 border-l-4 border-rpg-red p-4 mb-4 rounded shadow-sm animate-pulse">
-                    <h3 class="text-rpg-red dark:text-red-400 font-rpg font-black text-xl uppercase flex items-center gap-2">
-                        <i data-lucide="siren" class="w-6 h-6"></i> O Refúgio está em Crise!
-                    </h3>
+                    <h3 class="text-rpg-red dark:text-red-400 font-rpg font-black text-xl uppercase flex items-center gap-2"><i data-lucide="siren" class="w-6 h-6"></i> O Refúgio está em Crise!</h3>
                     <p id="texto-motivo-crise" class="text-gray-800 dark:text-gray-200 font-bold mt-1"></p>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Painel de População -->
                     <div class="bg-white dark:bg-[#1a1a1a] p-4 rounded border border-gray-300 dark:border-gray-700 shadow-sm">
-                        <h3 class="font-rpg font-black text-lg text-gray-700 dark:text-gray-300 uppercase mb-3 flex items-center gap-2 border-b border-gray-200 dark:border-gray-600 pb-1">
-                            <i data-lucide="users" class="w-5 h-5"></i> População (Níveis)
-                        </h3>
+                        <h3 class="font-rpg font-black text-lg text-gray-700 dark:text-gray-300 uppercase mb-3 flex items-center gap-2 border-b border-gray-200 dark:border-gray-600 pb-1"><i data-lucide="users" class="w-5 h-5"></i> População (Níveis)</h3>
                         <div class="flex items-center gap-4 justify-center">
-                            <div class="flex flex-col items-center">
-                                <label class="text-xs font-bold text-gray-500 uppercase">Atual</label>
-                                <input type="number" id="ref-pop-atual" value="0" min="0" class="w-16 h-10 text-center font-bold text-xl rounded border border-gray-400 outline-none bg-gray-50 dark:bg-[#2a2a2a] text-black dark:text-white auto-save-refugio">
-                            </div>
+                            <div class="flex flex-col items-center"><label class="text-xs font-bold text-gray-500 uppercase">Atual</label><input type="number" id="ref-pop-atual" value="0" min="0" class="w-16 h-10 text-center font-bold text-xl rounded border border-gray-400 outline-none bg-gray-50 dark:bg-[#2a2a2a] text-black dark:text-white auto-save-refugio"></div>
                             <span class="text-2xl font-black text-gray-400">/</span>
-                            <div class="flex flex-col items-center">
-                                <label class="text-xs font-bold text-gray-500 uppercase">Teto Máx.</label>
-                                <input type="number" id="ref-pop-max" value="0" min="1" class="w-16 h-10 text-center font-bold text-xl rounded border border-gray-400 outline-none bg-gray-50 dark:bg-[#2a2a2a] text-black dark:text-white auto-save-refugio">
-                            </div>
+                            <div class="flex flex-col items-center"><label class="text-xs font-bold text-gray-500 uppercase">Teto Máx.</label><input type="number" id="ref-pop-max" value="0" min="1" class="w-16 h-10 text-center font-bold text-xl rounded border border-gray-400 outline-none bg-gray-50 dark:bg-[#2a2a2a] text-black dark:text-white auto-save-refugio"></div>
                         </div>
                     </div>
 
-                    <!-- Painel de Estatísticas -->
                     <div class="bg-white dark:bg-[#1a1a1a] p-4 rounded border border-gray-300 dark:border-gray-700 shadow-sm grid grid-cols-2 gap-2">
-                        <div class="flex flex-col">
-                            <label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1"><i data-lucide="shield" class="w-3 h-3"></i> Defesa</label>
-                            <input type="number" id="ref-defesa" value="0" min="0" class="w-full h-8 px-2 font-bold rounded border border-gray-300 outline-none bg-transparent text-black dark:text-white auto-save-refugio">
-                        </div>
-                        <div class="flex flex-col">
-                            <label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1"><i data-lucide="smile" class="w-3 h-3"></i> Moral</label>
-                            <input type="number" id="ref-moral" value="4" min="0" max="6" class="w-full h-8 px-2 font-bold rounded border border-gray-300 outline-none bg-transparent text-black dark:text-white auto-save-refugio">
-                        </div>
-                        <div class="flex flex-col">
-                            <label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1"><i data-lucide="truck" class="w-3 h-3"></i> Mobilidade</label>
-                            <input type="number" id="ref-mobilidade" value="0" min="0" class="w-full h-8 px-2 font-bold rounded border border-gray-300 outline-none bg-transparent text-black dark:text-white auto-save-refugio">
-                        </div>
-                        <div class="flex flex-col">
-                            <label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1"><i data-lucide="swords" class="w-3 h-3"></i> Beligerância</label>
-                            <input type="number" id="ref-beligerancia" value="0" min="0" class="w-full h-8 px-2 font-bold rounded border border-gray-300 outline-none bg-transparent text-black dark:text-white auto-save-refugio">
-                        </div>
+                        <div class="flex flex-col"><label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1"><i data-lucide="shield" class="w-3 h-3"></i> Defesa</label><input type="number" id="ref-defesa" value="0" min="0" class="w-full h-8 px-2 font-bold rounded border border-gray-300 outline-none bg-transparent text-black dark:text-white auto-save-refugio"></div>
+                        <div class="flex flex-col"><label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1"><i data-lucide="smile" class="w-3 h-3"></i> Moral</label><input type="number" id="ref-moral" value="4" min="0" max="6" class="w-full h-8 px-2 font-bold rounded border border-gray-300 outline-none bg-transparent text-black dark:text-white auto-save-refugio"></div>
+                        <div class="flex flex-col"><label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1"><i data-lucide="truck" class="w-3 h-3"></i> Mobilidade</label><input type="number" id="ref-mobilidade" value="0" min="0" class="w-full h-8 px-2 font-bold rounded border border-gray-300 outline-none bg-transparent text-black dark:text-white auto-save-refugio"></div>
+                        <div class="flex flex-col"><label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1"><i data-lucide="swords" class="w-3 h-3"></i> Beligerância</label><input type="number" id="ref-beligerancia" value="0" min="0" class="w-full h-8 px-2 font-bold rounded border border-gray-300 outline-none bg-transparent text-black dark:text-white auto-save-refugio"></div>
                     </div>
 
-                    <!-- Painel de Recursos -->
                     <div class="bg-white dark:bg-[#1a1a1a] p-4 rounded border border-gray-300 dark:border-gray-700 shadow-sm md:col-span-2">
-                        <h3 class="font-rpg font-black text-lg text-blue-700 dark:text-blue-500 uppercase mb-3 flex items-center gap-2 border-b border-gray-200 dark:border-gray-600 pb-1">
-                            <i data-lucide="package" class="w-5 h-5"></i> Recursos (Consumo Semanal)
-                        </h3>
-                        
+                        <h3 class="font-rpg font-black text-lg text-blue-700 dark:text-blue-500 uppercase mb-3 flex items-center gap-2 border-b border-gray-200 dark:border-gray-600 pb-1"><i data-lucide="package" class="w-5 h-5"></i> Recursos (Consumo Semanal)</h3>
                         <div class="grid grid-cols-3 gap-4">
-                            <div class="flex flex-col items-center bg-blue-50 dark:bg-blue-900/20 p-2 rounded border border-blue-200 dark:border-blue-800 relative">
-                                <i data-lucide="droplet" class="w-6 h-6 text-blue-500 mb-1"></i>
-                                <label class="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase">Água</label>
-                                <input type="number" id="ref-agua" value="0" min="0" class="w-16 h-8 text-center font-bold mt-1 rounded border border-gray-300 outline-none bg-white dark:bg-[#2a2a2a] text-black dark:text-white auto-save-refugio">
-                                <label class="text-[10px] text-gray-500 mt-1 cursor-pointer flex items-center gap-1"><input type="checkbox" id="ref-fonte-agua" class="auto-save-refugio">Tem Fonte?</label>
-                            </div>
-
-                            <div class="flex flex-col items-center bg-green-50 dark:bg-green-900/20 p-2 rounded border border-green-200 dark:border-green-800">
-                                <i data-lucide="wheat" class="w-6 h-6 text-green-500 mb-1"></i>
-                                <label class="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase">Alimento</label>
-                                <input type="number" id="ref-alimento" value="0" min="0" class="w-16 h-8 text-center font-bold mt-1 rounded border border-gray-300 outline-none bg-white dark:bg-[#2a2a2a] text-black dark:text-white auto-save-refugio">
-                            </div>
-
-                            <div class="flex flex-col items-center bg-amber-50 dark:bg-amber-900/20 p-2 rounded border border-amber-200 dark:border-amber-800">
-                                <i data-lucide="tree-pine" class="w-6 h-6 text-amber-600 mb-1"></i>
-                                <label class="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase">Madeira</label>
-                                <input type="number" id="ref-madeira" value="0" min="0" class="w-16 h-8 text-center font-bold mt-1 rounded border border-gray-300 outline-none bg-white dark:bg-[#2a2a2a] text-black dark:text-white auto-save-refugio">
-                            </div>
+                            <div class="flex flex-col items-center bg-blue-50 dark:bg-blue-900/20 p-2 rounded border border-blue-200 dark:border-blue-800 relative"><i data-lucide="droplet" class="w-6 h-6 text-blue-500 mb-1"></i><label class="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase">Água</label><input type="number" id="ref-agua" value="0" min="0" class="w-16 h-8 text-center font-bold mt-1 rounded border border-gray-300 outline-none bg-white dark:bg-[#2a2a2a] text-black dark:text-white auto-save-refugio"><label class="text-[10px] text-gray-500 mt-1 cursor-pointer flex items-center gap-1"><input type="checkbox" id="ref-fonte-agua" class="auto-save-refugio">Tem Fonte?</label></div>
+                            <div class="flex flex-col items-center bg-green-50 dark:bg-green-900/20 p-2 rounded border border-green-200 dark:border-green-800"><i data-lucide="wheat" class="w-6 h-6 text-green-500 mb-1"></i><label class="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase">Alimento</label><input type="number" id="ref-alimento" value="0" min="0" class="w-16 h-8 text-center font-bold mt-1 rounded border border-gray-300 outline-none bg-white dark:bg-[#2a2a2a] text-black dark:text-white auto-save-refugio"></div>
+                            <div class="flex flex-col items-center bg-amber-50 dark:bg-amber-900/20 p-2 rounded border border-amber-200 dark:border-amber-800"><i data-lucide="tree-pine" class="w-6 h-6 text-amber-600 mb-1"></i><label class="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase">Madeira</label><input type="number" id="ref-madeira" value="0" min="0" class="w-16 h-8 text-center font-bold mt-1 rounded border border-gray-300 outline-none bg-white dark:bg-[#2a2a2a] text-black dark:text-white auto-save-refugio"></div>
                         </div>
                     </div>
                 </div>
 
-                <button id="btn-avancar-semana" class="mt-4 w-full bg-[#6c7a6b] hover:bg-[#4a5449] text-white font-black py-4 rounded uppercase font-rpg transition-colors shadow-md text-xl flex items-center justify-center gap-2">
-                    <i data-lucide="calendar-fast" class="w-6 h-6"></i> Avançar 1 Semana
-                </button>
+                <button id="btn-avancar-semana" class="mt-4 w-full bg-[#6c7a6b] hover:bg-[#4a5449] text-white font-black py-4 rounded uppercase font-rpg transition-colors shadow-md text-xl flex items-center justify-center gap-2"><i data-lucide="calendar-fast" class="w-6 h-6"></i> Avançar 1 Semana</button>
             </div>
-
         </div>
     </div>
 
-    <!-- ==========================================
-        MODAL: CONFIRMAR REMOÇÃO DE JOGADOR
-        ========================================== -->
+    <!-- MODAIS DE EXCLUSÃO SEGUROS (Char, Campanha, Jogador, Refúgio) -->
+    <div id="delete-char-modal" class="modal z-[99999]">
+        <div class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border-2 border-rpg-red rounded-md p-6 md:p-8 max-w-[500px] w-[90%] text-center shadow-2xl relative">
+            <div class="mx-auto flex items-center justify-center w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 mb-4"><i data-lucide="alert-triangle" class="w-6 h-6 text-rpg-red"></i></div>
+            <h2 class="text-2xl font-rpg font-black text-rpg-red uppercase mb-2">Excluir Personagem</h2>
+            <p class="mb-4 text-gray-700 dark:text-gray-300 text-sm md:text-base">Esta ação é <strong class="text-rpg-red">irreversível</strong>. Digite o nome abaixo:</p>
+            <div id="delete-char-target-name" class="font-bold text-lg md:text-xl text-black dark:text-white mb-4 bg-gray-200 dark:bg-[#1a1a1a] py-3 rounded tracking-wider select-all border border-gray-300 dark:border-gray-700"></div>
+            <input type="text" id="delete-char-input" placeholder="Digite o nome aqui..." class="w-full p-3 mb-6 bg-white dark:bg-[#242424] border border-gray-400 dark:border-gray-600 rounded outline-none focus:ring-2 focus:ring-rpg-red text-center text-black dark:text-white font-bold transition-colors" autocomplete="off">
+            <div class="flex justify-between gap-4">
+                <button id="btn-cancel-delete-char" class="w-1/2 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 rounded uppercase font-rpg transition-colors">Cancelar</button>
+                <button id="btn-confirm-delete-char" class="w-1/2 bg-rpg-red hover:bg-red-800 text-white font-bold py-3 rounded uppercase font-rpg transition-opacity duration-300 opacity-50 cursor-not-allowed flex justify-center items-center gap-2" disabled><i data-lucide="trash-2" class="w-5 h-5"></i> Excluir</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="delete-camp-modal" class="modal z-[999999]">
+        <div class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border-2 border-rpg-red rounded-md p-6 md:p-8 max-w-[500px] w-[90%] text-center shadow-2xl relative">
+            <div class="mx-auto flex items-center justify-center w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 mb-4"><i data-lucide="flame" class="w-6 h-6 text-rpg-red"></i></div>
+            <h2 class="text-2xl font-rpg font-black text-rpg-red uppercase mb-2">Destruir Mesa</h2>
+            <p class="mb-4 text-gray-700 dark:text-gray-300 text-sm md:text-base">Esta ação é <strong class="text-rpg-red">irreversível</strong>. Digite o nome da mesa:</p>
+            <div id="delete-camp-target-name" class="font-bold text-lg md:text-xl text-black dark:text-white mb-4 bg-gray-200 dark:bg-[#1a1a1a] py-3 rounded tracking-wider select-all border border-gray-300 dark:border-gray-700"></div>
+            <input type="text" id="delete-camp-input" placeholder="Digite o nome da mesa aqui..." class="w-full p-3 mb-6 bg-white dark:bg-[#242424] border border-gray-400 dark:border-gray-600 rounded outline-none focus:ring-2 focus:ring-rpg-red text-center text-black dark:text-white font-bold transition-colors" autocomplete="off">
+            <div class="flex justify-between gap-4">
+                <button id="btn-cancel-delete-camp" class="w-1/2 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 rounded uppercase font-rpg transition-colors">Cancelar</button>
+                <button id="btn-confirm-delete-camp" class="w-1/2 bg-rpg-red hover:bg-red-800 text-white font-bold py-3 rounded uppercase font-rpg transition-opacity duration-300 opacity-50 cursor-not-allowed flex justify-center items-center gap-2" disabled><i data-lucide="skull" class="w-5 h-5"></i> Destruir</button>
+            </div>
+        </div>
+    </div>
+
     <div id="remove-jogador-modal" class="modal z-[999999]">
         <div class="modal-content bg-rpg-paper dark:bg-[#1a1a1a] border-2 border-rpg-red rounded-md p-6 max-w-[400px] w-[90%] text-center shadow-[0_0_30px_rgba(140,58,58,0.6)]">
-            <h3 class="text-2xl font-rpg font-black text-rpg-red uppercase mb-2 flex justify-center items-center gap-2">
-                <i data-lucide="user-x" class="w-8 h-8"></i> Remover Jogador
-            </h3>
-            <p class="text-gray-700 dark:text-gray-300 mb-4 font-bold">Para expulsar este jogador da mesa, digite o nome da conta dele abaixo:</p>
+            <h3 class="text-2xl font-rpg font-black text-rpg-red uppercase mb-2 flex justify-center items-center gap-2"><i data-lucide="user-x" class="w-8 h-8"></i> Remover Jogador</h3>
+            <p class="text-gray-700 dark:text-gray-300 mb-4 font-bold">Digite o nome da conta do jogador abaixo:</p>
             <p id="remove-jogador-target-name" class="text-rpg-red dark:text-red-400 font-black text-xl mb-4 uppercase select-none"></p>
             <input type="text" id="remove-jogador-input" placeholder="Digite o nome..." class="w-full bg-white dark:bg-[#242424] border border-gray-400 dark:border-gray-600 rounded p-2 text-center text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-red mb-4 font-bold" autocomplete="off">
             <div class="flex justify-center gap-4">
@@ -966,15 +830,10 @@
         </div>
     </div>
 
-    <!-- ==========================================
-        MODAL: CONFIRMAR DESTRUIÇÃO DE REFÚGIO
-        ========================================== -->
     <div id="delete-refugio-modal" class="modal z-[999999]">
         <div class="modal-content bg-rpg-paper dark:bg-[#1a1a1a] border-2 border-rpg-red rounded-md p-6 max-w-[400px] w-[90%] text-center shadow-[0_0_30px_rgba(140,58,58,0.6)]">
-            <h3 class="text-2xl font-rpg font-black text-rpg-red uppercase mb-2 flex justify-center items-center gap-2">
-                <i data-lucide="alert-triangle" class="w-8 h-8"></i> Dizimar Refúgio
-            </h3>
-            <p class="text-gray-700 dark:text-gray-300 mb-4 font-bold">Esta ação é irreversível. Para confirmar a destruição, digite o nome do refúgio abaixo:</p>
+            <h3 class="text-2xl font-rpg font-black text-rpg-red uppercase mb-2 flex justify-center items-center gap-2"><i data-lucide="alert-triangle" class="w-8 h-8"></i> Dizimar Refúgio</h3>
+            <p class="text-gray-700 dark:text-gray-300 mb-4 font-bold">Esta ação é irreversível. Digite o nome do refúgio abaixo:</p>
             <p id="delete-refugio-target-name" class="text-rpg-red dark:text-red-400 font-black text-xl mb-4 uppercase select-none"></p>
             <input type="text" id="delete-refugio-input" placeholder="Digite o nome..." class="w-full bg-white dark:bg-[#242424] border border-gray-400 dark:border-gray-600 rounded p-2 text-center text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-red mb-4 font-bold" autocomplete="off">
             <div class="flex justify-center gap-4">
@@ -984,28 +843,72 @@
         </div>
     </div>
 
-    <footer class="w-full bg-rpg-paper dark:bg-rpg-paper-dark border-t border-gray-300 dark:border-gray-800 mt-12 py-8 transition-colors duration-300 mt-auto">
-        <div class="max-w-[1100px] mx-auto text-center px-4">
-            <h3 class="font-rpg font-black text-xl text-rpg-red dark:text-orange-500 uppercase mb-2 tracking-wider">
-            Ficha Assimilação RPG
-            </h3>
-            <p class="font-sans text-gray-600 dark:text-gray-400 text-sm md:text-base font-bold mb-3">
-                Desenvolvido com <i data-lucide="heart" class="w-4 h-4 inline-block text-rpg-red fill-current align-text-bottom"></i> por <a href="https://www.linkedin.com/in/roannl" target="_blank" class="text-rpg-blue hover:text-rpg-blue-hover dark:text-rpg-blue-hover hover:underline transition-colors">Roan Lisboa</a>
-            </p>
-            <p class="font-sans text-gray-600 dark:text-gray-400 text-sm md:text-base font-bold mb-3">
-                <a href="https://github.com/RoanNL/FichaAssimilacaoRPG" target="_blank" class="text-rpg-blue hover:text-rpg-blue-hover dark:text-rpg-blue-hover hover:underline transition-colors">Github</a>
-            </p>
-            <p class="font-rpg text-xs text-gray-500 dark:text-gray-500">
-                Sistema de Rolagem Dinâmica • Gerenciamento de Fichas • Multiplayer em Tempo Real
-            </p>
+    <!-- ==========================================
+         MODAL: PERFIL DO USUÁRIO
+         ========================================== -->
+    <div id="perfil-modal" class="modal z-[999999]">
+        <div class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border border-gray-300 dark:border-gray-800 rounded-md p-6 max-w-[500px] w-[95%] shadow-2xl relative">
+            <span class="absolute top-4 right-6 text-gray-500 hover:text-rpg-red dark:text-gray-400 dark:hover:text-red-400 text-3xl font-bold cursor-pointer transition-colors z-10" onclick="document.getElementById('perfil-modal').classList.remove('show')">&times;</span>
+            
+            <div class="flex flex-col items-center border-b border-gray-300 dark:border-gray-700 pb-6 mb-6 mt-2">
+                
+                <!-- ÁREA CLICÁVEL DA FOTO -->
+                <div class="relative w-24 h-24 rounded-full border-4 border-rpg-red overflow-hidden mb-3 shadow-md bg-gray-200 dark:bg-[#111] flex items-center justify-center group cursor-pointer" onclick="document.getElementById('input-avatar').click()">
+                    <img id="perfil-avatar-img" src="./assets/icon.jpg" alt="Avatar" class="w-full h-full object-cover transition-opacity group-hover:opacity-50">
+                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <i data-lucide="camera" class="w-8 h-8 text-white"></i>
+                    </div>
+                </div>
+                <!-- INPUT INVISÍVEL -->
+                <input type="file" id="input-avatar" accept="image/*" class="hidden">
+
+                <h2 id="perfil-nome-usuario" class="text-2xl font-black font-rpg text-gray-800 dark:text-white uppercase m-0">Operador</h2>
+                <p class="text-gray-500 dark:text-gray-400 text-sm font-bold uppercase tracking-widest mt-1">Status: Conectado</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="bg-gray-100 dark:bg-[#1a1a1a] p-4 rounded text-center border border-gray-300 dark:border-gray-700 shadow-sm">
+                    <i data-lucide="users" class="w-6 h-6 mx-auto text-rpg-red mb-1"></i>
+                    <h3 class="font-black text-2xl m-0 text-gray-800 dark:text-white" id="perfil-count-chars">0</h3>
+                    <p class="text-xs text-gray-500 font-bold uppercase mt-1">Personagens</p>
+                </div>
+                <div class="bg-gray-100 dark:bg-[#1a1a1a] p-4 rounded text-center border border-gray-300 dark:border-gray-700 shadow-sm">
+                    <i data-lucide="map" class="w-6 h-6 mx-auto text-rpg-blue mb-1"></i>
+                    <h3 class="font-black text-2xl m-0 text-gray-800 dark:text-white" id="perfil-count-camps">0</h3>
+                    <p class="text-xs text-gray-500 font-bold uppercase mt-1">Campanhas</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[300px] overflow-y-auto pr-2">
+                <div>
+                    <h4 class="font-rpg font-black text-rpg-red border-b border-gray-300 dark:border-gray-700 pb-1 mb-3 flex items-center gap-1"><i data-lucide="user" class="w-4 h-4"></i> Fichas</h4>
+                    <div id="perfil-lista-chars" class="flex flex-col gap-2">
+                        <!-- Preenchido via JS -->
+                        <p class="text-sm text-gray-500 italic">Carregando...</p>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-rpg font-black text-rpg-blue border-b border-gray-300 dark:border-gray-700 pb-1 mb-3 flex items-center gap-1"><i data-lucide="swords" class="w-4 h-4"></i> Mesas</h4>
+                    <div id="perfil-lista-camps" class="flex flex-col gap-2">
+                        <!-- Preenchido via JS -->
+                        <p class="text-sm text-gray-500 italic">Carregando...</p>
+                    </div>
+                </div>
+            </div>
         </div>
-    </footer>
+    </div>
 
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
-    <script src="./scripts/ficha-script.js"></script>
-    <script src="./scripts/rolador-script.js"></script>
-    <script src="./scripts/campanha-script.js"></script>
-    <script src="./scripts/leaves.js"></script>
+    
+    <script src="./js/router.js"></script> 
+    <script src="./js/auth.js"></script>
+    <script src="./js/dashboard.js"></script>
+    <script src="./js/ficha.js"></script>
+    <script src="./js/campanha.js"></script>
+    <script src="./js/rolador.js"></script>
+    <script src="./js/leaves.js"></script>
+    <script src="./js/tema.js"></script>
+    <script src="./js/perfil.js"></script>
 </body>
 </html>

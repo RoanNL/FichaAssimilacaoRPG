@@ -77,6 +77,7 @@ async function criarTabelas() {
 
     try {
         await pool.query(query);
+        await pool.query('ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS avatar TEXT;');
         console.log('✅ Tabelas do PostgreSQL verificadas/criadas com sucesso (Versão UUID)!');
     } catch (err) {
         console.error('❌ Erro ao criar tabelas:', err);

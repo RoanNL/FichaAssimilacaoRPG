@@ -239,7 +239,7 @@ app.post('/login', async (req, res) => {
     }
 
     try {
-        const sql = `SELECT id, username, password, email FROM usuarios WHERE email = $1`;
+        const sql = `SELECT id, username, password, email, avatar FROM usuarios WHERE email = $1`;
         const resultado = await pool.query(sql, [emailLowerCase]);
 
         if (resultado.rows.length === 0) {
@@ -261,6 +261,7 @@ app.post('/login', async (req, res) => {
             usuario: {
                 id: usuarioDb.id,
                 nome: usuarioDb.username,
+                avatar: usuarioDb.avatar,
                 email: usuarioDb.email
             },
             token: token 
@@ -371,6 +372,56 @@ app.post('/resetar-senha', async (req, res) => {
     } catch (err) {
         console.error("❌ Erro ao resetar senha:", err);
         res.status(500).json({ erro: 'Erro interno ao redefinir a senha.' });
+    }
+});
+
+// =========================================================================
+// ROTA PARA ATUALIZAR E BUSCAR O AVATAR DO USUÁRIO
+// =========================================================================
+app.post('/usuarios/avatar', verificarToken, async (req, res) => {
+    let foto = req.body.foto;
+    const usuarioId = req.usuario.id;
+
+    if (!foto) return res.status(400).json({ erro: 'Nenhuma foto enviada.' });
+
+    // Se for base64, sobe para o Supabase usando o mesmo bucket das fichas
+    if (supabase && foto.startsWith('data:image')) {
+        try {
+            const base64Data = foto.replace(/^data:image\/\w+;base64,/, "");
+            const buffer = Buffer.from(base64Data, 'base64');
+            const extensao = foto.substring(foto.indexOf('/') + 1, foto.indexOf(';base64'));
+            const nomeArquivo = `avatar_${usuarioId}_${Date.now()}.${extensao}`;
+
+            const { data, error } = await supabase.storage
+                .from('ficha-fotos') 
+                .upload(nomeArquivo, buffer, {
+                    contentType: `image/${extensao}`,
+                    upsert: true
+                });
+
+            if (error) throw error;
+            const { data: publicUrlData } = supabase.storage.from('ficha-fotos').getPublicUrl(nomeArquivo);
+            foto = publicUrlData.publicUrl; 
+        } catch (err) {
+            console.error("Erro no Supabase ao subir avatar:", err);
+            return res.status(500).json({ erro: 'Erro ao hospedar a imagem.' });
+        }
+    }
+
+    try {
+        await pool.query(`UPDATE usuarios SET avatar = $1 WHERE id = $2`, [foto, usuarioId]);
+        res.json({ mensagem: 'Avatar atualizado!', avatar: foto });
+    } catch (erro) {
+        res.status(500).json({ erro: 'Erro ao salvar avatar no banco.' });
+    }
+});
+
+app.get('/usuarios/me', verificarToken, async (req, res) => {
+    try {
+        const result = await pool.query('SELECT avatar FROM usuarios WHERE id = $1', [req.usuario.id]);
+        res.json(result.rows[0]);
+    } catch (erro) {
+        res.status(500).json({ erro: 'Erro ao buscar dados do usuário.' });
     }
 });
 
