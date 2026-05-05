@@ -23,18 +23,29 @@ const Router = {
             destino.classList.add('animate-fade-in'); 
         }
 
-        // GATILHOS DE ATUALIZAÇÃO (Com um micro-delay para evitar travamentos)
-        setTimeout(() => {
+        // 🔥 O CAÇADOR DE FUNÇÕES (Garante que carrega mesmo com F5) 🔥
+        let tentativas = 0;
+        const cacador = setInterval(() => {
             if (telaDestino === 'dashboard') {
-                if (typeof window.carregarListaPersonagens === 'function') window.carregarListaPersonagens();
-                if (typeof window.carregarMinhasCampanhas === 'function') window.carregarMinhasCampanhas();
+                if (typeof window.carregarListaPersonagens === 'function' && typeof window.carregarMinhasCampanhas === 'function') {
+                    window.carregarListaPersonagens();
+                    window.carregarMinhasCampanhas();
+                    clearInterval(cacador); // Missão cumprida, desliga o caçador!
+                }
+            } else if (telaDestino === 'campanha') {
+                if (typeof window.carregarLobbyCampanha === 'function') {
+                    window.carregarLobbyCampanha();
+                    clearInterval(cacador);
+                }
+            } else {
+                clearInterval(cacador); // Se não for nem mesa nem dashboard, cancela.
             }
 
-            if (telaDestino === 'campanha') {
-                if (typeof window.carregarLobbyCampanha === 'function') window.carregarLobbyCampanha();
-            }
-        }, 50);
+            tentativas++;
+            if(tentativas > 30) clearInterval(cacador); // Segurança: Desiste após 3 segundos para não travar o PC
+        }, 100);
 
+        // --- CONTROLES VISUAIS GLOBAIS ---
         const fabRolador = document.getElementById('fab-rolador');
         if (fabRolador) {
             if (telaDestino === 'ficha' || telaDestino === 'campanha') {
@@ -44,11 +55,9 @@ const Router = {
             }
         }
 
-        // --- CONTROLE DOS BOTÕES DA FICHA (BLINDADO) ---
         const btnSave = document.getElementById('btn-save-char-nav');
         const btnDelete = document.getElementById('btn-delete-char-nav');
         
-        // 🔥 A FORÇA BRUTA: Usamos style.display para o flex não ignorar o ocultamento!
         if (btnSave) {
             if (telaDestino === 'ficha') {
                 btnSave.classList.remove('hidden');

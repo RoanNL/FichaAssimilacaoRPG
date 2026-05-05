@@ -784,28 +784,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (resultado.id) {
                     window.idPersonagemAtual = resultado.id;
                     sessionStorage.setItem('personagemAtivoId', resultado.id);
-                    if (btnDeleteCharNav) btnDeleteCharNav.classList.remove('hidden');
                 }
 
-                // O Pop-up verde no canto da tela só aparece no manual, como você prefere
                 if (!silencioso) {
                     window.mostrarNotificacao(resultado.mensagem, 'sucesso');
                     if(typeof window.carregarListaPersonagens === 'function') window.carregarListaPersonagens();
                 }
                 
-                // 🔥 ANIMAÇÃO "SALVO!" AZUL RESTAURADA PARA TODOS OS CASOS 🔥
-                if (btnSaveNav) {
-                    btnSaveNav.classList.remove('bg-rpg-green', 'hover:bg-green-700');
-                    btnSaveNav.classList.add('bg-blue-600', 'hover:bg-blue-700');
-                    btnSaveNav.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4"></i> <span class="hidden md:inline">Salvo!</span>';
-                    if(window.lucide) lucide.createIcons();
-                    
-                    setTimeout(() => {
-                        btnSaveNav.classList.remove('bg-blue-600', 'hover:bg-blue-700');
-                        btnSaveNav.classList.add('bg-rpg-green', 'hover:bg-green-700');
-                        btnSaveNav.innerHTML = htmlPadrao;
+                // 🔥 TRAVA DE TELA: Só manipula os botões da navbar se o jogador AINDA ESTIVER na tela da Ficha! 🔥
+                if (typeof Router !== 'undefined' && Router.telaAtual === 'ficha') {
+                    if (btnDeleteCharNav) {
+                        btnDeleteCharNav.classList.remove('hidden');
+                        btnDeleteCharNav.style.display = 'flex';
+                    }
+
+                    if (btnSaveNav) {
+                        btnSaveNav.classList.remove('bg-rpg-green', 'hover:bg-green-700');
+                        btnSaveNav.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                        btnSaveNav.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4"></i> <span class="hidden md:inline">Salvo!</span>';
                         if(window.lucide) lucide.createIcons();
-                    }, 2000);
+                        
+                        setTimeout(() => {
+                            // Confirma de novo se o cara não saiu da ficha nesses 2 segundos do setTimeout!
+                            if (Router.telaAtual === 'ficha') {
+                                btnSaveNav.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                                btnSaveNav.classList.add('bg-rpg-green', 'hover:bg-green-700');
+                                btnSaveNav.innerHTML = htmlPadrao;
+                                if(window.lucide) lucide.createIcons();
+                            }
+                        }, 2000);
+                    }
                 }
             } else {
                 if (!silencioso) window.mostrarNotificacao(resultado.erro || "Erro.", 'erro');

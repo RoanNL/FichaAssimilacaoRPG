@@ -920,13 +920,14 @@ app.get('/campanhas/usuario/:usuarioId', verificarToken, async (req, res) => {
 // =========================================================================
 app.get('/campanhas/:id/fichas-mesa', verificarToken, async (req, res) => {
     try {
-        // 🔥 A MÁGICA AQUI: "DISTINCT ON (p.id)" garante que cada ficha só apareça UMA vez!
+        // 🔥 AGORA SIM! Com o ORDER BY, o Postgres sabe exatamente como organizar e filtrar os clones!
         const result = await pool.query(`
             SELECT DISTINCT ON (p.id) p.*, u.username as nome_conta, u.avatar 
             FROM personagens p
             JOIN membros_campanha m ON p.id = m.personagem_id
             JOIN usuarios u ON u.id = m.usuario_id
             WHERE m.campanha_id = $1
+            ORDER BY p.id
         `, [req.params.id]);
         
         res.json(result.rows);
@@ -935,7 +936,6 @@ app.get('/campanhas/:id/fichas-mesa', verificarToken, async (req, res) => {
         res.status(500).json({ erro: 'Erro ao buscar fichas da mesa.' });
     }
 });
-
 // =========================================================================
 // ROTA DO MESTRE: Excluir Campanha (Destruir a Mesa)
 // =========================================================================
