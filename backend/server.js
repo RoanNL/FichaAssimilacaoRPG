@@ -708,6 +708,77 @@ app.get('/campanhas/:id/jogadores', verificarToken, async (req, res) => {
     }
 });
 
+app.post('/campanhas/:id/adicionar-personagem', verificarToken, async (req, res) => {
+    const campanhaId = req.params.id;
+    const { personagem_id } = req.body;
+    const usuarioIdSeguro = req.usuario.id;
+
+    try {
+        // 1. Checa se ele já está dentro da sala (só quem tá na mesa pode puxar ficha)
+        const membroCheck = await pool.query('SELECT id FROM membros_campanha WHERE campanha_id = $1 AND usuario_id = $2 LIMIT 1', [campanhaId, usuarioIdSeguro]);
+        if (membroCheck.rows.length === 0) return res.status(403).json({erro: 'Você não tem permissão nesta mesa.'});
+
+        // 2. A ficha realmente pertence a ele?
+        const charCheck = await pool.query('SELECT id FROM personagens WHERE id = $1 AND usuario_id = $2', [personagem_id, usuarioIdSeguro]);
+        if (charCheck.rows.length === 0) return res.status(403).json({erro: 'Personagem inválido ou não te pertence.'});
+
+        // 3. O personagem já tá ali?
+        const dupCheck = await pool.query('SELECT id FROM membros_campanha WHERE campanha_id = $1 AND personagem_id = $2', [campanhaId, personagem_id]);
+        if (dupCheck.rows.length > 0) return res.status(400).json({erro: 'Este personagem já está na mesa.'});
+
+        // Adiciona a cadeira nova na mesa
+        await pool.query(`INSERT INTO membros_campanha (campanha_id, usuario_id, personagem_id) VALUES ($1, $2, $3)`, [campanhaId, usuarioIdSeguro, personagem_id]);
+
+        const io = req.app.get('io');
+        if (io) io.to(campanhaId.toString()).emit('atualizar-jogadores');
+
+        res.json({ mensagem: 'Ficha inserida na mesa!' });
+    } catch (err) {
+        res.status(500).json({ erro: 'Erro ao conectar com o servidor.' });
+    }
+});
+
+// 🔥 ROTA NOVA: RECOLHER PERSONAGEM SEM EXPULSAR O JOGADOR 🔥
+app.delete('/campanhas/:id/remover-personagem/:personagemId', verificarToken, async (req, res) => {
+    const campanhaId = req.params.id;
+    const personagemId = req.params.personagemId;
+    const usuarioIdSeguro = req.usuario.id;
+
+    try {
+        // Checa permissão (Ou é o Mestre da mesa, ou é o Dono da ficha)
+        const campCheck = await pool.query('SELECT mestre_id FROM campanhas WHERE id = $1', [campanhaId]);
+        const isMestre = campCheck.rows.length > 0 && campCheck.rows[0].mestre_id === usuarioIdSeguro;
+
+        const charCheck = await pool.query('SELECT usuario_id FROM personagens WHERE id = $1', [personagemId]);
+        const isDono = charCheck.rows.length > 0 && charCheck.rows[0].usuario_id === usuarioIdSeguro;
+
+        if (!isMestre && !isDono) return res.status(403).json({erro: 'Sem permissão.'});
+
+        // 🔥 A MÁGICA DE NÃO EXPULSAR: 
+        // Verificamos quantas "cadeiras" o usuário tem na mesa.
+        const donoDaCadeira = charCheck.rows[0].usuario_id;
+        const userRows = await pool.query('SELECT id, personagem_id FROM membros_campanha WHERE campanha_id = $1 AND usuario_id = $2', [campanhaId, donoDaCadeira]);
+        
+        const targetRow = userRows.rows.find(r => r.personagem_id === personagemId);
+        if (!targetRow) return res.status(404).json({erro: 'A ficha não está na mesa.'});
+
+        if (userRows.rows.length === 1) {
+            // Se for a última ficha dele na mesa, apagamos o ID da ficha, mas MANTEMOS ele na sala (NULL)
+            await pool.query('UPDATE membros_campanha SET personagem_id = NULL WHERE id = $1', [targetRow.id]);
+        } else {
+            // Se ele tem outras fichas (ou cadeiras vazias), só apagamos essa cadeira específica.
+            await pool.query('DELETE FROM membros_campanha WHERE id = $1', [targetRow.id]);
+        }
+
+        const io = req.app.get('io');
+        if (io) io.to(campanhaId.toString()).emit('atualizar-jogadores');
+
+        res.json({ mensagem: 'Ficha recolhida para o seu acervo.' });
+    } catch (err) {
+        res.status(500).json({ erro: 'Erro ao recolher ficha.' });
+    }
+});
+
 // =========================================================================
 // ROTAS DO BANNER DA CAMPANHA
 // =========================================================================

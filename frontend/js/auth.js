@@ -130,11 +130,6 @@ document.addEventListener('DOMContentLoaded', () => {
             viewAuth.classList.add('hidden');
             viewApp.classList.remove('hidden');
 
-            // Redireciona o usuário para a Landing Page via Router
-            if (typeof Router !== 'undefined') {
-                Router.navigate('landing');
-            }
-
             // Atualiza nomes pela interface se existirem
             const nomeOperador = sessionStorage.getItem('usuarioNome');
             const spanNomeFicha = document.getElementById('nome-usuario-logado-ficha');
@@ -142,6 +137,21 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Renderiza ícones se necessário
             if (window.lucide) lucide.createIcons();
+
+            // 🔥 MÁGICA DA RESTAURAÇÃO DE ESTADO (AGORA COM ATRASO SEGURO) 🔥
+            if (typeof Router !== 'undefined') {
+                const telaSalva = sessionStorage.getItem('telaAtual') || 'dashboard';
+                
+                // O setTimeout dá tempo para as funções do dashboard.js nascerem na memória!
+                setTimeout(() => {
+                    Router.navigate(telaSalva);
+
+                    if (telaSalva === 'ficha' && typeof window.carregarPersonagem === 'function') {
+                        const personagemId = sessionStorage.getItem('personagemAtivoId');
+                        if (personagemId) window.carregarPersonagem(personagemId);
+                    }
+                }, 150); 
+            }
             
             return true;
         }

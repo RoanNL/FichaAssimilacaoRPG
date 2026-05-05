@@ -111,56 +111,116 @@ document.addEventListener('DOMContentLoaded', () => {
 
             gridFichas.innerHTML = '';
 
-            // 🔥 SE FOR O MESTRE, MOSTRA O CARD DE CRIAR NPC 🔥
-            if (isMestre) {
-                const cardNovoNpc = document.createElement('div');
-                cardNovoNpc.className = 'flex flex-row h-[130px] w-full bg-gray-50 dark:bg-[#1a1a1a] rounded-lg overflow-hidden border-2 border-dashed border-gray-400 dark:border-gray-600 hover:border-rpg-blue hover:bg-gray-100 dark:hover:bg-[#242424] transition-all cursor-pointer items-center justify-center group';
+            // 🔥 MOSTRA O CARD DE ADICIONAR PARA TODOS (Mestre cria NPCs, Jogadores puxam os seus) 🔥
+            const cardAdicionar = document.createElement('div');
+            cardAdicionar.className = 'flex flex-row h-[130px] min-w-[250px] bg-gray-50 dark:bg-[#1a1a1a] rounded-lg overflow-hidden border-2 border-dashed border-gray-400 dark:border-gray-600 hover:border-rpg-blue hover:bg-gray-100 dark:hover:bg-[#242424] transition-all cursor-pointer items-center justify-center group';
+            
+            cardAdicionar.innerHTML = `
+                <div class="flex flex-col items-center justify-center w-full">
+                    <div class="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                        <i data-lucide="plus" class="w-5 h-5 text-gray-600 dark:text-gray-300"></i>
+                    </div>
+                    <span class="font-bold font-rpg text-gray-500 uppercase text-xs text-center px-2">
+                        ${isMestre ? 'Puxar NPC / Criar' : 'Puxar Personagem'}
+                    </span>
+                </div>
+            `;
+            
+            cardAdicionar.addEventListener('click', () => {
+                document.getElementById('modal-selecionar-npc').classList.add('show');
+                const btnCriarBranco = document.getElementById('btn-modal-criar-novo-npc');
+                // O botão de ficha limpa só aparece para o mestre
+                if (isMestre) btnCriarBranco.classList.remove('hidden');
+                else btnCriarBranco.classList.add('hidden');
                 
-                // Salvamos a "aparência original" fora do alcance do clique
-                const htmlNormal = `
-                    <div class="flex flex-col items-center justify-center w-full">
-                        <div class="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                            <i data-lucide="plus" class="w-5 h-5 text-gray-600 dark:text-gray-300"></i>
-                        </div>
-                        <span class="font-bold font-rpg text-gray-500 uppercase text-xs">Criar NPC / Ficha</span>
+                if(typeof window.carregarListaNpcsExistentes === 'function') {
+                    window.carregarListaNpcsExistentes(campanhaId);
+                }
+            });
+            gridFichas.appendChild(cardAdicionar);
+
+            if (fichas.length === 0) return;
+
+            fichas.forEach(char => {
+                // Se a linha do banco for de alguém que tirou a ficha (personagem_id = null), nós só ignoramos.
+                if (!char.id) return; 
+
+                const card = document.createElement('div');
+                card.className = 'flex flex-row h-[130px] w-full min-w-[280px] bg-white dark:bg-[#242424] rounded-lg overflow-hidden border border-gray-300 dark:border-[#333] hover:-translate-y-1 hover:shadow-lg transition-all relative shadow-sm';
+
+                const imgSrc = (char.foto && !char.foto.includes('R0lGODlhAQAB')) ? char.foto : './assets/icon.jpg';
+                const ocupacao = char.ocupacao || 'Desconhecido';
+
+                const isDonoDaFicha = (char.usuario_id == meuId);
+                const isFichaPrivada = char.is_privada === true;
+                const podeInspecionar = isMestre || isDonoDaFicha || !isFichaPrivada;
+
+                let controleHtml = '';
+                if (podeInspecionar) {
+                    controleHtml += `<button class="btn-inspecionar-ficha bg-rpg-blue hover:bg-[#2c6270] text-white px-3 py-1.5 rounded text-xs font-bold font-rpg uppercase shadow transition-colors z-10" data-id="${char.id}">Inspecionar</button>`;
+                } else {
+                    controleHtml += `<div class="bg-gray-200 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 text-gray-500 px-3 py-1.5 rounded text-[10px] font-bold uppercase shadow-inner z-10 flex items-center gap-1 cursor-not-allowed" title="Oculto"><i data-lucide="lock" class="w-3 h-3 text-rpg-red"></i> Sigilo</div>`;
+                }
+
+                // 🔥 O BOTÃO MÁGICO DE RETIRAR A FICHA 🔥
+                if (isDonoDaFicha || isMestre) {
+                    controleHtml += `
+                    <button class="btn-retirar-mesa bg-gray-600 hover:bg-rpg-red text-white p-1.5 rounded text-xs font-bold uppercase shadow transition-colors z-10 ml-2" data-id="${char.id}" title="Recolher Ficha">
+                        <i data-lucide="user-minus" class="w-4 h-4"></i>
+                    </button>`;
+                }
+
+                card.innerHTML = `
+                    <img src="${imgSrc}" class="w-[110px] h-[130px] object-cover flex-shrink-0 border-r border-gray-300 dark:border-[#333] bg-black">
+                    <div class="flex flex-col justify-start p-3 flex-grow overflow-hidden">
+                        <h3 class="text-gray-800 dark:text-white font-bold text-[15px] m-0 truncate" title="${window.escaparHTML(char.nome_personagem)}">${window.escaparHTML(char.nome_personagem)}</h3>
+                        <p class="text-rpg-red dark:text-orange-500 font-bold text-[10px] uppercase m-0 mt-1 truncate">${window.escaparHTML(ocupacao)}</p>
+                        <div class="mt-auto w-full flex items-center">${controleHtml}</div>
                     </div>
                 `;
-                cardNovoNpc.innerHTML = htmlNormal;
-                
-                cardNovoNpc.addEventListener('click', async () => {
-                    // Impede "Duplo Clique"
-                    if (cardNovoNpc.classList.contains('carregando')) return;
-                    cardNovoNpc.classList.add('carregando');
-                    
-                    cardNovoNpc.innerHTML = '<div class="flex justify-center items-center w-full h-full"><i data-lucide="loader" class="w-6 h-6 animate-spin text-rpg-blue"></i></div>';
+                gridFichas.appendChild(card);
+            });
+
+            if (window.lucide) lucide.createIcons();
+
+            // Adiciona a navegação pro inspecionar
+            document.querySelectorAll('.btn-inspecionar-ficha').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const fichaId = e.target.getAttribute('data-id');
+                    if (typeof window.carregarPersonagem === 'function') {
+                        await window.carregarPersonagem(fichaId);
+                        Router.navigate('ficha');
+                    }
+                });
+            });
+
+            // Lógica do botão de retirar
+            document.querySelectorAll('.btn-retirar-mesa').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    if(!confirm('Deseja retirar este personagem da mesa? \n\nA ficha continuará salva na sua conta, e você NÃO sairá da campanha.')) return;
+
+                    const personagemId = e.currentTarget.getAttribute('data-id');
+                    const btnIcon = e.currentTarget.innerHTML;
+                    e.currentTarget.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i>';
                     if (window.lucide) lucide.createIcons();
 
                     try {
-                        const res = await fetch(`${window.API_URL}/campanhas/${campanhaId}/criar-npc`, {
-                            method: 'POST',
+                        const res = await fetch(`${window.API_URL}/campanhas/${campanhaId}/remover-personagem/${personagemId}`, {
+                            method: 'DELETE',
                             headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
                         });
                         const data = await res.json();
                         
-                        if (res.ok) {
-                            window.idPersonagemAtual = data.id;
-                            Router.navigate('ficha'); 
-                            window.carregarPersonagem(data.id);
-                        } else {
-                            window.mostrarNotificacao(data.erro, 'erro');
-                            cardNovoNpc.innerHTML = htmlNormal;
-                            cardNovoNpc.classList.remove('carregando');
-                            if (window.lucide) lucide.createIcons();
-                        }
-                    } catch (err) {
-                        window.mostrarNotificacao('Erro de conexão com o servidor.', 'erro');
-                        cardNovoNpc.innerHTML = htmlNormal;
-                        cardNovoNpc.classList.remove('carregando');
-                        if (window.lucide) lucide.createIcons();
+                        if (res.ok) window.mostrarNotificacao(data.mensagem, 'sucesso');
+                        else window.mostrarNotificacao(data.erro, 'erro');
+                    } catch(err) {
+                        window.mostrarNotificacao('Erro na comunicação.', 'erro');
+                    } finally {
+                        window.carregarFichasDaMesa(campanhaId, isMestre);
+                        window.carregarJogadoresDaMesa(campanhaId, isMestre);
                     }
                 });
-                gridFichas.appendChild(cardNovoNpc);
-            }
+            });
 
             if (fichas.length === 0) {
                 gridFichas.innerHTML = '<p class="text-gray-500 italic col-span-full">Nenhum jogador aliado detectado.</p>';
@@ -778,4 +838,117 @@ document.addEventListener('DOMContentLoaded', () => {
             window.mostrarNotificacao("Erro de conexão.", 'erro');
         }
     };
+
+    // ==========================================
+    // EXTRA: MOTOR DA BIBLIOTECA DE PERSONAGENS
+    // ==========================================
+    window.carregarListaNpcsExistentes = async function(campanhaId) {
+        const container = document.getElementById('lista-npcs-existentes');
+        if(!container) return;
+        container.innerHTML = '<p class="text-gray-500 italic text-center text-sm py-4"><i data-lucide="loader" class="w-5 h-5 animate-spin mx-auto"></i></p>';
+        if (window.lucide) lucide.createIcons();
+        
+        try {
+            const usuarioId = sessionStorage.getItem('usuarioId');
+            const res = await fetch(`${window.API_URL}/personagens/usuario/${usuarioId}`, {
+                headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
+            });
+            const personagens = await res.json();
+            
+            container.innerHTML = '';
+            if (personagens.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 italic text-center text-sm py-4">Nenhuma ficha salva no seu acervo.</p>';
+                return;
+            }
+            
+            personagens.forEach(p => {
+                const div = document.createElement('div');
+                div.className = 'bg-gray-50 dark:bg-[#242424] border border-gray-300 dark:border-gray-700 p-2 rounded flex items-center justify-between shadow-sm hover:border-rpg-blue transition-colors cursor-pointer group';
+                const imgSrc = (p.foto && !p.foto.includes('R0lGODlhAQAB')) ? p.foto : './assets/icon.jpg';
+                
+                div.innerHTML = `
+                    <div class="flex items-center gap-3 overflow-hidden">
+                        <img src="${imgSrc}" class="w-10 h-10 rounded border border-gray-400 object-cover shadow-sm bg-black">
+                        <div>
+                            <h4 class="text-black dark:text-white font-bold text-sm m-0 truncate max-w-[200px]" title="${window.escaparHTML(p.nome_personagem)}">${window.escaparHTML(p.nome_personagem)}</h4>
+                            <p class="text-gray-500 text-[10px] uppercase font-bold truncate m-0">${window.escaparHTML(p.ocupacao)}</p>
+                        </div>
+                    </div>
+                    <button class="bg-gray-800 hover:bg-rpg-blue text-white p-2 rounded shadow transition-colors opacity-0 group-hover:opacity-100" title="Puxar para a Mesa">
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </button>
+                `;
+                div.addEventListener('click', async () => {
+                    const btnInside = div.querySelector('button');
+                    const originalIcon = btnInside.innerHTML;
+                    btnInside.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i>';
+                    if (window.lucide) lucide.createIcons();
+
+                    try {
+                        const addRes = await fetch(`${window.API_URL}/campanhas/${campanhaId}/adicionar-personagem`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionStorage.getItem('token')}` },
+                            body: JSON.stringify({ personagem_id: p.id })
+                        });
+                        const addData = await addRes.json();
+                        
+                        if (addRes.ok) {
+                            window.mostrarNotificacao(addData.mensagem, 'sucesso');
+                            document.getElementById('modal-selecionar-npc').classList.remove('show');
+                            window.carregarFichasDaMesa(campanhaId, sessionStorage.getItem('isMestreAtivo') === 'true');
+                            window.carregarJogadoresDaMesa(campanhaId, sessionStorage.getItem('isMestreAtivo') === 'true');
+                        } else {
+                            window.mostrarNotificacao(addData.erro, 'erro');
+                            btnInside.innerHTML = originalIcon;
+                            if (window.lucide) lucide.createIcons();
+                        }
+                    } catch(e) {
+                        window.mostrarNotificacao('Falha na comunicação.', 'erro');
+                        btnInside.innerHTML = originalIcon;
+                        if (window.lucide) lucide.createIcons();
+                    }
+                });
+                container.appendChild(div);
+            });
+            if (window.lucide) lucide.createIcons();
+        } catch(e) {
+            container.innerHTML = '<p class="text-rpg-red text-center text-sm py-4">Erro ao buscar banco de dados.</p>';
+        }
+    }
+
+    // Configura o Botão de Forjar o Novo NPC em branco no Modal
+    const btnCriarBlank = document.getElementById('btn-modal-criar-novo-npc');
+    if (btnCriarBlank) {
+        const clone = btnCriarBlank.cloneNode(true);
+        btnCriarBlank.parentNode.replaceChild(clone, btnCriarBlank);
+        
+        clone.addEventListener('click', async () => {
+            const campanhaId = sessionStorage.getItem('campanhaAtiva');
+            const iconeOriginal = clone.innerHTML;
+            clone.innerHTML = '<i data-lucide="loader" class="w-5 h-5 animate-spin"></i> Forjando...';
+            if (window.lucide) lucide.createIcons();
+            
+            try {
+                const res = await fetch(`${window.API_URL}/campanhas/${campanhaId}/criar-npc`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    document.getElementById('modal-selecionar-npc').classList.remove('show');
+                    window.idPersonagemAtual = data.id;
+                    Router.navigate('ficha'); 
+                    window.carregarPersonagem(data.id);
+                } else {
+                    window.mostrarNotificacao(data.erro, 'erro');
+                }
+            } catch (err) {
+                window.mostrarNotificacao('Erro de conexão.', 'erro');
+            } finally {
+                clone.innerHTML = iconeOriginal;
+                if (window.lucide) lucide.createIcons();
+            }
+        });
+    }
 });
