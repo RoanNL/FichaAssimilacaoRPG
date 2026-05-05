@@ -199,6 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         authEmailInput.value = '';
 
                         mostrarNotificacao(dados.mensagem, 'sucesso');
+                        window.carregarAvatarGlobal();
                         verificarSessao(); // Dispara a entrada no sistema!
                     } else {
                         authMensagem.textContent = 'Conta criada com sucesso! Faça login.';

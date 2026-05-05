@@ -817,4 +817,114 @@ document.addEventListener('DOMContentLoaded', () => {
         } 
     };
 
+    // ==========================================
+    // 11. AUTOMAÇÃO DE ROLAGEM (SISTEMA ABSOLUTO E INTEGRADO)
+    // ==========================================
+    window.selecaoRolagem = [];
+
+    window.limparSelecaoRolagem = function(apagarTerminal = true) {
+        // Varre a ficha e apaga as luzes (incluindo a classe 'label-selecionado' do rolador.js!)
+        document.querySelectorAll('.aptidao-box label').forEach(label => {
+            label.classList.remove('bg-gray-300', 'dark:bg-[#333]', 'text-rpg-red', 'dark:text-orange-500', 'scale-105', 'label-selecionado');
+        });
+        window.selecaoRolagem = []; 
+        
+        // Esconde o letreiro de "Rolagem Assimilada!" caso ele esteja aparecendo
+        const avisoAssimilada = document.getElementById('aviso-assimilada');
+        if (avisoAssimilada) avisoAssimilada.classList.add('hidden');
+
+        if (apagarTerminal) {
+            // O setTimeout garante que limpamos logo após o rolador.js terminar o que estava fazendo
+            setTimeout(() => {
+                // Apaga a caixa de texto do terminal
+                const inputRolador = document.getElementById('rolador-input');
+                if (inputRolador) inputRolador.value = '';
+                
+                // Apaga os dados desenhados na tela daquela rolagem
+                const resultadosAtuais = document.getElementById('rolador-resultados-atuais');
+                if (resultadosAtuais) resultadosAtuais.innerHTML = '';
+            }, 50);
+        }
+    };
+
+    const labelsAptidoesFicha = document.querySelectorAll('.aptidao-box label');
+    
+    labelsAptidoesFicha.forEach(label => {
+        // Fase de captura: ouvimos o clique ANTES do rolador.js intervir
+        label.addEventListener('click', (e) => {
+            // Se tentar selecionar um 3º atributo com a janela aberta, limpa tudo e recomeça
+            if (window.selecaoRolagem.length >= 2) {
+                window.limparSelecaoRolagem(true);
+            }
+
+            const nomeAtributo = label.textContent.trim();
+            const grupo = label.closest('.grupo-aptidoes');
+            const categoria = grupo ? grupo.id : ''; 
+            
+            // 🔥 BLOQUEIO ABSOLUTO DO SISTEMA 🔥
+            if (window.selecaoRolagem.length === 1) {
+                const primeiraFoiInstinto = window.selecaoRolagem[0].categoria === 'secao-instintos';
+                const segundaFoiInstinto = categoria === 'secao-instintos';
+
+                // Se as DUAS escolhas NÃO forem Instinto (Ex: Biologia + Armas) -> BLOQUEIA!
+                if (!primeiraFoiInstinto && !segundaFoiInstinto) {
+                    e.stopImmediatePropagation(); // Enforca a ação aqui, o rolador.js nem fica sabendo!
+                    e.preventDefault();
+                    window.mostrarNotificacao("Teste Inválido: É obrigatório usar pelo menos 1 Instinto na rolagem!", 'erro');
+                    window.limparSelecaoRolagem(true); 
+                    return; 
+                }
+            }
+
+            // Aprovado! Guarda na memória. (O visual será aplicado tanto por nós quanto pelo rolador.js)
+            window.selecaoRolagem.push({ label, nome: nomeAtributo, categoria });
+
+            // Bateu 2 escolhas válidas -> Abre o Terminal
+            if (window.selecaoRolagem.length === 2) {
+                const attr1 = window.selecaoRolagem[0].nome;
+                const attr2 = window.selecaoRolagem[1].nome;
+                
+                window.mostrarNotificacao(`Preparando Teste: ${attr1} + ${attr2}`, 'aviso');
+                
+                const modalRolador = document.getElementById('rolador-modal');
+                if(modalRolador) {
+                    modalRolador.classList.add('show');
+                    setTimeout(() => { document.getElementById('rolador-input')?.focus(); }, 100);
+                }
+            }
+        }, true);
+    });
+
+    // ==========================================
+    // GATILHOS INQUEBRÁVEIS DE FECHAMENTO
+    // ==========================================
+    document.addEventListener('click', (e) => {
+        const modalRolador = document.getElementById('rolador-modal');
+        
+        // 1. Fechou no "X"
+        if (e.target.closest('#fechar-rolador')) {
+            if (modalRolador) modalRolador.classList.remove('show');
+            window.limparSelecaoRolagem(true);
+        }
+        // 2. Fechou clicando no fundo escuro
+        else if (e.target.id === 'rolador-modal') {
+            if (modalRolador) modalRolador.classList.remove('show');
+            window.limparSelecaoRolagem(true);
+        }
+        // 3. Clicou no botão "Limpar" dentro do terminal
+        else if (e.target.closest('#rolador-btn-limpar')) {
+            window.limparSelecaoRolagem(true);
+        }
+    }, true);
+
+    // 4. Fechou apertando ESC no teclado
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const modalRolador = document.getElementById('rolador-modal');
+            if (modalRolador && modalRolador.classList.contains('show')) {
+                modalRolador.classList.remove('show');
+                window.limparSelecaoRolagem(true);
+            }
+        }
+    }, true);
 });

@@ -154,12 +154,39 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Tenta carregar o avatar da memória ao iniciar a página (para a Nav bar não ficar vazia)
-    setTimeout(() => {
-        const avatarSalvo = sessionStorage.getItem('usuarioAvatar');
-        if (avatarSalvo) {
-            const navImg = document.getElementById('nav-avatar-img');
-            if (navImg) navImg.src = avatarSalvo;
+    // ==========================================
+    // CARREGAMENTO AUTOMÁTICO GLOBAL (FOTO DA NAVBAR)
+    // ==========================================
+    window.carregarAvatarGlobal = async function() {
+        const token = sessionStorage.getItem('token');
+        const navImg = document.getElementById('nav-avatar-img');
+        
+        // Se não tiver logado ou não tiver a barra de navegação, nem tenta
+        if (!token || !navImg) return;
+
+        try {
+            // Busca os dados do usuário direto da sua rota /usuarios/me
+            const resUser = await fetch(`${window.API_URL}/usuarios/me`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (resUser.ok) {
+                const userData = await resUser.json();
+                if (userData.avatar && !userData.avatar.includes('R0lGODlhAQAB')) {
+                    // Atualiza a imagem na Navbar imediatamente
+                    navImg.src = userData.avatar;
+                    // Já deixa salvo no cache para uso rápido depois
+                    sessionStorage.setItem('usuarioAvatar', userData.avatar);
+                }
+            }
+        } catch (err) {
+            console.error('Erro silencioso ao carregar o avatar da nav bar:', err);
         }
-    }, 1000);
+    };
+
+    // Roda a função automaticamente assim que o arquivo JS é carregado
+    // (Útil para quando o usuário dá F5 e já está com o token no navegador)
+    if (sessionStorage.getItem('token')) {
+        window.carregarAvatarGlobal();
+    }
 });

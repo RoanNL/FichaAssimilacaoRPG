@@ -238,7 +238,7 @@
                     <h1
                         class="text-3xl md:text-5xl font-rpg font-black uppercase text-gray-800 dark:text-white mb-2 border-none">
                         Bem-vindo ao Colapso</h1>
-                    <p class="text-gray-600 dark:text-gray-400 font-bold max-w-2xl mx-auto">Explore as mecânicas de
+                    <p class="text-gray-600 dark:text-gray-400 font-bold max-w-2xl mx-auto ">Explore as mecânicas de
                         sobrevivência, corrupção e desespero. Conheça as regras antes de montar sua base ou desafiar as
                         criaturas.</p>
                 </div>
@@ -249,8 +249,8 @@
                             class="text-rpg-red font-rpg font-black text-2xl flex items-center gap-2 mb-4 uppercase border-b border-gray-200 dark:border-gray-600 pb-2">
                             <i data-lucide="brain-circuit"></i> Perda de Ego
                         </h2>
-                        <p class="text-gray-700 dark:text-gray-300">A perda de Ego é a mecânica central da corrupção do
-                            seu personagem. Cada vez que a pressão psicológica ou as mutações forem excessivas, marque
+                        <p class="text-gray-700 dark:text-gray-300 text-justify">A perda de Ego é a mecânica central da corrupção do
+                            seu personagem. Cada vez que a pressão psicológica ou as "Pressões" forem excessivas durante sua rolagem de assimilação, marque
                             uma caixa vermelha. Ao atingir o limite, o Parasita assume o controle.</p>
                     </div>
                     <div
@@ -262,9 +262,25 @@
                             <img src="./assets/nada-branco.png" alt="Nada"
                                 class="w-10 h-10 object-contain hidden dark:block">
                         </h2>
-                        <p class="text-gray-700 dark:text-gray-300">Os dados virtuais (D6, D10 e D12) possuem faces
+                        <p class="text-gray-700 dark:text-gray-300 text-justify">Os dados virtuais (D6, D10 e D12) possuem faces
                             vazias, representadas por este símbolo no rolador. Elas significam falhas diretas na ação ou
                             total ausência de instinto primitivo no momento do teste.</p>
+                    </div>
+                    <div
+                        class="bg-white dark:bg-[#1e293b] p-6 rounded-lg border border-gray-300 dark:border-gray-700 shadow-md">
+                        <h2
+                            class="text-rpg-blue font-rpg font-black text-2xl flex items-center gap-2 mb-4 uppercase border-b border-gray-200 dark:border-gray-600 pb-2">
+                            <span class=" text-2xl leading-none">&spades;</span> Baralho de Assimilações
+                        </h2>
+                        <p class="text-gray-700 dark:text-gray-300 text-justify">O baralho de assimilações já está disponível de forma resumida vinculado a seção de "perda de EGO" da ficha. Ao clicar em "Sortear Cartas" você abrirá uma tela com 4 locais para colocar seus resultados da rolagem de assimilação, ao clicar em "PUXAR CARTAS" elas serão sorteadas e apareceram logo abaixo do botão. O que vai aparecer é apenas o titulo e a descrição da Assimilação, para pegar oque elas dão de fato, você precisa abrir o livro de regras e ver ; ).</p>
+                    </div>
+                    <div
+                        class="bg-white dark:bg-[#1e293b] p-6 rounded-lg border border-gray-300 dark:border-gray-700 shadow-md">
+                        <h2
+                            class="text-rpg-red font-rpg font-black text-2xl flex items-center gap-2 mb-4 uppercase border-b border-gray-200 dark:border-gray-600 pb-2">
+                            Rolagem de Dados <img src="./assets/rolador-bola.png" alt="circulo de rolagem de dados" class="w-20 h-20 object-contain">
+                        </h2>
+                        <p class="text-gray-700 dark:text-gray-300 text-justify">A rolagem nesse sistema é feito da seguinte forma: O jogador escolhe um instinto (d6) + conhecimento/pratica (d10) e então faz a rolagem, Nessa ficha, a atribuição de dados pode ser feita de forma automática apenas clicando no nome da aptidão, você perceberá que o campo de nome da aptidão ficará destacado com uma cor diferente, isso significa que aquela aptidão foi escolhida! Lembre, clicar em dois instintos ou duas vezes no mesmo instinto ativará uma rolagem assimilada!</p>
                     </div>
                 </div>
             </div>
@@ -461,8 +477,8 @@
                             <input type="checkbox" id="char-is-private" class="w-4 h-4 accent-rpg-red cursor-pointer">
                             <label for="char-is-private"
                                 class="text-xs font-bold text-gray-500 uppercase cursor-pointer flex items-center gap-1">
-                                <i data-lucide="lock" class="w-3 h-3 text-rpg-red"></i> Ficha Privada <span
-                                    class="text-[9px] normal-case tracking-normal ml-1">(Ocultar para outros
+                                <i data-lucide="lock" class="w-5 h-5 text-rpg-red"></i> Ficha Privada <span
+                                    class="text-[15px] normal-case tracking-normal ml-1">(Ocultar para outros
                                     jogadores)</span>
                             </label>
                         </div>
@@ -1528,6 +1544,25 @@
                 </div>
             </div>
         </div>
+
+        <footer class="w-full bg-rpg-paper dark:bg-rpg-paper-dark border-t border-gray-300 dark:border-gray-800 mt-12 py-8 transition-colors duration-300 mt-auto">
+        <div class="max-w-[1100px] mx-auto text-center px-4">
+            <h3 class="font-rpg font-black text-xl text-rpg-red dark:text-orange-500 uppercase mb-2 tracking-wider">
+            Assimilação RPG - VTT
+            </h3>
+            <p class="font-sans text-gray-600 dark:text-gray-400 text-sm md:text-base font-bold mb-3">
+                Desenvolvido com <i data-lucide="heart" class="w-4 h-4 inline-block text-rpg-red fill-current align-text-bottom"></i> por <a href="https://www.linkedin.com/in/roannl" target="_blank" class="text-rpg-blue hover:text-rpg-blue-hover dark:text-rpg-blue-hover hover:underline transition-colors">Roan Lisboa</a>
+            </p>
+
+            <p class="font-sans text-gray-600 dark:text-gray-400 text-sm md:text-base font-bold mb-3">
+                <a href="https://github.com/RoanNL/FichaAssimilacaoRPG" target="_blank" class="text-rpg-blue hover:text-rpg-blue-hover dark:text-rpg-blue-hover hover:underline transition-colors">Github</a>
+            </p>
+
+            <p class="font-rpg text-xs text-gray-500 dark:text-gray-500">
+                Sistema de Rolagem Dinâmica • Gerenciamento de Fichas • Multiplayer em Tempo Real
+            </p>
+        </div>
+    </footer>
 
         <script src="https://unpkg.com/lucide@latest"></script>
         <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
