@@ -12,6 +12,18 @@ const Router = {
         // SALVA A TELA ATUAL NA MEMÓRIA PARA O F5 NÃO TE PERDER
         sessionStorage.setItem('telaAtual', telaDestino);
 
+        // 🔥 REGRA DE OURO: Se foi pro Dashboard ou Início, DESCONECTA DA MESA! 🔥
+        if (telaDestino === 'dashboard' || telaDestino === 'landing') {
+            sessionStorage.removeItem('campanhaAtiva');
+            sessionStorage.removeItem('isMestreAtivo');
+            sessionStorage.removeItem('campanhaNome');
+            sessionStorage.removeItem('campanhaCodigo');
+            
+            // Transforma o Terminal em Local automaticamente
+            const hist = document.getElementById('rolador-historico');
+            if (hist) hist.innerHTML = '<p class="text-center text-gray-500 text-xs italic font-bold mt-4">Terminal Local Ativo.<br>Acesse por uma campanha para ativar a rede multiplayer.</p>';
+        }
+
         this.telas.forEach(tela => {
             const el = document.getElementById(tela);
             if (el) el.classList.add('hidden');
@@ -30,7 +42,7 @@ const Router = {
                 if (typeof window.carregarListaPersonagens === 'function' && typeof window.carregarMinhasCampanhas === 'function') {
                     window.carregarListaPersonagens();
                     window.carregarMinhasCampanhas();
-                    clearInterval(cacador); // Missão cumprida, desliga o caçador!
+                    clearInterval(cacador); 
                 }
             } else if (telaDestino === 'campanha') {
                 if (typeof window.carregarLobbyCampanha === 'function') {
@@ -38,11 +50,11 @@ const Router = {
                     clearInterval(cacador);
                 }
             } else {
-                clearInterval(cacador); // Se não for nem mesa nem dashboard, cancela.
+                clearInterval(cacador); 
             }
 
             tentativas++;
-            if(tentativas > 30) clearInterval(cacador); // Segurança: Desiste após 3 segundos para não travar o PC
+            if(tentativas > 30) clearInterval(cacador); 
         }, 100);
 
         // --- CONTROLES VISUAIS GLOBAIS ---
@@ -88,6 +100,7 @@ const Router = {
             this.navigate('dashboard');
         } 
         else if (this.telaAtual === 'ficha') {
+            // Se veio da campanha, volta pra campanha. Se veio do dash, volta pro dash.
             this.navigate(telaAnterior);
         } else {
             this.navigate('dashboard');
@@ -95,7 +108,9 @@ const Router = {
     },
 
     abrirPerfil: function() {
-        alert("Abrindo Perfil do Usuário! (Substituído pelo perfil.js)");
+        if(typeof window.abrirModalPerfil === 'function') {
+            window.abrirModalPerfil();
+        }
     }
 };
 

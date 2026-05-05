@@ -21,15 +21,150 @@ document.addEventListener('DOMContentLoaded', () => {
         return document.body.classList.contains('dark') ? iconesTemaEscuro : iconesTemaClaro;
     }
 
+    const inputDados = document.getElementById('rolador-input');
+    const rollButton = document.getElementById('rolador-btn-rolar');
+    const clearButton = document.getElementById('rolador-btn-limpar');
+    const resultsDiv = document.getElementById('rolador-resultados-atuais');
+    const historicoDiv = document.getElementById('rolador-historico');
+
     // ==========================================
-    // 1. CONEXÃO MULTIPLAYER DAS ROLAGENS
+    // 1. CONSTRUTOR DE CARTÕES (ESTILO D&D BEYOND)
     // ==========================================
-    // Aguarda um milissegundo para garantir que o 'window.socket' foi criado no 'campanha.js'
+    function criarCardDndBeyond(pacote, animar = false) {
+        const avatar = (pacote.avatar && !pacote.avatar.includes('R0lGODlhAQAB')) ? pacote.avatar : './assets/icon.jpg';
+        const nomePersonagem = pacote.nome || 'Desconhecido';
+        const timestamp = pacote.timestamp || new Date().toISOString();
+        const dataFormatada = new Date(timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) + ' - ' + new Date(timestamp).toLocaleDateString('pt-BR');
+
+        const rollGroup = document.createElement('div');
+        rollGroup.className = 'flex flex-col w-full ' + (animar ? 'animate-fade-in py-4' : 'mb-1');
+
+        let corBorda = 'border-gray-300 dark:border-gray-700';
+        let corHover = 'group-hover:border-gray-400 dark:group-hover:border-gray-500';
+
+        // Destaque se for rolagem do usuário atual
+        const meuNomeLocal = sessionStorage.getItem('usuarioNome');
+        const meuPersonagemLocal = document.getElementById('nome') ? document.getElementById('nome').value.trim() : '';
+        if (pacote.nome === meuNomeLocal || pacote.nome === meuPersonagemLocal) {
+            corBorda = 'border-rpg-red/40 dark:border-red-900/50';
+            corHover = 'group-hover:border-rpg-red dark:group-hover:border-red-500';
+        }
+
+        rollGroup.innerHTML = `
+            <div class="flex items-start gap-2 w-full">
+                <img src="${avatar}" class="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600 shadow-sm mt-1 bg-black object-cover flex-shrink-0">
+                <div class="flex flex-col w-full overflow-hidden">
+                    <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 mb-0.5 pl-1 truncate">${window.escaparHTML(nomePersonagem)}</span>
+
+                    <div class="bg-white dark:bg-[#1a1a1a] border ${corBorda} rounded-lg p-3 shadow-sm flex flex-col group relative overflow-hidden transition-colors">
+                        <span class="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest truncate mb-2">Rolagem: ${window.escaparHTML(pacote.input)}</span>
+
+                        <div class="sub-rolls-container flex flex-wrap gap-2 justify-center min-h-[30px]"></div>
+
+                        <div class="bg-gray-50 dark:bg-[#0f172a] rounded p-1.5 text-center mt-3 border border-gray-100 dark:border-gray-800">
+                            <span class="text-[10px] font-bold uppercase tracking-wide flex justify-center gap-2">
+                                <span class="text-green-600 dark:text-green-500">${pacote.totais?.sucesso || 0} SUC</span>
+                                <span class="text-gray-300 dark:text-gray-600">|</span>
+                                <span class="text-rpg-red dark:text-red-500">${pacote.totais?.pressao || 0} PRE</span>
+                                <span class="text-gray-300 dark:text-gray-600">|</span>
+                                <span class="text-blue-600 dark:text-blue-500">${pacote.totais?.adaptacao || 0} ADA</span>
+                            </span>
+                        </div>
+
+                        <div class="absolute inset-0 border-2 border-transparent ${corHover} rounded-lg pointer-events-none transition-colors duration-300"></div>
+                    </div>
+
+                    <span class="text-[9px] font-bold text-gray-400 dark:text-gray-600 text-right mt-1 mr-1">${dataFormatada}</span>
+                </div>
+            </div>
+        `;
+
+        const subRollsContainer = rollGroup.querySelector('.sub-rolls-container');
+        const iconFilesAtuais = obterIconesAtuais();
+        const tempoGiroLogo = 1000;
+        const delaySuspense = 300;
+        const tempoTotalAntesDados = tempoGiroLogo + delaySuspense;
+
+        if (pacote.resultados) {
+            pacote.resultados.forEach(dado => {
+                const subRollDiv = document.createElement('div');
+                subRollDiv.className = 'relative bg-white dark:bg-[#242424] border border-gray-200 dark:border-gray-700 rounded p-1 text-center shadow-sm min-w-[35px] flex flex-col items-center justify-center';
+                subRollDiv.title = `${dado.tipo} rolou ${dado.faceMecanica}`;
+
+                const subRollIcons = document.createElement('div');
+                subRollIcons.className = 'icons-container flex flex-wrap gap-0.5 justify-center items-center';
+
+                if (animar) {
+                    subRollDiv.classList.add('opacity-0');
+                    subRollDiv.style.transition = 'opacity 0.3s ease';
+
+                    const logoImg = document.createElement('img');
+                    logoImg.src = 'assets/icon.jpg';
+                    logoImg.className = 'logo-animado absolute top-1/2 left-1/2 rounded-full w-[25px] h-[25px] object-contain z-10';
+                    subRollDiv.appendChild(logoImg);
+
+                    dado.icones.forEach((iconName, index) => {
+                        const img = document.createElement('img');
+                        img.src = iconFilesAtuais[iconName];
+                        img.className = 'dado-animado w-[20px] h-[20px] object-contain';
+                        const delayDados = tempoTotalAntesDados / 1000;
+                        img.style.animationDelay = `${delayDados + (index * 0.1)}s`;
+                        subRollIcons.appendChild(img);
+                    });
+
+                    setTimeout(() => {
+                        subRollDiv.classList.remove('opacity-0');
+                        subRollIcons.style.opacity = '1';
+                    }, tempoTotalAntesDados);
+
+                } else {
+                    dado.icones.forEach(iconName => {
+                        const img = document.createElement('img');
+                        img.src = iconFilesAtuais[iconName];
+                        img.className = 'w-[20px] h-[20px] object-contain opacity-100 visible';
+                        subRollIcons.appendChild(img);
+                    });
+                }
+
+                subRollDiv.appendChild(subRollIcons);
+                subRollsContainer.appendChild(subRollDiv);
+            });
+        }
+
+        return { card: rollGroup, tempoAnimacao: animar ? tempoTotalAntesDados : 0 };
+    }
+
+    function renderizarRolagem(pacote) {
+        if (!resultsDiv || !historicoDiv) return;
+
+        const emptyMsg = historicoDiv.querySelector('p.italic');
+        if (emptyMsg) emptyMsg.remove();
+
+        // 1. Renderiza animado no topo
+        const { card, tempoAnimacao } = criarCardDndBeyond(pacote, true);
+        resultsDiv.innerHTML = '';
+        resultsDiv.appendChild(card);
+
+        // 2. Move para o histórico infinito após animação
+        setTimeout(() => {
+            const historyCard = criarCardDndBeyond(pacote, false).card;
+            historicoDiv.prepend(historyCard);
+            resultsDiv.innerHTML = '';
+        }, tempoAnimacao + 600);
+    }
+
+    // ==========================================
+    // 2. CONEXÃO MULTIPLAYER E ISOLAMENTO DE CONTEXTO
+    // ==========================================
     setTimeout(() => {
         if (window.socket) {
             
             // Ouvindo novas rolagens dos aliados
             window.socket.on('nova-rolagem', (pacoteDeDados) => {
+                // 🔥 ISOLAMENTO BLINDADO: Só escuta se a campanha estiver ativada na sessão! 🔥
+                const campanhaAtiva = sessionStorage.getItem('campanhaAtiva');
+                if (!campanhaAtiva || pacoteDeDados.campanhaId !== campanhaAtiva) return; 
+
                 const souMestre = sessionStorage.getItem('isMestreAtivo') === 'true';
                 const meuId = sessionStorage.getItem('usuarioId');
                 const meuNomeLocal = sessionStorage.getItem('usuarioNome');
@@ -39,91 +174,50 @@ document.addEventListener('DOMContentLoaded', () => {
                     (!pacoteDeDados.usuarioId && (pacoteDeDados.nome === meuNomeLocal || pacoteDeDados.nome === meuPersonagemLocal));
 
                 if (!souMestre && !fuiEuQuemRolou) {
-                    return; 
+                    const emptyMsg = historicoDiv.querySelector('p.italic');
+                    if (emptyMsg) emptyMsg.remove();
+
+                    const { card } = criarCardDndBeyond(pacoteDeDados, false);
+                    historicoDiv.prepend(card);
+
+                    const panel = document.getElementById('game-log-sidebar');
+                    if (panel && panel.classList.contains('translate-x-full')) {
+                        if (typeof window.mostrarNotificacao === 'function') window.mostrarNotificacao(`Rolagem de ${pacoteDeDados.nome || 'alguém'}!`, 'aviso');
+                    }
                 }
-                renderizarRolagem(pacoteDeDados);
             });
 
             // Carregando Histórico Antigo ao dar F5
             window.socket.on('carregar-historico', (historico) => {
-                const historicoDiv = document.getElementById('rolador-historico');
                 if (!historicoDiv) return;
+                
+                // 🔥 ISOLAMENTO BLINDADO: Impede o histórico da mesa vazar pro Dashboard 🔥
+                const campanhaAtiva = sessionStorage.getItem('campanhaAtiva');
+                if (!campanhaAtiva) {
+                    historicoDiv.innerHTML = '<p class="text-center text-gray-500 text-xs italic font-bold mt-4">Terminal Local Ativo.<br>Acesse por uma campanha para ativar a rede multiplayer.</p>';
+                    return;
+                }
+
                 historicoDiv.innerHTML = '';
-                const iconFilesSeguro = obterIconesAtuais();
 
                 historico.forEach(pacoteBruto => {
                     try {
                         const pacote = typeof pacoteBruto === 'string' ? JSON.parse(pacoteBruto) : pacoteBruto;
-                        const historyEntry = document.createElement('div');
                         const meuNomeLocal = sessionStorage.getItem('usuarioNome');
                         const meuPersonagemLocal = document.getElementById('nome') ? document.getElementById('nome').value.trim() : '';
                         
-                        historyEntry.style.borderBottom = '1px solid var(--color-border-medium)';
-                        historyEntry.style.paddingBottom = '15px';
-                        historyEntry.style.marginBottom = '15px';
-
                         const souMestre = sessionStorage.getItem('isMestreAtivo') === 'true';
                         const meuId = sessionStorage.getItem('usuarioId');
                         const fuiEuQuemRolou = (pacote.usuarioId === meuId) ||
                             (!pacote.usuarioId && (pacote.nome === meuNomeLocal || pacote.nome === meuPersonagemLocal));
 
-                        if (!souMestre && !fuiEuQuemRolou) return;
+                        // Mantém as rolagens do mestre em segredo absoluto
+                        if (!souMestre && !fuiEuQuemRolou && pacote.isMestre) return; 
 
-                        const header = document.createElement('h3');
-                        header.textContent = `${pacote.nome} rolou: ${pacote.input}`;
-                        header.style.marginTop = '0';
-
-                        if (pacote.nome !== meuNomeLocal && pacote.nome !== meuPersonagemLocal) {
-                            header.style.color = '#3a7c8c'; // azul da assimilação
-                        }
-                        historyEntry.appendChild(header);
-
-                        const subRollsContainer = document.createElement('div');
-                        subRollsContainer.className = 'sub-rolls-container flex flex-wrap gap-3 mt-3 justify-center';
-
-                        if (pacote.resultados) {
-                            pacote.resultados.forEach(dado => {
-                                const subRollDiv = document.createElement('div');
-                                subRollDiv.className = 'sub-roll bg-white dark:bg-[#242424] border border-gray-300 dark:border-[#444] rounded-lg p-2 text-center shadow-sm w-[120px]';
-
-                                const subRollHeader = document.createElement('h4');
-                                subRollHeader.textContent = `${dado.tipo} #${dado.numero} (rolou ${dado.faceMecanica})`;
-                                subRollHeader.className = 'text-xs font-bold text-gray-500 border-b border-gray-200 dark:border-[#555] pb-1 mb-2';
-
-                                const subRollIcons = document.createElement('div');
-                                subRollIcons.className = 'icons-container flex flex-wrap gap-1 justify-center min-h-[40px] items-center';
-
-                                if (dado.icones) {
-                                    dado.icones.forEach(iconName => {
-                                        const img = document.createElement('img');
-                                        img.src = iconFilesSeguro[iconName];
-                                        img.alt = iconName;
-                                        img.className = 'w-[35px] h-[35px] object-contain';
-                                        
-                                        // 🔥 AS LINHAS MÁGICAS (Força os ícones a aparecerem ignorando o CSS global)
-                                        img.style.opacity = '1';
-                                        img.style.visibility = 'visible';
-
-                                        subRollIcons.appendChild(img);
-                                    });
-                                }
-
-                                subRollDiv.appendChild(subRollHeader);
-                                subRollDiv.appendChild(subRollIcons);
-                                subRollsContainer.appendChild(subRollDiv);
-                            });
-                        }
-
-                        historyEntry.appendChild(subRollsContainer);
-
-                        const summary = document.createElement('p');
-                        summary.className = 'rolador-summary text-center bg-[#e9e5d9] dark:bg-[#0f172a] p-2 rounded-md font-bold mt-3 text-sm';
-                        summary.textContent = `Total: ${pacote.totais?.sucesso || 0} Sucesso, ${pacote.totais?.pressao || 0} Pressão, ${pacote.totais?.adaptacao || 0} Adaptação.`;
-                        historyEntry.appendChild(summary);
-
-                        historicoDiv.prepend(historyEntry);
+                        const { card } = criarCardDndBeyond(pacote, false);
+                        historicoDiv.prepend(card);
                     } catch (err) {
-                        console.error("❌ Erro ao desenhar rolagem antiga:", err);
+                        console.error("❌ Erro ao desenhar rolagem antiga.");
                     }
                 });
             });
@@ -131,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 500);
 
     // ==========================================
-    // 2. MATEMÁTICA E LÓGICA DE ROLAGEM
+    // 3. MATEMÁTICA E LÓGICA DE ROLAGEM
     // ==========================================
     const diceTable = {
         d6: {
@@ -170,15 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const inputDados = document.getElementById('rolador-input');
-    const rollButton = document.getElementById('rolador-btn-rolar');
-    const clearButton = document.getElementById('rolador-btn-limpar');
-    const resultsDiv = document.getElementById('rolador-resultados-atuais');
-    const historicoDiv = document.getElementById('rolador-historico');
-
-    function rollDie(max) {
-        return Math.floor(Math.random() * max) + 1;
-    }
+    function rollDie(max) { return Math.floor(Math.random() * max) + 1; }
 
     function parseInput(inputString) {
         const diceRequests = [];
@@ -187,13 +273,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!part) continue;
             const match = part.match(/^(\d*)d(\d+)$/);
             if (!match) {
-                if (typeof window.mostrarNotificacao === 'function') window.mostrarNotificacao(`Formato inválido: "${part}". Use "2d6", "1d10", etc.`, 'erro');
+                if (typeof window.mostrarNotificacao === 'function') window.mostrarNotificacao(`Formato inválido: "${part}". Use "2d6", "1d10"`, 'erro');
                 return null;
             }
             const quantity = parseInt(match[1] || '1', 10);
             const size = parseInt(match[2], 10);
             if (![6, 10, 12].includes(size)) {
-                if (typeof window.mostrarNotificacao === 'function') window.mostrarNotificacao(`Dado inválido: "d${size}". Use apenas d6, d10 ou d12.`, 'aviso');
+                if (typeof window.mostrarNotificacao === 'function') window.mostrarNotificacao(`Dado inválido: "d${size}". Use d6, d10 ou d12.`, 'aviso');
                 return null;
             }
             diceRequests.push({ quantity, size });
@@ -219,6 +305,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const pacoteDeDados = {
             nome: nomeRolador,
             usuarioId: sessionStorage.getItem('usuarioId'),
+            timestamp: new Date().toISOString(),
             input: inputString,
             campanhaId: campanhaAtiva,
             resultados: [],
@@ -247,166 +334,161 @@ document.addEventListener('DOMContentLoaded', () => {
         
         renderizarRolagem(pacoteDeDados);
 
+        // 🔥 SINCRONIZAÇÃO BLINDADA: Emite o dado usando a variável que já declaramos lá em cima! 🔥
         if (campanhaAtiva && window.socket) {
             pacoteDeDados.token = sessionStorage.getItem('token'); 
             window.socket.emit('rolar-dados', pacoteDeDados);
         }
-    }
 
-    // ==========================================
-    // 3. ANIMAÇÃO DE GIRO E RENDERIZAÇÃO
-    // ==========================================
-    function renderizarRolagem(pacote) {
-        resultsDiv.innerHTML = '';
-
-        const rollGroup = document.createElement('div');
-        rollGroup.style.borderBottom = '1px solid var(--color-border-medium)';
-        rollGroup.style.paddingBottom = '15px';
-        rollGroup.style.marginBottom = '15px';
-
-        const header = document.createElement('h3');
-        header.textContent = `${pacote.nome} rolou: ${pacote.input}`;
-        header.style.marginTop = '0';
-
-        const meuNomeLocal = sessionStorage.getItem('usuarioNome');
-        const meuPersonagemLocal = document.getElementById('nome') ? document.getElementById('nome').value.trim() : '';
-
-        if (pacote.nome !== meuNomeLocal && pacote.nome !== meuPersonagemLocal) {
-            header.style.color = '#3a7c8c'; 
-        }
-
-        rollGroup.appendChild(header);
-
-        const subRollsContainer = document.createElement('div');
-        subRollsContainer.className = 'sub-rolls-container flex flex-wrap gap-3 justify-center mt-3';
-
-        const tempoGiroLogo = 1000;
-        const delaySuspense = 300;
-        const tempoTotalAntesDados = tempoGiroLogo + delaySuspense;
-
-        const iconFilesAtuais = obterIconesAtuais();
-
-        pacote.resultados.forEach(dado => {
-            const subRollDiv = document.createElement('div');
-            subRollDiv.className = 'sub-roll relative bg-white dark:bg-[#242424] border border-gray-300 dark:border-[#444] rounded-lg p-2 text-center shadow-sm w-[120px]';
-
-            const subRollHeader = document.createElement('h4');
-            subRollHeader.textContent = `${dado.tipo} #${dado.numero} (rolou ${dado.faceMecanica})`;
-            subRollHeader.className = 'text-xs font-bold text-gray-500 border-b border-gray-200 dark:border-[#555] pb-1 mb-2 opacity-0 transition-opacity duration-300';
-
-            const subRollIcons = document.createElement('div');
-            subRollIcons.className = 'icons-container flex flex-wrap gap-1 justify-center min-h-[40px] items-center opacity-0 transition-opacity duration-300';
-
-            const logoImg = document.createElement('img');
-            logoImg.src = 'assets/icon.jpg';
-            logoImg.className = 'logo-animado absolute top-1/2 left-1/2 rounded-full w-[50px] h-[50px] object-contain z-10';
-            subRollDiv.appendChild(logoImg);
-
-            dado.icones.forEach((iconName, index) => {
-                const img = document.createElement('img');
-                img.src = iconFilesAtuais[iconName];
-                img.alt = iconName;
-                img.className = 'dado-animado w-[35px] h-[35px] object-contain';
-                
-                const delayDados = tempoTotalAntesDados / 1000;
-                img.style.animationDelay = `${delayDados + (index * 0.1)}s`;
-
-                subRollIcons.appendChild(img);
-            });
-
-            setTimeout(() => {
-                subRollIcons.style.opacity = '1';
-                subRollHeader.style.opacity = '1';
-            }, tempoTotalAntesDados);
-
-            subRollDiv.appendChild(subRollHeader);
-            subRollDiv.appendChild(subRollIcons);
-            subRollsContainer.appendChild(subRollDiv);
-        });
-
-        rollGroup.appendChild(subRollsContainer);
-
-        const summary = document.createElement('p');
-        summary.className = 'rolador-summary text-center bg-[#e9e5d9] dark:bg-[#0f172a] p-2 rounded-md font-bold mt-3 text-sm';
-        summary.textContent = `Total: ${pacote.totais.sucesso} Sucesso, ${pacote.totais.pressao} Pressão, ${pacote.totais.adaptacao} Adaptação.`;
-        rollGroup.appendChild(summary);
-
-        resultsDiv.appendChild(rollGroup);
-
-        setTimeout(() => {
-            const historyEntry = rollGroup.cloneNode(true);
-            historyEntry.querySelectorAll('h4').forEach(h => h.style.opacity = '1');
-            historyEntry.querySelectorAll('.icons-container').forEach(c => c.style.opacity = '1');
-            historyEntry.querySelectorAll('.logo-animado').forEach(logo => logo.remove());
-            historyEntry.querySelectorAll('.dado-animado').forEach(die => {
-                die.classList.remove('dado-animado');
-                die.style.opacity = '1';
-                die.style.visibility = 'visible';
-                die.style.transform = 'scale(1) rotate(0deg)';
-                die.style.animation = 'none';
-            });
-            historicoDiv.prepend(historyEntry);
-        }, tempoTotalAntesDados);
     }
 
     if (rollButton) rollButton.addEventListener('click', handleRoll);
     if (inputDados) inputDados.addEventListener('keypress', (event) => { if (event.key === 'Enter') handleRoll(); });
-
+   
     // ==========================================
-    // 4. ROLADOR INTELIGENTE (Clique nas Perícias)
+    // 4. ROLADOR INTELIGENTE E VIGIA DO TERMINAL
     // ==========================================
     const labelsAptidoes = document.querySelectorAll('.aptidao-box label');
     let avisoAssimilada = document.getElementById('aviso-assimilada');
+    const containerAviso = document.getElementById('aviso-assimilada-container');
     
-    if (!avisoAssimilada && inputDados) {
+    if (!avisoAssimilada && containerAviso) {
         avisoAssimilada = document.createElement('div');
         avisoAssimilada.id = 'aviso-assimilada';
-        avisoAssimilada.className = 'hidden w-full text-center text-rpg-red dark:text-red-500 font-black font-rpg text-lg md:text-xl mb-3 animate-pulse uppercase tracking-widest';
-        avisoAssimilada.innerHTML = '<i data-lucide="flame" class="w-6 h-6 inline-block align-text-bottom"></i> Rolagem Assimilada! <i data-lucide="flame" class="w-6 h-6 inline-block align-text-bottom"></i>';
-        inputDados.parentNode.insertBefore(avisoAssimilada, inputDados);
+        avisoAssimilada.className = 'hidden w-full text-center text-rpg-red dark:text-red-500 font-black font-rpg text-sm mb-2 animate-pulse uppercase tracking-widest bg-red-100 dark:bg-red-900/30 p-1 rounded border border-red-500 shadow-sm';
+        avisoAssimilada.innerHTML = '<i data-lucide="flame" class="w-4 h-4 inline-block align-text-bottom"></i> Rolagem Assimilada <i data-lucide="flame" class="w-4 h-4 inline-block align-text-bottom"></i>';
+        containerAviso.appendChild(avisoAssimilada);
         if (window.lucide) lucide.createIcons();
     }
 
+    // 🔥 FUNÇÃO GLOBAL PARA APAGAR AS LUZES 🔥
+    window.limparRoladorLocal = function() {
+        if (inputDados) inputDados.value = '';
+        labelsAptidoes.forEach(lbl => {
+            lbl.classList.remove('label-selecionado', 'ring-2', 'ring-rpg-red', 'ring-offset-2', 'dark:ring-offset-[#1a1a1a]');
+            lbl.removeAttribute('data-clicks');
+        });
+        if (avisoAssimilada) avisoAssimilada.classList.add('hidden');
+    }
+
+    // 👁️ O OLHO QUE TUDO VÊ (Vigia se a gaveta foi fechada de qualquer forma)
+    const sidebarLog = document.getElementById('game-log-sidebar');
+    if (sidebarLog) {
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.attributeName === 'class') {
+                    // Se a gaveta ganhou a classe "translate-x-full", significa que ela fechou!
+                    if (sidebarLog.classList.contains('translate-x-full')) {
+                        window.limparRoladorLocal(); // Limpa as aptidões silenciosamente
+                    }
+                }
+            });
+        });
+        observer.observe(sidebarLog, { attributes: true });
+    }
+
+    // Função que "Lê" a ficha e monta a rolagem!
+    function recalcularRolagemInput() {
+        if (!inputDados) return;
+
+        const selecionados = document.querySelectorAll('.aptidao-box label.label-selecionado');
+        let instintos = [];
+        let outrasAptidoes = [];
+        let contadorDeMarcacoes = 0; 
+
+        selecionados.forEach(lbl => {
+            const box = lbl.closest('.aptidao-box');
+            const dots = box.querySelectorAll('input[type="checkbox"]:checked').length;
+            
+            if (box.closest('#secao-instintos')) {
+                let clicks = parseInt(lbl.getAttribute('data-clicks') || '1');
+                contadorDeMarcacoes += clicks; 
+                for(let i = 0; i < clicks; i++) {
+                    instintos.push(dots);
+                }
+            } else {
+                contadorDeMarcacoes += 1; 
+                outrasAptidoes.push(dots);
+            }
+        });
+
+        let isAssimilada = false;
+        
+        if (instintos.length >= 2) {
+            isAssimilada = true;
+            document.querySelectorAll('.aptidao-box label.label-selecionado').forEach(lbl => {
+                if (!lbl.closest('#secao-instintos')) {
+                    lbl.classList.remove('label-selecionado');
+                }
+            });
+            outrasAptidoes = []; 
+        }
+
+        let partes = [];
+        if (isAssimilada) {
+            if (avisoAssimilada) avisoAssimilada.classList.remove('hidden');
+            instintos.forEach(dots => partes.push(`${dots}d12`));
+        } else {
+            if (avisoAssimilada) avisoAssimilada.classList.add('hidden');
+            instintos.forEach(dots => partes.push(`${dots}d6`));
+            outrasAptidoes.forEach(dots => partes.push(`${dots}d10`));
+        }
+
+        inputDados.value = partes.join(' '); 
+
+        if (partes.length > 0) {
+            inputDados.classList.add('ring-2', 'ring-rpg-red');
+            setTimeout(() => inputDados.classList.remove('ring-2', 'ring-rpg-red'), 200);
+        }
+
+        // Abertura automática a partir de 2 marcações
+        if (contadorDeMarcacoes >= 2 && sidebarLog) {
+            if (sidebarLog.classList.contains('translate-x-full')) {
+                sidebarLog.classList.remove('translate-x-full');
+            }
+        }
+    }
+
+    // O Clique Mágico Inteligente
     labelsAptidoes.forEach(label => {
         label.addEventListener('click', function() {
             const box = this.closest('.aptidao-box');
             const checkedCount = box.querySelectorAll('input[type="checkbox"]:checked').length;
             if (checkedCount === 0) return; 
 
-            this.classList.add('label-selecionado');
-            let diceType = 'd10'; 
-            if (this.closest('#secao-instintos')) {
-                diceType = 'd6';
-            }
+            const isInstinto = box.closest('#secao-instintos') !== null;
 
-            if (inputDados) {
-                let currentVal = inputDados.value.trim();
-
-                // Regra Mágica de ROLAGEM ASSIMILADA 
-                if (diceType === 'd6' && (currentVal.includes('d6') || currentVal.includes('d12'))) {
-                    currentVal = currentVal.replace(/\b\d+d10\b/g, '').replace(/\s+/g, ' ').trim();
-                    currentVal = currentVal.replace(/d6/g, 'd12');
-                    diceType = 'd12'; 
-
-                    if (avisoAssimilada) avisoAssimilada.classList.remove('hidden');
-                    
-                    // Apaga os outros botões de conhecimento
-                    labelsAptidoes.forEach(lbl => {
-                        if (!lbl.closest('#secao-instintos')) lbl.classList.remove('label-selecionado');
-                    });
-                }
-
-                const diceString = `${checkedCount}${diceType}`;
-                if (currentVal !== '') {
-                    inputDados.value = currentVal + ' ' + diceString;
+            if (isInstinto) {
+                // Instintos: Sistema de 3 Estados (1 clique, 2 cliques, desliga)
+                if (!this.classList.contains('label-selecionado')) {
+                    this.classList.add('label-selecionado');
+                    this.setAttribute('data-clicks', '1');
                 } else {
-                    inputDados.value = diceString;
+                    let clicks = parseInt(this.getAttribute('data-clicks') || '1');
+                    if (clicks === 1) {
+                        this.setAttribute('data-clicks', '2');
+                        this.classList.add('ring-2', 'ring-rpg-red', 'ring-offset-2', 'dark:ring-offset-[#1a1a1a]');
+                    } else {
+                        this.classList.remove('label-selecionado', 'ring-2', 'ring-rpg-red', 'ring-offset-2', 'dark:ring-offset-[#1a1a1a]');
+                        this.removeAttribute('data-clicks');
+                    }
                 }
-
-                // Efeito Pulsante na barra
-                inputDados.classList.add('ring-4', 'ring-rpg-red', 'scale-105');
-                setTimeout(() => inputDados.classList.remove('ring-4', 'ring-rpg-red', 'scale-105'), 200);
+            } else {
+                // Conhecimento/Prática: Troca Inteligente!
+                if (!this.classList.contains('label-selecionado')) {
+                    // Desliga todos os outros conhecimentos e práticas antes de ligar este
+                    document.querySelectorAll('.aptidao-box label.label-selecionado').forEach(lbl => {
+                        if (!lbl.closest('#secao-instintos')) {
+                            lbl.classList.remove('label-selecionado');
+                        }
+                    });
+                    this.classList.add('label-selecionado');
+                } else {
+                    this.classList.remove('label-selecionado');
+                }
             }
+            
+            recalcularRolagemInput();
         });
     });
 
@@ -415,15 +497,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     if (clearButton) {
         clearButton.addEventListener('click', () => {
-            resultsDiv.innerHTML = '';
-            historicoDiv.innerHTML = '';
-            inputDados.value = '';
+            if (resultsDiv) resultsDiv.innerHTML = '';
+            if (historicoDiv) historicoDiv.innerHTML = '<p class="text-center text-gray-400 text-xs italic font-bold">O destino aguarda os dados...</p>';
+            
             const inputFiltroHistorico = document.getElementById('filtro-historico');
             if (inputFiltroHistorico) inputFiltroHistorico.value = '';
             
-            // Apaga as luzes dos botões pressionados
-            labelsAptidoes.forEach(label => label.classList.remove('label-selecionado'));
-            if (avisoAssimilada) avisoAssimilada.classList.add('hidden');
+            window.limparRoladorLocal(); 
         });
     }
 
@@ -434,14 +514,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const rolagensSalvas = historicoDiv.children;
 
             Array.from(rolagensSalvas).forEach(caixaDeRolagem => {
-                const tituloRolagem = caixaDeRolagem.querySelector('h3');
-                if (tituloRolagem) {
-                    const textoDoTitulo = tituloRolagem.textContent.toLowerCase();
-                    if (textoDoTitulo.includes(termoBusca)) {
-                        caixaDeRolagem.style.display = 'block';
-                    } else {
-                        caixaDeRolagem.style.display = 'none';
-                    }
+                if (caixaDeRolagem.tagName.toLowerCase() === 'p') return; 
+
+                const nomeSpan = caixaDeRolagem.querySelector('span.truncate');
+                const rolagemSpan = caixaDeRolagem.querySelector('.tracking-widest');
+                
+                let texto = '';
+                if (nomeSpan) texto += nomeSpan.textContent.toLowerCase() + ' ';
+                if (rolagemSpan) texto += rolagemSpan.textContent.toLowerCase();
+
+                if (texto.includes(termoBusca)) {
+                    caixaDeRolagem.style.display = 'flex';
+                } else {
+                    caixaDeRolagem.style.display = 'none';
                 }
             });
         });

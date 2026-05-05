@@ -76,28 +76,38 @@ io.on('connection', (socket) => {
     console.log('Um jogador conectou! ID:', socket.id);
 
     // 🛡️ A CATRACA VIP E O HISTÓRICO LIGADO
+    // 🛡️ A CATRACA VIP E O HISTÓRICO LIGADO
     socket.on('entrar-na-campanha', async (dados) => {
-        const { campanhaId, token } = dados;
-
+        const { campanhaId, token } = dados; 
         if (!token || !campanhaId) return;
 
         try {
             const segredo = process.env.SEGREDO_JWT || 'segredo_super_secreto_rpg';
             const usuarioVerificado = jwt.verify(token, segredo);
-            const usuarioIdSeguro = usuarioVerificado.id;
+            const usuarioIdSeguro = usuarioVerificado.id; 
 
-            const salaStr = campanhaId.toString();
+            const salaStr = campanhaId.toString(); 
             const sql = `SELECT * FROM membros_campanha WHERE campanha_id = $1 AND usuario_id = $2`;
             const resultado = await pool.query(sql, [campanhaId, usuarioIdSeguro]);
 
             if (resultado.rows.length > 0) {
-                socket.join(salaStr);
+                socket.join(salaStr); 
                 console.log(`✅ Catraca VIP: Usuário ${usuarioIdSeguro} acessou a mesa ${salaStr}`);
 
-                const sqlHist = `SELECT pacote FROM historico_rolagens WHERE campanha_id = $1 ORDER BY id ASC LIMIT 30`;
-                const histResult = await pool.query(sqlHist, [campanhaId]);
+                // 🔥 VERIFICA SE QUEM ENTROU É O MESTRE
+                const checkMestre = await pool.query('SELECT mestre_id FROM campanhas WHERE id = $1', [campanhaId]);
+                const isMestre = checkMestre.rows.length > 0 && checkMestre.rows[0].mestre_id === usuarioIdSeguro;
 
-                const rolagensAntigas = histResult.rows.map(row => row.pacote);
+                const sqlHist = `SELECT pacote FROM historico_rolagens WHERE campanha_id = $1 ORDER BY id ASC LIMIT 50`;
+                const histResult = await pool.query(sqlHist, [campanhaId]);
+                
+                let rolagensAntigas = histResult.rows.map(row => row.pacote);
+                
+                // 🔥 O FILTRO SUPREMO: Se NÃO for o Mestre, removemos todas as rolagens secretas do histórico!
+                if (!isMestre) {
+                    rolagensAntigas = rolagensAntigas.filter(r => r.isMestre !== true);
+                }
+                
                 socket.emit('carregar-historico', rolagensAntigas);
             } else {
                 console.log(`🚨 BARRADO: Invasor bloqueado na mesa ${salaStr}!`);
@@ -121,20 +131,27 @@ io.on('connection', (socket) => {
             const sqlCheck = `SELECT * FROM membros_campanha WHERE campanha_id = $1 AND usuario_id = $2`;
             const resultCheck = await pool.query(sqlCheck, [campanhaId, usuarioIdSeguro]);
 
-            if (resultCheck.rows.length === 0) {
-                console.log(`🚨 HACKER BARRADO: Usuário ${usuarioIdSeguro} tentou rolar dado em mesa alheia!`);
-                return;
-            }
+            if (resultCheck.rows.length === 0) return; 
+
+            // 🔥 IDENTIFICA SE A ROLAGEM VEIO DE TRÁS DO ESCUDO DO MESTRE
+            const checkMestre = await pool.query('SELECT mestre_id FROM campanhas WHERE id = $1', [campanhaId]);
+            const isMestre = checkMestre.rows.length > 0 && checkMestre.rows[0].mestre_id === usuarioIdSeguro;
 
             dadosDaRolagem.usuarioId = usuarioIdSeguro;
-            const salaStr = campanhaId.toString();
-            socket.to(salaStr).emit('nova-rolagem', dadosDaRolagem);
+            dadosDaRolagem.isMestre = isMestre; // Carimba a rolagem como secreta se for do mestre
+            dadosDaRolagem.timestamp = new Date().toISOString(); // Carimba a DATA e HORA EXATAS
 
-            // REMOVIDO: O parseInt(campanhaId, 10). UUID é string!
-            await pool.query(
-                `INSERT INTO historico_rolagens (campanha_id, pacote) VALUES ($1, $2)`,
-                [campanhaId, dadosDaRolagem]
-            );
+            const salaStr = campanhaId.toString(); 
+            
+            if (isMestre) {
+                // Se for o mestre, NÃO emite para a sala. Mantemos em segredo! 
+                // (O front-end do mestre já desenha a própria rolagem localmente)
+            } else {
+                // Se for jogador, manda para todo o resto da mesa (incluindo o mestre)
+                socket.to(salaStr).emit('nova-rolagem', dadosDaRolagem);
+            }
+            
+            await pool.query(`INSERT INTO historico_rolagens (campanha_id, pacote) VALUES ($1, $2)`, [campanhaId, dadosDaRolagem]);
         } catch (err) {
             console.error("❌ Tentativa de forjar rolagem bloqueada.");
         }

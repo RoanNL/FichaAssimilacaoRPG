@@ -260,12 +260,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
             });
 
-            if (!resposta.ok) throw new Error("O Servidor recusou a conexão (Erro 500).");
+            if (!resposta.ok) throw new Error("O Servidor recusou a conexão (Erro 500). Verifique o terminal do Node!");
 
             const jogadores = await resposta.json();
+            
+            // 🔥 DECLARADO APENAS UMA VEZ AQUI! 🔥
             const meuId = sessionStorage.getItem('usuarioId');
 
+            // ==========================================
+            // 🔥 BARREIRA DE F5 (SEGURANÇA ABSOLUTA) 🔥
+            // ==========================================
+            // Verifica se o ID do usuário local ainda existe na lista do banco de dados
             const euEstouNaLista = jogadores.some(jog => jog.usuario_id == meuId);
+            
+            // Se eu não estou na lista, e NÃO SOU o Mestre da mesa... fui expulso!
             if (!euEstouNaLista && !isMestreAtivo) {
                 window.mostrarNotificacao("Seu acesso a esta mesa foi revogado.", "erro");
                 sessionStorage.removeItem('campanhaAtiva');
@@ -273,13 +281,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 sessionStorage.removeItem('campanhaNome');
                 sessionStorage.removeItem('campanhaCodigo');
                 Router.navigate('dashboard');
-                return; 
+                return; // Para a execução do código aqui mesmo!
             }
 
             gridJogadores.innerHTML = '';
             if (jogadores.length === 0) return gridJogadores.innerHTML = '<p class="text-gray-500 italic col-span-full">Vazio.</p>';
-
-            const meuId = sessionStorage.getItem('usuarioId');
 
             jogadores.forEach(jog => {
                 const card = document.createElement('div');
@@ -983,4 +989,85 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // ==========================================
+    // EXTRA: MOTOR DO SELETOR VISUAL PARA ENTRAR NA MESA
+    // ==========================================
+    window.carregarCharsParaConvite = async function() {
+        const container = document.getElementById('lista-chars-convite');
+        if(!container) return;
+        container.innerHTML = '<p class="text-gray-500 italic text-center text-sm py-4"><i data-lucide="loader" class="w-5 h-5 animate-spin mx-auto"></i></p>';
+        if (window.lucide) lucide.createIcons();
+
+        try {
+            const usuarioId = sessionStorage.getItem('usuarioId');
+            const res = await fetch(`${window.API_URL}/personagens/usuario/${usuarioId}`, {
+                headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
+            });
+            const personagens = await res.json();
+
+            container.innerHTML = '';
+            if (personagens.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 italic text-center text-sm py-4">Você ainda não tem fichas salvas.</p>';
+                return;
+            }
+
+            const selectOriginal = document.getElementById('char-select-campanha');
+
+            personagens.forEach(p => {
+                const div = document.createElement('div');
+                div.className = 'bg-gray-50 dark:bg-[#242424] border border-gray-300 dark:border-gray-700 p-2 rounded flex items-center justify-between shadow-sm hover:border-rpg-green transition-colors cursor-pointer group';
+                const imgSrc = (p.foto && !p.foto.includes('R0lGODlhAQAB')) ? p.foto : './assets/icon.jpg';
+
+                div.innerHTML = `
+                    <div class="flex items-center gap-3 overflow-hidden">
+                        <img src="${imgSrc}" class="w-10 h-10 rounded border border-gray-400 object-cover shadow-sm bg-black">
+                        <div>
+                            <h4 class="text-black dark:text-white font-bold text-sm m-0 truncate max-w-[200px]" title="${window.escaparHTML(p.nome_personagem)}">${window.escaparHTML(p.nome_personagem)}</h4>
+                            <p class="text-gray-500 text-[10px] uppercase font-bold truncate m-0">${window.escaparHTML(p.ocupacao)}</p>
+                        </div>
+                    </div>
+                    <button class="bg-gray-800 hover:bg-rpg-green text-white p-2 rounded shadow transition-colors opacity-0 group-hover:opacity-100" title="Escolher">
+                        <i data-lucide="check" class="w-4 h-4"></i>
+                    </button>
+                `;
+
+                div.addEventListener('click', () => {
+                    // 1. Atualiza o select invisível para o dashboard.js não perceber a troca!
+                    let optionExists = Array.from(selectOriginal.options).some(opt => opt.value === p.id);
+                    if (!optionExists) {
+                        const newOpt = new Option(p.nome_personagem, p.id);
+                        selectOriginal.add(newOpt);
+                    }
+                    selectOriginal.value = p.id;
+
+                    // 2. Atualiza a interface visual para mostrar a foto do boneco selecionado
+                    document.getElementById('char-selecionado-nome').textContent = p.nome_personagem;
+                    const imgVisual = document.getElementById('char-selecionado-img');
+                    imgVisual.src = imgSrc;
+                    imgVisual.classList.remove('hidden');
+                    document.getElementById('icone-char-default').classList.add('hidden');
+
+                    // 3. Fecha o modal
+                    document.getElementById('modal-escolher-char-entrar').classList.remove('show');
+                });
+                container.appendChild(div);
+            });
+            if (window.lucide) lucide.createIcons();
+        } catch(e) {
+            container.innerHTML = '<p class="text-rpg-red text-center text-sm py-4">Erro ao buscar banco de dados.</p>';
+        }
+    };
+
+    window.limparSelecaoCharConvite = function() {
+        const selectOriginal = document.getElementById('char-select-campanha');
+        if (selectOriginal) selectOriginal.value = "";
+        
+        document.getElementById('char-selecionado-nome').textContent = "Selecionar Ficha";
+        document.getElementById('char-selecionado-img').classList.add('hidden');
+        document.getElementById('icone-char-default').classList.remove('hidden');
+        
+        document.getElementById('modal-escolher-char-entrar').classList.remove('show');
+    };
+
 });
