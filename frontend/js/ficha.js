@@ -1,5 +1,3 @@
-// js/ficha.js
-
 // Variável global para sabermos qual ficha está aberta
 window.idPersonagemAtual = null;
 
@@ -22,17 +20,26 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('nome').value = personagem.nome_personagem || '';
             document.getElementById('ocupacao').value = personagem.ocupacao || '';
 
+            // Privaciade
+            const checkPrivado = document.getElementById('char-is-private');
+            if (checkPrivado) checkPrivado.checked = (personagem.is_privada === true);
+
+            // 🔥 CARREGA A FOTO DIRETO DA FONTE 🔥
+            const photoPreview = document.getElementById('char-photo-preview');
+            if (photoPreview) {
+                photoPreview.src = (personagem.foto && !personagem.foto.includes('R0lGODlhAQAB')) 
+                    ? personagem.foto 
+                    : "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
+            }
+
             const ficha = personagem.dados_ficha || {};
             preencherFicha(ficha);
 
             window.idPersonagemAtual = id;
             sessionStorage.setItem('personagemAtivoId', id);
 
-            if (typeof window.atualizarPreviewAnotacoes === 'function') {
-                window.atualizarPreviewAnotacoes();
-            }
+            if (typeof window.atualizarPreviewAnotacoes === 'function') window.atualizarPreviewAnotacoes();
 
-            // Garante que o nome do header bate com o logado
             const spanNomeFicha = document.getElementById('nome-usuario-logado-ficha');
             if (spanNomeFicha) spanNomeFicha.textContent = `Bem-vindo, ${sessionStorage.getItem('usuarioNome')}`;
 
@@ -127,35 +134,47 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     function coletarDadosFicha() {
         const dados = {};
-        const elementos = document.querySelectorAll('#tela-ficha input, #tela-ficha textarea');
+        
+        const elementos = document.querySelectorAll('input, textarea, select');
 
         elementos.forEach(el => {
-            if (!el.id || el.type === 'file' || el.tagName === 'BUTTON') return;
-            if (el.id === 'busca-personagem' || el.id === 'nome' || el.id === 'ocupacao') return; // Tratados por fora
+            // Ignora botões e campos sem identificação
+            if (el.type === 'button' || el.type === 'submit' || el.type === 'file') return;
+            if (!el.id && !el.name) return; 
 
-            if (el.type === 'checkbox' || el.type === 'radio') {
-                dados[el.id] = el.checked;
+            const chave = el.name || el.id; 
+
+            if (el.type === 'checkbox') {
+                dados[chave] = el.checked;
+            } else if (el.type === 'radio') {
+                if (el.checked) {
+                    dados[chave] = el.value; 
+                }
             } else {
-                dados[el.id] = el.value;
+                // Salva inputs normais, textareas (características) e ranges (cabo de guerra)
+                dados[chave] = el.value;
             }
         });
 
-        if (photoPreview && photoPreview.src && !photoPreview.src.includes('R0lGODlhAQABAAD')) {
-            dados['char-photo'] = photoPreview.src;
-        }
+        // Caso você use uma imagem de personagem, garantimos que ela não vá no meio do JSON bagunçando tudo
+        delete dados['char-photo']; 
+        delete dados['input-foto-personagem'];
+
         return dados;
     }
 
     function preencherFicha(dados) {
-        if (photoPreview) {
-            photoPreview.src = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
-        }
+        if (!dados || typeof dados !== 'object') return;
 
-        // Restaura Características Dinâmicas primeiro, se existirem na base
+
+        // 1. RECONSTRÓI AS CARACTERÍSTICAS
         const caracContainer = document.getElementById('caracteristicas-container');
-        if (caracContainer) caracContainer.innerHTML = '';
+        if (caracContainer) {
+            caracContainer.innerHTML = '';
+            window.contadorCarac = 0; 
+        }
+        
         let caracCount = 0;
-
         for (const key in dados) {
             if (key.startsWith('carac-nome-')) caracCount++;
         }
@@ -163,61 +182,78 @@ document.addEventListener('DOMContentLoaded', () => {
             window.adicionarCaracteristicaDOM();
         }
 
+        // 2. PREENCHEDOR UNIVERSAL
         for (const key in dados) {
-            if (key === 'char-photo') {
-                if (photoPreview) photoPreview.src = dados[key];
-                continue;
-            }
+            // Ignora o processamento de foto, pois agora ela é tratada no carregarPersonagem
+            if (key === 'char-photo' || key === 'input-foto-personagem') continue;
 
             const el = document.getElementById(key);
             if (el) {
-                if (el.type === 'checkbox') el.checked = dados[key];
-                else el.value = dados[key];
+                if (el.type === 'checkbox') {
+                    el.checked = (dados[key] === true || dados[key] === 'true');
+                } else {
+                    el.value = dados[key];
+                }
+                continue; 
+            }
+
+            const radios = document.querySelectorAll(`input[name="${key}"]`);
+            if (radios.length > 0) {
+                radios.forEach(radio => {
+                    if (radio.value == dados[key]) radio.checked = true;
+                });
             }
         }
 
         if (typeof window.calcularSaudeMax === 'function') window.calcularSaudeMax(false);
-        if (typeof window.sincronizarTrilhas === 'function') window.sincronizarTrilhas();
+        
     }
 
-    window.salvarFicha = async function (silencioso = false) {
+    window.salvarFicha = async function(silencioso = false) {
         const usuarioLogadoId = sessionStorage.getItem('usuarioId');
         if (!usuarioLogadoId) return;
 
         const nomeInput = document.getElementById('nome');
         const nomePersonagem = nomeInput ? nomeInput.value.trim() : '';
+        
         if (!nomePersonagem || nomePersonagem === "") {
-            return window.mostrarNotificacao("O personagem precisa de pelo menos um Nome para ser salvo!", "aviso");
+            if (!silencioso) window.mostrarNotificacao("O personagem precisa de pelo menos um Nome para ser salvo!", "aviso");
+            return; 
         }
 
         const dadosFicha = coletarDadosFicha();
         const ocupacao = document.getElementById('ocupacao') ? document.getElementById('ocupacao').value : '';
-        const foto = dadosFicha['char-photo'] || null;
+        
+        // 🔥 PUXA A FOTO DA MOLDURA E NÃO DO JSON 🔥
+        const imgPreview = document.getElementById('char-photo-preview');
+        const fotoFinal = (imgPreview && imgPreview.src && !imgPreview.src.includes('R0lGODlhAQAB')) ? imgPreview.src : null;
+
+        const checkboxPrivacidade = document.getElementById('char-is-private');
+        const isPrivada = checkboxPrivacidade ? checkboxPrivacidade.checked : false;
 
         const payload = {
             usuarioId: usuarioLogadoId,
             personagemId: window.idPersonagemAtual,
-            nome: nomePersonagem,
+            nome: nomePersonagem, 
             ocupacao: ocupacao,
             dadosFicha: dadosFicha,
-            foto: foto
+            foto: fotoFinal, // A FOTO VAI CORRETA AGORA!
+            isPrivada: isPrivada
         };
 
         const btnSaveNav = document.getElementById('btn-save-char-nav');
-        const iconOriginal = btnSaveNav ? btnSaveNav.innerHTML : '';
-
-        if (!silencioso && btnSaveNav) {
-            btnSaveNav.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Salvando...';
-            if (window.lucide) lucide.createIcons();
+        const btnDeleteCharNav = document.getElementById('btn-delete-char-nav');
+        const htmlPadrao = '<i data-lucide="save" class="w-4 h-4"></i> <span class="hidden md:inline">Salvar</span>';
+        
+        if (btnSaveNav && !silencioso) {
+            btnSaveNav.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> <span class="hidden md:inline">Salvando...</span>';
+            if(window.lucide) lucide.createIcons();
         }
 
         try {
             const resposta = await fetch(`${window.API_URL}/personagens`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${sessionStorage.getItem('token')}`
-                },
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionStorage.getItem('token')}` },
                 body: JSON.stringify(payload)
             });
 
@@ -227,25 +263,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (resultado.id) {
                     window.idPersonagemAtual = resultado.id;
                     sessionStorage.setItem('personagemAtivoId', resultado.id);
+                    if (btnDeleteCharNav) btnDeleteCharNav.classList.remove('hidden');
                 }
 
                 if (!silencioso) {
                     window.mostrarNotificacao(resultado.mensagem, 'sucesso');
-                    // Atualiza a listagem lá no dashboard em background
-                    if (typeof window.carregarListaPersonagens === 'function') window.carregarListaPersonagens();
+                    if(typeof window.carregarListaPersonagens === 'function') window.carregarListaPersonagens();
+                }
+                
+                if (btnSaveNav && !silencioso) {
+                    btnSaveNav.classList.remove('bg-rpg-green', 'hover:bg-green-700');
+                    btnSaveNav.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                    btnSaveNav.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4"></i> <span class="hidden md:inline">Salvo!</span>';
+                    if(window.lucide) lucide.createIcons();
+                    
+                    setTimeout(() => {
+                        btnSaveNav.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                        btnSaveNav.classList.add('bg-rpg-green', 'hover:bg-green-700');
+                        btnSaveNav.innerHTML = htmlPadrao;
+                        if(window.lucide) lucide.createIcons();
+                    }, 2000);
                 }
             } else {
-                if (!silencioso) window.mostrarNotificacao(resultado.erro || "Erro desconhecido.", 'erro');
+                if (!silencioso) window.mostrarNotificacao(resultado.erro || "Erro.", 'erro');
+                if (btnSaveNav && !silencioso) btnSaveNav.innerHTML = htmlPadrao;
             }
         } catch (erro) {
-            console.error("❌ Erro ao salvar ficha:", erro);
-            if (!silencioso) window.mostrarNotificacao("Erro de comunicação com o servidor!", 'erro');
-        } finally {
-            if (!silencioso && btnSaveNav) {
-                btnSaveNav.innerHTML = iconOriginal;
-                if (window.lucide) lucide.createIcons();
-            }
-        }
+            if (!silencioso) window.mostrarNotificacao("Erro de comunicação!", 'erro');
+            if (btnSaveNav && !silencioso) btnSaveNav.innerHTML = htmlPadrao;
+        } 
     };
 
     // Botão de Salvar da Barra de Navegação Superior
@@ -415,16 +461,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
-    // 8. SINCRONIZAÇÃO DET / ASSIM
+    // 8. SINCRONIZAÇÃO DET / ASSIM (GASTO DE PONTOS)
     // ==========================================
     window.sincronizarTrilhas = function () {
-        const detNum = parseInt(document.getElementById('det-num').value) || 0;
+        // Essa função só é chamada quando o jogador muda o número TOTAL no input
+        const detNum = parseInt(document.getElementById('det-num')?.value) || 0;
         for (let i = 1; i <= 10; i++) {
             const check = document.getElementById(`det-${i}`);
             if (check) check.checked = (i <= detNum);
         }
 
-        const assimNum = parseInt(document.getElementById('assim-num').value) || 0;
+        const assimNum = parseInt(document.getElementById('assim-num')?.value) || 0;
         for (let i = 1; i <= 10; i++) {
             const check = document.getElementById(`assim-${i}`);
             if (check) check.checked = (i >= 11 - assimNum);
@@ -434,6 +481,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputDetNum = document.getElementById('det-num');
     const inputAssimNum = document.getElementById('assim-num');
 
+    // Ao digitar o número, ele calcula a proporção e "reseta" as bolinhas
     if (inputDetNum) {
         inputDetNum.addEventListener('input', () => {
             let val = parseInt(inputDetNum.value) || 0;
@@ -454,6 +502,20 @@ document.addEventListener('DOMContentLoaded', () => {
             window.sincronizarTrilhas();
             agendarAutosave();
         });
+    }
+
+    // 🔥 AS BOLINHAS AGORA SÃO O SEU BOLSO (GASTO) 🔥
+    // O jogador pode desmarcar bolinhas sem alterar os números de reserva máxima!
+    for (let i = 1; i <= 10; i++) {
+        const checkDet = document.getElementById(`det-${i}`);
+        if (checkDet) {
+            checkDet.addEventListener('change', agendarAutosave); // Só salva, não mexe na proporção
+        }
+        
+        const checkAssim = document.getElementById(`assim-${i}`);
+        if (checkAssim) {
+            checkAssim.addEventListener('change', agendarAutosave); // Só salva, não mexe na proporção
+        }
     }
 
     // ==========================================
@@ -525,27 +587,71 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const baralhoEvolutivas = [
-        { nome: "Assimilação Sensitiva", desc: "Desenvolve percepção intuitiva para criaturas assimiladas e eventos futuros. Sexto sentido aguçado." },
-        { nome: "Assimilação Reativa", desc: "Reflexos se tornam cada vez mais precisos, reagindo de forma instintiva a perigos ou situações inusitadas." },
-        { nome: "Assimilação Vigorosa", desc: "A resiliência física e mental é reforçada. Corpo e mente capazes de resistir a pressões extremas." }
+        { nome: "Assimilação Sensitiva A", desc: "O(a) Infectado(a) desenvolve uma percepção intuitiva para criaturas assimiladas e eventos futuros, navegando pelas tensões do ambiente usando o sexto sentido" },
+        { nome: "Assimilação Reativa 2", desc: "Os reflexos do(a) Infectado(a) se tornam cada vez mais precisos, reagindo de forma instintiva e assertiva a perigos ou situações inusitadas" },
+        { nome: "Assimilação Sensorial 3", desc: "Os sentidos do(a) Infectado(a) atingem níveis extraordinários, captando detalhes sutis com precisão." },
+        { nome: "Assimilação Vigorosa 4", desc: "A resiliência física e mental do(a) Infectado(a) é reforçada. Corpo e mente são capazes de resistir a pressões e traumas." },
+        { nome: "Assimilação Persuasiva 5", desc: "O carisma e a influência do(a) Infectado(a) se ampliam de forma sensível, facilitando a comunicação e o convencimento, além de ampliar seu magnetismo e sua autoridade" },
+        { nome: "Assimilação Brutal 6", desc: "A capacidade do(a) Infectado(a) em empregar força bruta e gerar aceleração é aumentada, alcançando proeza física sobre-humana." },
+        { nome: "Assimilação Perspicaz 7", desc: "O raciocínio e a cognição do(a) Infectado(a) são aprimorados, despertando sua genialidade, revelando conexões ocultas, padrões complexos e soluções brilhantes em meio ao caos." },
+        { nome: "Assimilação Regenerativa 8", desc: "A capacidade regenerativa do corpo do(a) Infectado(a) é ampliada além dos limites humanos." },
+        { nome: "Assimilação Silvestre 9", desc: "A conexão do(a) Infectado(a) com a natureza se aprofunda, concedendo habilidades extraordinárias que podem curar, comandar animais ou até modificar ambientes vivos." },
+        { nome: "Assimilação Opressora 10", desc: "A presença do(a) Infectado(a) deixa seus rivais acuados, hesitantes e mais suscetíveis à dominância." },
+        { nome: "Assimilação Esguia J", desc: "A motricidade do(a) Infectado(a) é adaptada para interagir de forma mais eficiente com o ambiente à sua volta, auxiliando a ocultação." },
+        { nome: "Assimilação Indomável Q", desc: "A perseverança do(a) Infectado(a) supera os seus limites, permitindo que continue lutando mesmo nas condições mais adversas." },
+        { nome: "Assimilação Primordial K", desc: "O DNA do(a) Infectado(a) integra a mais pura essência da Assimilação, permitindo-o interagir com a própria força evolutiva e com a Assimilação presente nos seres à sua volta." },
+        { nome: "Coringa Joker", desc: "Apenas o Assimilador saberá oque vai acontecer." }
     ];
 
     const baralhoAdaptativas = [
-        { nome: "Assimilação Anatômica", desc: "Transformações físicas profundas. Pode criar presas ou alterar membros, mas distorce a motricidade fina." },
-        { nome: "Assimilação Cutânea", desc: "A pele ganha novas capacidades (ex: aderência ou controle térmico), dificultando sua interação com o ambiente natural." },
-        { nome: "Assimilação Óssea", desc: "Mutações no sistema ósseo, excedendo limites humanos, mas impondo desafios anatômicos dolorosos." }
+        { nome: "Assimilação Anatômica A", desc: "O(a) Infectado(a) sofre transformações físicas profundas, moldando seu corpo para combate e deslocamento, porém distorce a alimentação e a motricidade fina" },
+        { nome: "Assimilação Cutânea 2", desc: "A pele do(a) Infectado(a) ganha novas capacidades, auxiliando ao mesmo tempo que dificulta sua interação com o ambiente." },
+        { nome: "Assimilação Camaleônica 3", desc: "O(a) Infectado(a) desenvolve camuflagem natural, se ajusta ao ambiente e aos outros, mas perde controle sobre impulsos visuais e compromete suas sensibilidades." },
+        { nome: "Assimilação Escamosa 4", desc: "Escamas cobrem o corpo do(a) Infectado(a), fortalecendo sua resistência mas atrapalhando a maneira que reage aos seus arredores." },
+        { nome: "Assimilação Óssea 5", desc: "Mutações no sistema ósseo do(a) Infectado(a), alterando sua estrutura e composição para exceder os limites do ser humano comum, porém a peculiaridade de sua anatomia traz novos desafios." },
+        { nome: "Assimilação Gastrointestinal 6", desc: "O sistema digestivo do(a) Infectado(a) pode consumir ampla variedade de nutrientes, mas exclui a dieta humana, o prazer na alimentação e pode gerar desconfortos." },
+        { nome: "Assimilação Respiratória 7", desc: "Aprimora o controle respiratório permitindo que o(a) Infectado(a) sobreviva em ambientes hostis, mas perturba a comunicação e amplifica reações sensoriais." },
+        { nome: "Assimilação Termorreguladora 8", desc: "O corpo do(a) Infectado(a) regula calor com precisão letal, alterando o ambiente ao redor, mas exige cautela com toques, desgastes e equilíbrio térmico." },
+        { nome: "Assimilação Neural 9", desc: "O(a) Infectado(a) gera sinapses hiperativas que decifram padrões e ameaças com precisão inumana, à custa do descanso, do afeto e da criatividade espontânea." },
+        { nome: "Assimilação Cardiovascular 10", desc: "O(a) Infectado(a) consegue controlar seu coração ao extremo, melhorando sua resposta a crises, porém pode passar por instabilidades ao longo do dia." },
+        { nome: "Assimilação Fitomórfica J", desc: "Fusão com o mundo vegetal transforma o corpo do(a) Infectado(a) em raiz, escudo e fonte de cura, desde que jamais perca o contato com o solo." },
+        { nome: "Assimilação Quimiorreceptora Q", desc: "O olfato do(a) Infectado(a) evolui, possibilitando que leia rastros, mentiras e histórias químicas, mas torna o mundo um tormento sensorial" },
+        { nome: "Assimilação Metabólica K", desc: "Um metabolismo fora de controle gera força, cura e resistência, mas cobra energia constante e consome o corpo do(a) Infectado(a) de dentro para fora." },
+        { nome: "Coringa Joker", desc: "Apenas o Assimilador saberá oque vai acontecer." }
     ];
 
     const baralhoInoportunas = [
-        { nome: "Assimilação Atrofiante", desc: "Músculos e tendões definham. O corpo se move em esforço contido, sempre à beira de ruir." },
-        { nome: "Assimilação Neuropática", desc: "Nervos disparam sinais confusos: dor fantasma, tremores e reflexos tardios. O corpo vira marionete de si." },
-        { nome: "Assimilação Devoradora", desc: "O metabolismo exige alimento constante. Se negado, devora reservas internas corroendo a carne e a sanidade." }
+        { nome: "Assimilação Atrofiante A", desc: "Músculos e tendões definham; o corpo do(a) Infectado(a) se move em esforço contido, aprendendo a sobreviver com menos, sempre à beira de ruir." },
+        { nome: "Assimilação Neuropática 2", desc: "Nervos disparam sinais confusos: dor fantasma, tremores e reflexos tardios tornam o corpo do(a) Infectado(a) uma marionete de si mesmo." },
+        { nome: "Assimilação Devoradora 3", desc: "O metabolismo exige alimento constante; se negado, devora as reservas internas, corroendo a carne, a paciência e o foco do(a) Infectado(a)." },
+        { nome: "Assimilação Secretora 4", desc: "Glândulas hiperativas liberam fluidos e odores; funcionam como defesa instintiva, mas denunciam a presença do(a) Infectado(a) e afastam seus aliados." },
+        { nome: "Assimilação Calcificante 5", desc: "Placas endurecidas formam ossos rígidos; roubam mobilidade, impondo rigidez crescente, atrapalhando a agilidade do(a) Infectado(a)." },
+        { nome: "Assimilação Fotossensível 6", desc: "Luz e claridade tornam-se agressivas; pele e olhos ardem, empurrando o(a) Infectado(a) para sombras e isolamento." },
+        { nome: "Assimilação Litodérmica 7", desc: "A pele transforma-se em uma mistura metálica; enfraquece sua resistência, atrapalha sua interação e em última instância afeta até mesmo o sangue do(a) Infectado(a)" },
+        { nome: "Assimilação Entorpecida 8", desc: "Os sentidos se arrastam, amortecidos; proteção contra a dor que embota a reação do(a) Infectado(a) e distorce sua orientação." },
+        { nome: "Assimilação Aberrante 9", desc: "Tecidos e órgãos redundantes surgem sem harmonia; aumentam o consumo e reduzem a eficiência da fisiologia do(a) Infectado(a)." },
+        { nome: "Assimilação Hipersensível 10", desc: "O mundo é áspero e invasivo, especialmente ao(à) Infectado(a) que sofre de hipersensibilidade; dor ou ruídos intensos podem ser particularmente agressivos." },
+        { nome: "Assimilação Mioclônica J", desc: "Espasmos e tiques rompem o controle; movimentos erráticos minam a sutileza e inviabilizam a precisão do(a) Infectado(a)." },
+        { nome: "Assimilação Disfásica Q", desc: "A fala se rompe em falhas e sons truncados; pensamento rápido, mas voz irregular, distante da comunicação habitual." },
+        { nome: "Assimilação Terminal K", desc: "A vitalidade se esgota lentamente; capacidades desaparecem enquanto a Assimilação toma o corpo do(a) Infectado(a) por completo." },
+        { nome: "Coringa Joker", desc: "Apenas o Assimilador saberá oque vai acontecer." }
     ];
 
     const baralhoSingulares = [
-        { nome: "Adaptação Biológica Local", desc: "Seu corpo se ajusta perfeitamente ao clima ou terreno da região atual, ignorando penalidades de deslocamento ou temperatura extrema." },
-        { nome: "Camuflagem Endêmica", desc: "A cor e textura da sua pele copiam os padrões da flora e fauna predominantes do local, garantindo vantagem absurda em furtividade neste bioma." },
-        { nome: "Metabolismo Regional", desc: "Permite extrair nutrientes e água de fontes locais que seriam tóxicas para outros, como plantas venenosas ou água contaminada." }
+        { nome: "Adaptação do Bosque A", desc: "Tecidos lenhosos e raízes internas permitem ao(à) Infectado(a) regenerar-se em meio a árvores, mas longe de vegetação seu corpo definha, exigindo contato com solo fértil." },
+        { nome: "Camuflagem da Campina 2", desc: "O corpo do(a) Infectado(a) se adapta ao campo aberto: postura baixa, movimentos ágeis e percepção aguçada pelo vento e vibrações do solo, garantindo vigilância constante em áreas planas." },
+        { nome: "Camuflagem do Cerrado 3", desc: "Casca grossa protege o(a) Infectado(a) contra lesões e aridez; o organismo armazena água em reservas internas e consegue se recuperar após longos períodos de calor intenso e seca." },
+        { nome: "Camuflagem da Colina 4", desc: "Músculos e tendões do(a) Infectado(a) se avolumam para ganhar força; a resistência se prolonga em terrenos inclinados e o corpo aprende a economizar energia durante subidas íngremes." },
+        { nome: "Camuflagem Desértica 5", desc: "Suor e metabolismo se adaptam à baixa umidade e a temperaturas extremas; o(a) Infectado(a) consome quantidades reduzidas de água e desenvolve outras maneiras de se proteger." },
+        { nome: "Camuflagem Florestal 6", desc: "O corpo do(a) Infectado(a) aprimora seu equilíbrio e sua capacidade de se esgueirar em terrenos densos; visão e audição se adaptam à penumbra e a movimentação entre árvores é quase imperceptível aos predadores." },
+        { nome: "Camuflagem do Manguezal 7", desc: "Poros filtram sal e membros se adaptam ao lodo; o(a) Infectado(a) respira e se move em áreas encharcadas, resistindo a infecções típicas de ambientes lamacentos." },
+        { nome: "Camuflagem Marinha 8", desc: "Pulmões e músculos se adaptam à pressão e correntes marinhas; o(a) Infectado(a) nada com eficiência e tolera longas imersões, explorando o oceano sem risco de colapso." },
+        { nome: "Camuflagem da Montanha 9", desc: "O sangue engrossa e a circulação se ajusta; o(a) Infectado(a) suporta ar rarefeito e frio intenso, mantendo energia e estabilidade mesmo em grandes altitudes." },
+        { nome: "Camuflagem do Pântano 10", desc: "Pele e pulmões toleram gases e microrganismos da água estagnada; o(a) Infectado(a) detecta movimentos sutis no brejo, usando o terreno alagado como proteção natural." },
+        { nome: "Camuflagem da Caatinga J", desc: "O organismo do(a) Infectado(a) aprende a reduzir funções em longos períodos secos; desperta com chuvas ocasionais e protege-se de predadores com pele espessa e pontiaguda." },
+        { nome: "Camuflagem Subterrânea Q", desc: "Visão perde relevância entre os sentidos; pele e ouvido detectam vibrações e correntes de ar em túneis. O(a) Infectado(a) se orienta no escuro e resiste a confinamento e baixa oxigenação." },
+        { nome: "Camuflagem da Tundra K", desc: "O metabolismo do(a) Infectado(a) regula calor em ambientes congelados; seu sangue não congela e seu corpo suporta longos períodos em torpor, reduzindo desgaste no frio extremo." },
+        { nome: "Coringa Joker", desc: "Apenas o Assimilador saberá oque vai acontecer." }
     ];
 
     const btnPuxarCartas = document.getElementById('btn-puxar-cartas');
@@ -569,23 +675,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 return baralho[Math.floor(Math.random() * baralho.length)];
             }
 
-            const drawCards = (qtd, baralho, bgClass, borderClass, textClass, icon, label) => {
+            const drawCards = (qtd, baralho, bgClass, borderClass, textClass, assetName, label) => {
                 for (let i = 0; i < qtd; i++) {
                     const carta = puxarCartaAleatoria(baralho);
+                    
+                    // 🔥 Lógica corrigida: Asset normal (preto) no Claro, e Asset "-branco" no Escuro 🔥
+                    const iconHtml = `
+                        <img src="./assets/${assetName}.png" class="w-5 h-5 object-contain block dark:hidden" alt="${label}">
+                        <img src="./assets/${assetName}-branco.png" class="w-5 h-5 object-contain hidden dark:block" alt="${label}">
+                    `;
+
+                    // Removemos a tag <i> do Lucide e colocamos o seu iconHtml super customizado!
                     containerCartas.innerHTML += `
                         <div class="${bgClass} border-l-4 ${borderClass} p-4 rounded shadow-sm">
-                            <h4 class="font-black font-rpg ${textClass} text-lg uppercase mb-1 flex items-center gap-1">
-                                <i data-lucide="${icon}" class="w-5 h-5"></i> ${carta.nome} <span class="text-sm font-sans font-bold ml-auto">${label}</span>
+                            <h4 class="font-black font-rpg ${textClass} text-lg uppercase mb-1 flex items-center gap-2">
+                                ${iconHtml} ${carta.nome} <span class="text-sm font-sans font-bold ml-auto">${label}</span>
                             </h4>
                             <p class="text-gray-700 dark:text-gray-300">${carta.desc}</p>
                         </div>`;
                 }
             };
 
-            drawCards(qtdA, baralhoEvolutivas, 'bg-green-100 dark:bg-green-900/30', 'border-green-500', 'text-green-800 dark:text-green-400', 'leaf', 'Evolutiva (A)');
-            drawCards(qtdB, baralhoAdaptativas, 'bg-blue-100 dark:bg-blue-900/30', 'border-blue-500', 'text-blue-800 dark:text-blue-400', 'settings', 'Adaptativa (B)');
-            drawCards(qtdC, baralhoInoportunas, 'bg-red-100 dark:bg-red-900/30', 'border-rpg-red', 'text-rpg-red dark:text-red-400', 'droplet', 'Inoportuna (C)');
-            drawCards(qtdI, baralhoSingulares, 'bg-amber-100 dark:bg-amber-900/30', 'border-amber-500', 'text-amber-800 dark:text-amber-400', 'mountain', 'Singular (I)');
+            // 🔥 Chamando o Javascript passando OS NOMES EXATOS dos seus arquivos (sem o .png) 🔥
+            drawCards(qtdA, baralhoEvolutivas, 'bg-green-100 dark:bg-green-900/30', 'border-green-500', 'text-green-800 dark:text-green-400', 'sucesso', 'Evolutiva (A)');
+            drawCards(qtdB, baralhoAdaptativas, 'bg-blue-100 dark:bg-blue-900/30', 'border-blue-500', 'text-blue-800 dark:text-blue-400', 'adaptacao', 'Adaptativa (B)');
+            drawCards(qtdC, baralhoInoportunas, 'bg-red-100 dark:bg-red-900/30', 'border-rpg-red', 'text-rpg-red dark:text-red-400', 'pressao', 'Inoportuna (C)');
+            drawCards(qtdI, baralhoSingulares, 'bg-amber-100 dark:bg-amber-900/30', 'border-amber-500', 'text-amber-800 dark:text-amber-400', 'singulares', 'Singular (I)');
 
             if (window.lucide) lucide.createIcons();
         });
@@ -628,9 +743,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const dadosFicha = coletarDadosFicha();
         const ocupacao = document.getElementById('ocupacao') ? document.getElementById('ocupacao').value : '';
-        const foto = dadosFicha['char-photo'] || null;
+        
+        // Puxa a foto da tela perfeitamente
+        const imgPreview = document.getElementById('char-photo-preview');
+        const fotoFinal = (imgPreview && imgPreview.src && !imgPreview.src.includes('R0lGODlhAQAB')) ? imgPreview.src : null;
 
-        // 🔥 LÊ A ESCOLHA DO JOGADOR
         const checkboxPrivacidade = document.getElementById('char-is-private');
         const isPrivada = checkboxPrivacidade ? checkboxPrivacidade.checked : false;
 
@@ -640,14 +757,15 @@ document.addEventListener('DOMContentLoaded', () => {
             nome: nomePersonagem, 
             ocupacao: ocupacao,
             dadosFicha: dadosFicha,
-            foto: foto,
-            isPrivada: isPrivada // 🔥 MANDA PRO SERVIDOR
+            foto: fotoFinal,
+            isPrivada: isPrivada
         };
 
         const btnSaveNav = document.getElementById('btn-save-char-nav');
         const btnDeleteCharNav = document.getElementById('btn-delete-char-nav');
         const htmlPadrao = '<i data-lucide="save" class="w-4 h-4"></i> <span class="hidden md:inline">Salvar</span>';
         
+        // 🔥 ANIMAÇÃO "SALVANDO..." RESTAURADA PARA TODOS OS CLIQUES E AUTOSAVES 🔥
         if (btnSaveNav) {
             btnSaveNav.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> <span class="hidden md:inline">Salvando...</span>';
             if(window.lucide) lucide.createIcons();
@@ -669,11 +787,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (btnDeleteCharNav) btnDeleteCharNav.classList.remove('hidden');
                 }
 
+                // O Pop-up verde no canto da tela só aparece no manual, como você prefere
                 if (!silencioso) {
                     window.mostrarNotificacao(resultado.mensagem, 'sucesso');
                     if(typeof window.carregarListaPersonagens === 'function') window.carregarListaPersonagens();
                 }
                 
+                // 🔥 ANIMAÇÃO "SALVO!" AZUL RESTAURADA PARA TODOS OS CASOS 🔥
                 if (btnSaveNav) {
                     btnSaveNav.classList.remove('bg-rpg-green', 'hover:bg-green-700');
                     btnSaveNav.classList.add('bg-blue-600', 'hover:bg-blue-700');
