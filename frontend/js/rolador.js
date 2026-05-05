@@ -36,6 +36,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const timestamp = pacote.timestamp || new Date().toISOString();
         const dataFormatada = new Date(timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) + ' - ' + new Date(timestamp).toLocaleDateString('pt-BR');
 
+        // 🔥 NOVIDADE: Mapeando os resultados numéricos para exibir no título 🔥
+        let numerosRolados = "";
+        if (pacote.resultados && pacote.resultados.length > 0) {
+            // Pega apenas o número puro (faceMecanica) de cada dado e junta com vírgulas
+            const faces = pacote.resultados.map(dado => dado.faceMecanica).join(', ');
+            numerosRolados = ` - (${faces})`;
+        }
+
         const rollGroup = document.createElement('div');
         rollGroup.className = 'flex flex-col w-full ' + (animar ? 'animate-fade-in py-4' : 'mb-1');
 
@@ -52,14 +60,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         rollGroup.innerHTML = `
             <div class="flex items-start gap-2 w-full">
-                <img src="${avatar}" class="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600 shadow-sm mt-1 bg-black object-cover flex-shrink-0">
+                <img src="${avatar}" class="w-10 h-10 rounded-full border border-gray-300 dark:border-gray-600 shadow-sm mt-1 bg-black object-cover flex-shrink-0">
                 <div class="flex flex-col w-full overflow-hidden">
-                    <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 mb-0.5 pl-1 truncate">${window.escaparHTML(nomePersonagem)}</span>
+                    <span class="text-[15px] font-bold text-gray-500 dark:text-gray-400 mb-0.5 pl-1 truncate">${window.escaparHTML(nomePersonagem)}</span>
 
                     <div class="bg-white dark:bg-[#1a1a1a] border ${corBorda} rounded-lg p-3 shadow-sm flex flex-col group relative overflow-hidden transition-colors">
-                        <span class="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest truncate mb-2">Rolagem: ${window.escaparHTML(pacote.input)}</span>
+                        
+                        <!-- 🔥 TÍTULO COM OS NÚMEROS AQUI 🔥 -->
+                        <span class="text-[12px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest truncate mb-2" title="${window.escaparHTML(pacote.input)}${numerosRolados}">
+                            Rolagem: ${window.escaparHTML(pacote.input)} <span class="text-gray-500 dark:text-gray-600">${numerosRolados}</span>
+                        </span>
 
-                        <div class="sub-rolls-container flex flex-wrap gap-2 justify-center min-h-[30px]"></div>
+                        <div class="sub-rolls-container flex flex-wrap gap-2 justify-center min-h-[45px]"></div>
 
                         <div class="bg-gray-50 dark:bg-[#0f172a] rounded p-1.5 text-center mt-3 border border-gray-100 dark:border-gray-800">
                             <span class="text-[10px] font-bold uppercase tracking-wide flex justify-center gap-2">
@@ -74,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="absolute inset-0 border-2 border-transparent ${corHover} rounded-lg pointer-events-none transition-colors duration-300"></div>
                     </div>
 
-                    <span class="text-[9px] font-bold text-gray-400 dark:text-gray-600 text-right mt-1 mr-1">${dataFormatada}</span>
+                    <span class="text-[13px] font-bold text-white dark:text-gray-600 text-right mt-1 mr-1">${dataFormatada}</span>
                 </div>
             </div>
         `;
@@ -165,24 +177,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 const campanhaAtiva = sessionStorage.getItem('campanhaAtiva');
                 if (!campanhaAtiva || pacoteDeDados.campanhaId !== campanhaAtiva) return; 
 
-                const souMestre = sessionStorage.getItem('isMestreAtivo') === 'true';
-                const meuId = sessionStorage.getItem('usuarioId');
-                const meuNomeLocal = sessionStorage.getItem('usuarioNome');
-                const meuPersonagemLocal = document.getElementById('nome') ? document.getElementById('nome').value.trim() : '';
+                // Se o dado chegou pela rede, significa que:
+                // 1. Outro jogador rolou (pois o Socket não devolve o evento pra quem enviou).
+                // 2. Não é uma rolagem do Mestre (pois o servidor blinda e não emite dados do Mestre).
+                // Logo, TODO MUNDO na mesa deve ver a animação e o log!
+                
+                renderizarRolagem(pacoteDeDados);
 
-                const fuiEuQuemRolou = (pacoteDeDados.usuarioId === meuId) ||
-                    (!pacoteDeDados.usuarioId && (pacoteDeDados.nome === meuNomeLocal || pacoteDeDados.nome === meuPersonagemLocal));
-
-                if (!souMestre && !fuiEuQuemRolou) {
-                    const emptyMsg = historicoDiv.querySelector('p.italic');
-                    if (emptyMsg) emptyMsg.remove();
-
-                    const { card } = criarCardDndBeyond(pacoteDeDados, false);
-                    historicoDiv.prepend(card);
-
-                    const panel = document.getElementById('game-log-sidebar');
-                    if (panel && panel.classList.contains('translate-x-full')) {
-                        if (typeof window.mostrarNotificacao === 'function') window.mostrarNotificacao(`Rolagem de ${pacoteDeDados.nome || 'alguém'}!`, 'aviso');
+                // Avisa que o dado rolou caso a gaveta esteja fechada
+                const panel = document.getElementById('game-log-sidebar');
+                if (panel && panel.classList.contains('translate-x-full')) {
+                    if (typeof window.mostrarNotificacao === 'function') {
+                        window.mostrarNotificacao(`Rolagem de ${pacoteDeDados.nome || 'alguém'}!`, 'aviso');
                     }
                 }
             });
@@ -211,8 +217,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         const fuiEuQuemRolou = (pacote.usuarioId === meuId) ||
                             (!pacote.usuarioId && (pacote.nome === meuNomeLocal || pacote.nome === meuPersonagemLocal));
 
-                        // Mantém as rolagens do mestre em segredo absoluto
-                        if (!souMestre && !fuiEuQuemRolou && pacote.isMestre) return; 
+                        // 🔥 NOVO: Mantém as rolagens do mestre em segredo, a não ser que ele as tenha tornado públicas!
+                        if (!souMestre && !fuiEuQuemRolou && pacote.isMestre && !pacote.isRolagemPublica) return; 
+
+                        const { card } = criarCardDndBeyond(pacote, false);
+                        historicoDiv.prepend(card);
 
                         const { card } = criarCardDndBeyond(pacote, false);
                         historicoDiv.prepend(card);
@@ -302,12 +311,34 @@ document.addEventListener('DOMContentLoaded', () => {
             nomeRolador = sessionStorage.getItem('usuarioNome');
         }
 
+        // 🔥 A MÁGICA VISUAL: Capturar a foto dependendo de onde o jogador está! 🔥
+        let fotoAvatar = './assets/icon.jpg';
+        const telaAtual = sessionStorage.getItem('telaAtual');
+        
+        if (telaAtual === 'ficha') {
+            // Se estiver na ficha, pega a foto do personagem!
+            const imgPersonagem = document.getElementById('char-photo-preview');
+            if (imgPersonagem && imgPersonagem.src && !imgPersonagem.src.includes('R0lGODlhAQAB')) {
+                fotoAvatar = imgPersonagem.src;
+            }
+        } else {
+            // Se estiver na mesa da campanha, pega a foto de perfil do usuário!
+            const imgPerfil = document.getElementById('nav-avatar-img');
+            if (imgPerfil && imgPerfil.src && !imgPerfil.src.includes('R0lGODlhAQAB')) {
+                fotoAvatar = imgPerfil.src;
+            }
+        }
+
         const pacoteDeDados = {
             nome: nomeRolador,
             usuarioId: sessionStorage.getItem('usuarioId'),
+            avatar: fotoAvatar,
             timestamp: new Date().toISOString(),
             input: inputString,
             campanhaId: campanhaAtiva,
+            
+            isRolagemPublica: (sessionStorage.getItem('isMestreAtivo') === 'true' && document.getElementById('toggle-rolagem-mestre')) ? !document.getElementById('toggle-rolagem-mestre').checked : true,
+            
             resultados: [],
             totais: { sucesso: 0, pressao: 0, adaptacao: 0, nada: 0 }
         };
@@ -334,12 +365,13 @@ document.addEventListener('DOMContentLoaded', () => {
         
         renderizarRolagem(pacoteDeDados);
 
-        // 🔥 SINCRONIZAÇÃO BLINDADA: Emite o dado usando a variável que já declaramos lá em cima! 🔥
+        // SINCRONIZAÇÃO BLINDADA
         if (campanhaAtiva && window.socket) {
             pacoteDeDados.token = sessionStorage.getItem('token'); 
             window.socket.emit('rolar-dados', pacoteDeDados);
         }
 
+        window.limparRoladorLocal(); 
     }
 
     if (rollButton) rollButton.addEventListener('click', handleRoll);

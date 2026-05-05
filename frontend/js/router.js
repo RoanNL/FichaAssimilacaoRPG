@@ -22,6 +22,25 @@ const Router = {
             // Transforma o Terminal em Local automaticamente
             const hist = document.getElementById('rolador-historico');
             if (hist) hist.innerHTML = '<p class="text-center text-gray-500 text-xs italic font-bold mt-4">Terminal Local Ativo.<br>Acesse por uma campanha para ativar a rede multiplayer.</p>';
+
+            // 🔥 NOVO: FORÇA A GAVETA A FECHAR AO SAIR DA MESA! 🔥
+            const sidebarLog = document.getElementById('game-log-sidebar');
+            if (sidebarLog && !sidebarLog.classList.contains('translate-x-full')) {
+                sidebarLog.classList.add('translate-x-full');
+            }
+            if (typeof window.limparRoladorLocal === 'function') window.limparRoladorLocal();
+        }
+
+        // 🔥 NOVO: CONTROLE DE VISIBILIDADE DO BOTÃO SECRETO DO MESTRE 🔥
+        const containerToggleMestre = document.getElementById('container-rolagem-mestre');
+        if (containerToggleMestre) {
+            if (sessionStorage.getItem('isMestreAtivo') === 'true' && (telaDestino === 'campanha' || telaDestino === 'ficha')) {
+                containerToggleMestre.classList.remove('hidden');
+                containerToggleMestre.classList.add('flex');
+            } else {
+                containerToggleMestre.classList.add('hidden');
+                containerToggleMestre.classList.remove('flex');
+            }
         }
 
         this.telas.forEach(tela => {

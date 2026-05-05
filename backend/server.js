@@ -76,7 +76,6 @@ io.on('connection', (socket) => {
     console.log('Um jogador conectou! ID:', socket.id);
 
     // 🛡️ A CATRACA VIP E O HISTÓRICO LIGADO
-    // 🛡️ A CATRACA VIP E O HISTÓRICO LIGADO
     socket.on('entrar-na-campanha', async (dados) => {
         const { campanhaId, token } = dados; 
         if (!token || !campanhaId) return;
@@ -94,7 +93,6 @@ io.on('connection', (socket) => {
                 socket.join(salaStr); 
                 console.log(`✅ Catraca VIP: Usuário ${usuarioIdSeguro} acessou a mesa ${salaStr}`);
 
-                // 🔥 VERIFICA SE QUEM ENTROU É O MESTRE
                 const checkMestre = await pool.query('SELECT mestre_id FROM campanhas WHERE id = $1', [campanhaId]);
                 const isMestre = checkMestre.rows.length > 0 && checkMestre.rows[0].mestre_id === usuarioIdSeguro;
 
@@ -103,9 +101,9 @@ io.on('connection', (socket) => {
                 
                 let rolagensAntigas = histResult.rows.map(row => row.pacote);
                 
-                // 🔥 O FILTRO SUPREMO: Se NÃO for o Mestre, removemos todas as rolagens secretas do histórico!
+                // 🔥 O FILTRO SUPREMO ATUALIZADO: Só remove a rolagem do mestre se ela NÃO for pública!
                 if (!isMestre) {
-                    rolagensAntigas = rolagensAntigas.filter(r => r.isMestre !== true);
+                    rolagensAntigas = rolagensAntigas.filter(r => r.isMestre !== true || r.isRolagemPublica === true);
                 }
                 
                 socket.emit('carregar-historico', rolagensAntigas);
@@ -113,11 +111,10 @@ io.on('connection', (socket) => {
                 console.log(`🚨 BARRADO: Invasor bloqueado na mesa ${salaStr}!`);
             }
         } catch (err) {
-            console.error('❌ Erro na catraca (Token Inválido ou Forjado)');
+            console.error('❌ Erro na catraca');
         }
     });
 
-    // 🛡️ O ESCUDO DA ROLAGEM E SALVAMENTO
     socket.on('rolar-dados', async (pacoteDeDados) => {
         const { token, ...dadosDaRolagem } = pacoteDeDados;
         if (!token) return;
@@ -133,21 +130,20 @@ io.on('connection', (socket) => {
 
             if (resultCheck.rows.length === 0) return; 
 
-            // 🔥 IDENTIFICA SE A ROLAGEM VEIO DE TRÁS DO ESCUDO DO MESTRE
             const checkMestre = await pool.query('SELECT mestre_id FROM campanhas WHERE id = $1', [campanhaId]);
             const isMestre = checkMestre.rows.length > 0 && checkMestre.rows[0].mestre_id === usuarioIdSeguro;
 
             dadosDaRolagem.usuarioId = usuarioIdSeguro;
-            dadosDaRolagem.isMestre = isMestre; // Carimba a rolagem como secreta se for do mestre
-            dadosDaRolagem.timestamp = new Date().toISOString(); // Carimba a DATA e HORA EXATAS
+            dadosDaRolagem.isMestre = isMestre; 
+            dadosDaRolagem.timestamp = new Date().toISOString(); 
 
             const salaStr = campanhaId.toString(); 
             
-            if (isMestre) {
-                // Se for o mestre, NÃO emite para a sala. Mantemos em segredo! 
-                // (O front-end do mestre já desenha a própria rolagem localmente)
+            // 🔥 A ESCOLHA DO MESTRE: Emite para todos se ele escolheu rolar em público! 🔥
+            if (isMestre && !dadosDaRolagem.isRolagemPublica) {
+                // É o mestre e a rolagem é secreta. Fica quieto.
             } else {
-                // Se for jogador, manda para todo o resto da mesa (incluindo o mestre)
+                // Ou é jogador, ou é o mestre rolando em público!
                 socket.to(salaStr).emit('nova-rolagem', dadosDaRolagem);
             }
             
