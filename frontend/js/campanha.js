@@ -24,6 +24,20 @@ document.addEventListener('DOMContentLoaded', () => {
         Router.navigate('dashboard');
     });
 
+    // 🔥 NOVO: ESCUTADOR DE EXPULSÃO 🔥
+    window.socket.on('jogador-expulso', (dados) => {
+        const meuId = sessionStorage.getItem('usuarioId');
+        // Se o ID que o servidor mandou for o meu... tchau!
+        if (dados.usuarioId == meuId) {
+            window.mostrarNotificacao("Você foi banido desta mesa pelo Mestre.", 'erro');
+            sessionStorage.removeItem('campanhaAtiva');
+            sessionStorage.removeItem('isMestreAtivo');
+            sessionStorage.removeItem('campanhaNome');
+            sessionStorage.removeItem('campanhaCodigo');
+            Router.navigate('dashboard');
+        }
+    });
+
     // ==========================================
     // 2. CARREGAR LOBBY E BANNER
     // ==========================================
@@ -217,29 +231,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Lógica do botão de retirar
             document.querySelectorAll('.btn-retirar-mesa').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    if (!confirm('Deseja retirar este personagem da mesa? \\n\\nA ficha continuará salva na sua conta, e você NÃO sairá da campanha.')) return;
-
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault(); 
+                    
                     const personagemId = e.currentTarget.getAttribute('data-id');
-                    const btnIcon = e.currentTarget.innerHTML;
-                    e.currentTarget.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i>';
-                    if (window.lucide) lucide.createIcons();
-
-                    try {
-                        const res = await fetch(`${window.API_URL}/campanhas/${campanhaId}/remover-personagem/${personagemId}`, {
-                            method: 'DELETE',
-                            headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
-                        });
-                        const data = await res.json();
-
-                        if (res.ok) window.mostrarNotificacao(data.mensagem, 'sucesso');
-                        else window.mostrarNotificacao(data.erro, 'erro');
-                    } catch (err) {
-                        window.mostrarNotificacao('Erro na comunicação.', 'erro');
-                    } finally {
-                        window.carregarFichasDaMesa(campanhaId, isMestre);
-                        window.carregarJogadoresDaMesa(campanhaId, isMestre);
-                    }
+                    const nomePersonagem = e.currentTarget.getAttribute('data-nome');
+                    
+                    window.abrirModalRecolherFicha(personagemId, nomePersonagem, e.currentTarget, campanhaId);
                 });
             });
         } catch (erro) {
@@ -262,9 +260,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
             });
 
-            if (!resposta.ok) throw new Error("O Servidor recusou a conexão (Erro 500). Verifique o terminal do Node!");
+            if (!resposta.ok) throw new Error("O Servidor recusou a conexão (Erro 500).");
 
             const jogadores = await resposta.json();
+            const meuId = sessionStorage.getItem('usuarioId');
+
+            const euEstouNaLista = jogadores.some(jog => jog.usuario_id == meuId);
+            if (!euEstouNaLista && !isMestreAtivo) {
+                window.mostrarNotificacao("Seu acesso a esta mesa foi revogado.", "erro");
+                sessionStorage.removeItem('campanhaAtiva');
+                sessionStorage.removeItem('isMestreAtivo');
+                sessionStorage.removeItem('campanhaNome');
+                sessionStorage.removeItem('campanhaCodigo');
+                Router.navigate('dashboard');
+                return; 
+            }
 
             gridJogadores.innerHTML = '';
             if (jogadores.length === 0) return gridJogadores.innerHTML = '<p class="text-gray-500 italic col-span-full">Vazio.</p>';

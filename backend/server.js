@@ -661,10 +661,13 @@ app.post('/campanhas/:id/pedidos/responder', verificarToken, async (req, res) =>
     }
 });
 
+// =========================================================================
+// ROTA DO MESTRE: Expulsar Jogador
+// =========================================================================
 app.delete('/campanhas/:id/membros/:usuarioId', verificarToken, async (req, res) => {
     const campanhaId = req.params.id;
     const usuarioAlvoId = req.params.usuarioId;
-    const mestreRequisitanteId = req.usuario.id;
+    const mestreRequisitanteId = req.usuario.id; 
 
     if (!regexUUID.test(campanhaId) || !regexUUID.test(usuarioAlvoId)) {
         return res.status(400).json({ erro: 'ID com formato inválido.' });
@@ -681,6 +684,16 @@ app.delete('/campanhas/:id/membros/:usuarioId', verificarToken, async (req, res)
         }
 
         await pool.query('DELETE FROM membros_campanha WHERE campanha_id = $1 AND usuario_id = $2', [campanhaId, usuarioAlvoId]);
+        
+        // 🔥 A MÁGICA DA EXPULSÃO EM TEMPO REAL 🔥
+        const io = req.app.get('io');
+        if (io) {
+            // Emite um evento exclusivo de banimento contendo o ID do coitado
+            io.to(campanhaId.toString()).emit('jogador-expulso', { usuarioId: usuarioAlvoId });
+            // Atualiza a tela de quem ficou na mesa
+            io.to(campanhaId.toString()).emit('atualizar-jogadores');
+        }
+
         res.status(200).json({ mensagem: 'Membro removido com sucesso.' });
     } catch (erro) {
         res.status(500).json({ erro: 'Erro ao deletar membro.' });
