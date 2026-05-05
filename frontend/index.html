@@ -360,9 +360,9 @@
                 <button onclick="Router.voltar()" class="mb-4 text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white font-bold font-rpg uppercase flex items-center gap-1 transition-colors w-max">
                     <i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar ao Dashboard
                 </button>
-                
+
                 <!-- ================= BANNER DA CAMPANHA ================= -->
-                <div class="relative w-full h-[250px] md:h-[300px] rounded-lg overflow-hidden mb-6 shadow-lg select-none"
+                <div class="relative w-full h-[250px] md:h-[300px] hover:-translate-y-1 hover:shadow-lg transition-all rounded-lg overflow-hidden mb-6 shadow-lg select-none"
                     id="banner-container">
                     <!-- O draggable="false" é crucial para o navegador não tentar "salvar" a imagem ao arrastar -->
                     <img id="campanha-banner-img" src="./assets/icon.jpg" draggable="false"
@@ -415,7 +415,7 @@
                             </div>
 
                             <!-- Coloquei os botões da Partitura e Refúgio aqui no canto inferior direito para ficar estiloso! -->
-                            <div id="painel-mestre-botoes" class="hidden flex gap-2">
+                            <div id="painel-mestre-botoes" class="hidden flex gap-2 pointer-events-auto">
                                 <button
                                     onclick="document.getElementById('modal-pedidos-mesa').classList.add('show'); window.carregarPedidosMesa();"
                                     class="relative bg-gray-800 hover:bg-black dark:bg-gray-200 dark:hover:bg-white text-white dark:text-black font-bold py-2 px-4 rounded text-sm uppercase font-rpg transition-colors flex items-center gap-2 shadow-sm">

@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let fichas = await resposta.json();
 
             const meuId = sessionStorage.getItem('usuarioId');
-            if (isMestre) fichas = fichas.filter(char => char.usuario_id != meuId);
+            //if (isMestre) fichas = fichas.filter(char => char.usuario_id != meuId);
 
             gridFichas.innerHTML = '';
 
