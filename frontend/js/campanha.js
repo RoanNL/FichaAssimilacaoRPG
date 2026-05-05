@@ -43,15 +43,14 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('campanha-codigo-view').textContent = codigoCampanhaTexto || '---';
 
         const painelMestre = document.getElementById('painel-mestre-botoes');
-        const btnEditarBanner = document.getElementById('btn-editar-banner');
+        const ctrlsPadrao = document.getElementById('controles-padrao-banner'); // 👈 AQUI ESTAVA O SEGREDO!
 
         if (isMestre) {
             if (painelMestre) painelMestre.classList.remove('hidden');
-            if (btnEditarBanner) btnEditarBanner.classList.remove('hidden'); // Libera o botão de foto!
-            if (btnEditarBanner) btnEditarBanner.style.display = 'flex';
+            if (ctrlsPadrao) ctrlsPadrao.classList.remove('hidden'); // Mostra a caixa que segura os dois botões!
         } else {
             if (painelMestre) painelMestre.classList.add('hidden');
-            if (btnEditarBanner) btnEditarBanner.classList.add('hidden');
+            if (ctrlsPadrao) ctrlsPadrao.classList.add('hidden');
         }
 
        // 🔥 PUXAR A FOTO DO BANNER E A POSIÇÃO 🔥
@@ -109,7 +108,6 @@ document.addEventListener('DOMContentLoaded', () => {
             let fichas = await resposta.json();
 
             const meuId = sessionStorage.getItem('usuarioId');
-            //if (isMestre) fichas = fichas.filter(char => char.usuario_id != meuId);
 
             gridFichas.innerHTML = '';
 
@@ -117,7 +115,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isMestre) {
                 const cardNovoNpc = document.createElement('div');
                 cardNovoNpc.className = 'flex flex-row h-[130px] w-full bg-gray-50 dark:bg-[#1a1a1a] rounded-lg overflow-hidden border-2 border-dashed border-gray-400 dark:border-gray-600 hover:border-rpg-blue hover:bg-gray-100 dark:hover:bg-[#242424] transition-all cursor-pointer items-center justify-center group';
-                cardNovoNpc.innerHTML = `
+                
+                // Salvamos a "aparência original" fora do alcance do clique
+                const htmlNormal = `
                     <div class="flex flex-col items-center justify-center w-full">
                         <div class="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                             <i data-lucide="plus" class="w-5 h-5 text-gray-600 dark:text-gray-300"></i>
@@ -125,10 +125,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span class="font-bold font-rpg text-gray-500 uppercase text-xs">Criar NPC / Ficha</span>
                     </div>
                 `;
+                cardNovoNpc.innerHTML = htmlNormal;
                 
                 cardNovoNpc.addEventListener('click', async () => {
-                    const iconeOriginal = cardNovoNpc.innerHTML;
-                    cardNovoNpc.innerHTML = '<div class="flex justify-center w-full"><i data-lucide="loader" class="w-6 h-6 animate-spin text-rpg-blue"></i></div>';
+                    // Impede "Duplo Clique"
+                    if (cardNovoNpc.classList.contains('carregando')) return;
+                    cardNovoNpc.classList.add('carregando');
+                    
+                    cardNovoNpc.innerHTML = '<div class="flex justify-center items-center w-full h-full"><i data-lucide="loader" class="w-6 h-6 animate-spin text-rpg-blue"></i></div>';
                     if (window.lucide) lucide.createIcons();
 
                     try {
@@ -137,18 +141,21 @@ document.addEventListener('DOMContentLoaded', () => {
                             headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
                         });
                         const data = await res.json();
+                        
                         if (res.ok) {
                             window.idPersonagemAtual = data.id;
-                            Router.navigate('ficha'); // Vai pra ficha graças ao roteador novo!
+                            Router.navigate('ficha'); 
                             window.carregarPersonagem(data.id);
                         } else {
                             window.mostrarNotificacao(data.erro, 'erro');
-                            cardNovoNpc.innerHTML = iconeOriginal;
+                            cardNovoNpc.innerHTML = htmlNormal;
+                            cardNovoNpc.classList.remove('carregando');
                             if (window.lucide) lucide.createIcons();
                         }
                     } catch (err) {
-                        window.mostrarNotificacao('Erro de conexão.', 'erro');
-                        cardNovoNpc.innerHTML = iconeOriginal;
+                        window.mostrarNotificacao('Erro de conexão com o servidor.', 'erro');
+                        cardNovoNpc.innerHTML = htmlNormal;
+                        cardNovoNpc.classList.remove('carregando');
                         if (window.lucide) lucide.createIcons();
                     }
                 });

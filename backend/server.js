@@ -749,22 +749,23 @@ app.post('/campanhas/:id/criar-npc', verificarToken, async (req, res) => {
             return res.status(403).json({erro: 'Apenas o Mestre pode criar NPCs aqui.'});
         }
 
-        // 1. Cria a ficha do NPC perfeitamente estruturada (Privada por padrão)
+        // 1. Cria a ficha usando JSON.stringify para o banco não reclamar!
         const sqlChar = `INSERT INTO personagens (usuario_id, nome_personagem, ocupacao, dados_ficha, foto, is_privada) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`;
-        const resChar = await pool.query(sqlChar, [mestreIdSeguro, 'Novo NPC', 'Coadjuvante', '{}', null, true]);
+        const resChar = await pool.query(sqlChar, [mestreIdSeguro, 'Novo NPC', 'Coadjuvante', JSON.stringify({}), null, true]);
         const npcId = resChar.rows[0].id;
 
-        // 2. Tenta inserir na mesa. O try/catch interno amortece o erro do banco!
+        // 2. Insere na mesa
         try {
             await pool.query(`INSERT INTO membros_campanha (campanha_id, usuario_id, personagem_id) VALUES ($1, $2, $3)`, [campanhaId, mestreIdSeguro, npcId]);
         } catch (errDb) {
-            console.log("Aviso: A trava do banco bloqueou uma duplicata, mas o NPC foi criado!");
+            console.log("Aviso: Trava de duplicata acionada no banco, mas o NPC foi salvo.");
         }
 
         res.json({ mensagem: 'NPC forjado nas sombras!', id: npcId });
     } catch (err) {
         console.error("Erro fatal ao criar NPC:", err);
-        res.status(500).json({ erro: 'Erro interno ao forjar NPC.' });
+        // Agora o servidor vai te dedurar EXATAMENTE o que falhou!
+        res.status(500).json({ erro: 'Erro BD: ' + err.message });
     }
 });
 
