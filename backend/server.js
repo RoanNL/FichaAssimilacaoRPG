@@ -86,22 +86,25 @@ io.on('connection', (socket) => {
             const usuarioIdSeguro = usuarioVerificado.id; 
 
             const salaStr = campanhaId.toString(); 
+
+            // 🔥 PRIMEIRO DESCOBRE SE É O MESTRE
+            const checkMestre = await pool.query('SELECT mestre_id FROM campanhas WHERE id = $1', [campanhaId]);
+            const isMestre = checkMestre.rows.length > 0 && checkMestre.rows[0].mestre_id === usuarioIdSeguro;
+
             const sql = `SELECT * FROM membros_campanha WHERE campanha_id = $1 AND usuario_id = $2`;
             const resultado = await pool.query(sql, [campanhaId, usuarioIdSeguro]);
 
-            if (resultado.rows.length > 0) {
+            // 🔥 GARANTIA DE ENTRADA: Passa se for membro OU se for o Mestre (Blinda campanhas antigas!)
+            if (resultado.rows.length > 0 || isMestre) {
                 socket.join(salaStr); 
                 console.log(`✅ Catraca VIP: Usuário ${usuarioIdSeguro} acessou a mesa ${salaStr}`);
-
-                const checkMestre = await pool.query('SELECT mestre_id FROM campanhas WHERE id = $1', [campanhaId]);
-                const isMestre = checkMestre.rows.length > 0 && checkMestre.rows[0].mestre_id === usuarioIdSeguro;
 
                 const sqlHist = `SELECT pacote FROM historico_rolagens WHERE campanha_id = $1 ORDER BY id ASC LIMIT 50`;
                 const histResult = await pool.query(sqlHist, [campanhaId]);
                 
                 let rolagensAntigas = histResult.rows.map(row => row.pacote);
                 
-                // 🔥 O FILTRO SUPREMO ATUALIZADO: Só remove a rolagem do mestre se ela NÃO for pública!
+                // O FILTRO SUPREMO ATUALIZADO: Só remove a rolagem do mestre se ela NÃO for pública!
                 if (!isMestre) {
                     rolagensAntigas = rolagensAntigas.filter(r => r.isMestre !== true || r.isRolagemPublica === true);
                 }

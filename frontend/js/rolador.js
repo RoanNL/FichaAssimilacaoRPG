@@ -168,70 +168,74 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // 2. CONEXÃO MULTIPLAYER E ISOLAMENTO DE CONTEXTO
     // ==========================================
-    setTimeout(() => {
-        if (window.socket) {
-            
-            // Ouvindo novas rolagens dos aliados
-            window.socket.on('nova-rolagem', (pacoteDeDados) => {
-                // 🔥 ISOLAMENTO BLINDADO: Só escuta se a campanha estiver ativada na sessão! 🔥
-                const campanhaAtiva = sessionStorage.getItem('campanhaAtiva');
-                if (!campanhaAtiva || pacoteDeDados.campanhaId !== campanhaAtiva) return; 
-
-                // Se o dado chegou pela rede, significa que:
-                // 1. Outro jogador rolou (pois o Socket não devolve o evento pra quem enviou).
-                // 2. Não é uma rolagem do Mestre (pois o servidor blinda e não emite dados do Mestre).
-                // Logo, TODO MUNDO na mesa deve ver a animação e o log!
-                
-                renderizarRolagem(pacoteDeDados);
-
-                // Avisa que o dado rolou caso a gaveta esteja fechada
-                const panel = document.getElementById('game-log-sidebar');
-                if (panel && panel.classList.contains('translate-x-full')) {
-                    if (typeof window.mostrarNotificacao === 'function') {
-                        window.mostrarNotificacao(`Rolagem de ${pacoteDeDados.nome || 'alguém'}!`, 'aviso');
-                    }
-                }
-            });
-
-            // Carregando Histórico Antigo ao dar F5
-            window.socket.on('carregar-historico', (historico) => {
-                if (!historicoDiv) return;
-                
-                // 🔥 ISOLAMENTO BLINDADO: Impede o histórico da mesa vazar pro Dashboard 🔥
-                const campanhaAtiva = sessionStorage.getItem('campanhaAtiva');
-                if (!campanhaAtiva) {
-                    historicoDiv.innerHTML = '<p class="text-center text-gray-500 text-xs italic font-bold mt-4">Terminal Local Ativo.<br>Acesse por uma campanha para ativar a rede multiplayer.</p>';
-                    return;
-                }
-
-                historicoDiv.innerHTML = '';
-
-                historico.forEach(pacoteBruto => {
-                    try {
-                        const pacote = typeof pacoteBruto === 'string' ? JSON.parse(pacoteBruto) : pacoteBruto;
-                        const meuNomeLocal = sessionStorage.getItem('usuarioNome');
-                        const meuPersonagemLocal = document.getElementById('nome') ? document.getElementById('nome').value.trim() : '';
-                        
-                        const souMestre = sessionStorage.getItem('isMestreAtivo') === 'true';
-                        const meuId = sessionStorage.getItem('usuarioId');
-                        const fuiEuQuemRolou = (pacote.usuarioId === meuId) ||
-                            (!pacote.usuarioId && (pacote.nome === meuNomeLocal || pacote.nome === meuPersonagemLocal));
-
-                        // 🔥 NOVO: Mantém as rolagens do mestre em segredo, a não ser que ele as tenha tornado públicas!
-                        if (!souMestre && !fuiEuQuemRolou && pacote.isMestre && !pacote.isRolagemPublica) return; 
-
-                        const { card } = criarCardDndBeyond(pacote, false);
-                        historicoDiv.prepend(card);
-
-                        const { card } = criarCardDndBeyond(pacote, false);
-                        historicoDiv.prepend(card);
-                    } catch (err) {
-                        console.error("❌ Erro ao desenhar rolagem antiga.");
-                    }
-                });
-            });
+    function iniciarMultiplayer() {
+        // Se a conexão não estiver pronta, tenta de novo em 50ms, evitando atrasos longos!
+        if (!window.socket) {
+            setTimeout(iniciarMultiplayer, 50); 
+            return;
         }
-    }, 500);
+
+        // Ouvindo novas rolagens dos aliados
+        window.socket.off('nova-rolagem'); // Previne duplicação de ouvintes
+        window.socket.on('nova-rolagem', (pacoteDeDados) => {
+            const campanhaAtiva = sessionStorage.getItem('campanhaAtiva');
+            if (!campanhaAtiva || pacoteDeDados.campanhaId !== campanhaAtiva) return; 
+
+            renderizarRolagem(pacoteDeDados);
+
+            const panel = document.getElementById('game-log-sidebar');
+            if (panel && panel.classList.contains('translate-x-full')) {
+                if (typeof window.mostrarNotificacao === 'function') {
+                    window.mostrarNotificacao(`Rolagem de ${pacoteDeDados.nome || 'alguém'}!`, 'aviso');
+                }
+            }
+        });
+
+        // Carregando Histórico Antigo ao entrar na mesa
+        window.socket.off('carregar-historico'); // Previne duplicação
+        window.socket.on('carregar-historico', (historico) => {
+            if (!historicoDiv) return;
+            
+            const campanhaAtiva = sessionStorage.getItem('campanhaAtiva');
+            if (!campanhaAtiva) {
+                historicoDiv.innerHTML = '<p class="text-center text-gray-500 text-xs italic font-bold mt-4">Terminal Local Ativo.<br>Acesse por uma campanha para ativar a rede multiplayer.</p>';
+                return;
+            }
+
+            // Limpa a tela
+            historicoDiv.innerHTML = '';
+            
+            // Se o histórico vier vazio do banco de dados, escreve a mensagem padrão!
+            if (!historico || historico.length === 0) {
+                historicoDiv.innerHTML = '<p class="text-center text-gray-400 text-xs italic font-bold mt-4">O destino aguarda os dados...</p>';
+                return;
+            }
+
+            historico.forEach(pacoteBruto => {
+                try {
+                    const pacote = typeof pacoteBruto === 'string' ? JSON.parse(pacoteBruto) : pacoteBruto;
+                    const meuNomeLocal = sessionStorage.getItem('usuarioNome');
+                    const meuPersonagemLocal = document.getElementById('nome') ? document.getElementById('nome').value.trim() : '';
+                    
+                    const souMestre = sessionStorage.getItem('isMestreAtivo') === 'true';
+                    const meuId = sessionStorage.getItem('usuarioId');
+                    const fuiEuQuemRolou = (pacote.usuarioId === meuId) ||
+                        (!pacote.usuarioId && (pacote.nome === meuNomeLocal || pacote.nome === meuPersonagemLocal));
+
+                    // Mantém as rolagens do mestre em segredo absoluto
+                    if (!souMestre && !fuiEuQuemRolou && pacote.isMestre && !pacote.isRolagemPublica) return; 
+
+                    const { card } = criarCardDndBeyond(pacote, false);
+                    historicoDiv.prepend(card);
+                } catch (err) {
+                    console.error("❌ Erro ao desenhar rolagem antiga.");
+                }
+            });
+        });
+    }
+    
+    // Inicia a vigilância imediatamente!
+    iniciarMultiplayer();
 
     // ==========================================
     // 3. MATEMÁTICA E LÓGICA DE ROLAGEM
