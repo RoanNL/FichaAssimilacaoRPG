@@ -14,7 +14,7 @@ pool.query('SELECT NOW()', async (err, res) => {
         console.error('❌ Erro ao conectar no PostgreSQL:', err);
     } else {
         console.log('✅ Conectado ao PostgreSQL com sucesso!');
-        criarTabelas(); 
+        criarTabelas();
     }
 });
 
@@ -29,7 +29,7 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(helmet({
-    contentSecurityPolicy: false, 
+    contentSecurityPolicy: false,
     crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
@@ -38,7 +38,7 @@ app.use(helmet({
 // =========================================================================
 app.use((req, res, next) => {
     const pediuPeloNavegador = req.headers.accept && req.headers.accept.includes('text/html');
-    
+
     if (pediuPeloNavegador) {
         return res.status(403).send(`
             <body style="background-color: #121212; color: #ff9800; font-family: 'Courier New', monospace; text-align: center; padding-top: 20vh;">
@@ -77,26 +77,26 @@ io.on('connection', (socket) => {
 
     // 🛡️ A CATRACA VIP E O HISTÓRICO LIGADO
     socket.on('entrar-na-campanha', async (dados) => {
-        const { campanhaId, token } = dados; 
-        
+        const { campanhaId, token } = dados;
+
         if (!token || !campanhaId) return;
 
         try {
             const segredo = process.env.SEGREDO_JWT || 'segredo_super_secreto_rpg';
             const usuarioVerificado = jwt.verify(token, segredo);
-            const usuarioIdSeguro = usuarioVerificado.id; 
+            const usuarioIdSeguro = usuarioVerificado.id;
 
-            const salaStr = campanhaId.toString(); 
+            const salaStr = campanhaId.toString();
             const sql = `SELECT * FROM membros_campanha WHERE campanha_id = $1 AND usuario_id = $2`;
             const resultado = await pool.query(sql, [campanhaId, usuarioIdSeguro]);
 
             if (resultado.rows.length > 0) {
-                socket.join(salaStr); 
+                socket.join(salaStr);
                 console.log(`✅ Catraca VIP: Usuário ${usuarioIdSeguro} acessou a mesa ${salaStr}`);
 
                 const sqlHist = `SELECT pacote FROM historico_rolagens WHERE campanha_id = $1 ORDER BY id ASC LIMIT 30`;
                 const histResult = await pool.query(sqlHist, [campanhaId]);
-                
+
                 const rolagensAntigas = histResult.rows.map(row => row.pacote);
                 socket.emit('carregar-historico', rolagensAntigas);
             } else {
@@ -123,17 +123,17 @@ io.on('connection', (socket) => {
 
             if (resultCheck.rows.length === 0) {
                 console.log(`🚨 HACKER BARRADO: Usuário ${usuarioIdSeguro} tentou rolar dado em mesa alheia!`);
-                return; 
+                return;
             }
 
             dadosDaRolagem.usuarioId = usuarioIdSeguro;
-            const salaStr = campanhaId.toString(); 
+            const salaStr = campanhaId.toString();
             socket.to(salaStr).emit('nova-rolagem', dadosDaRolagem);
-            
+
             // REMOVIDO: O parseInt(campanhaId, 10). UUID é string!
             await pool.query(
-                `INSERT INTO historico_rolagens (campanha_id, pacote) VALUES ($1, $2)`, 
-                [campanhaId, dadosDaRolagem] 
+                `INSERT INTO historico_rolagens (campanha_id, pacote) VALUES ($1, $2)`,
+                [campanhaId, dadosDaRolagem]
             );
         } catch (err) {
             console.error("❌ Tentativa de forjar rolagem bloqueada.");
@@ -146,7 +146,7 @@ io.on('connection', (socket) => {
 // =========================================================================
 function verificarToken(req, res, next) {
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; 
+    const token = authHeader && authHeader.split(' ')[1];
 
     if (!token) {
         return res.status(401).json({ erro: 'Acesso negado. Token não fornecido.' });
@@ -154,9 +154,9 @@ function verificarToken(req, res, next) {
 
     try {
         const segredo = process.env.SEGREDO_JWT || 'segredo_super_secreto_rpg';
-        const usuarioVerificado = jwt.verify(token, segredo); 
-        req.usuario = usuarioVerificado; 
-        next(); 
+        const usuarioVerificado = jwt.verify(token, segredo);
+        req.usuario = usuarioVerificado;
+        next();
     } catch (err) {
         return res.status(403).json({ erro: 'Token inválido, expirado ou forjado.' });
     }
@@ -176,7 +176,7 @@ function gerarCodigoConvite() {
 app.post('/registro', async (req, res) => {
     const username = req.body.username || req.body.usuario || req.body.nome || req.body.login;
     const password = req.body.password || req.body.senha;
-    const email = req.body.email; 
+    const email = req.body.email;
 
     const usernameLowerCase = username ? username.toLowerCase() : '';
 
@@ -202,7 +202,7 @@ app.post('/registro', async (req, res) => {
 
         const sql = `INSERT INTO usuarios (username, password, email) VALUES ($1, $2, $3) RETURNING id`;
         const resultado = await pool.query(sql, [usernameLowerCase, senhaHash, email]);
-        
+
         const novoUsuarioId = resultado.rows[0].id;
 
         const segredo = process.env.SEGREDO_JWT || 'segredo_super_secreto_rpg';
@@ -211,7 +211,7 @@ app.post('/registro', async (req, res) => {
         res.status(201).json({
             mensagem: 'Usuário registrado com sucesso!',
             usuario: { id: novoUsuarioId, nome: username },
-            token: token 
+            token: token
         });
     } catch (erro) {
         if (erro.code === '23505') {
@@ -264,7 +264,7 @@ app.post('/login', async (req, res) => {
                 avatar: usuarioDb.avatar,
                 email: usuarioDb.email
             },
-            token: token 
+            token: token
         });
     } catch (erro) {
         console.error('❌ Erro no login:', erro);
@@ -277,23 +277,23 @@ app.post('/login', async (req, res) => {
 // =========================================================================
 app.post('/esqueci-senha', async (req, res) => {
     const { email } = req.body;
-    
+
     if (!email) return res.status(400).json({ erro: 'Forneça o seu e-mail cadastrado.' });
 
     try {
         const result = await pool.query('SELECT id, username FROM usuarios WHERE email = $1', [email]);
-        
+
         if (result.rows.length === 0) {
             return res.status(404).json({ erro: 'E-mail não encontrado nos registros da Taverna.' });
         }
 
         const token = Math.floor(100000 + Math.random() * 900000).toString();
-        const expires = Date.now() + 15 * 60 * 1000; 
+        const expires = Date.now() + 15 * 60 * 1000;
 
         await pool.query('UPDATE usuarios SET reset_token = $1, reset_token_expires = $2 WHERE email = $3', [token, expires, email]);
 
         const brevoApiKey = process.env.BREVO_API_KEY;
-        const remetenteEmail = process.env.EMAIL_USUARIO; 
+        const remetenteEmail = process.env.EMAIL_USUARIO;
 
         if (!brevoApiKey) {
             console.error("⚠️ Chave do Brevo não encontrada no .env!");
@@ -393,7 +393,7 @@ app.post('/usuarios/avatar', verificarToken, async (req, res) => {
             const nomeArquivo = `avatar_${usuarioId}_${Date.now()}.${extensao}`;
 
             const { data, error } = await supabase.storage
-                .from('ficha-fotos') 
+                .from('ficha-fotos')
                 .upload(nomeArquivo, buffer, {
                     contentType: `image/${extensao}`,
                     upsert: true
@@ -401,7 +401,7 @@ app.post('/usuarios/avatar', verificarToken, async (req, res) => {
 
             if (error) throw error;
             const { data: publicUrlData } = supabase.storage.from('ficha-fotos').getPublicUrl(nomeArquivo);
-            foto = publicUrlData.publicUrl; 
+            foto = publicUrlData.publicUrl;
         } catch (err) {
             console.error("Erro no Supabase ao subir avatar:", err);
             return res.status(500).json({ erro: 'Erro ao hospedar a imagem.' });
@@ -429,24 +429,24 @@ app.get('/usuarios/me', verificarToken, async (req, res) => {
 // SALVAR OU ATUALIZAR FICHA (COM PRIVACIDADE)
 // =========================================================================
 app.post('/personagens', verificarToken, async (req, res) => {
-    const usuarioIdSeguro = req.usuario.id; 
-    
+    const usuarioIdSeguro = req.usuario.id;
+
     const personagemId = req.body.personagemId || req.body.id;
     const nome = req.body.nome || req.body.nome_personagem || 'Desconhecido';
     const ocupacao = req.body.ocupacao || '';
     const dadosFicha = req.body.dadosFicha || req.body.dados_ficha || req.body.dados_personagem || {};
-    let foto = req.body.foto || null; 
-    
+    let foto = req.body.foto || null;
+
     // 🔥 RECEBE A OPÇÃO DO JOGADOR
-    const isPrivada = req.body.isPrivada || false; 
+    const isPrivada = req.body.isPrivada || false;
 
     const regexSeguro = /^[^<>{}\[\]=;]*$/;
 
     function validarTexto(texto, limite) {
-        if (!texto) return true; 
-        if (typeof texto !== 'string') return false; 
-        if (texto.length > limite) return false; 
-        return regexSeguro.test(texto); 
+        if (!texto) return true;
+        if (typeof texto !== 'string') return false;
+        if (texto.length > limite) return false;
+        return regexSeguro.test(texto);
     }
 
     if (!validarTexto(nome, 50) || !validarTexto(ocupacao, 50)) {
@@ -464,7 +464,7 @@ app.post('/personagens', verificarToken, async (req, res) => {
             if (error) throw error;
 
             const { data: publicUrlData } = supabase.storage.from('ficha-fotos').getPublicUrl(nomeArquivo);
-            foto = publicUrlData.publicUrl; 
+            foto = publicUrlData.publicUrl;
         } catch (err) {
             console.error("❌ Erro ao enviar imagem pro Supabase:", err);
         }
@@ -477,7 +477,7 @@ app.post('/personagens', verificarToken, async (req, res) => {
         if (isUpdate) {
             const sql = `UPDATE personagens SET nome_personagem = $1, ocupacao = $2, dados_ficha = $3, foto = $4, is_privada = $5 WHERE id = $6 AND usuario_id = $7 RETURNING id`;
             const result = await pool.query(sql, [nome, ocupacao, fichaParaOBanco, foto, isPrivada, personagemId, usuarioIdSeguro]);
-            
+
             if (result.rowCount === 0) return res.status(403).json({ erro: 'Acesso negado.' });
             res.json({ mensagem: 'Ficha atualizada com sucesso!', id: personagemId });
         } else {
@@ -495,7 +495,7 @@ app.post('/personagens', verificarToken, async (req, res) => {
 // =========================================================================
 app.get('/personagens/usuario/:usuarioId', verificarToken, async (req, res) => {
     const { usuarioId } = req.params;
-    const usuarioSeguroId = req.usuario.id; 
+    const usuarioSeguroId = req.usuario.id;
 
     if (usuarioSeguroId !== usuarioId) {
         return res.status(403).json({ erro: 'Tentativa de ler personagens de outro jogador bloqueada.' });
@@ -515,7 +515,7 @@ app.get('/personagens/usuario/:usuarioId', verificarToken, async (req, res) => {
 // =========================================================================
 app.get('/personagem/:id', verificarToken, async (req, res) => {
     const { id } = req.params;
-    
+
     // Escudo Anti-Batata: Verifica se a URL contém um UUID válido
     if (!regexUUID.test(id)) {
         return res.status(400).json({ erro: 'Formato de ID de personagem inválido.' });
@@ -545,10 +545,10 @@ app.delete('/personagens/:id', verificarToken, async (req, res) => {
     if (!regexUUID.test(id)) {
         return res.status(400).json({ erro: 'Formato de ID de personagem inválido.' });
     }
-    
+
     try {
         const result = await pool.query('DELETE FROM personagens WHERE id = $1 AND usuario_id = $2 RETURNING id', [id, req.usuario.id]);
-        
+
         if (result.rowCount === 0) {
             return res.status(403).json({ erro: 'Acesso negado. Ficha não pertence a você.' });
         }
@@ -565,7 +565,7 @@ app.delete('/personagens/:id', verificarToken, async (req, res) => {
 
 app.post('/campanhas', verificarToken, async (req, res) => {
     const { nome } = req.body;
-    const mestre_id = req.usuario.id; 
+    const mestre_id = req.usuario.id;
     const codigo = gerarCodigoConvite();
 
     try {
@@ -589,7 +589,7 @@ app.post('/campanhas', verificarToken, async (req, res) => {
 // =========================================================================
 app.post('/campanhas/entrar', verificarToken, async (req, res) => {
     const { codigo_convite, personagem_id } = req.body;
-    const usuarioIdSeguro = req.usuario.id; 
+    const usuarioIdSeguro = req.usuario.id;
 
     try {
         const sqlBusca = `SELECT id FROM campanhas WHERE codigo_convite = $1`;
@@ -664,7 +664,7 @@ app.post('/campanhas/:id/pedidos/responder', verificarToken, async (req, res) =>
 app.delete('/campanhas/:id/membros/:usuarioId', verificarToken, async (req, res) => {
     const campanhaId = req.params.id;
     const usuarioAlvoId = req.params.usuarioId;
-    const mestreRequisitanteId = req.usuario.id; 
+    const mestreRequisitanteId = req.usuario.id;
 
     if (!regexUUID.test(campanhaId) || !regexUUID.test(usuarioAlvoId)) {
         return res.status(400).json({ erro: 'ID com formato inválido.' });
@@ -708,65 +708,87 @@ app.get('/campanhas/:id/jogadores', verificarToken, async (req, res) => {
     }
 });
 
+// 🔥 ROTA NOVA: ADICIONAR PERSONAGEM EXISTENTE À MESA 🔥
 app.post('/campanhas/:id/adicionar-personagem', verificarToken, async (req, res) => {
     const campanhaId = req.params.id;
     const { personagem_id } = req.body;
     const usuarioIdSeguro = req.usuario.id;
 
     try {
-        // 1. Checa se ele já está dentro da sala (só quem tá na mesa pode puxar ficha)
-        const membroCheck = await pool.query('SELECT id FROM membros_campanha WHERE campanha_id = $1 AND usuario_id = $2 LIMIT 1', [campanhaId, usuarioIdSeguro]);
-        if (membroCheck.rows.length === 0) return res.status(403).json({erro: 'Você não tem permissão nesta mesa.'});
+        const campCheck = await pool.query('SELECT mestre_id FROM campanhas WHERE id = $1', [campanhaId]);
+        if (campCheck.rows.length === 0) return res.status(404).json({ erro: 'Campanha não encontrada.' });
+
+        const isMestre = campCheck.rows[0].mestre_id === usuarioIdSeguro;
+
+        // 1. Checa se o usuário está na sala
+        const membroCheck = await pool.query('SELECT id, personagem_id FROM membros_campanha WHERE campanha_id = $1 AND usuario_id = $2', [campanhaId, usuarioIdSeguro]);
+        if (membroCheck.rows.length === 0 && !isMestre) return res.status(403).json({ erro: 'Você não tem permissão nesta mesa.' });
 
         // 2. A ficha realmente pertence a ele?
         const charCheck = await pool.query('SELECT id FROM personagens WHERE id = $1 AND usuario_id = $2', [personagem_id, usuarioIdSeguro]);
-        if (charCheck.rows.length === 0) return res.status(403).json({erro: 'Personagem inválido ou não te pertence.'});
+        if (charCheck.rows.length === 0) return res.status(403).json({ erro: 'Personagem inválido ou não te pertence.' });
 
         // 3. O personagem já tá ali?
         const dupCheck = await pool.query('SELECT id FROM membros_campanha WHERE campanha_id = $1 AND personagem_id = $2', [campanhaId, personagem_id]);
-        if (dupCheck.rows.length > 0) return res.status(400).json({erro: 'Este personagem já está na mesa.'});
+        if (dupCheck.rows.length > 0) return res.status(400).json({ erro: 'Este personagem já está na mesa.' });
 
-        // Adiciona a cadeira nova na mesa
-        await pool.query(`INSERT INTO membros_campanha (campanha_id, usuario_id, personagem_id) VALUES ($1, $2, $3)`, [campanhaId, usuarioIdSeguro, personagem_id]);
+        // 🔥 REGRA DO LIMITE: JOGADOR SÓ PODE TER 1 FICHA! 🔥
+        if (!isMestre) {
+            const charAtivo = membroCheck.rows.find(r => r.personagem_id !== null);
+            if (charAtivo) {
+                return res.status(400).json({ erro: 'Você já tem um personagem na mesa! Recolha-o antes de puxar outro.' });
+            }
+
+            // Tem uma vaga vazia (quando ele entrou na sala)?
+            const vagaVazia = membroCheck.rows.find(r => r.personagem_id === null);
+            if (vagaVazia) {
+                await pool.query('UPDATE membros_campanha SET personagem_id = $1 WHERE id = $2', [personagem_id, vagaVazia.id]);
+            } else {
+                await pool.query(`INSERT INTO membros_campanha (campanha_id, usuario_id, personagem_id) VALUES ($1, $2, $3)`, [campanhaId, usuarioIdSeguro, personagem_id]);
+            }
+        } else {
+            // Se for o Mestre, ele pode colocar infinitas fichas (NPCs)
+            await pool.query(`INSERT INTO membros_campanha (campanha_id, usuario_id, personagem_id) VALUES ($1, $2, $3)`, [campanhaId, usuarioIdSeguro, personagem_id]);
+        }
 
         const io = req.app.get('io');
         if (io) io.to(campanhaId.toString()).emit('atualizar-jogadores');
 
         res.json({ mensagem: 'Ficha inserida na mesa!' });
     } catch (err) {
+        console.error(err);
         res.status(500).json({ erro: 'Erro ao conectar com o servidor.' });
     }
 });
 
-// 🔥 ROTA NOVA: RECOLHER PERSONAGEM SEM EXPULSAR O JOGADOR 🔥
+// 🔥 ROTA NOVA: RECOLHER PERSONAGEM (APENAS O DONO PODE FAZER ISSO) 🔥
 app.delete('/campanhas/:id/remover-personagem/:personagemId', verificarToken, async (req, res) => {
     const campanhaId = req.params.id;
     const personagemId = req.params.personagemId;
     const usuarioIdSeguro = req.usuario.id;
 
     try {
-        // Checa permissão (Ou é o Mestre da mesa, ou é o Dono da ficha)
-        const campCheck = await pool.query('SELECT mestre_id FROM campanhas WHERE id = $1', [campanhaId]);
-        const isMestre = campCheck.rows.length > 0 && campCheck.rows[0].mestre_id === usuarioIdSeguro;
-
         const charCheck = await pool.query('SELECT usuario_id FROM personagens WHERE id = $1', [personagemId]);
-        const isDono = charCheck.rows.length > 0 && charCheck.rows[0].usuario_id === usuarioIdSeguro;
+        if (charCheck.rows.length === 0) return res.status(404).json({ erro: 'Ficha não encontrada.' });
 
-        if (!isMestre && !isDono) return res.status(403).json({erro: 'Sem permissão.'});
+        const isDono = charCheck.rows[0].usuario_id === usuarioIdSeguro;
 
-        // 🔥 A MÁGICA DE NÃO EXPULSAR: 
-        // Verificamos quantas "cadeiras" o usuário tem na mesa.
-        const donoDaCadeira = charCheck.rows[0].usuario_id;
-        const userRows = await pool.query('SELECT id, personagem_id FROM membros_campanha WHERE campanha_id = $1 AND usuario_id = $2', [campanhaId, donoDaCadeira]);
-        
+        // 🔥 GARANTIA ABSOLUTA: Apenas o jogador que colocou pode retirar! 🔥
+        if (!isDono) return res.status(403).json({ erro: 'Acesso Negado: Você não pode retirar a ficha de outro jogador!' });
+
+        const userRows = await pool.query('SELECT id, personagem_id FROM membros_campanha WHERE campanha_id = $1 AND usuario_id = $2', [campanhaId, usuarioIdSeguro]);
         const targetRow = userRows.rows.find(r => r.personagem_id === personagemId);
-        if (!targetRow) return res.status(404).json({erro: 'A ficha não está na mesa.'});
 
-        if (userRows.rows.length === 1) {
-            // Se for a última ficha dele na mesa, apagamos o ID da ficha, mas MANTEMOS ele na sala (NULL)
+        if (!targetRow) return res.status(404).json({ erro: 'A ficha não está na mesa.' });
+
+        const campCheck = await pool.query('SELECT mestre_id FROM campanhas WHERE id = $1', [campanhaId]);
+        const isMestre = campCheck.rows[0].mestre_id === usuarioIdSeguro;
+
+        if (!isMestre && userRows.rows.length === 1) {
+            // Se for jogador, ele continua na mesa, apenas a ficha é limpa!
             await pool.query('UPDATE membros_campanha SET personagem_id = NULL WHERE id = $1', [targetRow.id]);
         } else {
-            // Se ele tem outras fichas (ou cadeiras vazias), só apagamos essa cadeira específica.
+            // Se for NPC do mestre, apagamos a cadeira inteira para sumir da tela
             await pool.query('DELETE FROM membros_campanha WHERE id = $1', [targetRow.id]);
         }
 
@@ -775,6 +797,7 @@ app.delete('/campanhas/:id/remover-personagem/:personagemId', verificarToken, as
 
         res.json({ mensagem: 'Ficha recolhida para o seu acervo.' });
     } catch (err) {
+        console.error(err);
         res.status(500).json({ erro: 'Erro ao recolher ficha.' });
     }
 });
@@ -801,12 +824,12 @@ app.put('/campanhas/:id/posicao-banner', verificarToken, async (req, res) => {
     try {
         const resultCheck = await pool.query('SELECT mestre_id FROM campanhas WHERE id = $1', [campanhaId]);
         if (resultCheck.rows.length === 0 || resultCheck.rows[0].mestre_id !== mestreIdSeguro) {
-            return res.status(403).json({erro: 'Apenas o Mestre pode alterar o banner.'});
+            return res.status(403).json({ erro: 'Apenas o Mestre pode alterar o banner.' });
         }
         await pool.query('UPDATE campanhas SET banner_pos_y = $1 WHERE id = $2', [posicao_y, campanhaId]);
         res.json({ mensagem: 'Posição salva!' });
     } catch (err) {
-        res.status(500).json({erro: 'Erro ao salvar posição.'});
+        res.status(500).json({ erro: 'Erro ao salvar posição.' });
     }
 });
 
@@ -818,7 +841,7 @@ app.post('/campanhas/:id/criar-npc', verificarToken, async (req, res) => {
     try {
         const check = await pool.query('SELECT mestre_id FROM campanhas WHERE id = $1', [campanhaId]);
         if (check.rows.length === 0 || check.rows[0].mestre_id !== mestreIdSeguro) {
-            return res.status(403).json({erro: 'Apenas o Mestre pode criar NPCs aqui.'});
+            return res.status(403).json({ erro: 'Apenas o Mestre pode criar NPCs aqui.' });
         }
 
         // 1. Cria a ficha usando JSON.stringify para o banco não reclamar!
@@ -850,7 +873,7 @@ app.post('/campanhas/:id/banner', verificarToken, async (req, res) => {
         // Trava de segurança: Só o mestre pode trocar o banner!
         const resultCheck = await pool.query('SELECT mestre_id FROM campanhas WHERE id = $1', [campanhaId]);
         if (resultCheck.rows.length === 0 || resultCheck.rows[0].mestre_id !== mestreIdSeguro) {
-            return res.status(403).json({erro: 'Apenas o Mestre pode alterar o banner.'});
+            return res.status(403).json({ erro: 'Apenas o Mestre pode alterar o banner.' });
         }
 
         if (supabase && foto && foto.startsWith('data:image')) {
@@ -861,7 +884,7 @@ app.post('/campanhas/:id/banner', verificarToken, async (req, res) => {
 
             const { error } = await supabase.storage.from('ficha-fotos').upload(nomeArquivo, buffer, { contentType: `image/${extensao}`, upsert: true });
             if (error) throw error;
-            
+
             const { data: publicUrlData } = supabase.storage.from('ficha-fotos').getPublicUrl(nomeArquivo);
             foto = publicUrlData.publicUrl;
         }
@@ -869,7 +892,7 @@ app.post('/campanhas/:id/banner', verificarToken, async (req, res) => {
         await pool.query('UPDATE campanhas SET banner = $1 WHERE id = $2', [foto, campanhaId]);
         res.json({ mensagem: 'Banner épico atualizado!', banner: foto });
     } catch (err) {
-        res.status(500).json({erro: 'Erro ao atualizar banner.'});
+        res.status(500).json({ erro: 'Erro ao atualizar banner.' });
     }
 });
 
@@ -929,7 +952,6 @@ app.get('/campanhas/:id/fichas-mesa', verificarToken, async (req, res) => {
             WHERE m.campanha_id = $1
             ORDER BY p.id
         `, [req.params.id]);
-        
         res.json(result.rows);
     } catch (erro) {
         console.error("❌ Erro na Rota Fichas Mesa:", erro);
@@ -941,7 +963,7 @@ app.get('/campanhas/:id/fichas-mesa', verificarToken, async (req, res) => {
 // =========================================================================
 app.delete('/campanhas/:id', verificarToken, async (req, res) => {
     const campanhaId = req.params.id;
-    const mestreIdSeguro = req.usuario.id; 
+    const mestreIdSeguro = req.usuario.id;
 
     if (!regexUUID.test(campanhaId)) {
         return res.status(400).json({ erro: 'Formato de ID inválido.' });
@@ -952,14 +974,14 @@ app.delete('/campanhas/:id', verificarToken, async (req, res) => {
         const resultCheck = await pool.query(sqlCheck, [campanhaId]);
 
         if (resultCheck.rows.length === 0) return res.status(404).json({ erro: 'Campanha não encontrada.' });
-        
+
         if (resultCheck.rows[0].mestre_id !== mestreIdSeguro) {
             return res.status(403).json({ erro: 'ALERTA DE SEGURANÇA: Apenas o Mestre pode apagar esta mesa!' });
         }
 
         await pool.query(`DELETE FROM membros_campanha WHERE campanha_id = $1`, [campanhaId]);
         await pool.query(`DELETE FROM campanhas WHERE id = $1`, [campanhaId]);
-        
+
         const io = req.app.get('io');
         if (io) io.to(campanhaId.toString()).emit('mesa-encerrada');
 
@@ -981,7 +1003,7 @@ app.get('/api/refugios', verificarToken, async (req, res) => {
     try {
         const sql = `SELECT * FROM refugios WHERE usuario_id = $1 ORDER BY criado_em DESC`;
         const result = await pool.query(sql, [usuarioIdSeguro]);
-        
+
         // Formata os dados de snake_case (Banco) para camelCase (Frontend)
         const refugios = result.rows.map(row => ({
             id: row.id,
@@ -1030,7 +1052,7 @@ app.post('/api/refugios/salvar', verificarToken, async (req, res) => {
                 return res.status(403).json({ erro: 'Tentativa de invasão. Você não é dono deste refúgio.' });
             }
             res.json({ mensagem: 'Refúgio atualizado com sucesso!', id: ref.id });
-            
+
         } else {
             const sql = `
                 INSERT INTO refugios (usuario_id, nome, pop_atual, pop_max, defesa, moral, mobilidade, beligerancia, agua, tem_fonte_agua, alimento, madeira)
@@ -1039,7 +1061,7 @@ app.post('/api/refugios/salvar', verificarToken, async (req, res) => {
             const result = await pool.query(sql, [
                 usuarioIdSeguro, ref.nome, ref.popAtual, ref.popMax, ref.defesa, ref.moral, ref.mobilidade, ref.beligerancia, ref.agua, ref.temFonteAgua, ref.alimento, ref.madeira
             ]);
-            
+
             // Retorna o UUID gerado pelo banco para o frontend substituir o ID temporário!
             res.json({ mensagem: 'Refúgio criado no banco com sucesso!', id: result.rows[0].id });
         }
@@ -1060,7 +1082,7 @@ app.delete('/api/refugios/deletar/:id', verificarToken, async (req, res) => {
 
     try {
         const result = await pool.query('DELETE FROM refugios WHERE id = $1 AND usuario_id = $2 RETURNING id', [id, usuarioIdSeguro]);
-        
+
         if (result.rowCount === 0) {
             return res.status(403).json({ erro: 'Acesso negado. Refúgio não pertence a você.' });
         }

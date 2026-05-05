@@ -1618,20 +1618,55 @@
          MODAL: PUXAR PERSONAGENS DA CONTA
          ========================================== -->
     <div id="modal-selecionar-npc" class="modal z-[999999]">
-        <div class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border-2 border-rpg-blue rounded-md p-6 max-w-[500px] w-[95%] shadow-2xl relative max-h-[85vh] flex flex-col">
-            <span class="absolute top-4 right-6 text-gray-500 hover:text-rpg-red text-3xl font-bold cursor-pointer transition-colors" onclick="document.getElementById('modal-selecionar-npc').classList.remove('show')">&times;</span>
-            <h2 class="text-2xl font-black font-rpg text-gray-800 dark:text-white uppercase mb-4 border-b border-gray-300 dark:border-gray-700 pb-2 flex items-center gap-2">
+        <div
+            class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border-2 border-rpg-blue rounded-md p-6 max-w-[500px] w-[95%] shadow-2xl relative max-h-[85vh] flex flex-col">
+            <span
+                class="absolute top-4 right-6 text-gray-500 hover:text-rpg-red text-3xl font-bold cursor-pointer transition-colors"
+                onclick="document.getElementById('modal-selecionar-npc').classList.remove('show')">&times;</span>
+            <h2
+                class="text-2xl font-black font-rpg text-gray-800 dark:text-white uppercase mb-4 border-b border-gray-300 dark:border-gray-700 pb-2 flex items-center gap-2">
                 <i data-lucide="users" class="w-6 h-6 text-rpg-blue"></i> Puxar Personagem
             </h2>
-            
-            <button id="btn-modal-criar-novo-npc" class="hidden w-full bg-rpg-blue hover:bg-[#2c6270] text-white font-bold py-3 rounded uppercase font-rpg transition-colors flex justify-center items-center gap-2 shadow-sm mb-4">
+
+            <button id="btn-modal-criar-novo-npc"
+                class="hidden w-full bg-rpg-blue hover:bg-[#2c6270] text-white font-bold py-3 rounded uppercase font-rpg transition-colors flex justify-center items-center gap-2 shadow-sm mb-4">
                 <i data-lucide="plus-circle" class="w-5 h-5"></i> Forjar Ficha em Branco (NPC)
             </button>
 
-            <div class="text-center text-xs font-bold text-gray-500 uppercase mb-2">Selecione uma ficha do seu acervo:</div>
-            
+            <div class="text-center text-xs font-bold text-gray-500 uppercase mb-2">Selecione uma ficha do seu acervo:
+            </div>
+
             <div id="lista-npcs-existentes" class="flex flex-col gap-2 overflow-y-auto flex-grow pr-2">
                 <!-- Preenchido via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         MODAL: RECOLHER PERSONAGEM DA MESA
+         ========================================== -->
+    <div id="remover-personagem-mesa-modal" class="modal z-[999999]">
+        <div
+            class="modal-content bg-rpg-paper dark:bg-[#1a1a1a] border-2 border-rpg-red rounded-md p-6 max-w-[400px] w-[90%] text-center shadow-[0_0_30px_rgba(140,58,58,0.6)]">
+            <h3 class="text-2xl font-rpg font-black text-rpg-red uppercase mb-2 flex justify-center items-center gap-2">
+                <i data-lucide="user-minus" class="w-8 h-8"></i> Recolher Ficha
+            </h3>
+            <p class="text-gray-700 dark:text-gray-300 mb-2 font-bold text-sm">Deseja retirar o personagem da mesa?</p>
+            <p id="nome-recolher-ficha"
+                class="text-rpg-red dark:text-red-400 font-black text-xl mb-4 uppercase truncate px-2"></p>
+
+            <div class="bg-gray-100 dark:bg-[#242424] border border-gray-300 dark:border-gray-700 rounded p-3 mb-6">
+                <p class="text-[10px] uppercase font-bold text-gray-500 m-0"><i data-lucide="info"
+                        class="w-3 h-3 inline"></i> A ficha continuará a salvo na sua conta, e você NÃO sairá da
+                    campanha!</p>
+            </div>
+
+            <div class="flex justify-center gap-4">
+                <button
+                    class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition-colors w-full uppercase font-rpg tracking-widest"
+                    onclick="document.getElementById('remover-personagem-mesa-modal').classList.remove('show')">Cancelar</button>
+                <button id="btn-confirmar-recolher-ficha"
+                    class="bg-rpg-red hover:bg-red-800 text-white font-bold py-2 px-4 rounded transition-colors w-full uppercase font-rpg tracking-widest flex justify-center items-center gap-2">Retirar</button>
             </div>
         </div>
     </div>

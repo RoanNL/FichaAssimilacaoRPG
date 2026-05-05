@@ -1,5 +1,3 @@
-// js/campanha.js
-
 document.addEventListener('DOMContentLoaded', () => {
 
     // ==========================================
@@ -53,24 +51,24 @@ document.addEventListener('DOMContentLoaded', () => {
             if (ctrlsPadrao) ctrlsPadrao.classList.add('hidden');
         }
 
-       // 🔥 PUXAR A FOTO DO BANNER E A POSIÇÃO 🔥
+        // 🔥 PUXAR A FOTO DO BANNER E A POSIÇÃO 🔥
         try {
             const resBanner = await fetch(`${window.API_URL}/campanhas/${campanhaId}/info`, {
                 headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
             });
             const dataBanner = await resBanner.json();
             const imgBanner = document.getElementById('campanha-banner-img');
-            
+
             if (imgBanner && dataBanner.banner) {
                 imgBanner.src = dataBanner.banner;
                 // Aplica a posição salva!
                 const posY = dataBanner.banner_pos_y !== undefined && dataBanner.banner_pos_y !== null ? dataBanner.banner_pos_y : 50;
                 imgBanner.style.objectPosition = `50% ${posY}%`;
-                
+
                 // Grava na variável global de reposicionamento
                 if (typeof savedObjectPositionY !== 'undefined') savedObjectPositionY = posY;
             } else if (imgBanner) {
-                imgBanner.src = './assets/banner-default.jpg'; 
+                imgBanner.src = './assets/banner-default.jpg';
                 imgBanner.style.objectPosition = `50% 50%`;
             }
         } catch (e) { console.log("Erro ao carregar banner"); }
@@ -114,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // 🔥 MOSTRA O CARD DE ADICIONAR PARA TODOS (Mestre cria NPCs, Jogadores puxam os seus) 🔥
             const cardAdicionar = document.createElement('div');
             cardAdicionar.className = 'flex flex-row h-[130px] min-w-[250px] bg-gray-50 dark:bg-[#1a1a1a] rounded-lg overflow-hidden border-2 border-dashed border-gray-400 dark:border-gray-600 hover:border-rpg-blue hover:bg-gray-100 dark:hover:bg-[#242424] transition-all cursor-pointer items-center justify-center group';
-            
+
             cardAdicionar.innerHTML = `
                 <div class="flex flex-col items-center justify-center w-full">
                     <div class="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
@@ -125,15 +123,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     </span>
                 </div>
             `;
-            
+
             cardAdicionar.addEventListener('click', () => {
                 document.getElementById('modal-selecionar-npc').classList.add('show');
                 const btnCriarBranco = document.getElementById('btn-modal-criar-novo-npc');
                 // O botão de ficha limpa só aparece para o mestre
                 if (isMestre) btnCriarBranco.classList.remove('hidden');
                 else btnCriarBranco.classList.add('hidden');
-                
-                if(typeof window.carregarListaNpcsExistentes === 'function') {
+
+                if (typeof window.carregarListaNpcsExistentes === 'function') {
                     window.carregarListaNpcsExistentes(campanhaId);
                 }
             });
@@ -141,9 +139,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (fichas.length === 0) return;
 
+            // ==========================================
+            // 🛡️ O ESCUDO ANTI-CLONE (A MÁGICA ESTÁ AQUI!)
+            // ==========================================
+            const fichasRenderizadas = new Set();
+
             fichas.forEach(char => {
-                // Se a linha do banco for de alguém que tirou a ficha (personagem_id = null), nós só ignoramos.
-                if (!char.id) return; 
+                // Ignora linhas que não tem personagem atrelado (cadeiras vazias)
+                if (!char.id) return;
+
+                // 🔥 Bloqueia a ficha se o ID dela já tiver passado por aqui! 🔥
+                if (fichasRenderizadas.has(char.id)) {
+                    console.log("🛡️ Clone bloqueado pelo Front-end:", char.nome_personagem);
+                    return;
+                }
+
+                // Registra que a ficha já está na mesa e não pode ser duplicada
+                fichasRenderizadas.add(char.id);
 
                 const card = document.createElement('div');
                 card.className = 'flex flex-row h-[130px] w-full min-w-[280px] bg-white dark:bg-[#242424] rounded-lg overflow-hidden border border-gray-300 dark:border-[#333] hover:-translate-y-1 hover:shadow-lg transition-all relative shadow-sm';
@@ -162,10 +174,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     controleHtml += `<div class="bg-gray-200 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 text-gray-500 px-3 py-1.5 rounded text-[10px] font-bold uppercase shadow-inner z-10 flex items-center gap-1 cursor-not-allowed" title="Oculto"><i data-lucide="lock" class="w-3 h-3 text-rpg-red"></i> Sigilo</div>`;
                 }
 
-                // 🔥 O BOTÃO MÁGICO DE RETIRAR A FICHA 🔥
+                // 🔥 GARANTIA DE POSSE: Apenas o jogador que botou a ficha pode retirá-la! 🔥
                 if (isDonoDaFicha || isMestre) {
                     controleHtml += `
-                    <button class="btn-retirar-mesa bg-gray-600 hover:bg-rpg-red text-white p-1.5 rounded text-xs font-bold uppercase shadow transition-colors z-10 ml-2" data-id="${char.id}" title="Recolher Ficha">
+                    <button class="btn-retirar-mesa bg-gray-600 hover:bg-rpg-red text-white p-1.5 rounded text-xs font-bold uppercase shadow transition-colors z-10 ml-2" data-id="${char.id}" data-nome="${window.escaparHTML(char.nome_personagem)}" title="Recolher Ficha">
                         <i data-lucide="user-minus" class="w-4 h-4"></i>
                     </button>`;
                 }
@@ -173,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 card.innerHTML = `
                     <img src="${imgSrc}" class="w-[110px] h-[130px] object-cover flex-shrink-0 border-r border-gray-300 dark:border-[#333] bg-black">
                     <div class="flex flex-col justify-start p-3 flex-grow overflow-hidden">
-                        <h3 class="text-gray-800 dark:text-white font-bold text-[15px] m-0 truncate" title="${window.escaparHTML(char.nome_personagem)}">${window.escaparHTML(char.nome_personagem)}</h3>
+                        <h3 class="text-gray-800 dark:text-white font-bold text-[15px] m-0 truncate" title="${window.escaparHTML(char.nome_personagem)}">${window.escaparHTML(char.nome_personagem) || 'Sem Nome'}</h3>
                         <p class="text-rpg-red dark:text-orange-500 font-bold text-[10px] uppercase m-0 mt-1 truncate">${window.escaparHTML(ocupacao)}</p>
                         <div class="mt-auto w-full flex items-center">${controleHtml}</div>
                     </div>
@@ -194,10 +206,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             });
 
+            // Lógica do botão de retirar (AGORA ABRE O MODAL!)
+            document.querySelectorAll('.btn-retirar-mesa').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const personagemId = e.currentTarget.getAttribute('data-id');
+                    const nomePersonagem = e.currentTarget.getAttribute('data-nome');
+                    window.abrirModalRecolherFicha(personagemId, nomePersonagem, e.currentTarget, campanhaId);
+                });
+            });
+
             // Lógica do botão de retirar
             document.querySelectorAll('.btn-retirar-mesa').forEach(btn => {
                 btn.addEventListener('click', async (e) => {
-                    if(!confirm('Deseja retirar este personagem da mesa? \n\nA ficha continuará salva na sua conta, e você NÃO sairá da campanha.')) return;
+                    if (!confirm('Deseja retirar este personagem da mesa? \\n\\nA ficha continuará salva na sua conta, e você NÃO sairá da campanha.')) return;
 
                     const personagemId = e.currentTarget.getAttribute('data-id');
                     const btnIcon = e.currentTarget.innerHTML;
@@ -210,57 +231,14 @@ document.addEventListener('DOMContentLoaded', () => {
                             headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
                         });
                         const data = await res.json();
-                        
+
                         if (res.ok) window.mostrarNotificacao(data.mensagem, 'sucesso');
                         else window.mostrarNotificacao(data.erro, 'erro');
-                    } catch(err) {
+                    } catch (err) {
                         window.mostrarNotificacao('Erro na comunicação.', 'erro');
                     } finally {
                         window.carregarFichasDaMesa(campanhaId, isMestre);
                         window.carregarJogadoresDaMesa(campanhaId, isMestre);
-                    }
-                });
-            });
-
-            if (fichas.length === 0) {
-                gridFichas.innerHTML = '<p class="text-gray-500 italic col-span-full">Nenhum jogador aliado detectado.</p>';
-                return;
-            }
-
-            fichas.forEach(char => {
-                const card = document.createElement('div');
-                // 🔥 REMOVIDO o w-[300px] para ele preencher o Grid Perfeitamente 🔥
-                card.className = 'flex flex-row h-[130px] w-full bg-white dark:bg-[#242424] rounded-lg overflow-hidden border border-gray-300 dark:border-[#333] hover:-translate-y-1 hover:shadow-lg transition-all relative shadow-sm';
-
-                const imgSrc = (char.foto && !char.foto.includes('R0lGODlhAQAB')) ? char.foto : './assets/icon.jpg';
-                const ocupacao = char.ocupacao || 'Desconhecido';
-
-                const isDonoDaFicha = (char.usuario_id == meuId);
-                const isFichaPrivada = char.is_privada === true;
-                const podeInspecionar = isMestre || isDonoDaFicha || !isFichaPrivada;
-
-                const controleInspecionarHtml = podeInspecionar
-                    ? `<button class="btn-inspecionar-ficha mt-auto w-max bg-rpg-blue hover:bg-[#2c6270] text-white px-3 py-1.5 rounded text-xs font-bold font-rpg uppercase shadow transition-colors z-10" data-id="${char.id}">Inspecionar</button>`
-                    : `<div class="mt-auto w-max bg-gray-200 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 text-gray-500 px-3 py-1.5 rounded text-[10px] font-bold uppercase shadow-inner z-10 flex items-center gap-1 cursor-not-allowed" title="Oculto"><i data-lucide="lock" class="w-3 h-3 text-rpg-red"></i> Sigilo</div>`;
-
-                card.innerHTML = `
-                    <img src="${imgSrc}" class="w-[110px] h-[130px] object-cover flex-shrink-0 border-r border-gray-300 dark:border-[#333] bg-black">
-                    <div class="flex flex-col justify-start p-3 flex-grow overflow-hidden">
-                        <h3 class="text-gray-800 dark:text-white font-bold text-[15px] m-0 truncate" title="${window.escaparHTML(char.nome_personagem)}">${window.escaparHTML(char.nome_personagem) || 'Sem Nome'}</h3>
-                        <p class="text-rpg-red dark:text-orange-500 font-bold text-[10px] uppercase m-0 mt-1 truncate">${window.escaparHTML(ocupacao)}</p>
-                        ${controleInspecionarHtml}
-                    </div>
-                `;
-                gridFichas.appendChild(card);
-            });
-            if (window.lucide) lucide.createIcons();
-
-            document.querySelectorAll('.btn-inspecionar-ficha').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    const fichaId = e.target.getAttribute('data-id');
-                    if (typeof window.carregarPersonagem === 'function') {
-                        await window.carregarPersonagem(fichaId);
-                        Router.navigate('ficha');
                     }
                 });
             });
@@ -462,7 +440,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionStorage.getItem('token')}` },
                         body: JSON.stringify({ posicao_y: posicaoFinal })
                     });
-                    
+
                     if (res.ok) {
                         window.mostrarNotificacao("Posição do banner salva!", "sucesso");
                         sairModoEdicaoBanner();
@@ -842,30 +820,30 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // EXTRA: MOTOR DA BIBLIOTECA DE PERSONAGENS
     // ==========================================
-    window.carregarListaNpcsExistentes = async function(campanhaId) {
+    window.carregarListaNpcsExistentes = async function (campanhaId) {
         const container = document.getElementById('lista-npcs-existentes');
-        if(!container) return;
+        if (!container) return;
         container.innerHTML = '<p class="text-gray-500 italic text-center text-sm py-4"><i data-lucide="loader" class="w-5 h-5 animate-spin mx-auto"></i></p>';
         if (window.lucide) lucide.createIcons();
-        
+
         try {
             const usuarioId = sessionStorage.getItem('usuarioId');
             const res = await fetch(`${window.API_URL}/personagens/usuario/${usuarioId}`, {
                 headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
             });
             const personagens = await res.json();
-            
+
             container.innerHTML = '';
             if (personagens.length === 0) {
                 container.innerHTML = '<p class="text-gray-500 italic text-center text-sm py-4">Nenhuma ficha salva no seu acervo.</p>';
                 return;
             }
-            
+
             personagens.forEach(p => {
                 const div = document.createElement('div');
                 div.className = 'bg-gray-50 dark:bg-[#242424] border border-gray-300 dark:border-gray-700 p-2 rounded flex items-center justify-between shadow-sm hover:border-rpg-blue transition-colors cursor-pointer group';
                 const imgSrc = (p.foto && !p.foto.includes('R0lGODlhAQAB')) ? p.foto : './assets/icon.jpg';
-                
+
                 div.innerHTML = `
                     <div class="flex items-center gap-3 overflow-hidden">
                         <img src="${imgSrc}" class="w-10 h-10 rounded border border-gray-400 object-cover shadow-sm bg-black">
@@ -891,7 +869,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             body: JSON.stringify({ personagem_id: p.id })
                         });
                         const addData = await addRes.json();
-                        
+
                         if (addRes.ok) {
                             window.mostrarNotificacao(addData.mensagem, 'sucesso');
                             document.getElementById('modal-selecionar-npc').classList.remove('show');
@@ -902,7 +880,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             btnInside.innerHTML = originalIcon;
                             if (window.lucide) lucide.createIcons();
                         }
-                    } catch(e) {
+                    } catch (e) {
                         window.mostrarNotificacao('Falha na comunicação.', 'erro');
                         btnInside.innerHTML = originalIcon;
                         if (window.lucide) lucide.createIcons();
@@ -911,7 +889,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 container.appendChild(div);
             });
             if (window.lucide) lucide.createIcons();
-        } catch(e) {
+        } catch (e) {
             container.innerHTML = '<p class="text-rpg-red text-center text-sm py-4">Erro ao buscar banco de dados.</p>';
         }
     }
@@ -921,24 +899,24 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnCriarBlank) {
         const clone = btnCriarBlank.cloneNode(true);
         btnCriarBlank.parentNode.replaceChild(clone, btnCriarBlank);
-        
+
         clone.addEventListener('click', async () => {
             const campanhaId = sessionStorage.getItem('campanhaAtiva');
             const iconeOriginal = clone.innerHTML;
             clone.innerHTML = '<i data-lucide="loader" class="w-5 h-5 animate-spin"></i> Forjando...';
             if (window.lucide) lucide.createIcons();
-            
+
             try {
                 const res = await fetch(`${window.API_URL}/campanhas/${campanhaId}/criar-npc`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
                 });
                 const data = await res.json();
-                
+
                 if (res.ok) {
                     document.getElementById('modal-selecionar-npc').classList.remove('show');
                     window.idPersonagemAtual = data.id;
-                    Router.navigate('ficha'); 
+                    Router.navigate('ficha');
                     window.carregarPersonagem(data.id);
                 } else {
                     window.mostrarNotificacao(data.erro, 'erro');
@@ -948,6 +926,50 @@ document.addEventListener('DOMContentLoaded', () => {
             } finally {
                 clone.innerHTML = iconeOriginal;
                 if (window.lucide) lucide.createIcons();
+            }
+        });
+    }
+
+    // ==========================================
+    // EXTRA: MOTOR DO MODAL DE RECOLHER FICHA
+    // ==========================================
+    let fichaParaRecolherId = null;
+    let btnRecolherAtual = null;
+    let campanhaParaRecolherId = null;
+
+    window.abrirModalRecolherFicha = function (personagemId, nome, btn, campId) {
+        fichaParaRecolherId = personagemId;
+        btnRecolherAtual = btn;
+        campanhaParaRecolherId = campId;
+        document.getElementById('nome-recolher-ficha').textContent = nome;
+        document.getElementById('remover-personagem-mesa-modal').classList.add('show');
+    };
+
+    const btnConfirmarRecolher = document.getElementById('btn-confirmar-recolher-ficha');
+    if (btnConfirmarRecolher) {
+        btnConfirmarRecolher.addEventListener('click', async () => {
+            if (!fichaParaRecolherId || !campanhaParaRecolherId) return;
+
+            const iconeOriginal = btnRecolherAtual.innerHTML;
+            btnRecolherAtual.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i>';
+            document.getElementById('remover-personagem-mesa-modal').classList.remove('show');
+            if (window.lucide) lucide.createIcons();
+
+            try {
+                const res = await fetch(`${window.API_URL}/campanhas/${campanhaParaRecolherId}/remover-personagem/${fichaParaRecolherId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
+                });
+                const data = await res.json();
+
+                if (res.ok) window.mostrarNotificacao(data.mensagem, 'sucesso');
+                else window.mostrarNotificacao(data.erro, 'erro');
+            } catch (err) {
+                window.mostrarNotificacao('Erro na comunicação.', 'erro');
+            } finally {
+                const isMestre = sessionStorage.getItem('isMestreAtivo') === 'true';
+                window.carregarFichasDaMesa(campanhaParaRecolherId, isMestre);
+                window.carregarJogadoresDaMesa(campanhaParaRecolherId, isMestre);
             }
         });
     }

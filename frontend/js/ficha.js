@@ -27,8 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
             // 🔥 CARREGA A FOTO DIRETO DA FONTE 🔥
             const photoPreview = document.getElementById('char-photo-preview');
             if (photoPreview) {
-                photoPreview.src = (personagem.foto && !personagem.foto.includes('R0lGODlhAQAB')) 
-                    ? personagem.foto 
+                photoPreview.src = (personagem.foto && !personagem.foto.includes('R0lGODlhAQAB'))
+                    ? personagem.foto
                     : "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
             }
 
@@ -134,21 +134,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     function coletarDadosFicha() {
         const dados = {};
-        
+
         const elementos = document.querySelectorAll('input, textarea, select');
 
         elementos.forEach(el => {
             // Ignora botões e campos sem identificação
             if (el.type === 'button' || el.type === 'submit' || el.type === 'file') return;
-            if (!el.id && !el.name) return; 
+            if (!el.id && !el.name) return;
 
-            const chave = el.name || el.id; 
+            const chave = el.name || el.id;
 
             if (el.type === 'checkbox') {
                 dados[chave] = el.checked;
             } else if (el.type === 'radio') {
                 if (el.checked) {
-                    dados[chave] = el.value; 
+                    dados[chave] = el.value;
                 }
             } else {
                 // Salva inputs normais, textareas (características) e ranges (cabo de guerra)
@@ -157,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Caso você use uma imagem de personagem, garantimos que ela não vá no meio do JSON bagunçando tudo
-        delete dados['char-photo']; 
+        delete dados['char-photo'];
         delete dados['input-foto-personagem'];
 
         return dados;
@@ -171,9 +171,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const caracContainer = document.getElementById('caracteristicas-container');
         if (caracContainer) {
             caracContainer.innerHTML = '';
-            window.contadorCarac = 0; 
+            window.contadorCarac = 0;
         }
-        
+
         let caracCount = 0;
         for (const key in dados) {
             if (key.startsWith('carac-nome-')) caracCount++;
@@ -194,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     el.value = dados[key];
                 }
-                continue; 
+                continue;
             }
 
             const radios = document.querySelectorAll(`input[name="${key}"]`);
@@ -206,24 +206,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (typeof window.calcularSaudeMax === 'function') window.calcularSaudeMax(false);
-        
+
     }
 
-    window.salvarFicha = async function(silencioso = false) {
+    window.salvarFicha = async function (silencioso = false) {
         const usuarioLogadoId = sessionStorage.getItem('usuarioId');
         if (!usuarioLogadoId) return;
 
         const nomeInput = document.getElementById('nome');
         const nomePersonagem = nomeInput ? nomeInput.value.trim() : '';
-        
+
         if (!nomePersonagem || nomePersonagem === "") {
             if (!silencioso) window.mostrarNotificacao("O personagem precisa de pelo menos um Nome para ser salvo!", "aviso");
-            return; 
+            return;
         }
 
         const dadosFicha = coletarDadosFicha();
         const ocupacao = document.getElementById('ocupacao') ? document.getElementById('ocupacao').value : '';
-        
+
         // 🔥 PUXA A FOTO DA MOLDURA E NÃO DO JSON 🔥
         const imgPreview = document.getElementById('char-photo-preview');
         const fotoFinal = (imgPreview && imgPreview.src && !imgPreview.src.includes('R0lGODlhAQAB')) ? imgPreview.src : null;
@@ -234,7 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const payload = {
             usuarioId: usuarioLogadoId,
             personagemId: window.idPersonagemAtual,
-            nome: nomePersonagem, 
+            nome: nomePersonagem,
             ocupacao: ocupacao,
             dadosFicha: dadosFicha,
             foto: fotoFinal, // A FOTO VAI CORRETA AGORA!
@@ -244,10 +244,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnSaveNav = document.getElementById('btn-save-char-nav');
         const btnDeleteCharNav = document.getElementById('btn-delete-char-nav');
         const htmlPadrao = '<i data-lucide="save" class="w-4 h-4"></i> <span class="hidden md:inline">Salvar</span>';
-        
+
         if (btnSaveNav && !silencioso) {
             btnSaveNav.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> <span class="hidden md:inline">Salvando...</span>';
-            if(window.lucide) lucide.createIcons();
+            if (window.lucide) lucide.createIcons();
         }
 
         try {
@@ -268,20 +268,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (!silencioso) {
                     window.mostrarNotificacao(resultado.mensagem, 'sucesso');
-                    if(typeof window.carregarListaPersonagens === 'function') window.carregarListaPersonagens();
+                    if (typeof window.carregarListaPersonagens === 'function') window.carregarListaPersonagens();
                 }
-                
+
                 if (btnSaveNav && !silencioso) {
                     btnSaveNav.classList.remove('bg-rpg-green', 'hover:bg-green-700');
                     btnSaveNav.classList.add('bg-blue-600', 'hover:bg-blue-700');
                     btnSaveNav.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4"></i> <span class="hidden md:inline">Salvo!</span>';
-                    if(window.lucide) lucide.createIcons();
-                    
+                    if (window.lucide) lucide.createIcons();
+
                     setTimeout(() => {
                         btnSaveNav.classList.remove('bg-blue-600', 'hover:bg-blue-700');
                         btnSaveNav.classList.add('bg-rpg-green', 'hover:bg-green-700');
                         btnSaveNav.innerHTML = htmlPadrao;
-                        if(window.lucide) lucide.createIcons();
+                        if (window.lucide) lucide.createIcons();
                     }, 2000);
                 }
             } else {
@@ -291,7 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (erro) {
             if (!silencioso) window.mostrarNotificacao("Erro de comunicação!", 'erro');
             if (btnSaveNav && !silencioso) btnSaveNav.innerHTML = htmlPadrao;
-        } 
+        }
     };
 
     // Botão de Salvar da Barra de Navegação Superior
@@ -511,7 +511,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (checkDet) {
             checkDet.addEventListener('change', agendarAutosave); // Só salva, não mexe na proporção
         }
-        
+
         const checkAssim = document.getElementById(`assim-${i}`);
         if (checkAssim) {
             checkAssim.addEventListener('change', agendarAutosave); // Só salva, não mexe na proporção
@@ -678,7 +678,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const drawCards = (qtd, baralho, bgClass, borderClass, textClass, assetName, label) => {
                 for (let i = 0; i < qtd; i++) {
                     const carta = puxarCartaAleatoria(baralho);
-                    
+
                     // 🔥 Lógica corrigida: Asset normal (preto) no Claro, e Asset "-branco" no Escuro 🔥
                     const iconHtml = `
                         <img src="./assets/${assetName}.png" class="w-5 h-5 object-contain block dark:hidden" alt="${label}">
@@ -729,21 +729,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const funcaoSalvarOriginal = window.salvarFicha;
-    window.salvarFicha = async function(silencioso = false) {
+    window.salvarFicha = async function (silencioso = false) {
         const usuarioLogadoId = sessionStorage.getItem('usuarioId');
         if (!usuarioLogadoId) return;
 
         const nomeInput = document.getElementById('nome');
         const nomePersonagem = nomeInput ? nomeInput.value.trim() : '';
-        
+
         if (!nomePersonagem || nomePersonagem === "") {
             if (!silencioso) window.mostrarNotificacao("O personagem precisa de pelo menos um Nome para ser salvo!", "aviso");
-            return; 
+            return;
         }
 
         const dadosFicha = coletarDadosFicha();
         const ocupacao = document.getElementById('ocupacao') ? document.getElementById('ocupacao').value : '';
-        
+
         // Puxa a foto da tela perfeitamente
         const imgPreview = document.getElementById('char-photo-preview');
         const fotoFinal = (imgPreview && imgPreview.src && !imgPreview.src.includes('R0lGODlhAQAB')) ? imgPreview.src : null;
@@ -754,7 +754,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const payload = {
             usuarioId: usuarioLogadoId,
             personagemId: window.idPersonagemAtual,
-            nome: nomePersonagem, 
+            nome: nomePersonagem,
             ocupacao: ocupacao,
             dadosFicha: dadosFicha,
             foto: fotoFinal,
@@ -764,11 +764,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnSaveNav = document.getElementById('btn-save-char-nav');
         const btnDeleteCharNav = document.getElementById('btn-delete-char-nav');
         const htmlPadrao = '<i data-lucide="save" class="w-4 h-4"></i> <span class="hidden md:inline">Salvar</span>';
-        
+
         // 🔥 ANIMAÇÃO "SALVANDO..." RESTAURADA PARA TODOS OS CLIQUES E AUTOSAVES 🔥
         if (btnSaveNav) {
             btnSaveNav.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> <span class="hidden md:inline">Salvando...</span>';
-            if(window.lucide) lucide.createIcons();
+            if (window.lucide) lucide.createIcons();
         }
 
         try {
@@ -788,9 +788,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (!silencioso) {
                     window.mostrarNotificacao(resultado.mensagem, 'sucesso');
-                    if(typeof window.carregarListaPersonagens === 'function') window.carregarListaPersonagens();
+                    if (typeof window.carregarListaPersonagens === 'function') window.carregarListaPersonagens();
                 }
-                
+
                 // 🔥 TRAVA DE TELA: Só manipula os botões da navbar se o jogador AINDA ESTIVER na tela da Ficha! 🔥
                 if (typeof Router !== 'undefined' && Router.telaAtual === 'ficha') {
                     if (btnDeleteCharNav) {
@@ -802,15 +802,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         btnSaveNav.classList.remove('bg-rpg-green', 'hover:bg-green-700');
                         btnSaveNav.classList.add('bg-blue-600', 'hover:bg-blue-700');
                         btnSaveNav.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4"></i> <span class="hidden md:inline">Salvo!</span>';
-                        if(window.lucide) lucide.createIcons();
-                        
+                        if (window.lucide) lucide.createIcons();
+
                         setTimeout(() => {
                             // Confirma de novo se o cara não saiu da ficha nesses 2 segundos do setTimeout!
                             if (Router.telaAtual === 'ficha') {
                                 btnSaveNav.classList.remove('bg-blue-600', 'hover:bg-blue-700');
                                 btnSaveNav.classList.add('bg-rpg-green', 'hover:bg-green-700');
                                 btnSaveNav.innerHTML = htmlPadrao;
-                                if(window.lucide) lucide.createIcons();
+                                if (window.lucide) lucide.createIcons();
                             }
                         }, 2000);
                     }
@@ -822,7 +822,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (erro) {
             if (!silencioso) window.mostrarNotificacao("Erro de comunicação!", 'erro');
             if (btnSaveNav) btnSaveNav.innerHTML = htmlPadrao;
-        } 
+        }
     };
 
     // ==========================================
@@ -830,13 +830,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     window.selecaoRolagem = [];
 
-    window.limparSelecaoRolagem = function(apagarTerminal = true) {
+    window.limparSelecaoRolagem = function (apagarTerminal = true) {
         // Varre a ficha e apaga as luzes (incluindo a classe 'label-selecionado' do rolador.js!)
         document.querySelectorAll('.aptidao-box label').forEach(label => {
             label.classList.remove('bg-gray-300', 'dark:bg-[#333]', 'text-rpg-red', 'dark:text-orange-500', 'scale-105', 'label-selecionado');
         });
-        window.selecaoRolagem = []; 
-        
+        window.selecaoRolagem = [];
+
         // Esconde o letreiro de "Rolagem Assimilada!" caso ele esteja aparecendo
         const avisoAssimilada = document.getElementById('aviso-assimilada');
         if (avisoAssimilada) avisoAssimilada.classList.add('hidden');
@@ -847,7 +847,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Apaga a caixa de texto do terminal
                 const inputRolador = document.getElementById('rolador-input');
                 if (inputRolador) inputRolador.value = '';
-                
+
                 // Apaga os dados desenhados na tela daquela rolagem
                 const resultadosAtuais = document.getElementById('rolador-resultados-atuais');
                 if (resultadosAtuais) resultadosAtuais.innerHTML = '';
@@ -856,7 +856,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const labelsAptidoesFicha = document.querySelectorAll('.aptidao-box label');
-    
+
     labelsAptidoesFicha.forEach(label => {
         // Fase de captura: ouvimos o clique ANTES do rolador.js intervir
         label.addEventListener('click', (e) => {
@@ -867,8 +867,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const nomeAtributo = label.textContent.trim();
             const grupo = label.closest('.grupo-aptidoes');
-            const categoria = grupo ? grupo.id : ''; 
-            
+            const categoria = grupo ? grupo.id : '';
+
             // 🔥 BLOQUEIO ABSOLUTO DO SISTEMA 🔥
             if (window.selecaoRolagem.length === 1) {
                 const primeiraFoiInstinto = window.selecaoRolagem[0].categoria === 'secao-instintos';
@@ -879,8 +879,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     e.stopImmediatePropagation(); // Enforca a ação aqui, o rolador.js nem fica sabendo!
                     e.preventDefault();
                     window.mostrarNotificacao("Teste Inválido: É obrigatório usar pelo menos 1 Instinto na rolagem!", 'erro');
-                    window.limparSelecaoRolagem(true); 
-                    return; 
+                    window.limparSelecaoRolagem(true);
+                    return;
                 }
             }
 
@@ -891,11 +891,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (window.selecaoRolagem.length === 2) {
                 const attr1 = window.selecaoRolagem[0].nome;
                 const attr2 = window.selecaoRolagem[1].nome;
-                
+
                 window.mostrarNotificacao(`Preparando Teste: ${attr1} + ${attr2}`, 'aviso');
-                
+
                 const modalRolador = document.getElementById('rolador-modal');
-                if(modalRolador) {
+                if (modalRolador) {
                     modalRolador.classList.add('show');
                     setTimeout(() => { document.getElementById('rolador-input')?.focus(); }, 100);
                 }
@@ -908,7 +908,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     document.addEventListener('click', (e) => {
         const modalRolador = document.getElementById('rolador-modal');
-        
+
         // 1. Fechou no "X"
         if (e.target.closest('#fechar-rolador')) {
             if (modalRolador) modalRolador.classList.remove('show');
