@@ -920,13 +920,15 @@ app.get('/campanhas/usuario/:usuarioId', verificarToken, async (req, res) => {
 // =========================================================================
 app.get('/campanhas/:id/fichas-mesa', verificarToken, async (req, res) => {
     try {
+        // 🔥 A MÁGICA AQUI: "DISTINCT ON (p.id)" garante que cada ficha só apareça UMA vez!
         const result = await pool.query(`
-            SELECT p.*, u.username as nome_conta, u.avatar 
+            SELECT DISTINCT ON (p.id) p.*, u.username as nome_conta, u.avatar 
             FROM personagens p
             JOIN membros_campanha m ON p.id = m.personagem_id
             JOIN usuarios u ON u.id = m.usuario_id
             WHERE m.campanha_id = $1
         `, [req.params.id]);
+        
         res.json(result.rows);
     } catch (erro) {
         console.error("❌ Erro na Rota Fichas Mesa:", erro);
