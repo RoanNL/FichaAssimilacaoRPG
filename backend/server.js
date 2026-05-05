@@ -692,8 +692,9 @@ app.delete('/campanhas/:id/membros/:usuarioId', verificarToken, async (req, res)
 // =========================================================================
 app.get('/campanhas/:id/jogadores', verificarToken, async (req, res) => {
     try {
+        // 🔥 Adicionamos o DISTINCT ON para agrupar os clones do Mestre em um só!
         const result = await pool.query(`
-            SELECT m.usuario_id, u.username, u.avatar, p.nome_personagem, c.mestre_id 
+            SELECT DISTINCT ON (m.usuario_id) m.usuario_id, u.username, u.avatar, p.nome_personagem, c.mestre_id 
             FROM membros_campanha m
             JOIN usuarios u ON m.usuario_id = u.id
             JOIN campanhas c ON c.id = m.campanha_id
@@ -828,8 +829,9 @@ app.get('/campanhas/usuario/:usuarioId', verificarToken, async (req, res) => {
     }
 
     try {
+        // 🔥 Adicionamos o DISTINCT para ele não duplicar as mesas do Mestre!
         const sql = `
-            SELECT c.id, c.nome, c.codigo_convite, c.mestre_id, 
+            SELECT DISTINCT c.id, c.nome, c.codigo_convite, c.mestre_id, 
             (c.mestre_id::text = $1::text) as is_mestre
             FROM campanhas c
             JOIN membros_campanha m ON c.id = m.campanha_id
