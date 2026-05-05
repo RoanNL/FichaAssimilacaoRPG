@@ -712,10 +712,54 @@ app.get('/campanhas/:id/jogadores', verificarToken, async (req, res) => {
 // =========================================================================
 app.get('/campanhas/:id/info', verificarToken, async (req, res) => {
     try {
-        const result = await pool.query('SELECT banner FROM campanhas WHERE id = $1', [req.params.id]);
+        // 🔥 AGORA PUXA A POSIÇÃO Y TAMBÉM 🔥
+        const result = await pool.query('SELECT banner, banner_pos_y FROM campanhas WHERE id = $1', [req.params.id]);
         res.json(result.rows[0]);
     } catch (err) {
         res.status(500).json({ erro: 'Erro ao buscar info.' });
+    }
+});
+
+// 🔥 NOVA ROTA: SALVAR POSIÇÃO DO BANNER 🔥
+app.put('/campanhas/:id/posicao-banner', verificarToken, async (req, res) => {
+    const { posicao_y } = req.body;
+    const campanhaId = req.params.id;
+    const mestreIdSeguro = req.usuario.id;
+
+    try {
+        const resultCheck = await pool.query('SELECT mestre_id FROM campanhas WHERE id = $1', [campanhaId]);
+        if (resultCheck.rows.length === 0 || resultCheck.rows[0].mestre_id !== mestreIdSeguro) {
+            return res.status(403).json({erro: 'Apenas o Mestre pode alterar o banner.'});
+        }
+        await pool.query('UPDATE campanhas SET banner_pos_y = $1 WHERE id = $2', [posicao_y, campanhaId]);
+        res.json({ mensagem: 'Posição salva!' });
+    } catch (err) {
+        res.status(500).json({erro: 'Erro ao salvar posição.'});
+    }
+});
+
+// 🔥 NOVA ROTA: MESTRE CRIAR NPC NA MESA 🔥
+app.post('/campanhas/:id/criar-npc', verificarToken, async (req, res) => {
+    const campanhaId = req.params.id;
+    const mestreIdSeguro = req.usuario.id;
+
+    try {
+        const check = await pool.query('SELECT mestre_id FROM campanhas WHERE id = $1', [campanhaId]);
+        if (check.rows.length === 0 || check.rows[0].mestre_id !== mestreIdSeguro) {
+            return res.status(403).json({erro: 'Apenas o Mestre pode criar NPCs aqui.'});
+        }
+
+        // 1. Cria a ficha do NPC (Privada por padrão para não vazar info)
+        const sqlChar = `INSERT INTO personagens (usuario_id, nome_personagem, ocupacao, dados_ficha, is_privada) VALUES ($1, $2, $3, $4, $5) RETURNING id`;
+        const resChar = await pool.query(sqlChar, [mestreIdSeguro, 'Novo NPC', 'Coadjuvante', '{}', true]);
+        const npcId = resChar.rows[0].id;
+
+        // 2. Adiciona o NPC na mesa
+        await pool.query(`INSERT INTO membros_campanha (campanha_id, usuario_id, personagem_id) VALUES ($1, $2, $3)`, [campanhaId, mestreIdSeguro, npcId]);
+
+        res.json({ mensagem: 'NPC criado!', id: npcId });
+    } catch (err) {
+        res.status(500).json({ erro: 'Erro ao criar NPC.' });
     }
 });
 

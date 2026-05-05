@@ -54,6 +54,45 @@ window.mostrarNotificacao = function (mensagem, tipo = 'sucesso') {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+    
+    // ==========================================
+    // SISTEMA DE REVELAR SENHAS (OLHO MÁGICO BLINDADO)
+    // ==========================================
+    document.addEventListener('click', (e) => {
+        // Dicionário mapeando qual Ícone controla qual Input
+        const paresSenhas = {
+            'toggle-auth-password': 'auth-password',
+            'toggle-auth-confirm': 'auth-confirm-password',
+            'toggle-recuperar-senha': 'recuperar-nova-senha',
+            'toggle-recuperar-confirmar': 'recuperar-confirmar-senha'
+        };
+
+        // Verifica se o clique atingiu algum dos nossos ícones de olho
+        for (const [iconId, inputId] of Object.entries(paresSenhas)) {
+            const clickedIcon = e.target.closest(`#${iconId}`);
+            if (clickedIcon) {
+                const inputEl = document.getElementById(inputId);
+                if (inputEl) {
+                    const isPassword = inputEl.type === 'password';
+                    
+                    // Alterna o tipo do input
+                    inputEl.type = isPassword ? 'text' : 'password';
+                    
+                    // Cria uma tag limpa para o Lucide não quebrar
+                    const newIcon = document.createElement('i');
+                    newIcon.id = iconId;
+                    newIcon.setAttribute('data-lucide', isPassword ? 'eye-off' : 'eye');
+                    newIcon.className = "absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors";
+                    
+                    // Substitui o velho pelo novo e manda o Lucide renderizar
+                    clickedIcon.replaceWith(newIcon);
+                    if (window.lucide) lucide.createIcons();
+                }
+                break; // Para o loop pois já achamos quem foi clicado
+            }
+        }
+    });
+
     let isLoginMode = true;
 
     // Elementos de Autenticação
@@ -78,6 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const subtitleTexto = document.querySelector('.auth-subtitle');
 
     const btnSair = document.getElementById('btn-sair');
+    
 
     // ==========================================
     // VERIFICAÇÃO DE SESSÃO ATIVA
@@ -110,6 +150,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Roda a verificação assim que a página carrega
     verificarSessao();
+
+    
 
     // ==========================================
     // ALTERNAR ENTRE LOGIN E REGISTRO
@@ -199,7 +241,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         authEmailInput.value = '';
 
                         mostrarNotificacao(dados.mensagem, 'sucesso');
-                        window.carregarAvatarGlobal();
+                        if (typeof window.carregarAvatarGlobal === 'function') {
+                            window.carregarAvatarGlobal();
+                        }
                         verificarSessao(); // Dispara a entrada no sistema!
                     } else {
                         authMensagem.textContent = 'Conta criada com sucesso! Faça login.';
@@ -314,33 +358,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-
-    // ==========================================
-    // SISTEMA DE REVELAR SENHAS (OLHINHO)
-    // ==========================================
-    function configurarOlhinho(inputId, iconId) {
-        const input = document.getElementById(inputId);
-        const icon = document.getElementById(iconId);
-        
-        if (input && icon) {
-            icon.addEventListener('click', () => {
-                if (input.type === 'password') {
-                    input.type = 'text';
-                    // Troca os icones do Lucide re-injetando o HTML
-                    icon.innerHTML = `<i data-lucide="eye-off" class="w-5 h-5"></i>`;
-                } else {
-                    input.type = 'password';
-                    icon.innerHTML = `<i data-lucide="eye" class="w-5 h-5"></i>`;
-                }
-                if (window.lucide) lucide.createIcons();
-            });
-        }
-    }
-
-    configurarOlhinho('auth-password', 'toggle-auth-password');
-    configurarOlhinho('auth-confirm-password', 'toggle-auth-confirm');
-    configurarOlhinho('recuperar-nova-senha', 'toggle-recuperar-senha');
-    configurarOlhinho('recuperar-confirmar-senha', 'toggle-recuperar-confirmar');
 
     // ==========================================
     // SISTEMA DE LOGOUT (DESCONECTAR)

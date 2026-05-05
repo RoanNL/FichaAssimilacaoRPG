@@ -249,8 +249,10 @@
                             class="text-rpg-red font-rpg font-black text-2xl flex items-center gap-2 mb-4 uppercase border-b border-gray-200 dark:border-gray-600 pb-2">
                             <i data-lucide="brain-circuit"></i> Perda de Ego
                         </h2>
-                        <p class="text-gray-700 dark:text-gray-300 text-justify">A perda de Ego é a mecânica central da corrupção do
-                            seu personagem. Cada vez que a pressão psicológica ou as "Pressões" forem excessivas durante sua rolagem de assimilação, marque
+                        <p class="text-gray-700 dark:text-gray-300 text-justify">A perda de Ego é a mecânica central da
+                            corrupção do
+                            seu personagem. Cada vez que a pressão psicológica ou as "Pressões" forem excessivas durante
+                            sua rolagem de assimilação, marque
                             uma caixa vermelha. Ao atingir o limite, o Parasita assume o controle.</p>
                     </div>
                     <div
@@ -262,7 +264,8 @@
                             <img src="./assets/nada-branco.png" alt="Nada"
                                 class="w-10 h-10 object-contain hidden dark:block">
                         </h2>
-                        <p class="text-gray-700 dark:text-gray-300 text-justify">Os dados virtuais (D6, D10 e D12) possuem faces
+                        <p class="text-gray-700 dark:text-gray-300 text-justify">Os dados virtuais (D6, D10 e D12)
+                            possuem faces
                             vazias, representadas por este símbolo no rolador. Elas significam falhas diretas na ação ou
                             total ausência de instinto primitivo no momento do teste.</p>
                     </div>
@@ -272,15 +275,26 @@
                             class="text-rpg-blue font-rpg font-black text-2xl flex items-center gap-2 mb-4 uppercase border-b border-gray-200 dark:border-gray-600 pb-2">
                             <span class=" text-2xl leading-none">&spades;</span> Baralho de Assimilações
                         </h2>
-                        <p class="text-gray-700 dark:text-gray-300 text-justify">O baralho de assimilações já está disponível de forma resumida vinculado a seção de "perda de EGO" da ficha. Ao clicar em "Sortear Cartas" você abrirá uma tela com 4 locais para colocar seus resultados da rolagem de assimilação, ao clicar em "PUXAR CARTAS" elas serão sorteadas e apareceram logo abaixo do botão. O que vai aparecer é apenas o titulo e a descrição da Assimilação, para pegar oque elas dão de fato, você precisa abrir o livro de regras e ver ; ).</p>
+                        <p class="text-gray-700 dark:text-gray-300 text-justify">O baralho de assimilações já está
+                            disponível de forma resumida vinculado a seção de "perda de EGO" da ficha. Ao clicar em
+                            "Sortear Cartas" você abrirá uma tela com 4 locais para colocar seus resultados da rolagem
+                            de assimilação, ao clicar em "PUXAR CARTAS" elas serão sorteadas e apareceram logo abaixo do
+                            botão. O que vai aparecer é apenas o titulo e a descrição da Assimilação, para pegar oque
+                            elas dão de fato, você precisa abrir o livro de regras e ver ; ).</p>
                     </div>
                     <div
                         class="bg-white dark:bg-[#1e293b] p-6 rounded-lg border border-gray-300 dark:border-gray-700 shadow-md">
                         <h2
                             class="text-rpg-red font-rpg font-black text-2xl flex items-center gap-2 mb-4 uppercase border-b border-gray-200 dark:border-gray-600 pb-2">
-                            Rolagem de Dados <img src="./assets/rolador-bola.png" alt="circulo de rolagem de dados" class="w-20 h-20 object-contain">
+                            Rolagem de Dados <img src="./assets/rolador-bola.png" alt="circulo de rolagem de dados"
+                                class="w-20 h-20 object-contain">
                         </h2>
-                        <p class="text-gray-700 dark:text-gray-300 text-justify">A rolagem nesse sistema é feito da seguinte forma: O jogador escolhe um instinto (d6) + conhecimento/pratica (d10) e então faz a rolagem, Nessa ficha, a atribuição de dados pode ser feita de forma automática apenas clicando no nome da aptidão, você perceberá que o campo de nome da aptidão ficará destacado com uma cor diferente, isso significa que aquela aptidão foi escolhida! Lembre, clicar em dois instintos ou duas vezes no mesmo instinto ativará uma rolagem assimilada!</p>
+                        <p class="text-gray-700 dark:text-gray-300 text-justify">A rolagem nesse sistema é feito da
+                            seguinte forma: O jogador escolhe um instinto (d6) + conhecimento/pratica (d10) e então faz
+                            a rolagem, Nessa ficha, a atribuição de dados pode ser feita de forma automática apenas
+                            clicando no nome da aptidão, você perceberá que o campo de nome da aptidão ficará destacado
+                            com uma cor diferente, isso significa que aquela aptidão foi escolhida! Lembre, clicar em
+                            dois instintos ou duas vezes no mesmo instinto ativará uma rolagem assimilada!</p>
                     </div>
                 </div>
             </div>
@@ -341,22 +355,55 @@
 
             <!-- 🏰 TELA 3: LOBBY DA CAMPANHA -->
             <div id="tela-campanha" class="hidden">
+
+                <!-- 🔥 BOTÃO VOLTAR 🔥 -->
+                <button onclick="Router.voltar()" class="mb-4 text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white font-bold font-rpg uppercase flex items-center gap-1 transition-colors w-max">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar ao Dashboard
+                </button>
+                
                 <!-- ================= BANNER DA CAMPANHA ================= -->
-                <div class="relative w-full h-[250px] md:h-[300px] rounded-lg overflow-hidden mb-6 group shadow-lg">
-                    <!-- Imagem do Banner -->
-                    <img id="campanha-banner-img" src="./assets/icon.jpg"
-                        class="w-full h-full object-cover transition-opacity" alt="Banner da Campanha">
+                <div class="relative w-full h-[250px] md:h-[300px] rounded-lg overflow-hidden mb-6 shadow-lg select-none"
+                    id="banner-container">
+                    <!-- O draggable="false" é crucial para o navegador não tentar "salvar" a imagem ao arrastar -->
+                    <img id="campanha-banner-img" src="./assets/icon.jpg" draggable="false"
+                        class="w-full h-full object-cover transition-opacity" style="object-position: 50% 50%;"
+                        alt="Banner da Campanha">
 
-                    <!-- Input invisível e botão do Mestre -->
                     <input type="file" id="input-banner-campanha" accept="image/*" class="hidden">
-                    <button id="btn-editar-banner" onclick="document.getElementById('input-banner-campanha').click()"
-                        class="hidden absolute top-4 right-4 bg-gray-900/80 hover:bg-black text-white px-3 py-2 rounded cursor-pointer font-bold font-rpg uppercase text-sm flex items-center gap-2 shadow transition-colors z-10 backdrop-blur-sm">
-                        <i data-lucide="camera" class="w-4 h-4"></i> Trocar Arte
-                    </button>
 
-                    <!-- Degradê Escuro para os textos ficarem legíveis -->
+                    <!-- Botões Padrão do Mestre -->
+                    <div id="controles-padrao-banner" class="hidden absolute top-4 right-4 flex gap-2 z-20">
+                        <button id="btn-reposicionar-banner"
+                            class="bg-gray-900/80 hover:bg-black text-white px-3 py-2 rounded text-sm flex items-center gap-2 backdrop-blur-sm transition-colors font-bold font-rpg uppercase shadow-md">
+                            <i data-lucide="move-vertical" class="w-4 h-4"></i> Reposicionar
+                        </button>
+                        <button id="btn-editar-banner"
+                            onclick="document.getElementById('input-banner-campanha').click()"
+                            class="bg-gray-900/80 hover:bg-black text-white px-3 py-2 rounded text-sm flex items-center gap-2 backdrop-blur-sm transition-colors font-bold font-rpg uppercase shadow-md">
+                            <i data-lucide="camera" class="w-4 h-4"></i> Trocar Arte
+                        </button>
+                    </div>
+
+                    <!-- Botões do Modo de Edição de Posição (Ocultos por padrão) -->
+                    <div id="controles-edicao-banner" class="hidden absolute top-4 right-4 flex gap-2 z-20">
+                        <div
+                            class="bg-black/60 text-white px-4 py-2 rounded text-sm backdrop-blur-sm font-bold animate-pulse pointer-events-none flex items-center gap-2">
+                            <i data-lucide="mouse-pointer-2" class="w-4 h-4"></i> Arraste para reposicionar
+                        </div>
+                        <button id="btn-salvar-posicao"
+                            class="bg-rpg-green hover:bg-green-700 text-white px-4 py-2 rounded text-sm flex items-center gap-2 backdrop-blur-sm transition-colors font-bold font-rpg uppercase shadow-md">
+                            Salvar
+                        </button>
+                        <button id="btn-cancelar-posicao"
+                            class="bg-gray-500 hover:bg-gray-700 text-white px-4 py-2 rounded text-sm flex items-center gap-2 backdrop-blur-sm transition-colors font-bold font-rpg uppercase shadow-md">
+                            Cancelar
+                        </button>
+                    </div>
+
+                    <!-- Degradê Escuro -->
                     <div
-                        class="absolute inset-0 bg-gradient-to-t from-[#121212] via-black/50 to-transparent flex flex-col justify-end p-6 md:p-8">
+                        class="absolute inset-0 bg-gradient-to-t from-[#121212] via-black/50 to-transparent flex flex-col justify-end p-6 md:p-8 pointer-events-none">
+                        <!-- ... Aqui continua o seu título e botões da campanha ... -->
                         <div class="flex justify-between items-end">
                             <div>
                                 <h1 id="campanha-titulo-view"
@@ -414,6 +461,12 @@
 
             <!-- 📝 TELA 4: A FICHA MAGNÍFICA DO PERSONAGEM -->
             <div id="tela-ficha" class="hidden">
+
+                <!-- 🔥 BOTÃO VOLTAR 🔥 -->
+                <button onclick="Router.voltar()" class="mb-4 text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white font-bold font-rpg uppercase flex items-center gap-1 transition-colors w-max">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar ao Dashboard
+                </button>
+
                 <form class="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-5 items-start">
                     <!-- CABEÇALHO DA FICHA -->
                     <section
@@ -1103,11 +1156,17 @@
 
     <!-- MODAL: SORTEADOR DE MUTAÇÕES -->
     <div id="sorteador-modal" class="modal z-[99999]">
-        <div class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border-2 border-purple-700 rounded-md p-6 max-w-[700px] w-[95%] max-h-[85vh] overflow-y-auto relative shadow-[0_0_30px_rgba(126,34,206,0.3)]">
-            <span class="absolute top-4 right-6 text-gray-500 hover:text-purple-700 dark:text-gray-400 dark:hover:text-purple-400 text-4xl font-bold cursor-pointer transition-colors" onclick="document.getElementById('sorteador-modal').classList.remove('show')">&times;</span>
-            
-            <h2 class="text-center text-purple-700 dark:text-purple-400 font-rpg font-black text-2xl mb-2 uppercase tracking-widest">Baralho de Assimilação</h2>
-            <p class="text-center text-sm text-gray-600 dark:text-gray-400 font-bold mb-6">Insira os resultados do seu Teste de Assimilação:</p>
+        <div
+            class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border-2 border-purple-700 rounded-md p-6 max-w-[700px] w-[95%] max-h-[85vh] overflow-y-auto relative shadow-[0_0_30px_rgba(126,34,206,0.3)]">
+            <span
+                class="absolute top-4 right-6 text-gray-500 hover:text-purple-700 dark:text-gray-400 dark:hover:text-purple-400 text-4xl font-bold cursor-pointer transition-colors"
+                onclick="document.getElementById('sorteador-modal').classList.remove('show')">&times;</span>
+
+            <h2
+                class="text-center text-purple-700 dark:text-purple-400 font-rpg font-black text-2xl mb-2 uppercase tracking-widest">
+                Baralho de Assimilação</h2>
+            <p class="text-center text-sm text-gray-600 dark:text-gray-400 font-bold mb-6">Insira os resultados do seu
+                Teste de Assimilação:</p>
 
             <div class="flex flex-wrap justify-center gap-4 mb-6">
                 <!-- CAIXA A: EVOLUTIVAS -->
@@ -1117,17 +1176,20 @@
                         <img src="./assets/sucesso-branco.png" class="h-full w-auto hidden dark:block" alt="Evolutiva">
                     </div>
                     <p class="text-green-500 font-bold text-xs uppercase mb-2">Evolutivas</p>
-                    <input type="number" id="sorteio-a" min="0" value="0" class="w-full text-center bg-transparent border border-gray-400 dark:border-gray-600 rounded text-black dark:text-white font-bold outline-none">
+                    <input type="number" id="sorteio-a" min="0" value="0"
+                        class="w-full text-center bg-transparent border border-gray-400 dark:border-gray-600 rounded text-black dark:text-white font-bold outline-none">
                 </div>
 
                 <!-- CAIXA B: ADAPTATIVAS -->
                 <div class="border border-blue-500 rounded p-4 text-center w-[120px]">
                     <div class="flex justify-center mb-2 h-10">
                         <img src="./assets/adaptacao.png" class="h-full w-auto block dark:hidden" alt="Adaptativa">
-                        <img src="./assets/adaptacao-branco.png" class="h-full w-auto hidden dark:block" alt="Adaptativa">
+                        <img src="./assets/adaptacao-branco.png" class="h-full w-auto hidden dark:block"
+                            alt="Adaptativa">
                     </div>
                     <p class="text-blue-500 font-bold text-xs uppercase mb-2">Adaptativas</p>
-                    <input type="number" id="sorteio-b" min="0" value="0" class="w-full text-center bg-transparent border border-gray-400 dark:border-gray-600 rounded text-black dark:text-white font-bold outline-none">
+                    <input type="number" id="sorteio-b" min="0" value="0"
+                        class="w-full text-center bg-transparent border border-gray-400 dark:border-gray-600 rounded text-black dark:text-white font-bold outline-none">
                 </div>
 
                 <!-- CAIXA C: INOPORTUNAS -->
@@ -1137,425 +1199,434 @@
                         <img src="./assets/pressao-branco.png" class="h-full w-auto hidden dark:block" alt="Inoportuna">
                     </div>
                     <p class="text-rpg-red font-bold text-xs uppercase mb-2">Inoportunas</p>
-                    <input type="number" id="sorteio-c" min="0" value="0" class="w-full text-center bg-transparent border border-gray-400 dark:border-gray-600 rounded text-black dark:text-white font-bold outline-none">
+                    <input type="number" id="sorteio-c" min="0" value="0"
+                        class="w-full text-center bg-transparent border border-gray-400 dark:border-gray-600 rounded text-black dark:text-white font-bold outline-none">
                 </div>
 
                 <!-- CAIXA I: SINGULARES -->
                 <div class="border border-yellow-500 rounded p-4 text-center w-[120px]">
                     <div class="flex justify-center mb-2 h-10">
                         <img src="./assets/singulares.png" class="h-full w-auto block dark:hidden" alt="Singular">
-                        <img src="./assets/singulares-branco.png" class="h-full w-auto hidden dark:block" alt="Singular">
+                        <img src="./assets/singulares-branco.png" class="h-full w-auto hidden dark:block"
+                            alt="Singular">
                     </div>
                     <p class="text-yellow-500 font-bold text-xs uppercase mb-2">Singulares</p>
-                    <input type="number" id="sorteio-i" min="0" value="0" class="w-full text-center bg-transparent border border-gray-400 dark:border-gray-600 rounded text-black dark:text-white font-bold outline-none">
+                    <input type="number" id="sorteio-i" min="0" value="0"
+                        class="w-full text-center bg-transparent border border-gray-400 dark:border-gray-600 rounded text-black dark:text-white font-bold outline-none">
                 </div>
             </div>
 
             <!-- 🔥 O BOTÃO RETORNOU DAS SOMBRAS! 🔥 -->
-            <button id="btn-puxar-cartas" class="w-full bg-purple-700 hover:bg-purple-900 text-white font-bold py-3 rounded uppercase font-rpg transition-colors shadow-md text-lg mt-2">
+            <button id="btn-puxar-cartas"
+                class="w-full bg-purple-700 hover:bg-purple-900 text-white font-bold py-3 rounded uppercase font-rpg transition-colors shadow-md text-lg mt-2">
                 Puxar Cartas
             </button>
-            
+
             <!-- 🔥 E A MESA ONDE AS CARTAS CAEM TAMBÉM! 🔥 -->
             <div id="container-cartas" class="mt-6 flex flex-col gap-4"></div>
         </div>
     </div>
-        <!-- MODAL: PARTITURA DE CONFLITO -->
-        <div id="partitura-modal" class="modal z-[99999]">
-            <!-- Conteúdo idêntico ao que geramos no último passo da partitura -->
-            <div
-                class="modal-content bg-rpg-bg-light dark:bg-rpg-bg-dark border-2 border-purple-700 rounded-md p-6 md:p-8 max-w-[1000px] w-[95%] h-[85vh] flex flex-col relative shadow-[0_0_40px_rgba(126,34,206,0.2)]">
-                <span
-                    class="absolute top-4 right-6 text-gray-500 hover:text-purple-700 dark:text-gray-400 dark:hover:text-purple-400 text-4xl font-bold cursor-pointer transition-colors z-10"
-                    onclick="document.getElementById('partitura-modal').classList.remove('show')">&times;</span>
-                <h2
-                    class="text-center text-white font-rpg font-black text-2xl md:text-3xl mb-6 uppercase tracking-widest bg-purple-800 py-3 px-8 rounded-sm shadow-md mx-auto flex items-center gap-3 w-max">
-                    <i data-lucide="swords" class="w-8 h-8"></i> Partitura de Conflito
-                </h2>
-                <div class="flex-grow overflow-y-auto pr-2 flex flex-col gap-8">
-                    <!-- OBJETIVOS -->
-                    <div
-                        class="bg-white dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 p-5 rounded-lg shadow-sm">
-                        <div class="flex justify-between items-center mb-4 border-b-2 border-green-600 pb-2">
-                            <h3
-                                class="text-xl font-black font-rpg text-green-700 dark:text-green-500 uppercase flex items-center gap-2 m-0">
-                                <i data-lucide="target" class="w-6 h-6"></i> Objetivos (Sucessos)
-                            </h3>
-                            <button id="btn-add-objetivo"
-                                class="bg-green-600 hover:bg-green-800 text-white font-bold py-1.5 px-4 rounded text-sm flex items-center gap-1 transition-colors"><i
-                                    data-lucide="plus" class="w-4 h-4"></i> Novo</button>
-                        </div>
-                        <div id="container-objetivos" class="flex flex-col gap-4">
-                            <p class="text-gray-500 italic text-sm text-center" id="empty-objetivos">Nenhum objetivo
-                                ativo.
-                            </p>
-                        </div>
+    <!-- MODAL: PARTITURA DE CONFLITO -->
+    <div id="partitura-modal" class="modal z-[99999]">
+        <!-- Conteúdo idêntico ao que geramos no último passo da partitura -->
+        <div
+            class="modal-content bg-rpg-bg-light dark:bg-rpg-bg-dark border-2 border-purple-700 rounded-md p-6 md:p-8 max-w-[1000px] w-[95%] h-[85vh] flex flex-col relative shadow-[0_0_40px_rgba(126,34,206,0.2)]">
+            <span
+                class="absolute top-4 right-6 text-gray-500 hover:text-purple-700 dark:text-gray-400 dark:hover:text-purple-400 text-4xl font-bold cursor-pointer transition-colors z-10"
+                onclick="document.getElementById('partitura-modal').classList.remove('show')">&times;</span>
+            <h2
+                class="text-center text-white font-rpg font-black text-2xl md:text-3xl mb-6 uppercase tracking-widest bg-purple-800 py-3 px-8 rounded-sm shadow-md mx-auto flex items-center gap-3 w-max">
+                <i data-lucide="swords" class="w-8 h-8"></i> Partitura de Conflito
+            </h2>
+            <div class="flex-grow overflow-y-auto pr-2 flex flex-col gap-8">
+                <!-- OBJETIVOS -->
+                <div
+                    class="bg-white dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 p-5 rounded-lg shadow-sm">
+                    <div class="flex justify-between items-center mb-4 border-b-2 border-green-600 pb-2">
+                        <h3
+                            class="text-xl font-black font-rpg text-green-700 dark:text-green-500 uppercase flex items-center gap-2 m-0">
+                            <i data-lucide="target" class="w-6 h-6"></i> Objetivos (Sucessos)
+                        </h3>
+                        <button id="btn-add-objetivo"
+                            class="bg-green-600 hover:bg-green-800 text-white font-bold py-1.5 px-4 rounded text-sm flex items-center gap-1 transition-colors"><i
+                                data-lucide="plus" class="w-4 h-4"></i> Novo</button>
                     </div>
-                    <!-- AMEAÇAS -->
-                    <div
-                        class="bg-white dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 p-5 rounded-lg shadow-sm">
-                        <div class="flex justify-between items-center mb-4 border-b-2 border-rpg-red pb-2">
-                            <h3
-                                class="text-xl font-black font-rpg text-rpg-red dark:text-red-500 uppercase flex items-center gap-2 m-0">
-                                <i data-lucide="skull" class="w-6 h-6"></i> Ameaças (Inimigos)
-                            </h3>
-                            <button id="btn-add-ameaca"
-                                class="bg-rpg-red hover:bg-red-800 text-white font-bold py-1.5 px-4 rounded text-sm flex items-center gap-1 transition-colors"><i
-                                    data-lucide="plus" class="w-4 h-4"></i> Nova</button>
-                        </div>
-                        <div id="container-ameacas" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <p class="text-gray-500 italic text-sm text-center md:col-span-2" id="empty-ameacas">Nenhuma
-                                ameaça ativa.</p>
-                        </div>
+                    <div id="container-objetivos" class="flex flex-col gap-4">
+                        <p class="text-gray-500 italic text-sm text-center" id="empty-objetivos">Nenhum objetivo
+                            ativo.
+                        </p>
+                    </div>
+                </div>
+                <!-- AMEAÇAS -->
+                <div
+                    class="bg-white dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 p-5 rounded-lg shadow-sm">
+                    <div class="flex justify-between items-center mb-4 border-b-2 border-rpg-red pb-2">
+                        <h3
+                            class="text-xl font-black font-rpg text-rpg-red dark:text-red-500 uppercase flex items-center gap-2 m-0">
+                            <i data-lucide="skull" class="w-6 h-6"></i> Ameaças (Inimigos)
+                        </h3>
+                        <button id="btn-add-ameaca"
+                            class="bg-rpg-red hover:bg-red-800 text-white font-bold py-1.5 px-4 rounded text-sm flex items-center gap-1 transition-colors"><i
+                                data-lucide="plus" class="w-4 h-4"></i> Nova</button>
+                    </div>
+                    <div id="container-ameacas" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <p class="text-gray-500 italic text-sm text-center md:col-span-2" id="empty-ameacas">Nenhuma
+                            ameaça ativa.</p>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- SUB-MODAL: NOTAS DA AMEAÇA -->
-        <div id="notas-ameaca-modal" class="modal z-[999999]">
-            <div
-                class="modal-content bg-gray-100 dark:bg-[#1a1a1a] border-2 border-rpg-red rounded-md p-6 max-w-[500px] w-[90%] shadow-[0_0_30px_rgba(140,58,58,0.4)] relative">
-                <h3
-                    class="text-xl font-rpg font-black text-rpg-red uppercase mb-4 flex items-center gap-2 border-b border-rpg-red pb-2">
-                    <i data-lucide="file-edit" class="w-5 h-5"></i> Status e Notas da Ameaça
-                </h3>
-                <textarea id="texto-notas-ameaca" rows="6" placeholder="Descreva os status, vida, habilidades..."
-                    class="w-full bg-white dark:bg-[#242424] border border-gray-300 dark:border-gray-700 rounded p-3 text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-red resize-none font-medium"></textarea>
-                <div class="flex justify-end mt-4">
-                    <button id="btn-salvar-notas"
-                        class="bg-rpg-red hover:bg-red-800 text-white font-bold py-2 px-6 rounded uppercase font-rpg transition-colors shadow-md flex items-center gap-2"><i
-                            data-lucide="check" class="w-5 h-5"></i> Salvar e Fechar</button>
-                </div>
+    <!-- SUB-MODAL: NOTAS DA AMEAÇA -->
+    <div id="notas-ameaca-modal" class="modal z-[999999]">
+        <div
+            class="modal-content bg-gray-100 dark:bg-[#1a1a1a] border-2 border-rpg-red rounded-md p-6 max-w-[500px] w-[90%] shadow-[0_0_30px_rgba(140,58,58,0.4)] relative">
+            <h3
+                class="text-xl font-rpg font-black text-rpg-red uppercase mb-4 flex items-center gap-2 border-b border-rpg-red pb-2">
+                <i data-lucide="file-edit" class="w-5 h-5"></i> Status e Notas da Ameaça
+            </h3>
+            <textarea id="texto-notas-ameaca" rows="6" placeholder="Descreva os status, vida, habilidades..."
+                class="w-full bg-white dark:bg-[#242424] border border-gray-300 dark:border-gray-700 rounded p-3 text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-red resize-none font-medium"></textarea>
+            <div class="flex justify-end mt-4">
+                <button id="btn-salvar-notas"
+                    class="bg-rpg-red hover:bg-red-800 text-white font-bold py-2 px-6 rounded uppercase font-rpg transition-colors shadow-md flex items-center gap-2"><i
+                        data-lucide="check" class="w-5 h-5"></i> Salvar e Fechar</button>
             </div>
         </div>
+    </div>
 
-        <!-- ==========================================
+    <!-- ==========================================
          MODAL: GERENCIADOR DE REFÚGIOS
          ========================================== -->
-        <div id="modal-meus-refugios" class="modal z-[999999]">
-            <div
-                class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border border-gray-300 dark:border-gray-800 rounded-md p-6 max-w-[800px] w-[95%] shadow-2xl relative max-h-[90vh] overflow-y-auto">
-                <span
-                    class="absolute top-4 right-6 text-gray-500 hover:text-rpg-red text-3xl font-bold cursor-pointer transition-colors"
-                    onclick="document.getElementById('modal-meus-refugios').classList.remove('show')">&times;</span>
+    <div id="modal-meus-refugios" class="modal z-[999999]">
+        <div
+            class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border border-gray-300 dark:border-gray-800 rounded-md p-6 max-w-[800px] w-[95%] shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <span
+                class="absolute top-4 right-6 text-gray-500 hover:text-rpg-red text-3xl font-bold cursor-pointer transition-colors"
+                onclick="document.getElementById('modal-meus-refugios').classList.remove('show')">&times;</span>
 
-                <h2
-                    class="text-2xl font-black font-rpg text-gray-800 dark:text-white uppercase mb-4 border-b border-gray-300 dark:border-gray-700 pb-2 text-center flex items-center justify-center gap-2">
-                    <i data-lucide="tent" class="w-6 h-6 text-rpg-green"></i> Meus Refúgios
-                </h2>
+            <h2
+                class="text-2xl font-black font-rpg text-gray-800 dark:text-white uppercase mb-4 border-b border-gray-300 dark:border-gray-700 pb-2 text-center flex items-center justify-center gap-2">
+                <i data-lucide="tent" class="w-6 h-6 text-rpg-green"></i> Meus Refúgios
+            </h2>
 
-                <!-- TELA 1: LISTA DE REFÚGIOS -->
-                <div id="area-lista-refugios">
-                    <button id="btn-novo-refugio-modal"
-                        class="w-full bg-rpg-green hover:bg-green-800 text-white font-bold py-3 rounded uppercase font-rpg transition-colors flex justify-center items-center gap-2 shadow-sm mb-4">
-                        <i data-lucide="plus-circle" class="w-5 h-5"></i> Criar Novo Refúgio
-                    </button>
-                    <div id="grid-meus-refugios" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- Preenchido via JS -->
-                    </div>
+            <!-- TELA 1: LISTA DE REFÚGIOS -->
+            <div id="area-lista-refugios">
+                <button id="btn-novo-refugio-modal"
+                    class="w-full bg-rpg-green hover:bg-green-800 text-white font-bold py-3 rounded uppercase font-rpg transition-colors flex justify-center items-center gap-2 shadow-sm mb-4">
+                    <i data-lucide="plus-circle" class="w-5 h-5"></i> Criar Novo Refúgio
+                </button>
+                <div id="grid-meus-refugios" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Preenchido via JS -->
+                </div>
+            </div>
+
+            <!-- TELA 2: FORMULÁRIO DE CRIAÇÃO/EDIÇÃO -->
+            <div id="area-form-refugio" class="hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <button id="btn-voltar-lista-refugios"
+                        class="text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white font-bold text-sm uppercase flex items-center gap-1 transition-colors"><i
+                            data-lucide="arrow-left" class="w-4 h-4"></i> Voltar</button>
+                    <h3 id="titulo-form-refugio" class="text-lg font-black text-rpg-green uppercase m-0">Novo
+                        Refúgio
+                    </h3>
                 </div>
 
-                <!-- TELA 2: FORMULÁRIO DE CRIAÇÃO/EDIÇÃO -->
-                <div id="area-form-refugio" class="hidden">
-                    <div class="flex justify-between items-center mb-4">
-                        <button id="btn-voltar-lista-refugios"
-                            class="text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white font-bold text-sm uppercase flex items-center gap-1 transition-colors"><i
-                                data-lucide="arrow-left" class="w-4 h-4"></i> Voltar</button>
-                        <h3 id="titulo-form-refugio" class="text-lg font-black text-rpg-green uppercase m-0">Novo
-                            Refúgio
-                        </h3>
+                <form id="form-refugio-detalhes" class="flex flex-col gap-3">
+                    <input type="hidden" id="ref-id">
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Nome do Refúgio</label>
+                        <input type="text" id="ref-nome"
+                            class="w-full p-2 bg-gray-100 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 rounded text-black dark:text-white outline-none focus:border-rpg-green"
+                            required placeholder="Ex: Acampamento Alpha">
                     </div>
 
-                    <form id="form-refugio-detalhes" class="flex flex-col gap-3">
-                        <input type="hidden" id="ref-id">
-
+                    <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Nome do Refúgio</label>
-                            <input type="text" id="ref-nome"
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">População
+                                Atual</label>
+                            <input type="number" id="ref-pop-atual"
                                 class="w-full p-2 bg-gray-100 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 rounded text-black dark:text-white outline-none focus:border-rpg-green"
-                                required placeholder="Ex: Acampamento Alpha">
+                                value="0" min="0">
                         </div>
-
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">População
-                                    Atual</label>
-                                <input type="number" id="ref-pop-atual"
-                                    class="w-full p-2 bg-gray-100 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 rounded text-black dark:text-white outline-none focus:border-rpg-green"
-                                    value="0" min="0">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Capacidade
-                                    Máxima</label>
-                                <input type="number" id="ref-pop-max"
-                                    class="w-full p-2 bg-gray-100 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 rounded text-black dark:text-white outline-none focus:border-rpg-green"
-                                    value="10" min="1">
-                            </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Capacidade
+                                Máxima</label>
+                            <input type="number" id="ref-pop-max"
+                                class="w-full p-2 bg-gray-100 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 rounded text-black dark:text-white outline-none focus:border-rpg-green"
+                                value="10" min="1">
                         </div>
+                    </div>
 
+                    <div
+                        class="grid grid-cols-2 md:grid-cols-4 gap-3 border-t border-gray-300 dark:border-gray-700 pt-3 mt-1">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
+                                title="Defesa passiva contra ataques">🛡️ Defesa</label>
+                            <input type="number" id="ref-defesa"
+                                class="w-full p-2 bg-gray-100 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 rounded text-black dark:text-white outline-none"
+                                value="0">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
+                                title="Estado psicológico da população">😊 Moral</label>
+                            <input type="number" id="ref-moral"
+                                class="w-full p-2 bg-gray-100 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 rounded text-black dark:text-white outline-none"
+                                value="0">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
+                                title="Capacidade de evacuação/transporte">🚙 Mobilidade</label>
+                            <input type="number" id="ref-mobilidade"
+                                class="w-full p-2 bg-gray-100 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 rounded text-black dark:text-white outline-none"
+                                value="0">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
+                                title="Capacidade de ataque/conflito">⚔️ Beligerância</label>
+                            <input type="number" id="ref-beligerancia"
+                                class="w-full p-2 bg-gray-100 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 rounded text-black dark:text-white outline-none"
+                                value="0">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
+                                title="Suprimento de água potável">💧 Água</label>
+                            <input type="number" id="ref-agua"
+                                class="w-full p-2 bg-gray-100 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 rounded text-black dark:text-white outline-none"
+                                value="0">
+                        </div>
                         <div
-                            class="grid grid-cols-2 md:grid-cols-4 gap-3 border-t border-gray-300 dark:border-gray-700 pt-3 mt-1">
-                            <div>
-                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
-                                    title="Defesa passiva contra ataques">🛡️ Defesa</label>
-                                <input type="number" id="ref-defesa"
-                                    class="w-full p-2 bg-gray-100 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 rounded text-black dark:text-white outline-none"
-                                    value="0">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
-                                    title="Estado psicológico da população">😊 Moral</label>
-                                <input type="number" id="ref-moral"
-                                    class="w-full p-2 bg-gray-100 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 rounded text-black dark:text-white outline-none"
-                                    value="0">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
-                                    title="Capacidade de evacuação/transporte">🚙 Mobilidade</label>
-                                <input type="number" id="ref-mobilidade"
-                                    class="w-full p-2 bg-gray-100 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 rounded text-black dark:text-white outline-none"
-                                    value="0">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
-                                    title="Capacidade de ataque/conflito">⚔️ Beligerância</label>
-                                <input type="number" id="ref-beligerancia"
-                                    class="w-full p-2 bg-gray-100 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 rounded text-black dark:text-white outline-none"
-                                    value="0">
-                            </div>
+                            class="flex flex-col justify-center items-center bg-gray-100 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 rounded p-1">
+                            <label for="ref-fonte"
+                                class="text-[10px] font-bold text-gray-500 uppercase mb-1 cursor-pointer">Fonte
+                                Infinita?</label>
+                            <input type="checkbox" id="ref-fonte" class="w-4 h-4 accent-rpg-blue cursor-pointer">
                         </div>
-
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            <div>
-                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
-                                    title="Suprimento de água potável">💧 Água</label>
-                                <input type="number" id="ref-agua"
-                                    class="w-full p-2 bg-gray-100 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 rounded text-black dark:text-white outline-none"
-                                    value="0">
-                            </div>
-                            <div
-                                class="flex flex-col justify-center items-center bg-gray-100 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 rounded p-1">
-                                <label for="ref-fonte"
-                                    class="text-[10px] font-bold text-gray-500 uppercase mb-1 cursor-pointer">Fonte
-                                    Infinita?</label>
-                                <input type="checkbox" id="ref-fonte" class="w-4 h-4 accent-rpg-blue cursor-pointer">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
-                                    title="Rações e comida">🥩 Alimento</label>
-                                <input type="number" id="ref-alimento"
-                                    class="w-full p-2 bg-gray-100 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 rounded text-black dark:text-white outline-none"
-                                    value="0">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
-                                    title="Materiais de construção/fogo">🪵 Madeira</label>
-                                <input type="number" id="ref-madeira"
-                                    class="w-full p-2 bg-gray-100 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 rounded text-black dark:text-white outline-none"
-                                    value="0">
-                            </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
+                                title="Rações e comida">🥩 Alimento</label>
+                            <input type="number" id="ref-alimento"
+                                class="w-full p-2 bg-gray-100 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 rounded text-black dark:text-white outline-none"
+                                value="0">
                         </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
+                                title="Materiais de construção/fogo">🪵 Madeira</label>
+                            <input type="number" id="ref-madeira"
+                                class="w-full p-2 bg-gray-100 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 rounded text-black dark:text-white outline-none"
+                                value="0">
+                        </div>
+                    </div>
 
-                        <button type="submit" id="btn-salvar-refugio-form"
-                            class="mt-4 w-full bg-rpg-blue hover:bg-[#2c6270] text-white font-bold py-3 rounded uppercase font-rpg transition-colors flex justify-center items-center gap-2 shadow-sm">
-                            <i data-lucide="save" class="w-5 h-5"></i> Salvar Refúgio
-                        </button>
-                    </form>
-                </div>
+                    <button type="submit" id="btn-salvar-refugio-form"
+                        class="mt-4 w-full bg-rpg-blue hover:bg-[#2c6270] text-white font-bold py-3 rounded uppercase font-rpg transition-colors flex justify-center items-center gap-2 shadow-sm">
+                        <i data-lucide="save" class="w-5 h-5"></i> Salvar Refúgio
+                    </button>
+                </form>
             </div>
         </div>
+    </div>
 
-        <!-- MODAIS DE EXCLUSÃO SEGUROS (Char, Campanha, Jogador, Refúgio) -->
-        <div id="delete-char-modal" class="modal z-[99999]">
+    <!-- MODAIS DE EXCLUSÃO SEGUROS (Char, Campanha, Jogador, Refúgio) -->
+    <div id="delete-char-modal" class="modal z-[99999]">
+        <div
+            class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border-2 border-rpg-red rounded-md p-6 md:p-8 max-w-[500px] w-[90%] text-center shadow-2xl relative">
             <div
-                class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border-2 border-rpg-red rounded-md p-6 md:p-8 max-w-[500px] w-[90%] text-center shadow-2xl relative">
-                <div
-                    class="mx-auto flex items-center justify-center w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 mb-4">
-                    <i data-lucide="alert-triangle" class="w-6 h-6 text-rpg-red"></i>
-                </div>
-                <h2 class="text-2xl font-rpg font-black text-rpg-red uppercase mb-2">Excluir Personagem</h2>
-                <p class="mb-4 text-gray-700 dark:text-gray-300 text-sm md:text-base">Esta ação é <strong
-                        class="text-rpg-red">irreversível</strong>. Digite o nome abaixo:</p>
-                <div id="delete-char-target-name"
-                    class="font-bold text-lg md:text-xl text-black dark:text-white mb-4 bg-gray-200 dark:bg-[#1a1a1a] py-3 rounded tracking-wider select-all border border-gray-300 dark:border-gray-700">
-                </div>
-                <input type="text" id="delete-char-input" placeholder="Digite o nome aqui..."
-                    class="w-full p-3 mb-6 bg-white dark:bg-[#242424] border border-gray-400 dark:border-gray-600 rounded outline-none focus:ring-2 focus:ring-rpg-red text-center text-black dark:text-white font-bold transition-colors"
-                    autocomplete="off">
-                <div class="flex justify-between gap-4">
-                    <button id="btn-cancel-delete-char"
-                        class="w-1/2 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 rounded uppercase font-rpg transition-colors">Cancelar</button>
-                    <button id="btn-confirm-delete-char"
-                        class="w-1/2 bg-rpg-red hover:bg-red-800 text-white font-bold py-3 rounded uppercase font-rpg transition-opacity duration-300 opacity-50 cursor-not-allowed flex justify-center items-center gap-2"
-                        disabled><i data-lucide="trash-2" class="w-5 h-5"></i> Excluir</button>
-                </div>
+                class="mx-auto flex items-center justify-center w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 mb-4">
+                <i data-lucide="alert-triangle" class="w-6 h-6 text-rpg-red"></i>
+            </div>
+            <h2 class="text-2xl font-rpg font-black text-rpg-red uppercase mb-2">Excluir Personagem</h2>
+            <p class="mb-4 text-gray-700 dark:text-gray-300 text-sm md:text-base">Esta ação é <strong
+                    class="text-rpg-red">irreversível</strong>. Digite o nome abaixo:</p>
+            <div id="delete-char-target-name"
+                class="font-bold text-lg md:text-xl text-black dark:text-white mb-4 bg-gray-200 dark:bg-[#1a1a1a] py-3 rounded tracking-wider select-all border border-gray-300 dark:border-gray-700">
+            </div>
+            <input type="text" id="delete-char-input" placeholder="Digite o nome aqui..."
+                class="w-full p-3 mb-6 bg-white dark:bg-[#242424] border border-gray-400 dark:border-gray-600 rounded outline-none focus:ring-2 focus:ring-rpg-red text-center text-black dark:text-white font-bold transition-colors"
+                autocomplete="off">
+            <div class="flex justify-between gap-4">
+                <button id="btn-cancel-delete-char"
+                    class="w-1/2 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 rounded uppercase font-rpg transition-colors">Cancelar</button>
+                <button id="btn-confirm-delete-char"
+                    class="w-1/2 bg-rpg-red hover:bg-red-800 text-white font-bold py-3 rounded uppercase font-rpg transition-opacity duration-300 opacity-50 cursor-not-allowed flex justify-center items-center gap-2"
+                    disabled><i data-lucide="trash-2" class="w-5 h-5"></i> Excluir</button>
             </div>
         </div>
+    </div>
 
-        <div id="delete-camp-modal" class="modal z-[999999]">
+    <div id="delete-camp-modal" class="modal z-[999999]">
+        <div
+            class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border-2 border-rpg-red rounded-md p-6 md:p-8 max-w-[500px] w-[90%] text-center shadow-2xl relative">
             <div
-                class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border-2 border-rpg-red rounded-md p-6 md:p-8 max-w-[500px] w-[90%] text-center shadow-2xl relative">
-                <div
-                    class="mx-auto flex items-center justify-center w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 mb-4">
-                    <i data-lucide="flame" class="w-6 h-6 text-rpg-red"></i>
-                </div>
-                <h2 class="text-2xl font-rpg font-black text-rpg-red uppercase mb-2">Destruir Mesa</h2>
-                <p class="mb-4 text-gray-700 dark:text-gray-300 text-sm md:text-base">Esta ação é <strong
-                        class="text-rpg-red">irreversível</strong>. Digite o nome da mesa:</p>
-                <div id="delete-camp-target-name"
-                    class="font-bold text-lg md:text-xl text-black dark:text-white mb-4 bg-gray-200 dark:bg-[#1a1a1a] py-3 rounded tracking-wider select-all border border-gray-300 dark:border-gray-700">
-                </div>
-                <input type="text" id="delete-camp-input" placeholder="Digite o nome da mesa aqui..."
-                    class="w-full p-3 mb-6 bg-white dark:bg-[#242424] border border-gray-400 dark:border-gray-600 rounded outline-none focus:ring-2 focus:ring-rpg-red text-center text-black dark:text-white font-bold transition-colors"
-                    autocomplete="off">
-                <div class="flex justify-between gap-4">
-                    <button id="btn-cancel-delete-camp"
-                        class="w-1/2 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 rounded uppercase font-rpg transition-colors">Cancelar</button>
-                    <button id="btn-confirm-delete-camp"
-                        class="w-1/2 bg-rpg-red hover:bg-red-800 text-white font-bold py-3 rounded uppercase font-rpg transition-opacity duration-300 opacity-50 cursor-not-allowed flex justify-center items-center gap-2"
-                        disabled><i data-lucide="skull" class="w-5 h-5"></i> Destruir</button>
-                </div>
+                class="mx-auto flex items-center justify-center w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 mb-4">
+                <i data-lucide="flame" class="w-6 h-6 text-rpg-red"></i>
+            </div>
+            <h2 class="text-2xl font-rpg font-black text-rpg-red uppercase mb-2">Destruir Mesa</h2>
+            <p class="mb-4 text-gray-700 dark:text-gray-300 text-sm md:text-base">Esta ação é <strong
+                    class="text-rpg-red">irreversível</strong>. Digite o nome da mesa:</p>
+            <div id="delete-camp-target-name"
+                class="font-bold text-lg md:text-xl text-black dark:text-white mb-4 bg-gray-200 dark:bg-[#1a1a1a] py-3 rounded tracking-wider select-all border border-gray-300 dark:border-gray-700">
+            </div>
+            <input type="text" id="delete-camp-input" placeholder="Digite o nome da mesa aqui..."
+                class="w-full p-3 mb-6 bg-white dark:bg-[#242424] border border-gray-400 dark:border-gray-600 rounded outline-none focus:ring-2 focus:ring-rpg-red text-center text-black dark:text-white font-bold transition-colors"
+                autocomplete="off">
+            <div class="flex justify-between gap-4">
+                <button id="btn-cancel-delete-camp"
+                    class="w-1/2 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 rounded uppercase font-rpg transition-colors">Cancelar</button>
+                <button id="btn-confirm-delete-camp"
+                    class="w-1/2 bg-rpg-red hover:bg-red-800 text-white font-bold py-3 rounded uppercase font-rpg transition-opacity duration-300 opacity-50 cursor-not-allowed flex justify-center items-center gap-2"
+                    disabled><i data-lucide="skull" class="w-5 h-5"></i> Destruir</button>
             </div>
         </div>
+    </div>
 
-        <div id="remove-jogador-modal" class="modal z-[999999]">
-            <div
-                class="modal-content bg-rpg-paper dark:bg-[#1a1a1a] border-2 border-rpg-red rounded-md p-6 max-w-[400px] w-[90%] text-center shadow-[0_0_30px_rgba(140,58,58,0.6)]">
-                <h3
-                    class="text-2xl font-rpg font-black text-rpg-red uppercase mb-2 flex justify-center items-center gap-2">
-                    <i data-lucide="user-x" class="w-8 h-8"></i> Remover Jogador
-                </h3>
-                <p class="text-gray-700 dark:text-gray-300 mb-4 font-bold">Digite o nome da conta do jogador abaixo:</p>
-                <p id="remove-jogador-target-name"
-                    class="text-rpg-red dark:text-red-400 font-black text-xl mb-4 uppercase select-none"></p>
-                <input type="text" id="remove-jogador-input" placeholder="Digite o nome..."
-                    class="w-full bg-white dark:bg-[#242424] border border-gray-400 dark:border-gray-600 rounded p-2 text-center text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-red mb-4 font-bold"
-                    autocomplete="off">
-                <div class="flex justify-center gap-4">
-                    <button id="btn-cancel-remove-jogador"
-                        class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition-colors w-full uppercase font-rpg tracking-widest">Cancelar</button>
-                    <button id="btn-confirm-remove-jogador"
-                        class="bg-rpg-red hover:bg-red-800 text-white font-bold py-2 px-4 rounded transition-colors w-full opacity-50 cursor-not-allowed uppercase font-rpg tracking-widest"
-                        disabled>Remover</button>
-                </div>
+    <div id="remove-jogador-modal" class="modal z-[999999]">
+        <div
+            class="modal-content bg-rpg-paper dark:bg-[#1a1a1a] border-2 border-rpg-red rounded-md p-6 max-w-[400px] w-[90%] text-center shadow-[0_0_30px_rgba(140,58,58,0.6)]">
+            <h3 class="text-2xl font-rpg font-black text-rpg-red uppercase mb-2 flex justify-center items-center gap-2">
+                <i data-lucide="user-x" class="w-8 h-8"></i> Remover Jogador
+            </h3>
+            <p class="text-gray-700 dark:text-gray-300 mb-4 font-bold">Digite o nome da conta do jogador abaixo:</p>
+            <p id="remove-jogador-target-name"
+                class="text-rpg-red dark:text-red-400 font-black text-xl mb-4 uppercase select-none"></p>
+            <input type="text" id="remove-jogador-input" placeholder="Digite o nome..."
+                class="w-full bg-white dark:bg-[#242424] border border-gray-400 dark:border-gray-600 rounded p-2 text-center text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-red mb-4 font-bold"
+                autocomplete="off">
+            <div class="flex justify-center gap-4">
+                <button id="btn-cancel-remove-jogador"
+                    class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition-colors w-full uppercase font-rpg tracking-widest">Cancelar</button>
+                <button id="btn-confirm-remove-jogador"
+                    class="bg-rpg-red hover:bg-red-800 text-white font-bold py-2 px-4 rounded transition-colors w-full opacity-50 cursor-not-allowed uppercase font-rpg tracking-widest"
+                    disabled>Remover</button>
             </div>
         </div>
+    </div>
 
-        <!-- ==========================================
+    <!-- ==========================================
          MODAL: DESTRUIR REFÚGIO (SEGURANÇA MÁXIMA)
          ========================================== -->
-        <div id="delete-refugio-modal" class="modal z-[9999999]">
-            <!-- Z-index maior para ficar por cima do outro modal -->
-            <div
-                class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border border-gray-300 dark:border-gray-800 rounded-md p-6 max-w-[400px] w-[95%] shadow-2xl relative text-center">
-                <i data-lucide="alert-triangle" class="w-12 h-12 mx-auto text-rpg-red mb-4 animate-pulse"></i>
-                <h2 class="text-2xl font-black font-rpg text-gray-800 dark:text-white uppercase mb-2">Destruir Refúgio?
-                </h2>
-                <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Para confirmar a destruição permanente, digite
-                    o
-                    nome <strong id="delete-refugio-target-name" class="text-rpg-red font-black uppercase"></strong>
-                    abaixo:
-                </p>
+    <div id="delete-refugio-modal" class="modal z-[9999999]">
+        <!-- Z-index maior para ficar por cima do outro modal -->
+        <div
+            class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border border-gray-300 dark:border-gray-800 rounded-md p-6 max-w-[400px] w-[95%] shadow-2xl relative text-center">
+            <i data-lucide="alert-triangle" class="w-12 h-12 mx-auto text-rpg-red mb-4 animate-pulse"></i>
+            <h2 class="text-2xl font-black font-rpg text-gray-800 dark:text-white uppercase mb-2">Destruir Refúgio?
+            </h2>
+            <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Para confirmar a destruição permanente, digite
+                o
+                nome <strong id="delete-refugio-target-name" class="text-rpg-red font-black uppercase"></strong>
+                abaixo:
+            </p>
 
-                <input type="text" id="delete-refugio-input"
-                    class="w-full p-2 bg-gray-100 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 rounded text-center text-black dark:text-white font-bold mb-4 outline-none focus:border-rpg-red"
-                    placeholder="Digite o nome do refúgio">
+            <input type="text" id="delete-refugio-input"
+                class="w-full p-2 bg-gray-100 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 rounded text-center text-black dark:text-white font-bold mb-4 outline-none focus:border-rpg-red"
+                placeholder="Digite o nome do refúgio">
 
-                <div class="flex gap-3 mt-4">
-                    <button id="btn-cancel-delete-refugio"
-                        class="flex-1 bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 text-black dark:text-white font-bold py-2 rounded uppercase font-rpg transition-colors shadow-sm">Cancelar</button>
-                    <button id="btn-confirm-delete-refugio"
-                        class="flex-1 bg-rpg-red text-white font-bold py-2 rounded uppercase font-rpg transition-colors opacity-50 cursor-not-allowed shadow-sm flex justify-center items-center gap-2"
-                        disabled>
-                        <i data-lucide="flame" class="w-4 h-4"></i> Destruir
-                    </button>
-                </div>
+            <div class="flex gap-3 mt-4">
+                <button id="btn-cancel-delete-refugio"
+                    class="flex-1 bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 text-black dark:text-white font-bold py-2 rounded uppercase font-rpg transition-colors shadow-sm">Cancelar</button>
+                <button id="btn-confirm-delete-refugio"
+                    class="flex-1 bg-rpg-red text-white font-bold py-2 rounded uppercase font-rpg transition-colors opacity-50 cursor-not-allowed shadow-sm flex justify-center items-center gap-2"
+                    disabled>
+                    <i data-lucide="flame" class="w-4 h-4"></i> Destruir
+                </button>
             </div>
         </div>
+    </div>
 
-        <!-- ==========================================
+    <!-- ==========================================
          MODAL: PERFIL DO USUÁRIO
          ========================================== -->
-        <div id="perfil-modal" class="modal z-[999999]">
-            <div
-                class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border border-gray-300 dark:border-gray-800 rounded-md p-6 max-w-[500px] w-[95%] shadow-2xl relative">
-                <span
-                    class="absolute top-4 right-6 text-gray-500 hover:text-rpg-red dark:text-gray-400 dark:hover:text-red-400 text-3xl font-bold cursor-pointer transition-colors z-10"
-                    onclick="document.getElementById('perfil-modal').classList.remove('show')">&times;</span>
+    <div id="perfil-modal" class="modal z-[999999]">
+        <div
+            class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border border-gray-300 dark:border-gray-800 rounded-md p-6 max-w-[500px] w-[95%] shadow-2xl relative">
+            <span
+                class="absolute top-4 right-6 text-gray-500 hover:text-rpg-red dark:text-gray-400 dark:hover:text-red-400 text-3xl font-bold cursor-pointer transition-colors z-10"
+                onclick="document.getElementById('perfil-modal').classList.remove('show')">&times;</span>
 
-                <div class="flex flex-col items-center border-b border-gray-300 dark:border-gray-700 pb-6 mb-6 mt-2">
+            <div class="flex flex-col items-center border-b border-gray-300 dark:border-gray-700 pb-6 mb-6 mt-2">
 
-                    <!-- ÁREA CLICÁVEL DA FOTO -->
-                    <div class="relative w-24 h-24 rounded-full border-4 border-rpg-red overflow-hidden mb-3 shadow-md bg-gray-200 dark:bg-[#111] flex items-center justify-center group cursor-pointer"
-                        onclick="document.getElementById('input-avatar').click()">
-                        <img id="perfil-avatar-img" src="./assets/icon.jpg" alt="Avatar"
-                            class="w-full h-full object-cover transition-opacity group-hover:opacity-50">
-                        <div
-                            class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <i data-lucide="camera" class="w-8 h-8 text-white"></i>
-                        </div>
-                    </div>
-                    <!-- INPUT INVISÍVEL -->
-                    <input type="file" id="input-avatar" accept="image/*" class="hidden">
-
-                    <h2 id="perfil-nome-usuario"
-                        class="text-2xl font-black font-rpg text-gray-800 dark:text-white uppercase m-0">Operador</h2>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm font-bold uppercase tracking-widest mt-1">Status:
-                        Conectado</p>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4 mb-6">
+                <!-- ÁREA CLICÁVEL DA FOTO -->
+                <div class="relative w-24 h-24 rounded-full border-4 border-rpg-red overflow-hidden mb-3 shadow-md bg-gray-200 dark:bg-[#111] flex items-center justify-center group cursor-pointer"
+                    onclick="document.getElementById('input-avatar').click()">
+                    <img id="perfil-avatar-img" src="./assets/icon.jpg" alt="Avatar"
+                        class="w-full h-full object-cover transition-opacity group-hover:opacity-50">
                     <div
-                        class="bg-gray-100 dark:bg-[#1a1a1a] p-4 rounded text-center border border-gray-300 dark:border-gray-700 shadow-sm">
-                        <i data-lucide="users" class="w-6 h-6 mx-auto text-rpg-red mb-1"></i>
-                        <h3 class="font-black text-2xl m-0 text-gray-800 dark:text-white" id="perfil-count-chars">0</h3>
-                        <p class="text-xs text-gray-500 font-bold uppercase mt-1">Personagens</p>
-                    </div>
-                    <div
-                        class="bg-gray-100 dark:bg-[#1a1a1a] p-4 rounded text-center border border-gray-300 dark:border-gray-700 shadow-sm">
-                        <i data-lucide="map" class="w-6 h-6 mx-auto text-rpg-blue mb-1"></i>
-                        <h3 class="font-black text-2xl m-0 text-gray-800 dark:text-white" id="perfil-count-camps">0</h3>
-                        <p class="text-xs text-gray-500 font-bold uppercase mt-1">Campanhas</p>
+                        class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <i data-lucide="camera" class="w-8 h-8 text-white"></i>
                     </div>
                 </div>
+                <!-- INPUT INVISÍVEL -->
+                <input type="file" id="input-avatar" accept="image/*" class="hidden">
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[300px] overflow-y-auto pr-2">
-                    <div>
-                        <h4
-                            class="font-rpg font-black text-rpg-red border-b border-gray-300 dark:border-gray-700 pb-1 mb-3 flex items-center gap-1">
-                            <i data-lucide="user" class="w-4 h-4"></i> Fichas
-                        </h4>
-                        <div id="perfil-lista-chars" class="flex flex-col gap-2">
-                            <!-- Preenchido via JS -->
-                            <p class="text-sm text-gray-500 italic">Carregando...</p>
-                        </div>
+                <h2 id="perfil-nome-usuario"
+                    class="text-2xl font-black font-rpg text-gray-800 dark:text-white uppercase m-0">Operador</h2>
+                <p class="text-gray-500 dark:text-gray-400 text-sm font-bold uppercase tracking-widest mt-1">Status:
+                    Conectado</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div
+                    class="bg-gray-100 dark:bg-[#1a1a1a] p-4 rounded text-center border border-gray-300 dark:border-gray-700 shadow-sm">
+                    <i data-lucide="users" class="w-6 h-6 mx-auto text-rpg-red mb-1"></i>
+                    <h3 class="font-black text-2xl m-0 text-gray-800 dark:text-white" id="perfil-count-chars">0</h3>
+                    <p class="text-xs text-gray-500 font-bold uppercase mt-1">Personagens</p>
+                </div>
+                <div
+                    class="bg-gray-100 dark:bg-[#1a1a1a] p-4 rounded text-center border border-gray-300 dark:border-gray-700 shadow-sm">
+                    <i data-lucide="map" class="w-6 h-6 mx-auto text-rpg-blue mb-1"></i>
+                    <h3 class="font-black text-2xl m-0 text-gray-800 dark:text-white" id="perfil-count-camps">0</h3>
+                    <p class="text-xs text-gray-500 font-bold uppercase mt-1">Campanhas</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[300px] overflow-y-auto pr-2">
+                <div>
+                    <h4
+                        class="font-rpg font-black text-rpg-red border-b border-gray-300 dark:border-gray-700 pb-1 mb-3 flex items-center gap-1">
+                        <i data-lucide="user" class="w-4 h-4"></i> Fichas
+                    </h4>
+                    <div id="perfil-lista-chars" class="flex flex-col gap-2">
+                        <!-- Preenchido via JS -->
+                        <p class="text-sm text-gray-500 italic">Carregando...</p>
                     </div>
-                    <div>
-                        <h4
-                            class="font-rpg font-black text-rpg-blue border-b border-gray-300 dark:border-gray-700 pb-1 mb-3 flex items-center gap-1">
-                            <i data-lucide="swords" class="w-4 h-4"></i> Mesas
-                        </h4>
-                        <div id="perfil-lista-camps" class="flex flex-col gap-2">
-                            <!-- Preenchido via JS -->
-                            <p class="text-sm text-gray-500 italic">Carregando...</p>
-                        </div>
+                </div>
+                <div>
+                    <h4
+                        class="font-rpg font-black text-rpg-blue border-b border-gray-300 dark:border-gray-700 pb-1 mb-3 flex items-center gap-1">
+                        <i data-lucide="swords" class="w-4 h-4"></i> Mesas
+                    </h4>
+                    <div id="perfil-lista-camps" class="flex flex-col gap-2">
+                        <!-- Preenchido via JS -->
+                        <p class="text-sm text-gray-500 italic">Carregando...</p>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <footer class="w-full bg-rpg-paper dark:bg-rpg-paper-dark border-t border-gray-300 dark:border-gray-800 mt-12 py-8 transition-colors duration-300 mt-auto">
+    <footer
+        class="w-full bg-rpg-paper dark:bg-rpg-paper-dark border-t border-gray-300 dark:border-gray-800 mt-12 py-8 transition-colors duration-300 mt-auto">
         <div class="max-w-[1100px] mx-auto text-center px-4">
             <h3 class="font-rpg font-black text-xl text-rpg-red dark:text-orange-500 uppercase mb-2 tracking-wider">
-            Assimilação RPG - VTT
+                Assimilação RPG - VTT
             </h3>
             <p class="font-sans text-gray-600 dark:text-gray-400 text-sm md:text-base font-bold mb-3">
-                Desenvolvido com <i data-lucide="heart" class="w-4 h-4 inline-block text-rpg-red fill-current align-text-bottom"></i> por <a href="https://www.linkedin.com/in/roannl" target="_blank" class="text-rpg-blue hover:text-rpg-blue-hover dark:text-rpg-blue-hover hover:underline transition-colors">Roan Lisboa</a>
+                Desenvolvido com <i data-lucide="heart"
+                    class="w-4 h-4 inline-block text-rpg-red fill-current align-text-bottom"></i> por <a
+                    href="https://www.linkedin.com/in/roannl" target="_blank"
+                    class="text-rpg-blue hover:text-rpg-blue-hover dark:text-rpg-blue-hover hover:underline transition-colors">Roan
+                    Lisboa</a>
             </p>
 
             <p class="font-sans text-gray-600 dark:text-gray-400 text-sm md:text-base font-bold mb-3">
-                <a href="https://github.com/RoanNL/FichaAssimilacaoRPG" target="_blank" class="text-rpg-blue hover:text-rpg-blue-hover dark:text-rpg-blue-hover hover:underline transition-colors">Github</a>
+                <a href="https://github.com/RoanNL/FichaAssimilacaoRPG" target="_blank"
+                    class="text-rpg-blue hover:text-rpg-blue-hover dark:text-rpg-blue-hover hover:underline transition-colors">Github</a>
             </p>
 
             <p class="font-rpg text-xs text-gray-500 dark:text-gray-500">
@@ -1564,19 +1635,19 @@
         </div>
     </footer>
 
-        <script src="https://unpkg.com/lucide@latest"></script>
-        <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
 
-        <script src="./js/router.js"></script>
-        <script src="./js/auth.js"></script>
-        <script src="./js/dashboard.js"></script>
-        <script src="./js/ficha.js"></script>
-        <script src="./js/campanha.js"></script>
-        <script src="./js/rolador.js"></script>
-        <script src="./js/leaves.js"></script>
-        <script src="./js/tema.js"></script>
-        <script src="./js/perfil.js"></script>
-        <script src="./js/refugio.js"></script>
+    <script src="./js/router.js"></script>
+    <script src="./js/auth.js"></script>
+    <script src="./js/dashboard.js"></script>
+    <script src="./js/ficha.js"></script>
+    <script src="./js/campanha.js"></script>
+    <script src="./js/rolador.js"></script>
+    <script src="./js/leaves.js"></script>
+    <script src="./js/tema.js"></script>
+    <script src="./js/perfil.js"></script>
+    <script src="./js/refugio.js"></script>
 </body>
 
 </html>

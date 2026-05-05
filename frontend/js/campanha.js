@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // 2. CARREGAR LOBBY E BANNER
     // ==========================================
-    window.carregarLobbyCampanha = async function() {
+    window.carregarLobbyCampanha = async function () {
         const campanhaId = sessionStorage.getItem('campanhaAtiva');
         const isMestre = sessionStorage.getItem('isMestreAtivo') === 'true';
         const nomeCampanha = sessionStorage.getItem('campanhaNome');
@@ -44,27 +44,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const painelMestre = document.getElementById('painel-mestre-botoes');
         const btnEditarBanner = document.getElementById('btn-editar-banner');
-        
+
         if (isMestre) {
-            if(painelMestre) painelMestre.classList.remove('hidden');
-            if(btnEditarBanner) btnEditarBanner.classList.remove('hidden'); // Libera o botão de foto!
-            if(btnEditarBanner) btnEditarBanner.style.display = 'flex';
+            if (painelMestre) painelMestre.classList.remove('hidden');
+            if (btnEditarBanner) btnEditarBanner.classList.remove('hidden'); // Libera o botão de foto!
+            if (btnEditarBanner) btnEditarBanner.style.display = 'flex';
         } else {
-            if(painelMestre) painelMestre.classList.add('hidden');
-            if(btnEditarBanner) btnEditarBanner.classList.add('hidden');
+            if (painelMestre) painelMestre.classList.add('hidden');
+            if (btnEditarBanner) btnEditarBanner.classList.add('hidden');
         }
 
-        // 🔥 PUXAR A FOTO DO BANNER 🔥
+       // 🔥 PUXAR A FOTO DO BANNER E A POSIÇÃO 🔥
         try {
             const resBanner = await fetch(`${window.API_URL}/campanhas/${campanhaId}/info`, {
                 headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
             });
             const dataBanner = await resBanner.json();
             const imgBanner = document.getElementById('campanha-banner-img');
-            if(imgBanner && dataBanner.banner) {
+            
+            if (imgBanner && dataBanner.banner) {
                 imgBanner.src = dataBanner.banner;
+                // Aplica a posição salva!
+                const posY = dataBanner.banner_pos_y !== undefined && dataBanner.banner_pos_y !== null ? dataBanner.banner_pos_y : 50;
+                imgBanner.style.objectPosition = `50% ${posY}%`;
+                
+                // Grava na variável global de reposicionamento
+                if (typeof savedObjectPositionY !== 'undefined') savedObjectPositionY = posY;
             } else if (imgBanner) {
-                imgBanner.src = './assets/banner-default.jpg'; // Coloque uma imagem bonita padrão na sua pasta assets!
+                imgBanner.src = './assets/banner-default.jpg'; 
+                imgBanner.style.objectPosition = `50% 50%`;
             }
         } catch (e) { console.log("Erro ao carregar banner"); }
 
@@ -74,12 +82,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 🔥 LIBERA A LISTA DE JOGADORES PARA TODO MUNDO 🔥
         const secaoJogadores = document.getElementById('grid-jogadores-mesa-view')?.parentElement;
-        if(secaoJogadores) secaoJogadores.style.display = 'block'; 
+        if (secaoJogadores) secaoJogadores.style.display = 'block';
 
         await carregarFichasDaMesa(campanhaId, isMestre);
         await carregarJogadoresDaMesa(campanhaId, isMestre);
-        
-        if (isMestre) await carregarPartituraDoBanco(campanhaId); 
+
+        if (isMestre) await carregarPartituraDoBanco(campanhaId);
     };
 
     // ==========================================
@@ -87,8 +95,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     async function carregarFichasDaMesa(campanhaId, isMestre) {
         const gridFichas = document.getElementById('grid-fichas-mesa-view');
-        if(!gridFichas) return;
-        
+        if (!gridFichas) return;
+
         // 🔥 FORÇANDO O GRID CSS PELO JAVASCRIPT 🔥
         gridFichas.className = "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 w-full";
         gridFichas.innerHTML = '<p class="text-gray-500 italic animate-pulse col-span-full">Procurando sobreviventes...</p>';
@@ -105,6 +113,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
             gridFichas.innerHTML = '';
 
+            // 🔥 SE FOR O MESTRE, MOSTRA O CARD DE CRIAR NPC 🔥
+            if (isMestre) {
+                const cardNovoNpc = document.createElement('div');
+                cardNovoNpc.className = 'flex flex-row h-[130px] w-full bg-gray-50 dark:bg-[#1a1a1a] rounded-lg overflow-hidden border-2 border-dashed border-gray-400 dark:border-gray-600 hover:border-rpg-blue hover:bg-gray-100 dark:hover:bg-[#242424] transition-all cursor-pointer items-center justify-center group';
+                cardNovoNpc.innerHTML = `
+                    <div class="flex flex-col items-center justify-center w-full">
+                        <div class="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                            <i data-lucide="plus" class="w-5 h-5 text-gray-600 dark:text-gray-300"></i>
+                        </div>
+                        <span class="font-bold font-rpg text-gray-500 uppercase text-xs">Criar NPC / Ficha</span>
+                    </div>
+                `;
+                
+                cardNovoNpc.addEventListener('click', async () => {
+                    const iconeOriginal = cardNovoNpc.innerHTML;
+                    cardNovoNpc.innerHTML = '<div class="flex justify-center w-full"><i data-lucide="loader" class="w-6 h-6 animate-spin text-rpg-blue"></i></div>';
+                    if (window.lucide) lucide.createIcons();
+
+                    try {
+                        const res = await fetch(`${window.API_URL}/campanhas/${campanhaId}/criar-npc`, {
+                            method: 'POST',
+                            headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
+                        });
+                        const data = await res.json();
+                        if (res.ok) {
+                            window.idPersonagemAtual = data.id;
+                            Router.navigate('ficha'); // Vai pra ficha graças ao roteador novo!
+                            window.carregarPersonagem(data.id);
+                        } else {
+                            window.mostrarNotificacao(data.erro, 'erro');
+                            cardNovoNpc.innerHTML = iconeOriginal;
+                            if (window.lucide) lucide.createIcons();
+                        }
+                    } catch (err) {
+                        window.mostrarNotificacao('Erro de conexão.', 'erro');
+                        cardNovoNpc.innerHTML = iconeOriginal;
+                        if (window.lucide) lucide.createIcons();
+                    }
+                });
+                gridFichas.appendChild(cardNovoNpc);
+            }
+
             if (fichas.length === 0) {
                 gridFichas.innerHTML = '<p class="text-gray-500 italic col-span-full">Nenhum jogador aliado detectado.</p>';
                 return;
@@ -117,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const imgSrc = (char.foto && !char.foto.includes('R0lGODlhAQAB')) ? char.foto : './assets/icon.jpg';
                 const ocupacao = char.ocupacao || 'Desconhecido';
-                
+
                 const isDonoDaFicha = (char.usuario_id == meuId);
                 const isFichaPrivada = char.is_privada === true;
                 const podeInspecionar = isMestre || isDonoDaFicha || !isFichaPrivada;
@@ -136,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
                 gridFichas.appendChild(card);
             });
-            if(window.lucide) lucide.createIcons();
+            if (window.lucide) lucide.createIcons();
 
             document.querySelectorAll('.btn-inspecionar-ficha').forEach(btn => {
                 btn.addEventListener('click', async (e) => {
@@ -157,8 +207,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     async function carregarJogadoresDaMesa(campanhaId, isMestreAtivo) {
         const gridJogadores = document.getElementById('grid-jogadores-mesa-view');
-        if(!gridJogadores) return;
-        
+        if (!gridJogadores) return;
+
         gridJogadores.className = "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 w-full";
         gridJogadores.innerHTML = '<p class="text-gray-500 italic animate-pulse col-span-full">Analisando conexões...</p>';
 
@@ -166,9 +216,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const resposta = await fetch(`${window.API_URL}/campanhas/${campanhaId}/jogadores`, {
                 headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
             });
-            
+
             if (!resposta.ok) throw new Error("O Servidor recusou a conexão (Erro 500). Verifique o terminal do Node!");
-            
+
             const jogadores = await resposta.json();
 
             gridJogadores.innerHTML = '';
@@ -182,9 +232,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const nomeConta = jog.username || 'Desconhecido';
                 const nomeChar = jog.nome_personagem || 'Sem personagem ativo';
-                const avatarJogador = (jog.avatar && !jog.avatar.includes('R0lGODlhAQAB')) ? jog.avatar : './assets/icon.jpg'; 
-                
-                const isEsteOMestre = (jog.usuario_id === jog.mestre_id); 
+                const avatarJogador = (jog.avatar && !jog.avatar.includes('R0lGODlhAQAB')) ? jog.avatar : './assets/icon.jpg';
+
+                const isEsteOMestre = (jog.usuario_id === jog.mestre_id);
 
                 let controleHtml = '';
                 if (isEsteOMestre) {
@@ -244,15 +294,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
                     // Otimiza para Banner panorâmico
-                    const maxW = 1200; 
+                    const maxW = 1200;
                     const proporcao = img.width / img.height;
                     canvas.width = maxW;
                     canvas.height = maxW / proporcao;
-                    
+
                     ctx.imageSmoothingEnabled = true;
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                     const base64Foto = canvas.toDataURL('image/webp', 0.8);
-                    
+
                     document.getElementById('campanha-banner-img').src = base64Foto;
 
                     try {
@@ -269,13 +319,100 @@ document.addEventListener('DOMContentLoaded', () => {
                         window.mostrarNotificacao('Erro na transmissão.', 'erro');
                     } finally {
                         btnBanner.innerHTML = iconOriginal;
-                        if(window.lucide) lucide.createIcons();
+                        if (window.lucide) lucide.createIcons();
                     }
                 };
                 img.src = e.target.result;
             };
             reader.readAsDataURL(file);
         });
+
+        // Lógica de Reposicionamento do Banner
+        let isDraggingBanner = false;
+        let startY = 0;
+        let currentObjectPositionY = 50; // Começa em 50%
+        let savedObjectPositionY = 50;
+
+        const bannerImg = document.getElementById('campanha-banner-img');
+        const btnReposicionar = document.getElementById('btn-reposicionar-banner');
+        const btnSalvarPos = document.getElementById('btn-salvar-posicao');
+        const btnCancelarPos = document.getElementById('btn-cancelar-posicao');
+        const ctrlsPadrao = document.getElementById('controles-padrao-banner');
+        const ctrlsEdicao = document.getElementById('controles-edicao-banner');
+
+        if (btnReposicionar) {
+            btnReposicionar.addEventListener('click', () => {
+                ctrlsPadrao.classList.add('hidden');
+                ctrlsEdicao.classList.remove('hidden');
+                bannerImg.style.cursor = 'grab';
+
+                // Pega a posição atual gravada
+                const posicaoAtual = bannerImg.style.objectPosition || '50% 50%';
+                savedObjectPositionY = parseFloat(posicaoAtual.split(' ')[1]) || 50;
+                currentObjectPositionY = savedObjectPositionY;
+            });
+
+            bannerImg.addEventListener('mousedown', (e) => {
+                if (ctrlsEdicao.classList.contains('hidden')) return;
+                isDraggingBanner = true;
+                startY = e.clientY;
+                bannerImg.style.cursor = 'grabbing';
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!isDraggingBanner) return;
+                const deltaY = e.clientY - startY;
+
+                // Sensibilidade do arraste (ajuste o 0.15 se achar muito rápido/devagar)
+                currentObjectPositionY = savedObjectPositionY - (deltaY * 0.15);
+
+                // Trava o limite entre 0% (topo) e 100% (base)
+                currentObjectPositionY = Math.max(0, Math.min(100, currentObjectPositionY));
+                bannerImg.style.objectPosition = `50% ${currentObjectPositionY}%`;
+            });
+
+            window.addEventListener('mouseup', () => {
+                if (isDraggingBanner) {
+                    isDraggingBanner = false;
+                    bannerImg.style.cursor = 'grab';
+                    savedObjectPositionY = currentObjectPositionY; // Fixa a nova âncora
+                }
+            });
+
+            btnCancelarPos.addEventListener('click', () => {
+                // Reverte para a posição original
+                bannerImg.style.objectPosition = `50% ${savedObjectPositionY}%`;
+                sairModoEdicaoBanner();
+            });
+
+            btnSalvarPos.addEventListener('click', async () => {
+                const posicaoFinal = currentObjectPositionY;
+                const idCampanha = sessionStorage.getItem('campanhaAtiva');
+
+                try {
+                    const res = await fetch(`${window.API_URL}/campanhas/${idCampanha}/posicao-banner`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionStorage.getItem('token')}` },
+                        body: JSON.stringify({ posicao_y: posicaoFinal })
+                    });
+                    
+                    if (res.ok) {
+                        window.mostrarNotificacao("Posição do banner salva!", "sucesso");
+                        sairModoEdicaoBanner();
+                    } else {
+                        window.mostrarNotificacao("Erro ao salvar posição no servidor.", "erro");
+                    }
+                } catch (error) {
+                    window.mostrarNotificacao("Falha de conexão.", "erro");
+                }
+            });
+
+            function sairModoEdicaoBanner() {
+                ctrlsEdicao.classList.add('hidden');
+                ctrlsPadrao.classList.remove('hidden');
+                bannerImg.style.cursor = 'default';
+            }
+        }
     }
 
     // ==========================================
@@ -292,19 +429,19 @@ document.addEventListener('DOMContentLoaded', () => {
     let nomeJogadorLimpo = '';
     let campanhaIdAtual = null;
 
-    window.prepararExpulsaoJogador = function(id, nome, card, campId) {
+    window.prepararExpulsaoJogador = function (id, nome, card, campId) {
         jogadorParaRemoverId = id;
         nomeJogadorLimpo = nome;
         cardJogadorParaRemover = card;
         campanhaIdAtual = campId;
 
-        if(targetNameJogador) targetNameJogador.textContent = nomeJogadorLimpo;
-        if(inputRemoveJogador) inputRemoveJogador.value = '';
-        if(btnConfirmRemoveJogador) {
+        if (targetNameJogador) targetNameJogador.textContent = nomeJogadorLimpo;
+        if (inputRemoveJogador) inputRemoveJogador.value = '';
+        if (btnConfirmRemoveJogador) {
             btnConfirmRemoveJogador.disabled = true;
             btnConfirmRemoveJogador.classList.add('opacity-50', 'cursor-not-allowed');
         }
-        if(modalRemoveJogador) modalRemoveJogador.classList.add('show');
+        if (modalRemoveJogador) modalRemoveJogador.classList.add('show');
     };
 
     if (inputRemoveJogador) {
@@ -328,7 +465,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnConfirmRemoveJogador) {
         btnConfirmRemoveJogador.addEventListener('click', async () => {
             if (!jogadorParaRemoverId || !campanhaIdAtual) return;
-            
+
             const iconeOriginal = btnConfirmRemoveJogador.innerHTML;
             btnConfirmRemoveJogador.innerHTML = "Expulsando...";
             btnConfirmRemoveJogador.disabled = true;
@@ -359,7 +496,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     function criarAmeaca(nome = '', desc = '') {
         const containerAmeacas = document.getElementById('container-ameacas');
-        if(!containerAmeacas) return;
+        if (!containerAmeacas) return;
 
         const bloco = document.createElement('div');
         bloco.className = 'ameaca-item bg-white dark:bg-[#2a2a2a] p-4 rounded-md shadow-inner border border-gray-300 dark:border-gray-600 mb-3 focus-within:ring-2 focus-within:ring-rpg-red transition-all relative';
@@ -375,12 +512,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function criarObjetivo(nome = '', atual = 0, max = 10, desc = '') {
         const containerObjetivos = document.getElementById('container-objetivos');
-        if(!containerObjetivos) return;
+        if (!containerObjetivos) return;
 
         const bloco = document.createElement('div');
         bloco.className = 'objetivo-item bg-white dark:bg-[#2a2a2a] p-4 rounded-md shadow-inner border border-gray-300 dark:border-gray-600 mb-3 focus-within:ring-2 focus-within:ring-rpg-blue transition-all relative';
         const porcentagem = Math.min(100, Math.max(0, (atual / max) * 100)) || 0;
-        
+
         bloco.innerHTML = `
             <div class="flex justify-between items-center mb-2 border-b-2 border-blue-900 pb-1">
                 <input type="text" class="item-nome w-full font-bold p-1 bg-transparent text-black dark:text-white text-base outline-none" placeholder="Novo Objetivo" value="${window.escaparHTML(nome)}">
@@ -403,7 +540,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 🔥 O REFÚGIO DA PARTITURA VOLTOU! 🔥
     function criarRefugio(nome = '', seg = '', rec = '', desc = '') {
         const containerRefugios = document.getElementById('container-refugios');
-        if(!containerRefugios) return;
+        if (!containerRefugios) return;
 
         const bloco = document.createElement('div');
         bloco.className = 'refugio-item bg-white dark:bg-[#2a2a2a] p-4 rounded-md shadow-inner border border-gray-300 dark:border-gray-600 mb-3 focus-within:ring-2 focus-within:ring-rpg-green transition-all relative';
@@ -427,7 +564,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const ligarBotao = (ids, funcao) => {
         ids.forEach(id => {
             const btn = document.getElementById(id);
-            if (btn) btn.addEventListener('click', () => { funcao(); if(window.lucide) lucide.createIcons(); agendarAutosavePartitura(); });
+            if (btn) btn.addEventListener('click', () => { funcao(); if (window.lucide) lucide.createIcons(); agendarAutosavePartitura(); });
         });
     };
 
@@ -438,12 +575,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let timeoutPartitura;
     function agendarAutosavePartitura() {
         clearTimeout(timeoutPartitura);
-        timeoutPartitura = setTimeout(salvarPartituraNoBanco, 1500); 
+        timeoutPartitura = setTimeout(salvarPartituraNoBanco, 1500);
     }
 
     function atualizarBarraObjetivo(bloco) {
         const atual = parseInt(bloco.querySelector('.obj-atual').value) || 0;
-        const max = parseInt(bloco.querySelector('.obj-max').value) || 1; 
+        const max = parseInt(bloco.querySelector('.obj-max').value) || 1;
         const porcentagem = Math.min(100, Math.max(0, (atual / max) * 100));
         bloco.querySelector('.obj-bar').style.width = `${porcentagem}%`;
     }
@@ -451,7 +588,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('input', (e) => {
         // Agora escuta os 3 containers!
         if (!e.target.closest('#container-ameacas') && !e.target.closest('#container-objetivos') && !e.target.closest('#container-refugios')) return;
-        
+
         if (e.target.classList.contains('obj-atual') || e.target.classList.contains('obj-max')) {
             atualizarBarraObjetivo(e.target.closest('.objetivo-item'));
         }
@@ -503,7 +640,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const containerAmeacas = document.getElementById('container-ameacas');
         const containerObjetivos = document.getElementById('container-objetivos');
         const containerRefugios = document.getElementById('container-refugios');
-        
+
         if (containerAmeacas) containerAmeacas.innerHTML = '';
         if (containerObjetivos) containerObjetivos.innerHTML = '';
         if (containerRefugios) containerRefugios.innerHTML = '';
@@ -513,15 +650,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
             });
             const dadosStr = await res.json();
-            
+
             if (dadosStr) {
                 const dados = JSON.parse(dadosStr);
                 if (dados.ameacas) dados.ameacas.forEach(a => criarAmeaca(a.nome, a.desc));
                 if (dados.objetivos) dados.objetivos.forEach(o => criarObjetivo(o.nome, o.atual, o.max, o.desc));
                 if (dados.refugios) dados.refugios.forEach(r => criarRefugio(r.nome, r.seguranca, r.recursos, r.desc));
             }
-            if(window.lucide) lucide.createIcons();
-            
+            if (window.lucide) lucide.createIcons();
+
         } catch (erro) {
             console.error("Erro ao puxar a partitura antiga.");
         }
@@ -530,7 +667,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // EXTRA: SISTEMA DE PEDIDOS DE ENTRADA (PORTARIA)
     // ==========================================
-    
+
     // Escuta quando alguém bate na porta (em tempo real)
     window.socket.on('novo-pedido-entrada', () => {
         const isMestre = sessionStorage.getItem('isMestreAtivo') === 'true';
@@ -544,19 +681,19 @@ document.addEventListener('DOMContentLoaded', () => {
     window.socket.on('atualizar-jogadores', async () => {
         const campanhaId = sessionStorage.getItem('campanhaAtiva');
         const isMestre = sessionStorage.getItem('isMestreAtivo') === 'true';
-        if(campanhaId) {
+        if (campanhaId) {
             await carregarFichasDaMesa(campanhaId, isMestre);
             await carregarJogadoresDaMesa(campanhaId, isMestre);
         }
     });
 
     // Função que o Mestre usa para ver os pedidos
-    window.carregarPedidosMesa = async function() {
+    window.carregarPedidosMesa = async function () {
         const campanhaId = sessionStorage.getItem('campanhaAtiva');
         const containerPedidos = document.getElementById('lista-pedidos-container');
         const badge = document.getElementById('badge-pedidos');
-        
-        if(!campanhaId || !containerPedidos) return;
+
+        if (!campanhaId || !containerPedidos) return;
 
         try {
             const res = await fetch(`${window.API_URL}/campanhas/${campanhaId}/pedidos`, {
@@ -606,7 +743,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
                 containerPedidos.appendChild(div);
             });
-            if(window.lucide) lucide.createIcons();
+            if (window.lucide) lucide.createIcons();
 
         } catch (e) {
             containerPedidos.innerHTML = '<p class="text-rpg-red">Erro ao carregar a portaria.</p>';
@@ -614,7 +751,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Função que despacha a resposta do Mestre para o Servidor
-    window.responderPedido = async function(pedidoId, aprovado, usuarioId, personagemId) {
+    window.responderPedido = async function (pedidoId, aprovado, usuarioId, personagemId) {
         const campanhaId = sessionStorage.getItem('campanhaAtiva');
         try {
             const res = await fetch(`${window.API_URL}/campanhas/${campanhaId}/pedidos/responder`, {
@@ -623,7 +760,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ pedido_id: pedidoId, aprovado: aprovado, usuario_id: usuarioId, personagem_id: personagemId })
             });
             const data = await res.json();
-            
+
             if (res.ok) {
                 window.mostrarNotificacao(data.mensagem, aprovado ? 'sucesso' : 'aviso');
                 window.carregarPedidosMesa(); // Atualiza a lista

@@ -1,7 +1,13 @@
 const Router = {
     telas: ['tela-landing', 'tela-dashboard', 'tela-campanha', 'tela-ficha'],
+    telaAtual: 'landing',
     
     navigate: function(telaDestino) {
+        // 🔥 A MÁGICA DE MEMÓRIA: Grava de onde estamos vindo antes de mudar!
+        if (this.telaAtual !== telaDestino) {
+            sessionStorage.setItem('telaAnterior', this.telaAtual);
+        }
+
         this.telas.forEach(tela => {
             const el = document.getElementById(tela);
             if (el) el.classList.add('hidden');
@@ -27,7 +33,6 @@ const Router = {
             }
         }
 
-        // --- CONTROLE DOS BOTÕES DA FICHA (SALVAR E EXCLUIR) ---
         const btnSave = document.getElementById('btn-save-char-nav');
         const btnDelete = document.getElementById('btn-delete-char-nav');
         
@@ -37,12 +42,29 @@ const Router = {
         }
         
         if (btnDelete) {
-            // Só exibe o excluir se estiver na ficha E a ficha já estiver salva no banco!
             if (telaDestino === 'ficha' && sessionStorage.getItem('personagemAtivoId')) {
                 btnDelete.classList.remove('hidden');
             } else {
                 btnDelete.classList.add('hidden');
             }
+        }
+
+        this.telaAtual = telaDestino;
+    },
+
+    // 🔥 A FUNÇÃO DE VOLTAR INTELIGENTE 🔥
+    voltar: function() {
+        const telaAnterior = sessionStorage.getItem('telaAnterior') || 'dashboard';
+        
+        // Se tentar voltar estando na Campanha, volta direto pro Dashboard
+        if (this.telaAtual === 'campanha') {
+            this.navigate('dashboard');
+        } 
+        // Se tentar voltar estando na Ficha, volta para a tela de onde veio!
+        else if (this.telaAtual === 'ficha') {
+            this.navigate(telaAnterior);
+        } else {
+            this.navigate('dashboard');
         }
     },
 
