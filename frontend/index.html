@@ -194,11 +194,11 @@
                 </div>
                 <ul class="flex gap-4 md:gap-6 list-none m-0 p-0 font-bold uppercase text-sm font-rpg">
                     <li><button onclick="Router.navigate('landing')"
-                            class="hover:text-rpg-blue dark:hover:text-orange-500 transition-colors flex items-center gap-1"><i
-                                data-lucide="book-open" class="w-4 h-4"></i> Início</button></li>
+                            class="hover:text-rpg-blue dark:hover:text-orange-500 transition-colors flex items-center gap-1.5"><i
+                                data-lucide="book-open" class="w-4 h-4 md:w-5 md:h-5"></i> <span class="hidden sm:inline">Início</span></button></li>
                     <li><button onclick="Router.navigate('dashboard')"
-                            class="hover:text-rpg-blue dark:hover:text-orange-500 transition-colors flex items-center gap-1"><i
-                                data-lucide="layout-dashboard" class="w-4 h-4"></i> Jogar</button></li>
+                            class="hover:text-rpg-blue dark:hover:text-orange-500 transition-colors flex items-center gap-1.5"><i
+                                data-lucide="layout-dashboard" class="w-4 h-4 md:w-5 md:h-5"></i> <span class="hidden sm:inline">Jogar</span></button></li>
                 </ul>
             </div>
 
@@ -1275,8 +1275,8 @@
                 class="absolute top-4 right-6 text-gray-500 hover:text-purple-700 dark:text-gray-400 dark:hover:text-purple-400 text-4xl font-bold cursor-pointer transition-colors z-10"
                 onclick="document.getElementById('partitura-modal').classList.remove('show')">&times;</span>
             <h2
-                class="text-center text-white font-rpg font-black text-2xl md:text-3xl mb-6 uppercase tracking-widest bg-purple-800 py-3 px-8 rounded-sm shadow-md mx-auto flex items-center gap-3 w-max">
-                <i data-lucide="swords" class="w-8 h-8"></i> Partitura de Conflito
+                class="text-center text-white font-rpg font-black text-lg md:text-3xl mb-6 mt-8 md:mt-0 uppercase tracking-widest bg-purple-800 py-2 md:py-3 px-4 md:px-8 rounded-sm shadow-md mx-auto flex items-center justify-center gap-2 md:gap-3 w-full md:w-max">
+                <i data-lucide="swords" class="w-6 h-6 md:w-8 md:h-8"></i> Partitura de Conflito
             </h2>
             <div class="flex-grow overflow-y-auto pr-2 flex flex-col gap-8">
                 <!-- OBJETIVOS -->

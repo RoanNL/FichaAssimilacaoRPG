@@ -624,19 +624,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
         bloco.innerHTML = `
             <div class="flex justify-between items-center mb-2 border-b-2 border-blue-900 pb-1">
-                <input type="text" class="item-nome w-full font-bold p-1 bg-transparent text-black dark:text-white text-base outline-none" placeholder="Novo Objetivo" value="${window.escaparHTML(nome)}">
+                <input type="text" class="item-nome w-full font-bold p-1 bg-transparent text-black dark:text-white text-sm md:text-base outline-none" placeholder="Novo Objetivo" value="${window.escaparHTML(nome)}">
                 <button type="button" class="btn-del-item ml-2 bg-red-800 hover:bg-red-900 text-white text-xs font-bold py-1 px-2 rounded cursor-pointer transition-colors shadow-sm border-none"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
             </div>
-            <div class="flex items-center gap-2 mb-3 bg-gray-100 dark:bg-[#1a1a1a] p-2 rounded border border-gray-300 dark:border-gray-700">
-                <span class="text-xs font-bold text-gray-500 uppercase">Progresso:</span>
-                <input type="number" class="obj-atual w-16 text-center bg-transparent text-black dark:text-white font-bold outline-none border-b border-gray-400 focus:border-rpg-blue" value="${atual}">
-                <span class="text-gray-500 font-bold">/</span>
-                <input type="number" class="obj-max w-16 text-center bg-transparent text-black dark:text-white font-bold outline-none border-b border-gray-400 focus:border-rpg-blue" value="${max}">
-                <div class="w-full bg-gray-300 dark:bg-gray-600 rounded-full h-2.5 ml-2 overflow-hidden shadow-inner">
+            
+            <div class="flex flex-wrap md:flex-nowrap items-center gap-2 mb-3 bg-gray-100 dark:bg-[#1a1a1a] p-2 rounded border border-gray-300 dark:border-gray-700">
+                <div class="flex items-center gap-2 shrink-0">
+                    <span class="text-[10px] md:text-xs font-bold text-gray-500 uppercase">Progresso:</span>
+                    <input type="number" class="obj-atual w-10 md:w-16 text-center bg-transparent text-black dark:text-white font-bold outline-none border-b border-gray-400 focus:border-rpg-blue p-0" value="${atual}">
+                    <span class="text-gray-500 font-bold">/</span>
+                    <input type="number" class="obj-max w-10 md:w-16 text-center bg-transparent text-black dark:text-white font-bold outline-none border-b border-gray-400 focus:border-rpg-blue p-0" value="${max}">
+                </div>
+                <div class="w-full md:flex-grow bg-gray-300 dark:bg-gray-600 rounded-full h-2.5 mt-2 md:mt-0 md:ml-2 overflow-hidden shadow-inner">
                     <div class="bg-rpg-blue h-2.5 rounded-full obj-bar transition-all duration-300" style="width: ${porcentagem}%"></div>
                 </div>
             </div>
-            <textarea rows="2" class="item-desc w-full p-1 bg-transparent text-black dark:text-gray-300 outline-none resize-y text-sm" placeholder="Recompensas e Consequências...">${window.escaparHTML(desc)}</textarea>
+            
+            <textarea rows="2" class="item-desc w-full p-1 bg-transparent text-black dark:text-gray-300 outline-none resize-y text-xs md:text-sm" placeholder="Recompensas e Consequências...">${window.escaparHTML(desc)}</textarea>
         `;
         containerObjetivos.appendChild(bloco);
     }
