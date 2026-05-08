@@ -391,7 +391,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Lógica de Reposicionamento do Banner
         let isDraggingBanner = false;
         let startY = 0;
-        let currentObjectPositionY = 50; // Começa em 50%
+        let currentObjectPositionY = 50; 
         let savedObjectPositionY = 50;
 
         const bannerImg = document.getElementById('campanha-banner-img');
@@ -407,41 +407,56 @@ document.addEventListener('DOMContentLoaded', () => {
                 ctrlsEdicao.classList.remove('hidden');
                 bannerImg.style.cursor = 'grab';
 
-                // Pega a posição atual gravada
                 const posicaoAtual = bannerImg.style.objectPosition || '50% 50%';
                 savedObjectPositionY = parseFloat(posicaoAtual.split(' ')[1]) || 50;
                 currentObjectPositionY = savedObjectPositionY;
             });
 
-            bannerImg.addEventListener('mousedown', (e) => {
+            // Função central para iniciar o arrasto
+            const iniciarArrasto = (e) => {
                 if (ctrlsEdicao.classList.contains('hidden')) return;
                 isDraggingBanner = true;
-                startY = e.clientY;
+                // Detecta se foi toque de tela ou clique de mouse
+                startY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
                 bannerImg.style.cursor = 'grabbing';
-            });
+            };
 
-            window.addEventListener('mousemove', (e) => {
+            // Função central para mover
+            const moverArrasto = (e) => {
                 if (!isDraggingBanner) return;
-                const deltaY = e.clientY - startY;
+                
+                // Evita que a tela do celular role para baixo enquanto arrasta a foto
+                if (e.type.includes('touch')) e.preventDefault(); 
 
-                // Sensibilidade do arraste (ajuste o 0.15 se achar muito rápido/devagar)
+                const currentY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+                const deltaY = currentY - startY;
+
+                // Em telas de celular, os pixels andam muito rápido, mantemos a sensibilidade a 0.15
                 currentObjectPositionY = savedObjectPositionY - (deltaY * 0.15);
-
-                // Trava o limite entre 0% (topo) e 100% (base)
                 currentObjectPositionY = Math.max(0, Math.min(100, currentObjectPositionY));
                 bannerImg.style.objectPosition = `50% ${currentObjectPositionY}%`;
-            });
+            };
 
-            window.addEventListener('mouseup', () => {
+            // Função central para soltar
+            const soltarArrasto = () => {
                 if (isDraggingBanner) {
                     isDraggingBanner = false;
                     bannerImg.style.cursor = 'grab';
-                    savedObjectPositionY = currentObjectPositionY; // Fixa a nova âncora
+                    savedObjectPositionY = currentObjectPositionY;
                 }
-            });
+            };
+
+            // Adiciona ouvintes para Mouse (PC)
+            bannerImg.addEventListener('mousedown', iniciarArrasto);
+            window.addEventListener('mousemove', moverArrasto);
+            window.addEventListener('mouseup', soltarArrasto);
+
+            // Adiciona ouvintes para Toque (Celular)
+            bannerImg.addEventListener('touchstart', iniciarArrasto, { passive: true });
+            window.addEventListener('touchmove', moverArrasto, { passive: false });
+            window.addEventListener('touchend', soltarArrasto);
 
             btnCancelarPos.addEventListener('click', () => {
-                // Reverte para a posição original
                 bannerImg.style.objectPosition = `50% ${savedObjectPositionY}%`;
                 sairModoEdicaoBanner();
             });
