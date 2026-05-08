@@ -945,4 +945,59 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }, true);
+
+    // ==========================================
+    // 12. AUTOMAÇÃO: ROLAGEM DE ASSIMILAÇÃO E DANO DE PRESSÃO
+    // ==========================================
+    
+    // Função Global que o rolador.js vai chamar quando tirar "Pressões"
+    window.aplicarPressaoAutomatica = function(qtdPressao) {
+        if (qtdPressao <= 0) return;
+        
+        const checksDeEgo = document.querySelectorAll('.ego-check');
+        let pressoesAplicadas = 0;
+        
+        for (let i = 0; i < checksDeEgo.length; i++) {
+            if (!checksDeEgo[i].checked) {
+                checksDeEgo[i].checked = true;
+                pressoesAplicadas++;
+                
+                // Dispara o evento de 'change' manualmente para salvar e verificar o limite de 10
+                const event = new Event('change');
+                checksDeEgo[i].dispatchEvent(event);
+                
+                if (pressoesAplicadas === qtdPressao) break;
+            }
+        }
+        
+        if (pressoesAplicadas > 0) {
+            window.mostrarNotificacao(`Corrupção! O parasita causou +${pressoesAplicadas} de Pressão no Ego!`, 'erro');
+        }
+    };
+
+    // Botão que pega o Nível de Assimilação e rola os D12 automaticamente
+    const btnRolarAssim = document.getElementById('btn-rolar-assimilacao');
+    if (btnRolarAssim) {
+        btnRolarAssim.addEventListener('click', () => {
+            const nivelAssimilacao = parseInt(document.getElementById('assim-num').value) || 1;
+            
+            // Abre o painel do Terminal de Dados
+            const sidebarLog = document.getElementById('game-log-sidebar');
+            if (sidebarLog && sidebarLog.classList.contains('translate-x-full')) {
+                sidebarLog.classList.remove('translate-x-full');
+            }
+            
+            // 🔥 CORREÇÃO DA REGRA: 1d10 fixo + Xd12 baseado no nível 🔥
+            const inputRolador = document.getElementById('rolador-input');
+            if (inputRolador) {
+                inputRolador.value = `1d10 ${nivelAssimilacao}d12`; 
+                
+                // Dispara a rolagem depois de um piscar de olhos
+                setTimeout(() => {
+                    const btnRolar = document.getElementById('rolador-btn-rolar');
+                    if (btnRolar) btnRolar.click();
+                }, 100);
+            }
+        });
+    }
 });

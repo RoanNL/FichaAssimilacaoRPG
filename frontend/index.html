@@ -505,14 +505,13 @@
                             <input type="text" id="proposito-coletivo" maxlength="100"
                                 class="w-full font-rpg text-lg px-2 py-1 text-black dark:text-white bg-[#f0f3f5] dark:bg-[#2a2a2a] focus:bg-[#e8eef1] dark:focus:bg-[#333] border-b-2 border-rpg-brown dark:border-[#c59b76] outline-none transition-colors">
                         </div>
-                        <div
-                            class="flex items-center gap-2 mt-4 bg-gray-100 dark:bg-[#1a1a1a] p-2 rounded border border-gray-300 dark:border-gray-700 w-max shadow-sm">
-                            <input type="checkbox" id="char-is-private" class="w-4 h-4 accent-rpg-red cursor-pointer">
-                            <label for="char-is-private"
-                                class="text-xs font-bold text-gray-500 uppercase cursor-pointer flex items-center gap-1">
-                                <i data-lucide="lock" class="w-5 h-5 text-rpg-red"></i> Ficha Privada <span
-                                    class="text-[15px] normal-case tracking-normal ml-1">(Ocultar para outros
-                                    jogadores)</span>
+                        <div class="flex items-start md:items-center gap-3 mt-4 bg-gray-100 dark:bg-[#1a1a1a] p-3 rounded border border-gray-300 dark:border-gray-700 w-full lg:w-max shadow-sm">
+                            <input type="checkbox" id="char-is-private" class="w-4 h-4 accent-rpg-red cursor-pointer mt-0.5 md:mt-0 shrink-0">
+                            <label for="char-is-private" class="text-xs font-bold text-gray-500 uppercase cursor-pointer flex flex-col md:flex-row md:items-center gap-1 w-full">
+                                <span class="flex items-center gap-1 shrink-0"><i data-lucide="lock" class="w-4 h-4 text-rpg-red"></i> Ficha Privada</span>
+                                <span class="text-[11px] md:text-xs normal-case tracking-normal text-gray-400 md:ml-1 leading-tight">
+                                    (Ocultar para outros jogadores)
+                                </span>
                             </label>
                         </div>
                     </section>
@@ -837,11 +836,17 @@
                             <i data-lucide="alert-triangle" class="w-6 h-6"></i>
                         </p>
 
-                        <button type="button" id="btn-abrir-sorteador"
-                            class="mt-2 bg-purple-700 hover:bg-purple-900 text-white font-bold py-2.5 px-6 rounded font-rpg uppercase transition-colors shadow-md flex items-center justify-center gap-2"
-                            onclick="document.getElementById('sorteador-modal').classList.add('show')">
-                            <i data-lucide="dna" class="w-5 h-5"></i> Sortear Mutações
-                        </button>
+                        <div class="flex flex-col sm:flex-row gap-3 mt-2 w-full max-w-[500px]">
+                            <button type="button" id="btn-rolar-assimilacao"
+                                class="flex-1 bg-rpg-red hover:bg-red-800 text-white font-bold py-2.5 px-4 rounded font-rpg uppercase transition-colors shadow-md flex items-center justify-center gap-2">
+                                <i data-lucide="dices" class="w-5 h-5"></i> Rolar Assimilação
+                            </button>
+                            <button type="button" id="btn-abrir-sorteador"
+                                class="flex-1 bg-purple-700 hover:bg-purple-900 text-white font-bold py-2.5 px-4 rounded font-rpg uppercase transition-colors shadow-md flex items-center justify-center gap-2"
+                                onclick="document.getElementById('sorteador-modal').classList.add('show')">
+                                <i data-lucide="dna" class="w-5 h-5"></i> Sortear Mutações
+                            </button>
+                        </div>
                     </section>
                 </form>
 
