@@ -347,25 +347,21 @@
             </div>
 
             <!-- 🏰 TELA 3: LOBBY DA CAMPANHA -->
-            <div id="tela-campanha" class="hidden">
+           <div id="tela-campanha" class="hidden">
 
-                <!-- 🔥 BOTÃO VOLTAR 🔥 -->
                 <button onclick="Router.voltar()"
                     class="mb-4 text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white font-bold font-rpg uppercase flex items-center gap-1 transition-colors w-max">
-                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar ao Dashboard
                 </button>
 
-                <!-- ================= BANNER DA CAMPANHA ================= -->
                 <div class="relative w-full h-[250px] md:h-[300px] hover:-translate-y-1 hover:shadow-lg transition-all rounded-lg overflow-hidden mb-6 shadow-lg select-none"
                     id="banner-container">
-                    <!-- O draggable="false" é crucial para o navegador não tentar "salvar" a imagem ao arrastar -->
                     <img id="campanha-banner-img" src="./assets/icon.jpg" draggable="false"
                         class="w-full h-full object-cover transition-opacity" style="object-position: 50% 50%;"
                         alt="Banner da Campanha">
 
                     <input type="file" id="input-banner-campanha" accept="image/*" class="hidden">
 
-                    <!-- Botões Padrão do Mestre -->
                     <div id="controles-padrao-banner" class="hidden absolute top-4 right-4 flex gap-2 z-20">
                         <button id="btn-reposicionar-banner"
                             class="bg-gray-900/80 hover:bg-black text-white px-3 py-2 rounded text-sm flex items-center gap-2 backdrop-blur-sm transition-colors font-bold font-rpg uppercase shadow-md">
@@ -378,7 +374,6 @@
                         </button>
                     </div>
 
-                    <!-- Botões do Modo de Edição de Posição (Ocultos por padrão) -->
                     <div id="controles-edicao-banner" class="hidden absolute top-4 right-4 flex gap-2 z-20">
                         <div
                             class="bg-black/60 text-white px-4 py-2 rounded text-sm backdrop-blur-sm font-bold animate-pulse pointer-events-none flex items-center gap-2">
@@ -394,7 +389,6 @@
                         </button>
                     </div>
 
-                    <!-- Degradê Escuro -->
                     <div class="absolute inset-0 bg-gradient-to-t from-[#121212] via-black/50 to-transparent flex flex-col justify-end p-4 md:p-8 pointer-events-none">
                         <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 w-full">
                             
@@ -424,27 +418,23 @@
                             </div>
                         </div>
                     </div>
+                </div>
 
-                <!-- Seção de Jogadores na Mesa -->
-                <div
-                    class="bg-white dark:bg-[#1e293b] p-6 rounded border border-gray-300 dark:border-gray-700 shadow-sm mb-8">
-                    <h2
-                        class="text-xl font-rpg font-black border-b-2 border-rpg-red dark:border-orange-500 mb-4 pb-2 uppercase text-left w-max">
-                        Fichas da Mesa</h2>
+                <div class="bg-white dark:bg-[#1e293b] p-6 rounded border border-gray-300 dark:border-gray-700 shadow-sm mb-8">
+                    <h2 class="text-xl font-rpg font-black border-b-2 border-rpg-red dark:border-orange-500 mb-4 pb-2 uppercase text-left w-max">
+                        Fichas da Mesa
+                    </h2>
                     <div id="grid-fichas-mesa-view" class="flex gap-4 overflow-x-auto pb-4">
-                        <!-- Fichas injetadas via JS -->
                         <p class="text-gray-500 italic">Buscando aventureiros...</p>
                     </div>
                 </div>
 
-                <div
-                    class="bg-white dark:bg-[#1e293b] p-6 rounded border border-gray-300 dark:border-gray-700 shadow-sm">
-                    <h2
-                        class="text-xl font-rpg font-black border-b-2 border-rpg-blue dark:border-blue-500 mb-4 pb-2 uppercase text-left w-max">
-                        Jogadores Conectados</h2>
+                <div class="bg-white dark:bg-[#1e293b] p-6 rounded border border-gray-300 dark:border-gray-700 shadow-sm">
+                    <h2 class="text-xl font-rpg font-black border-b-2 border-rpg-blue dark:border-blue-500 mb-4 pb-2 uppercase text-left w-max">
+                        Jogadores Conectados
+                    </h2>
                     <div id="grid-jogadores-mesa-view" class="flex gap-4 overflow-x-auto pb-4">
-                        <!-- Jogadores injetados via JS -->
-                    </div>
+                        </div>
                 </div>
             </div>
 
