@@ -77,6 +77,16 @@ const Router = {
         }, 100);
 
         // --- CONTROLES VISUAIS GLOBAIS ---
+        
+        // 🔥 NOVO: Puxa a foto de perfil do jogador para o cabeçalho da ficha! 🔥
+        if (telaDestino === 'ficha') {
+            const avatarFicha = document.getElementById('ficha-jogador-avatar');
+            const avatarNav = document.getElementById('nav-avatar-img');
+            if (avatarFicha && avatarNav) {
+                avatarFicha.src = avatarNav.src;
+            }
+        }
+
         const fabRolador = document.getElementById('fab-rolador');
         if (fabRolador) {
             if (telaDestino === 'ficha' || telaDestino === 'campanha') {

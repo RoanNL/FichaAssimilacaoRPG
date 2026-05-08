@@ -28,9 +28,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const historicoDiv = document.getElementById('rolador-historico');
 
     // ==========================================
-    // 1. CONSTRUTOR DE CARTÕES (ESTILO D&D BEYOND)
+    // 1. CONSTRUTOR DE CARTÕES 
     // ==========================================
-    function criarCardDndBeyond(pacote, animar = false) {
+    function criarCard(pacote, animar = false) {
         const avatar = (pacote.avatar && !pacote.avatar.includes('R0lGODlhAQAB')) ? pacote.avatar : './assets/icon.jpg';
         const nomePersonagem = pacote.nome || 'Desconhecido';
         const timestamp = pacote.timestamp || new Date().toISOString();
@@ -153,13 +153,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (emptyMsg) emptyMsg.remove();
 
         // 1. Renderiza animado no topo
-        const { card, tempoAnimacao } = criarCardDndBeyond(pacote, true);
+        const { card, tempoAnimacao } = criarCard(pacote, true);
         resultsDiv.innerHTML = '';
         resultsDiv.appendChild(card);
 
         // 2. Move para o histórico infinito após animação
         setTimeout(() => {
-            const historyCard = criarCardDndBeyond(pacote, false).card;
+            const historyCard = criarCard(pacote, false).card;
             historicoDiv.prepend(historyCard);
             resultsDiv.innerHTML = '';
         }, tempoAnimacao + 600);
@@ -225,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Mantém as rolagens do mestre em segredo absoluto
                     if (!souMestre && !fuiEuQuemRolou && pacote.isMestre && !pacote.isRolagemPublica) return; 
 
-                    const { card } = criarCardDndBeyond(pacote, false);
+                    const { card } = criarCard(pacote, false);
                     historicoDiv.prepend(card);
                 } catch (err) {
                     console.error("❌ Erro ao desenhar rolagem antiga.");
@@ -306,27 +306,25 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!parsedDice || parsedDice.length === 0) return;
 
         const campanhaAtiva = sessionStorage.getItem('campanhaAtiva');
-        let nomeRolador = 'Operador Misterioso';
-        const inputNome = document.getElementById('nome');
-
-        if (inputNome && inputNome.value.trim() !== '') {
-            nomeRolador = inputNome.value.trim();
-        } else if (sessionStorage.getItem('usuarioNome') && sessionStorage.getItem('usuarioNome') !== 'undefined') {
-            nomeRolador = sessionStorage.getItem('usuarioNome');
-        }
-
-        // 🔥 A MÁGICA VISUAL: Capturar a foto dependendo de onde o jogador está! 🔥
-        let fotoAvatar = './assets/icon.jpg';
+        
+        // 🔥 A MÁGICA DA IDENTIDADE: Lendo NOME e FOTO de acordo com a tela! 🔥
         const telaAtual = sessionStorage.getItem('telaAtual');
+        let nomeRolador = sessionStorage.getItem('usuarioNome') || 'Operador Misterioso';
+        let fotoAvatar = './assets/icon.jpg';
         
         if (telaAtual === 'ficha') {
-            // Se estiver na ficha, pega a foto do personagem!
+            // Se estiver na Ficha, a máscara do personagem assume!
+            const inputNome = document.getElementById('nome');
+            if (inputNome && inputNome.value.trim() !== '') {
+                nomeRolador = inputNome.value.trim();
+            }
+            
             const imgPersonagem = document.getElementById('char-photo-preview');
             if (imgPersonagem && imgPersonagem.src && !imgPersonagem.src.includes('R0lGODlhAQAB')) {
                 fotoAvatar = imgPersonagem.src;
             }
         } else {
-            // Se estiver na mesa da campanha, pega a foto de perfil do usuário!
+            // Se estiver no Lobby da Campanha, a identidade real do jogador/mestre prevalece!
             const imgPerfil = document.getElementById('nav-avatar-img');
             if (imgPerfil && imgPerfil.src && !imgPerfil.src.includes('R0lGODlhAQAB')) {
                 fotoAvatar = imgPerfil.src;
@@ -341,6 +339,7 @@ document.addEventListener('DOMContentLoaded', () => {
             input: inputString,
             campanhaId: campanhaAtiva,
             
+            // Lendo se o Mestre quer rolar em público!
             isRolagemPublica: (sessionStorage.getItem('isMestreAtivo') === 'true' && document.getElementById('toggle-rolagem-mestre')) ? !document.getElementById('toggle-rolagem-mestre').checked : true,
             
             resultados: [],

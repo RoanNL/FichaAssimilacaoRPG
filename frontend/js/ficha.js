@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ==========================================
-    // 2. SISTEMA DE FOTO E COMPRESSÃO (CANVAS)
+    // 2. SISTEMA DE FOTO E COMPRESSÃO (COM SUPORTE A GIF)
     // ==========================================
     const photoInput = document.getElementById('char-photo-input');
     const photoPreview = document.getElementById('char-photo-preview');
@@ -96,34 +96,44 @@ document.addEventListener('DOMContentLoaded', () => {
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function (e) {
-                    const img = new Image();
-                    img.onload = function () {
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-
-                        const MAX_WIDTH = 800;
-                        const MAX_HEIGHT = 800;
-                        let width = img.width;
-                        let height = img.height;
-
-                        if (width > height) {
-                            if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-                        } else {
-                            if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
-                        }
-
-                        canvas.width = width;
-                        canvas.height = height;
-                        ctx.imageSmoothingEnabled = true;
-                        ctx.imageSmoothingQuality = 'high';
-                        ctx.drawImage(img, 0, 0, width, height);
-
-                        const compressedBase64 = canvas.toDataURL('image/webp', 0.95);
-                        photoPreview.src = compressedBase64;
+                    
+                    // 🔥 ROTA DE FUGA DO GIF: Pula o compressor! 🔥
+                    if (file.type === 'image/gif') {
+                        const base64Gif = e.target.result;
+                        photoPreview.src = base64Gif;
                         agendarAutosave(); // Salva a foto automaticamente
-                    };
-                    img.src = e.target.result;
-                }
+                    } 
+                    // SE NÃO FOR GIF, USA O COMPRESSOR NORMAL
+                    else {
+                        const img = new Image();
+                        img.onload = function () {
+                            const canvas = document.createElement('canvas');
+                            const ctx = canvas.getContext('2d');
+
+                            const MAX_WIDTH = 800;
+                            const MAX_HEIGHT = 800;
+                            let width = img.width;
+                            let height = img.height;
+
+                            if (width > height) {
+                                if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                            } else {
+                                if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+                            }
+
+                            canvas.width = width;
+                            canvas.height = height;
+                            ctx.imageSmoothingEnabled = true;
+                            ctx.imageSmoothingQuality = 'high';
+                            ctx.drawImage(img, 0, 0, width, height);
+
+                            const compressedBase64 = canvas.toDataURL('image/webp', 0.95);
+                            photoPreview.src = compressedBase64;
+                            agendarAutosave(); // Salva a foto automaticamente
+                        };
+                        img.src = e.target.result;
+                    }
+                };
                 reader.readAsDataURL(file);
             }
         });

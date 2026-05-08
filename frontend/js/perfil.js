@@ -87,8 +87,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // ==========================================
-    // UPLOAD E CORTE (CROP) DO AVATAR
+   // ==========================================
+    // UPLOAD E CORTE (CROP) DO AVATAR COM SUPORTE A GIF
     // ==========================================
     const inputAvatar = document.getElementById('input-avatar');
     
@@ -98,29 +98,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function (e) {
-                    const img = new Image();
-                    img.onload = async function () {
-                        
-                        // Recorta a imagem em um Quadrado Perfeito e a comprime
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        const SIZE = 400; // Tamanho ideal para avatares
-                        canvas.width = SIZE;
-                        canvas.height = SIZE;
-                        
-                        const minSize = Math.min(img.width, img.height);
-                        const sx = (img.width - minSize) / 2;
-                        const sy = (img.height - minSize) / 2;
-                        
-                        ctx.imageSmoothingEnabled = true;
-                        ctx.imageSmoothingQuality = 'high';
-                        ctx.drawImage(img, sx, sy, minSize, minSize, 0, 0, SIZE, SIZE);
-
-                        const base64Foto = canvas.toDataURL('image/webp', 0.9);
-                        
-                        // Atualiza a interface instantaneamente
-                        document.getElementById('perfil-avatar-img').src = base64Foto;
-                        document.getElementById('nav-avatar-img').src = base64Foto;
+                    
+                    // Função auxiliar para enviar a imagem pronta (GIF ou WebP) para o servidor
+                    const enviarParaServidor = async (base64Final) => {
+                        document.getElementById('perfil-avatar-img').src = base64Final;
+                        document.getElementById('nav-avatar-img').src = base64Final;
                         document.getElementById('perfil-avatar-img').classList.add('animate-pulse');
 
                         try {
@@ -130,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     'Content-Type': 'application/json',
                                     'Authorization': `Bearer ${sessionStorage.getItem('token')}` 
                                 },
-                                body: JSON.stringify({ foto: base64Foto })
+                                body: JSON.stringify({ foto: base64Final })
                             });
                             
                             const data = await res.json();
@@ -147,7 +129,36 @@ document.addEventListener('DOMContentLoaded', () => {
                             document.getElementById('perfil-avatar-img').classList.remove('animate-pulse');
                         }
                     };
-                    img.src = e.target.result;
+
+                    // 🔥 ROTA DE FUGA DO GIF: Pula o Canvas e envia direto! 🔥
+                    if (file.type === 'image/gif') {
+                        enviarParaServidor(e.target.result);
+                    } 
+                    // SE NÃO FOR GIF, FAZ O PROCESSO NORMAL DE COMPRESSÃO
+                    else {
+                        const img = new Image();
+                        img.onload = function () {
+                            
+                            // Recorta a imagem em um Quadrado Perfeito e a comprime
+                            const canvas = document.createElement('canvas');
+                            const ctx = canvas.getContext('2d');
+                            const SIZE = 400; // Tamanho ideal para avatares
+                            canvas.width = SIZE;
+                            canvas.height = SIZE;
+                            
+                            const minSize = Math.min(img.width, img.height);
+                            const sx = (img.width - minSize) / 2;
+                            const sy = (img.height - minSize) / 2;
+                            
+                            ctx.imageSmoothingEnabled = true;
+                            ctx.imageSmoothingQuality = 'high';
+                            ctx.drawImage(img, sx, sy, minSize, minSize, 0, 0, SIZE, SIZE);
+
+                            const base64Foto = canvas.toDataURL('image/webp', 0.9);
+                            enviarParaServidor(base64Foto);
+                        };
+                        img.src = e.target.result;
+                    }
                 };
                 reader.readAsDataURL(file);
             }
