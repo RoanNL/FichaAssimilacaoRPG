@@ -38,6 +38,34 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // 🔥 NOVO: ESCUTADOR DE RESPOSTA AO PEDIDO DE ENTRADA (TELETRANSPORTE) 🔥
+    window.socket.on('pedido-respondido', (dados) => {
+        const meuId = sessionStorage.getItem('usuarioId');
+        
+        // Verifica se o grito do servidor foi direcionado para MIM!
+        if (dados.usuarioId == meuId) {
+            if (dados.aprovado) {
+                window.mostrarNotificacao("O Mestre aprovou sua entrada! Puxando a cadeira...", 'sucesso');
+                
+                // Configura a sessão como se o jogador tivesse clicado na campanha
+                sessionStorage.setItem('campanhaAtiva', dados.campanhaId);
+                sessionStorage.setItem('campanhaNome', dados.nomeCampanha);
+                sessionStorage.setItem('campanhaCodigo', dados.codigoCampanha);
+                sessionStorage.setItem('isMestreAtivo', 'false'); // Jogador não é o Mestre!
+                
+                // Redireciona imediatamente para a tela da mesa e fecha modais abertos
+                const modalEscolher = document.getElementById('modal-escolher-char-entrar');
+                if(modalEscolher) modalEscolher.classList.remove('show');
+                const modalEntrar = document.getElementById('modal-entrar-campanha');
+                if(modalEntrar) modalEntrar.classList.remove('show');
+
+                Router.navigate('campanha');
+            } else {
+                window.mostrarNotificacao("O Mestre recusou sua entrada na mesa.", 'erro');
+            }
+        }
+    });
+
     // ==========================================
     // 2. CARREGAR LOBBY E BANNER
     // ==========================================

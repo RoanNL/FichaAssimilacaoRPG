@@ -640,6 +640,45 @@ app.post('/campanhas/entrar', verificarToken, async (req, res) => {
 });
 
 // =========================================================================
+// ROTAS DO MESTRE: GERENCIAR PEDIDOS DE ENTRADA E TELETRANSPORTE
+// =========================================================================
+app.post('/campanhas/:id/pedidos/responder', verificarToken, async (req, res) => {
+    const { pedido_id, aprovado, usuario_id, personagem_id } = req.body;
+    const campanhaId = req.params.id;
+
+    try {
+        // Busca as infos da campanha para mandar pro jogador conseguir "montar" a tela dele
+        const campQuery = await pool.query('SELECT nome, codigo_convite FROM campanhas WHERE id = $1', [campanhaId]);
+        const nomeCampanha = campQuery.rows[0]?.nome || 'Campanha';
+        const codigoCampanha = campQuery.rows[0]?.codigo_convite || '---';
+
+        if (aprovado) {
+            await pool.query(`INSERT INTO membros_campanha (campanha_id, usuario_id, personagem_id) VALUES ($1, $2, $3)`, [campanhaId, usuario_id, personagem_id]);
+        }
+
+        await pool.query(`DELETE FROM pedidos_campanha WHERE id = $1`, [pedido_id]);
+
+        const io = req.app.get('io');
+        if (io) {
+            io.to(campanhaId.toString()).emit('atualizar-jogadores');
+            
+            // 🔥 TELETRANSPORTE: Grito global para avisar apenas o jogador alvo que ele foi aceito!
+            io.emit('pedido-respondido', { 
+                usuarioId: usuario_id, 
+                aprovado: aprovado, 
+                campanhaId: campanhaId,
+                nomeCampanha: nomeCampanha,
+                codigoCampanha: codigoCampanha
+            });
+        }
+
+        res.json({ mensagem: aprovado ? 'Jogador aprovado na mesa!' : 'Jogador barrado com sucesso.' });
+    } catch (err) {
+        res.status(500).json({ erro: 'Erro ao responder pedido.' });
+    }
+});
+
+// =========================================================================
 // ROTAS DO MESTRE: GERENCIAR PEDIDOS DE ENTRADA
 // =========================================================================
 app.get('/campanhas/:id/pedidos', verificarToken, async (req, res) => {
