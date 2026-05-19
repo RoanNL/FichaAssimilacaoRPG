@@ -402,7 +402,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.onload = function () {
         if (typeof google !== 'undefined') {
             google.accounts.id.initialize({
-                client_id: "fichaassimilacaorpg.apps.googleusercontent.com",
+                client_id: "522356534352-l2fm34cfha2n1fjtcg8iho879vqk44dk.apps.googleusercontent.com",
                 callback: handleGoogleLogin
             });
             google.accounts.id.renderButton(
