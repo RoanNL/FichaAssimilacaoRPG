@@ -6,6 +6,8 @@ const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const helmet = require('helmet');
+const { OAuth2Client } = require('google-auth-library');
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const { pool, criarTabelas } = require('./database');
 
@@ -388,6 +390,67 @@ app.post('/resetar-senha', async (req, res) => {
     } catch (err) {
         console.error("❌ Erro ao resetar senha:", err);
         res.status(500).json({ erro: 'Erro interno ao redefinir a senha.' });
+    }
+});
+
+// =========================================================================
+// ROTA DE LOGIN / REGISTRO COM GOOGLE
+// =========================================================================
+app.post('/auth/google', async (req, res) => {
+    const { token } = req.body;
+    
+    if (!token) return res.status(400).json({ erro: 'Token não fornecido.' });
+
+    try {
+        // Descriptografa e verifica o token junto ao Google
+        const ticket = await googleClient.verifyIdToken({
+            idToken: token,
+            audience: process.env.GOOGLE_CLIENT_ID, 
+        });
+        
+        const payload = ticket.getPayload();
+        const email = payload.email;
+        const nome = payload.name;
+        const avatar = payload.picture;
+
+        // Verifica se o usuário já existe na base
+        let result = await pool.query('SELECT id, username, avatar FROM usuarios WHERE email = $1', [email]);
+        let usuarioId, username;
+
+        if (result.rows.length === 0) {
+            // Se não existe, REGISTRA automaticamente!
+            const usernameLimpo = nome.trim();
+            // Cria uma senha aleatória que ele nunca vai usar (já que loga pelo Google)
+            const randomPassword = await bcrypt.hash(Math.random().toString(36).slice(-12), 10);
+            
+            const insert = await pool.query(
+                `INSERT INTO usuarios (username, password, email, avatar) VALUES ($1, $2, $3, $4) RETURNING id`, 
+                [usernameLimpo, randomPassword, email, avatar]
+            );
+            usuarioId = insert.rows[0].id;
+            username = usernameLimpo;
+        } else {
+            // Se existe, faz o LOGIN
+            usuarioId = result.rows[0].id;
+            username = result.rows[0].username;
+            
+            // Opcional: Atualizar a foto de perfil caso ele tenha mudado no Google
+            await pool.query('UPDATE usuarios SET avatar = $1 WHERE id = $2 AND (avatar IS NULL OR avatar LIKE \'%googleusercontent%\')', [avatar, usuarioId]);
+        }
+
+        // Gera o nosso Token JWT de sessão padrão do VTT
+        const segredo = process.env.SEGREDO_JWT || 'segredo_super_secreto_rpg';
+        const tokenJwt = jwt.sign({ id: usuarioId, nome: username }, segredo, { expiresIn: '7d' });
+
+        res.json({ 
+            mensagem: 'Login realizado com sucesso!', 
+            usuario: { id: usuarioId, nome: username }, 
+            token: tokenJwt 
+        });
+
+    } catch (err) {
+        console.error("❌ Erro Google Auth:", err);
+        res.status(401).json({ erro: 'Falha ao autenticar com o Google.' });
     }
 });
 

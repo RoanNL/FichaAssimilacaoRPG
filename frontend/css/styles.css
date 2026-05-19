@@ -116,12 +116,17 @@ body.dark {
 /* --- Estilos Gerais --- */
 body {
     font-family: var(--font-theme);
-    background-color: var(--color-bg-main);
+    background-color: var(--color-bg-main); 
+    
+    background-image: url('../assets/fundo.jpg');
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center;
+    
     color: var(--color-text-dark);
     padding: 0;
     margin: 0;
 }
-
 
 ::-webkit-scrollbar {
     display: none;

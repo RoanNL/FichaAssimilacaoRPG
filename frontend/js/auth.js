@@ -395,4 +395,52 @@ document.addEventListener('DOMContentLoaded', () => {
             mostrarNotificacao('Você foi desconectado com segurança.', 'aviso');
         });
     }
+
+    // ==========================================
+    // SISTEMA DE LOGIN COM GOOGLE
+    // ==========================================
+    window.onload = function () {
+        if (typeof google !== 'undefined') {
+            google.accounts.id.initialize({
+                client_id: "fichaassimilacaorpg.apps.googleusercontent.com",
+                callback: handleGoogleLogin
+            });
+            google.accounts.id.renderButton(
+                document.getElementById("google-btn-container"),
+                { theme: "outline", size: "large", width: 330, text: "continue_with" }
+            );
+        }
+    };
+
+    async function handleGoogleLogin(response) {
+        try {
+            authSubmitBtn.disabled = true;
+            authSubmitBtn.textContent = 'Autenticando Google...';
+
+            const res = await fetch(`${window.API_URL}/auth/google`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: response.credential })
+            });
+
+            const dados = await res.json();
+            
+            if (res.ok) {
+                sessionStorage.setItem('usuarioId', dados.usuario.id);
+                sessionStorage.setItem('usuarioNome', dados.usuario.nome);
+                sessionStorage.setItem('token', dados.token); 
+                
+                mostrarNotificacao(dados.mensagem, 'sucesso');
+                if (typeof window.carregarAvatarGlobal === 'function') window.carregarAvatarGlobal();
+                verificarSessao(); // Entra no sistema!
+            } else {
+                authMensagem.textContent = dados.erro;
+            }
+        } catch (err) {
+            authMensagem.textContent = 'Erro ao comunicar com servidor Google.';
+        } finally {
+            authSubmitBtn.disabled = false;
+            authSubmitBtn.textContent = 'Entrar no Sistema';
+        }
+    }
 });

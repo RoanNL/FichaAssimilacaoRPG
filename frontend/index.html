@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="./css/styles.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -38,8 +39,7 @@
     <link rel="shortcut icon" href="./assets/icon.jpg" type="image/x-icon">
 </head>
 
-<body class="bg-[#f7f4f0] dark:bg-[#0f172a] text-gray-800 dark:text-gray-200 transition-colors duration-300">
-
+<body class="text-gray-800 dark:text-gray-200 transition-colors duration-300">
     <div id="leaves-container"></div>
     <div id="toast-container" class="fixed top-5 right-5 z-[9999999] flex flex-col gap-2 pointer-events-none"></div>
 
@@ -111,6 +111,12 @@
                     class="w-full bg-rpg-blue hover:bg-rpg-blue-hover text-white font-bold font-rpg py-3 rounded uppercase transition-colors shadow-md cursor-pointer border-none text-lg">
                     Entrar no Sistema
                 </button>
+                
+                <div class="flex items-center my-5 before:flex-1 before:border-t before:border-gray-300 dark:before:border-gray-700 after:flex-1 after:border-t after:border-gray-300 dark:after:border-gray-700">
+                    <p class="text-center font-bold text-gray-500 dark:text-gray-400 text-sm mx-4 uppercase font-rpg">OU</p>
+                </div>
+                
+                <div id="google-btn-container" class="flex justify-center w-full"></div>
             </form>
 
             <form id="recuperar-form" style="display: none;">
@@ -1714,30 +1720,36 @@
     <footer
         class="w-full bg-rpg-paper dark:bg-rpg-paper-dark border-t border-gray-300 dark:border-gray-800 mt-12 py-8 transition-colors duration-300 mt-auto">
         <div class="max-w-[1100px] mx-auto text-center px-4">
-            <h3 class="font-rpg font-black text-xl text-rpg-red dark:text-orange-500 uppercase mb-2 tracking-wider">
+            <h3 class="font-rpg font-black text-xl text-rpg-red dark:text-orange-500 uppercase mb-4 tracking-wider">
                 Assimilação RPG - VTT
             </h3>
-            <p class="font-sans text-gray-600 dark:text-gray-400 text-sm md:text-base font-bold mb-3">
-                Desenvolvido com <i data-lucide="heart"
-                    class="w-4 h-4 inline-block text-rpg-red fill-current align-text-bottom"></i> por <a
-                    href="https://www.linkedin.com/in/roannl" target="_blank"
-                    class="text-rpg-blue hover:text-rpg-blue-hover dark:text-rpg-blue-hover hover:underline transition-colors">Roan
-                    Lisboa</a>
+    
+            
+            <p class="font-sans text-gray-600 dark:text-gray-400 text-sm md:text-base font-bold mb-2 uppercase tracking-wide">
+                Assimilação RPG é um sistema criado por @Rakin e @ViniciusLAUzito. © Todos os direitos reservados.
             </p>
-
-            <p class="font-sans text-gray-600 dark:text-gray-400 text-sm md:text-base font-bold mb-3">
+            <p class="font-sans text-gray-600 dark:text-gray-400 text-sm md:text-base font-bold mb-2 uppercase tracking-wide">
+Este site é conteúdo de fã não oficial e segue as diretrizes de conteúdo permitido. Não aprovado ou endossado por terceiros.
+            </p>
+            
+            
+            <p class="font-sans text-gray-600 dark:text-gray-400 text-sm md:text-base font-bold mb-4 uppercase tracking-wide">
+                Desenvolvido por <a href="https://www.linkedin.com/in/roannl" target="_blank"
+                    class="text-rpg-red hover:text-red-700 dark:text-orange-500 dark:hover:text-orange-400 hover:underline transition-colors">Roan Lisboa</a>
+            </p>
+            <div class="flex text-right gap-4 mt-2">
                 <a href="https://github.com/RoanNL/FichaAssimilacaoRPG" target="_blank"
-                    class="text-rpg-blue hover:text-rpg-blue-hover dark:text-rpg-blue-hover hover:underline transition-colors">Github</a>
-            </p>
-
-            <p class="font-rpg text-xs text-gray-500 dark:text-gray-500">
-                Sistema de Rolagem Dinâmica • Gerenciamento de Fichas • Multiplayer em Tempo Real
-            </p>
+                    class="text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white transition-colors flex items-center gap-1 font-bold uppercase text-sm">
+                    <i class="fa fa-github" style="font-size:36px"></i>
+                </a>
+            </div>
+            
         </div>
     </footer>
 
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 
     <script src="./js/router.js"></script>
     <script src="./js/auth.js"></script>
