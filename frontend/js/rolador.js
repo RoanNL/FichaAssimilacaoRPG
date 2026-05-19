@@ -368,8 +368,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         renderizarRolagem(pacoteDeDados);
 
-        // 🔥 INTEGRAÇÃO ABSOLUTA: Aplica o dano de Pressão automaticamente na Ficha! 🔥
-        if (telaAtual === 'ficha' && pacoteDeDados.totais.pressao > 0) {
+        if (telaAtual === 'ficha' && pacoteDeDados.totais.pressao > 0 && dieCounter.d12 > 0) {
             if (typeof window.aplicarPressaoAutomatica === 'function') {
                 window.aplicarPressaoAutomatica(pacoteDeDados.totais.pressao);
             }
