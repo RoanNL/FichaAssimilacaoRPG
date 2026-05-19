@@ -122,6 +122,7 @@ body {
     background-size: cover;
     background-attachment: fixed;
     background-position: center;
+    background-blend-mode: overlay; /* Mistura a imagem com a cor escura/clara do tema! */
     
     color: var(--color-text-dark);
     padding: 0;
