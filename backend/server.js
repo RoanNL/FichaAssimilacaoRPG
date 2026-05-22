@@ -1027,6 +1027,26 @@ app.post('/campanhas/:id/banner', verificarToken, async (req, res) => {
     }
 });
 
+// 🔥 NOVA ROTA: MESTRE ALTERAR NOME DA CAMPANHA 🔥
+app.put('/campanhas/:id/nome', verificarToken, async (req, res) => {
+    const { nome } = req.body;
+    const campanhaId = req.params.id;
+    const mestreIdSeguro = req.usuario.id;
+
+    if (!nome || nome.trim() === '') return res.status(400).json({ erro: 'O nome não pode ser vazio.' });
+
+    try {
+        const resultCheck = await pool.query('SELECT mestre_id FROM campanhas WHERE id = $1', [campanhaId]);
+        if (resultCheck.rows.length === 0 || resultCheck.rows[0].mestre_id !== mestreIdSeguro) {
+            return res.status(403).json({ erro: 'Apenas o Mestre pode renomear a campanha.' });
+        }
+        await pool.query('UPDATE campanhas SET nome = $1 WHERE id = $2', [nome.trim(), campanhaId]);
+        res.json({ mensagem: 'Nome da campanha atualizado com sucesso!' });
+    } catch (err) {
+        res.status(500).json({ erro: 'Erro ao atualizar o nome.' });
+    }
+});
+
 // =========================================================================
 // Buscar jogadores para o painel de Gerenciamento 
 // =========================================================================

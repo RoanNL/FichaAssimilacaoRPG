@@ -93,6 +93,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (ctrlsPadrao) ctrlsPadrao.classList.add('hidden');
         }
 
+        const btnEditNome = document.getElementById('btn-editar-nome-campanha');
+        if (isMestre) {
+            if (btnEditNome) btnEditNome.classList.remove('hidden');
+        } else {
+            if (btnEditNome) btnEditNome.classList.add('hidden');
+        }
+
         // 🔥 PUXAR A FOTO DO BANNER E A POSIÇÃO 🔥
         try {
             const resBanner = await fetch(`${window.API_URL}/campanhas/${campanhaId}/info`, {
@@ -1116,5 +1123,74 @@ document.addEventListener('DOMContentLoaded', () => {
         
         document.getElementById('modal-escolher-char-entrar').classList.remove('show');
     };
+
+    // ==========================================
+    // EXTRA: RENOMEAR A CAMPANHA (MESTRE VIA MODAL)
+    // ==========================================
+    const btnEditarNomeCamp = document.getElementById('btn-editar-nome-campanha');
+    const modalEditarNomeCamp = document.getElementById('modal-editar-nome-campanha');
+    const inputEditarNomeCamp = document.getElementById('editar-campanha-nome-input');
+    const btnSalvarNomeCamp = document.getElementById('btn-salvar-nome-campanha');
+
+    if (btnEditarNomeCamp && modalEditarNomeCamp && inputEditarNomeCamp) {
+        btnEditarNomeCamp.addEventListener('click', () => {
+            const tituloHtml = document.getElementById('campanha-titulo-view');
+            if (tituloHtml) {
+                // Preenche o input do modal com o nome que já está no banner
+                inputEditarNomeCamp.value = tituloHtml.textContent.trim();
+                modalEditarNomeCamp.classList.add('show');
+                
+                // Dá foco automático no campo de texto para facilitar a digitação
+                setTimeout(() => inputEditarNomeCamp.focus(), 150);
+            }
+        });
+    }
+
+    if (btnSalvarNomeCamp) {
+        btnSalvarNomeCamp.addEventListener('click', async () => {
+            const novoNome = inputEditarNomeCamp.value.trim();
+            const tituloHtml = document.getElementById('campanha-titulo-view');
+            const nomeAtual = tituloHtml ? tituloHtml.textContent.trim() : '';
+
+            // Impede nomes vazios ou puramente espaços
+            if (!novoNome || novoNome === '') {
+                return window.mostrarNotificacao("O nome da mesa não pode ser vazio!", "erro");
+            }
+
+            // Se o nome digitado for igual ao atual, apenas fecha o modal sem gastar requisição
+            if (novoNome === nomeAtual) {
+                modalEditarNomeCamp.classList.remove('show');
+                return;
+            }
+
+            const textoOriginal = btnSalvarNomeCamp.textContent;
+            btnSalvarNomeCamp.textContent = "Salvando...";
+            btnSalvarNomeCamp.disabled = true;
+
+            const campanhaId = sessionStorage.getItem('campanhaAtActive') || sessionStorage.getItem('campanhaAtiva');
+            try {
+                const res = await fetch(`${window.API_URL}/campanhas/${campanhaId}/nome`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionStorage.getItem('token')}` },
+                    body: JSON.stringify({ nome: novoNome })
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    if (tituloHtml) tituloHtml.textContent = novoNome;
+                    sessionStorage.setItem('campanhaNome', novoNome);
+                    window.mostrarNotificacao("Nome da mesa forjado com sucesso!", "sucesso");
+                    modalEditarNomeCamp.classList.remove('show');
+                } else {
+                    window.mostrarNotificacao(data.erro, "erro");
+                }
+            } catch(e) {
+                window.mostrarNotificacao("Erro de conexão.", "erro");
+            } finally {
+                btnSalvarNomeCamp.textContent = textoOriginal;
+                btnSalvarNomeCamp.disabled = false;
+            }
+        });
+    }
 
 });

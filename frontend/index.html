@@ -112,10 +112,12 @@
                     Entrar no Sistema
                 </button>
 
-                <div class="flex items-center my-5 before:flex-1 before:border-t before:border-gray-300 dark:before:border-gray-700 after:flex-1 after:border-t after:border-gray-300 dark:after:border-gray-700">
-                    <p class="text-center font-bold text-gray-500 dark:text-gray-400 text-sm mx-4 uppercase font-rpg">OU</p>
+                <div
+                    class="flex items-center my-5 before:flex-1 before:border-t before:border-gray-300 dark:before:border-gray-700 after:flex-1 after:border-t after:border-gray-300 dark:after:border-gray-700">
+                    <p class="text-center font-bold text-gray-500 dark:text-gray-400 text-sm mx-4 uppercase font-rpg">OU
+                    </p>
                 </div>
-                
+
                 <div id="google-btn-container" class="flex justify-center w-full"></div>
             </form>
 
@@ -201,10 +203,12 @@
                 <ul class="flex gap-4 md:gap-6 list-none m-0 p-0 font-bold uppercase text-sm font-rpg">
                     <li><button onclick="Router.navigate('landing')"
                             class="hover:text-rpg-blue dark:hover:text-orange-500 transition-colors flex items-center gap-1.5"><i
-                                data-lucide="book-open" class="w-4 h-4 md:w-5 md:h-5"></i> <span class="hidden sm:inline">Início</span></button></li>
+                                data-lucide="book-open" class="w-4 h-4 md:w-5 md:h-5"></i> <span
+                                class="hidden sm:inline">Início</span></button></li>
                     <li><button onclick="Router.navigate('dashboard')"
                             class="hover:text-rpg-blue dark:hover:text-orange-500 transition-colors flex items-center gap-1.5"><i
-                                data-lucide="layout-dashboard" class="w-4 h-4 md:w-5 md:h-5"></i> <span class="hidden sm:inline">Jogar</span></button></li>
+                                data-lucide="layout-dashboard" class="w-4 h-4 md:w-5 md:h-5"></i> <span
+                                class="hidden sm:inline">Jogar</span></button></li>
                 </ul>
             </div>
 
@@ -310,8 +314,10 @@
                 <!-- Seção Personagens -->
                 <div
                     class="bg-rpg-paper dark:bg-[#1e293b] p-6 rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm">
-                    <div class="flex flex-col md:flex-row justify-between md:items-center border-b border-gray-300 dark:border-gray-600 pb-3 mb-5 gap-4">
-                        <h2 class="text-2xl font-rpg font-black uppercase m-0 flex items-center gap-2 text-rpg-red dark:text-orange-500 border-none">
+                    <div
+                        class="flex flex-col md:flex-row justify-between md:items-center border-b border-gray-300 dark:border-gray-600 pb-3 mb-5 gap-4">
+                        <h2
+                            class="text-2xl font-rpg font-black uppercase m-0 flex items-center gap-2 text-rpg-red dark:text-orange-500 border-none">
                             <i data-lucide="users" class="w-6 h-6"></i> Meus Personagens
                         </h2>
                         <button id="btn-novo-personagem-dash"
@@ -332,15 +338,21 @@
                 <!-- Seção Campanhas -->
                 <div
                     class="bg-rpg-paper dark:bg-[#1e293b] p-6 rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm">
-                   <div class="flex flex-col md:flex-row justify-between md:items-center border-b border-gray-300 dark:border-gray-600 pb-3 mb-5 gap-4">
-                        <h2 class="text-2xl font-rpg font-black uppercase m-0 flex items-center gap-2 text-rpg-blue dark:text-blue-400 border-none">
+                    <div
+                        class="flex flex-col md:flex-row justify-between md:items-center border-b border-gray-300 dark:border-gray-600 pb-3 mb-5 gap-4">
+                        <h2
+                            class="text-2xl font-rpg font-black uppercase m-0 flex items-center gap-2 text-rpg-blue dark:text-blue-400 border-none">
                             <i data-lucide="map" class="w-6 h-6"></i> Minhas Campanhas
                         </h2>
                         <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
-                            <button class="w-full sm:flex-1 flex justify-center bg-rpg-green hover:bg-green-700 text-white px-4 py-2 rounded font-bold font-rpg uppercase text-sm items-center gap-2 shadow transition-colors"
-                                onclick="document.getElementById('modal-entrar-campanha').classList.add('show')"><i data-lucide="log-in" class="w-4 h-4"></i> Entrar</button>
-                            <button class="w-full sm:flex-1 flex justify-center bg-purple-600 hover:bg-purple-800 text-white px-4 py-2 rounded font-bold font-rpg uppercase text-sm items-center gap-2 shadow transition-colors"
-                                onclick="document.getElementById('modal-criar-campanha').classList.add('show')"><i data-lucide="crown" class="w-4 h-4"></i> Fundar Mesa</button>
+                            <button
+                                class="w-full sm:flex-1 flex justify-center bg-rpg-green hover:bg-green-700 text-white px-4 py-2 rounded font-bold font-rpg uppercase text-sm items-center gap-2 shadow transition-colors"
+                                onclick="document.getElementById('modal-entrar-campanha').classList.add('show')"><i
+                                    data-lucide="log-in" class="w-4 h-4"></i> Entrar</button>
+                            <button
+                                class="w-full sm:flex-1 flex justify-center bg-purple-600 hover:bg-purple-800 text-white px-4 py-2 rounded font-bold font-rpg uppercase text-sm items-center gap-2 shadow transition-colors"
+                                onclick="document.getElementById('modal-criar-campanha').classList.add('show')"><i
+                                    data-lucide="crown" class="w-4 h-4"></i> Fundar Mesa</button>
                         </div>
                     </div>
                     <div id="grid-minhas-campanhas" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -353,7 +365,7 @@
             </div>
 
             <!-- 🏰 TELA 3: LOBBY DA CAMPANHA -->
-           <div id="tela-campanha" class="hidden">
+            <div id="tela-campanha" class="hidden">
 
                 <button onclick="Router.voltar()"
                     class="mb-4 text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white font-bold font-rpg uppercase flex items-center gap-1 transition-colors w-max">
@@ -395,23 +407,35 @@
                         </button>
                     </div>
 
-                    <div class="absolute inset-0 bg-gradient-to-t from-[#121212] via-black/50 to-transparent flex flex-col justify-end p-4 md:p-8 pointer-events-none">
+                    <div
+                        class="absolute inset-0 bg-gradient-to-t from-[#121212] via-black/50 to-transparent flex flex-col justify-end p-4 md:p-8 pointer-events-none">
                         <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 w-full">
-                            
+
                             <div class="w-full md:max-w-[60%] overflow-hidden">
-                                <h1 id="campanha-titulo-view" class="text-3xl sm:text-4xl md:text-5xl font-black font-rpg text-white m-0 uppercase tracking-wide shadow-black drop-shadow-lg truncate">
-                                    Carregando...
-                                </h1>
-                                <p id="campanha-codigo-view" class="text-gray-300 font-bold mt-1 tracking-widest uppercase text-xs md:text-sm drop-shadow-md">
+                                <div class="flex items-center gap-3">
+                                    <h1 id="campanha-titulo-view"
+                                        class="text-3xl sm:text-4xl md:text-5xl font-black font-rpg text-white m-0 uppercase tracking-wide shadow-black drop-shadow-lg truncate">
+                                        Carregando...
+                                    </h1>
+                                    <button id="btn-editar-nome-campanha"
+                                        class="hidden text-gray-300 hover:text-white transition-colors cursor-pointer z-20 pointer-events-auto"
+                                        title="Renomear Campanha">
+                                        <i data-lucide="edit-3" class="w-5 h-5 md:w-6 md:h-6 drop-shadow-md"></i>
+                                    </button>
+                                </div>
+                                <p id="campanha-codigo-view"
+                                    class="text-gray-300 font-bold mt-1 tracking-widest uppercase text-xs md:text-sm drop-shadow-md">
                                     # ---
                                 </p>
                             </div>
 
                             <div id="painel-mestre-botoes" class="hidden flex flex-wrap gap-2 pointer-events-auto">
-                                <button onclick="document.getElementById('modal-pedidos-mesa').classList.add('show'); window.carregarPedidosMesa();"
+                                <button
+                                    onclick="document.getElementById('modal-pedidos-mesa').classList.add('show'); window.carregarPedidosMesa();"
                                     class="relative bg-gray-800 hover:bg-black dark:bg-gray-200 dark:hover:bg-white text-white dark:text-black font-bold py-1.5 md:py-2 px-3 md:px-4 rounded text-xs md:text-sm uppercase font-rpg transition-colors flex items-center gap-1 md:gap-2 shadow-sm">
                                     <i data-lucide="bell" class="w-3.5 h-3.5 md:w-4 md:h-4"></i> Pedidos
-                                    <span id="badge-pedidos" class="hidden absolute -top-2 -right-2 bg-rpg-red text-white text-[10px] font-black px-2 py-0.5 rounded-full animate-bounce shadow">0</span>
+                                    <span id="badge-pedidos"
+                                        class="hidden absolute -top-2 -right-2 bg-rpg-red text-white text-[10px] font-black px-2 py-0.5 rounded-full animate-bounce shadow">0</span>
                                 </button>
                                 <button onclick="document.getElementById('partitura-modal').classList.add('show')"
                                     class="bg-gray-800 hover:bg-black dark:bg-gray-200 dark:hover:bg-white text-white dark:text-black font-bold py-1.5 md:py-2 px-3 md:px-4 rounded text-xs md:text-sm uppercase font-rpg transition-colors flex items-center gap-1 md:gap-2 shadow-sm">
@@ -426,8 +450,10 @@
                     </div>
                 </div>
 
-                <div class="bg-white dark:bg-[#1e293b] p-6 rounded border border-gray-300 dark:border-gray-700 shadow-sm mb-8">
-                    <h2 class="text-xl font-rpg font-black border-b-2 border-rpg-red dark:border-orange-500 mb-4 pb-2 uppercase text-left w-max">
+                <div
+                    class="bg-white dark:bg-[#1e293b] p-6 rounded border border-gray-300 dark:border-gray-700 shadow-sm mb-8">
+                    <h2
+                        class="text-xl font-rpg font-black border-b-2 border-rpg-red dark:border-orange-500 mb-4 pb-2 uppercase text-left w-max">
                         Fichas da Mesa
                     </h2>
                     <div id="grid-fichas-mesa-view" class="flex gap-4 overflow-x-auto pb-4">
@@ -435,12 +461,14 @@
                     </div>
                 </div>
 
-                <div class="bg-white dark:bg-[#1e293b] p-6 rounded border border-gray-300 dark:border-gray-700 shadow-sm">
-                    <h2 class="text-xl font-rpg font-black border-b-2 border-rpg-blue dark:border-blue-500 mb-4 pb-2 uppercase text-left w-max">
+                <div
+                    class="bg-white dark:bg-[#1e293b] p-6 rounded border border-gray-300 dark:border-gray-700 shadow-sm">
+                    <h2
+                        class="text-xl font-rpg font-black border-b-2 border-rpg-blue dark:border-blue-500 mb-4 pb-2 uppercase text-left w-max">
                         Jogadores Conectados
                     </h2>
                     <div id="grid-jogadores-mesa-view" class="flex gap-4 overflow-x-auto pb-4">
-                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -511,11 +539,16 @@
                             <input type="text" id="proposito-coletivo" maxlength="100"
                                 class="w-full font-rpg text-lg px-2 py-1 text-black dark:text-white bg-[#f0f3f5] dark:bg-[#2a2a2a] focus:bg-[#e8eef1] dark:focus:bg-[#333] border-b-2 border-rpg-brown dark:border-[#c59b76] outline-none transition-colors">
                         </div>
-                        <div class="flex items-start md:items-center gap-3 mt-4 bg-gray-100 dark:bg-[#1a1a1a] p-3 rounded border border-gray-300 dark:border-gray-700 w-full lg:w-max shadow-sm">
-                            <input type="checkbox" id="char-is-private" class="w-4 h-4 accent-rpg-red cursor-pointer mt-0.5 md:mt-0 shrink-0">
-                            <label for="char-is-private" class="text-xs font-bold text-gray-500 uppercase cursor-pointer flex flex-col md:flex-row md:items-center gap-1 w-full">
-                                <span class="flex items-center gap-1 shrink-0"><i data-lucide="lock" class="w-4 h-4 text-rpg-red"></i> Ficha Privada</span>
-                                <span class="text-[11px] md:text-xs normal-case tracking-normal text-gray-400 md:ml-1 leading-tight">
+                        <div
+                            class="flex items-start md:items-center gap-3 mt-4 bg-gray-100 dark:bg-[#1a1a1a] p-3 rounded border border-gray-300 dark:border-gray-700 w-full lg:w-max shadow-sm">
+                            <input type="checkbox" id="char-is-private"
+                                class="w-4 h-4 accent-rpg-red cursor-pointer mt-0.5 md:mt-0 shrink-0">
+                            <label for="char-is-private"
+                                class="text-xs font-bold text-gray-500 uppercase cursor-pointer flex flex-col md:flex-row md:items-center gap-1 w-full">
+                                <span class="flex items-center gap-1 shrink-0"><i data-lucide="lock"
+                                        class="w-4 h-4 text-rpg-red"></i> Ficha Privada</span>
+                                <span
+                                    class="text-[11px] md:text-xs normal-case tracking-normal text-gray-400 md:ml-1 leading-tight">
                                     (Ocultar para outros jogadores)
                                 </span>
                             </label>
@@ -527,36 +560,45 @@
                         class="col-span-1 self-start bg-rpg-paper dark:bg-rpg-paper-dark p-6 rounded shadow-sm border border-gray-300 dark:border-gray-800">
                         <h2 class="border-none mt-0 mb-4 text-center">Aptidões</h2>
 
-                        <div class="grupo-aptidoes" id="secao-instintos">
+                        <div class="grupo-aptidoes"
+                            title="Os Instintos representam as características inerentes dos seres vivos, seja através de força muscular, raciocínio, ou até mesmo os 5 sentidos. Estes são os atributos que regem o mundo animal. Animais possuem mais pontos nessas Aptidões e tendem a usá-las de maneira mais natural. O parasita dentro de todos os Infectados não tem Práticas ou Conhecimentos, mas é muito mais conectado aos seus Instintos que o homem moderno. Ao Agir por Instinto, executando assim uma Rolagem Assimilada, o(a) Infectado(a) elege dois Instintos para o teste e ignora suas outras Aptidões."
+                            id="secao-instintos">
                             <h3 class="dark:text-rpg-blue">Instintos <i data-lucide="square"
-                                    class="w-4 h-4 inline-block opacity-100 text-rpg-red dark:text-rpg-blue align-baseline"></i></h3>
+                                    class="w-4 h-4 inline-block opacity-100 text-rpg-red dark:text-rpg-blue align-baseline"></i>
+                            </h3>
                             <div class="aptidoes-grid">
-                                <div class="aptidao-box"><label>Influência</label>
+                                <div class="aptidao-box"><label
+                                        title="A capacidade dos Infectados de influenciar outras pessoas. Seu magnetismo pessoal, carisma, habilidade com palavras e liderança. Inclui a capacidade de intimidar ameaças e sua credibilidade. Pode ser testada em ações ou percepções de terceiros que envolvam aparência, olhares, cheiros, palavras, gestos e afins.">Influência</label>
                                     <div class="dots-track-1"><input type="checkbox" id="inf-1" checked><input
                                             type="checkbox" id="inf-2"><input type="checkbox" id="inf-3"><input
                                             type="checkbox" id="inf-4"><input type="checkbox" id="inf-5"></div>
                                 </div>
-                                <div class="aptidao-box"><label>Percepção</label>
+                                <div class="aptidao-box"><label
+                                        title="Rege a capacidade sensorial dos Infectados, incluindo sentidos e atenção. Usado em testes para perceber nuances, notar detalhes, enxergar longas distâncias, identificar odores e até mesmo pontaria.">Percepção</label>
                                     <div class="dots-track-1"><input type="checkbox" id="per-1" checked><input
                                             type="checkbox" id="per-2"><input type="checkbox" id="per-3"><input
                                             type="checkbox" id="per-4"><input type="checkbox" id="per-5"></div>
                                 </div>
-                                <div class="aptidao-box"><label>Potência</label>
+                                <div class="aptidao-box"><label
+                                        title="Capacidade de exercer força física e resistir a pressões externas. Mede seu poder físico, incluindo a capacidade de realizar movimentos rápidos e potentes. É o atributo que define tanto a força bruta quanto a capacidade de tração e explosão, combinando potência muscular e agilidade dinâmica.">Potência</label>
                                     <div class="dots-track-1"><input type="checkbox" id="pot-1" checked><input
                                             type="checkbox" id="pot-2"><input type="checkbox" id="pot-3"><input
                                             type="checkbox" id="pot-4"><input type="checkbox" id="pot-5"></div>
                                 </div>
-                                <div class="aptidao-box"><label>Reação</label>
+                                <div class="aptidao-box"><label
+                                        title="Instinto básico que mede a velocidade e precisão das reações dos Infectados. Geralmente é posto à prova em situações em que a personagem precise agir rapidamente e não tenha se preparado.">Reação</label>
                                     <div class="dots-track-1"><input type="checkbox" id="rea-1" checked><input
                                             type="checkbox" id="rea-2"><input type="checkbox" id="rea-3"><input
                                             type="checkbox" id="rea-4"><input type="checkbox" id="rea-5"></div>
                                 </div>
-                                <div class="aptidao-box"><label>Resolução</label>
+                                <div class="aptidao-box"><label
+                                        title="Resistência física, resiliência mental e empenho. Representa a capacidade dos Infectados de resistir à pressão psicológica e suas resistências físicas e fisiológica.">Resolução</label>
                                     <div class="dots-track-1"><input type="checkbox" id="res-1" checked><input
                                             type="checkbox" id="res-2"><input type="checkbox" id="res-3"><input
                                             type="checkbox" id="res-4"><input type="checkbox" id="res-5"></div>
                                 </div>
-                                <div class="aptidao-box"><label>Sagacidade</label>
+                                <div class="aptidao-box"><label
+                                        title="Facilidade para entender e interpretar informações, explicações ou situações, deduzir ou concluir  resultados; agudeza de espírito; perspicácia, argúcia, astúcia.">Sagacidade</label>
                                     <div class="dots-track-1"><input type="checkbox" id="sag-1" checked><input
                                             type="checkbox" id="sag-2"><input type="checkbox" id="sag-3"><input
                                             type="checkbox" id="sag-4"><input type="checkbox" id="sag-5"></div>
@@ -564,36 +606,45 @@
                             </div>
                         </div>
 
-                        <div class="grupo-aptidoes" id="secao-conhecimentos">
+                        <div class="grupo-aptidoes"
+                            title="Os Conhecimentos são adquiridos através de longo período de investigação e estudo. Conhecimentos também podem ser usados em testes ativos para realizar algo, como um teste de Biologia para construir uma pequena fazenda ou Erudição para não violar nenhum costume em interação com um grupo de cultura muito diferente. Animais não possuem níveis nessas aptidões."
+                            id="secao-conhecimentos">
                             <h3 class="dark:text-rpg-blue">Conhecimentos <i data-lucide="diamond"
-                                    class="w-4 h-4 inline-block opacity-100 text-rpg-red dark:text-rpg-blue align-baseline"></i></h3>
+                                    class="w-4 h-4 inline-block opacity-100 text-rpg-red dark:text-rpg-blue align-baseline"></i>
+                            </h3>
                             <div class="aptidoes-grid">
-                                <div class="aptidao-box"><label>Biologia</label>
+                                <div class="aptidao-box"><label
+                                        title="O campo do conhecimento que estuda a vida em todas as suas formas e como elas interagem com o meio ambiente. Inclui o estudo biológico do ser humano, a fauna, a flora e outros seres vivos. Além disso, abrange a química orgânica, que investiga a estrutura, propriedades e reações dos compostos químicos que formam a base da vida. Essa aptidão é voltada para a pesquisa sobre a origem, evolução, adaptação e o funcionamento dos organismos.">Biologia</label>
                                     <div class="dots-track"><input type="checkbox" id="bio-1"><input type="checkbox"
                                             id="bio-2"><input type="checkbox" id="bio-3"><input type="checkbox"
                                             id="bio-4"><input type="checkbox" id="bio-5"></div>
                                 </div>
-                                <div class="aptidao-box"><label>Erudição</label>
+                                <div class="aptidao-box"><label
+                                        title="História humana, culturas, artes, ciências políticas, filosofia, sociologia e psicologia são os principais conhecimentos eruditos. Além do conhecimento teórico, rege prática de exercícios de manutenção da saúde mental, trabalhos artísticos e facilita a compreensão da cultura e características de civilizações presentes e passadas.">Erudição</label>
                                     <div class="dots-track"><input type="checkbox" id="eru-1"><input type="checkbox"
                                             id="eru-2"><input type="checkbox" id="eru-3"><input type="checkbox"
                                             id="eru-4"><input type="checkbox" id="eru-5"></div>
                                 </div>
-                                <div class="aptidao-box"><label>Engenharia</label>
+                                <div class="aptidao-box"><label
+                                        title="Conhecimentos técnicos e científicos sobre Matemática, Física, Química Inorgânica e Engenharia. Essa aptidão abrange a aplicação prática de princípios matemáticos e físicos para projetar, construir e manter estruturas, máquinas, sistemas e processos. Inclui desde a construção de pontes e edifícios até a criação de tecnologias avançadas e a resolução de problemas complexos por meio de cálculos precisos e método científico.">Engenharia</label>
                                     <div class="dots-track"><input type="checkbox" id="eng-1"><input type="checkbox"
                                             id="eng-2"><input type="checkbox" id="eng-3"><input type="checkbox"
                                             id="eng-4"><input type="checkbox" id="eng-5"></div>
                                 </div>
-                                <div class="aptidao-box"><label>Geografia</label>
+                                <div class="aptidao-box"><label
+                                        title="Investigações sobre a Terra, seus fenômenos naturais e a interação entre o ambiente e as sociedades humanas. Inclui o estudo de mapas, climas, ecossistemas, relevos e recursos naturais. ajudando a entender como as civilizações se adaptam e transformam o espaço geográfico.">Geografia</label>
                                     <div class="dots-track"><input type="checkbox" id="geo-1"><input type="checkbox"
                                             id="geo-2"><input type="checkbox" id="geo-3"><input type="checkbox"
                                             id="geo-4"><input type="checkbox" id="geo-5"></div>
                                 </div>
-                                <div class="aptidao-box"><label>Medicina</label>
+                                <div class="aptidao-box"><label
+                                        title="Conhecimento sobre saúde humana e suas áreas conectadas, inclui também a medicina veterinária. Além do conhecimento teórico, inclui a prática de tratamentos relacionados, como diagnóstico, cirurgia, prescrição de medicamentos e reabilitação. Essa aptidão é essencial para a cura de doenças, a manutenção da saúde e a compreensão do funcionamento do corpo humano e animal.">Medicina</label>
                                     <div class="dots-track"><input type="checkbox" id="med-1"><input type="checkbox"
                                             id="med-2"><input type="checkbox" id="med-3"><input type="checkbox"
                                             id="med-4"><input type="checkbox" id="med-5"></div>
                                 </div>
-                                <div class="aptidao-box"><label>Segurança</label>
+                                <div class="aptidao-box"><label
+                                        title="Conhecimento que engloba medidas de segurança. De mecanismos rudimentares até os mais complexos, incluindo avaliação de riscos, manutenção preventiva e proteção contra ameaças. Em um mundo pós apocalíptico, essa Aptidão é essencial para garantir a sobrevivência, proteger recursos e evitar desastres. Inclui a criação de barreiras físicas, sistemas de alarme, armadilhas e rotinas de segurança para situações cotidianas ou extremas.">Segurança</label>
                                     <div class="dots-track"><input type="checkbox" id="seg-1"><input type="checkbox"
                                             id="seg-2"><input type="checkbox" id="seg-3"><input type="checkbox"
                                             id="seg-4"><input type="checkbox" id="seg-5"></div>
@@ -601,36 +652,43 @@
                             </div>
                         </div>
 
-                        <div class="grupo-aptidoes " id="secao-praticas">
+                        <div class="grupo-aptidoes" title="As Práticas regem as Aptidões desenvolvidas e exercitáveis por treino e/ou prática recorrente. Pode estar relacionado ou não com o uso de objetos e outras ferramentas." id="secao-praticas">
                             <h3 class="dark:text-rpg-blue">Práticas <i data-lucide="diamond"
-                                    class="w-4 h-4 inline-block opacity-100 text-rpg-red dark:text-rpg-blue align-baseline"></i></h3>
+                                    class="w-4 h-4 inline-block opacity-100 text-rpg-red dark:text-rpg-blue align-baseline"></i>
+                            </h3>
                             <div class="aptidoes-grid">
-                                <div class="aptidao-box"><label>Armas</label>
+                                <div class="aptidao-box"><label
+                                        title="Prática relacionada ao uso eficiente de armas, sejam elas brancas (facas, espadas) ou de fogo (pistolas, rifles). Inclui técnicas de combate, precisão, manutenção e adaptação a diferentes tipos de armamento.">Armas</label>
                                     <div class="dots-track"><input type="checkbox" id="arm-1"><input type="checkbox"
                                             id="arm-2"><input type="checkbox" id="arm-3"><input type="checkbox"
                                             id="arm-4"><input type="checkbox" id="arm-5"></div>
                                 </div>
-                                <div class="aptidao-box"><label>Atletismo</label>
+                                <div class="aptidao-box"><label
+                                        title="Prática relacionada ao condicionamento físico, incluindo corrida, salto, natação e outras atividades  que exigem força, agilidade e resistência. É essencial para superar obstáculos físicos e manter o corpo em forma.">Atletismo</label>
                                     <div class="dots-track"><input type="checkbox" id="atl-1"><input type="checkbox"
                                             id="atl-2"><input type="checkbox" id="atl-3"><input type="checkbox"
                                             id="atl-4"><input type="checkbox" id="atl-5"></div>
                                 </div>
-                                <div class="aptidao-box"><label>Expressão</label>
+                                <div class="aptidao-box"><label
+                                        title="Prática relacionada à comunicação e à arte, incluindo oratória, escrita, música, dança e outras formas de expressão criativa. É usada para influenciar, emocionar e transmitir ideias.">Expressão</label>
                                     <div class="dots-track"><input type="checkbox" id="exp-1"><input type="checkbox"
                                             id="exp-2"><input type="checkbox" id="exp-3"><input type="checkbox"
                                             id="exp-4"><input type="checkbox" id="exp-5"></div>
                                 </div>
-                                <div class="aptidao-box"><label>Furtividade</label>
+                                <div class="aptidao-box"><label
+                                        title="Prática relacionada à capacidade de se mover silenciosamente, passar despercebido, esconder objetos e realizar ações sem chamar atenção. Inclui técnicas de camuflagem, infiltração, evasão e ocultação de itens em locais estratégicos.">Furtividade</label>
                                     <div class="dots-track"><input type="checkbox" id="fur-1"><input type="checkbox"
                                             id="fur-2"><input type="checkbox" id="fur-3"><input type="checkbox"
                                             id="fur-4"><input type="checkbox" id="fur-5"></div>
                                 </div>
-                                <div class="aptidao-box"><label>Manufaturas</label>
+                                <div class="aptidao-box"><label
+                                        title="Prática relacionada à criação, reparo e modificação de objetos, ferramentas e estruturas. Inclui habilidades como carpintaria, metalurgia, costura e engenharia prática.">Manufaturas</label>
                                     <div class="dots-track"><input type="checkbox" id="man-1"><input type="checkbox"
                                             id="man-2"><input type="checkbox" id="man-3"><input type="checkbox"
                                             id="man-4"><input type="checkbox" id="man-5"></div>
                                 </div>
-                                <div class="aptidao-box"><label>Sobrevivência</label>
+                                <div class="aptidao-box"><label
+                                        title="Prática relacionada à capacidade de sobreviver em ambientes hostis, incluindo técnicas de caça, pesca, construção de abrigos, obtenção de água e fogo, e identificação de perigos naturais.">Sobrevivência</label>
                                     <div class="dots-track"><input type="checkbox" id="sob-1"><input type="checkbox"
                                             id="sob-2"><input type="checkbox" id="sob-3"><input type="checkbox"
                                             id="sob-4"><input type="checkbox" id="sob-5"></div>
@@ -1071,30 +1129,38 @@
 
     <!-- MODAL: ENTRAR NA MESA -->
     <div id="modal-entrar-campanha" class="modal z-[99999]">
-        <div class="modal-content bg-rpg-paper dark:bg-[#1e293b] border-2 border-rpg-green rounded-md p-6 max-w-[400px] w-[90%] text-center shadow-xl">
-            <h3 class="text-2xl font-rpg font-black text-rpg-green uppercase mb-2 flex justify-center items-center gap-2">
+        <div
+            class="modal-content bg-rpg-paper dark:bg-[#1e293b] border-2 border-rpg-green rounded-md p-6 max-w-[400px] w-[90%] text-center shadow-xl">
+            <h3
+                class="text-2xl font-rpg font-black text-rpg-green uppercase mb-2 flex justify-center items-center gap-2">
                 <i data-lucide="log-in" class="w-6 h-6"></i> Entrar na Mesa
             </h3>
             <p class="text-gray-600 dark:text-gray-400 mb-4">Insira o código fornecido pelo seu mestre.</p>
-            
+
             <input type="text" id="codigo-convite-input" placeholder="EX: A7X9P2" maxlength="6"
                 class="w-full bg-white dark:bg-[#0f172a] border border-gray-400 dark:border-gray-600 rounded p-2 text-center text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-green mb-4 font-black tracking-widest uppercase">
-            
+
             <!-- Select Invisível (Mantém a lógica do seu dashboard.js intacta!) -->
             <select id="char-select-campanha" class="hidden">
                 <option value="">-- Selecione seu Personagem --</option>
             </select>
 
             <!-- Novo Input Visual Estilizado -->
-            <div id="char-selecionado-display" class="w-full mb-6 p-2 bg-white dark:bg-[#0f172a] border border-gray-400 dark:border-gray-600 rounded flex items-center justify-between cursor-pointer hover:border-rpg-green focus:ring-2 focus:ring-rpg-green transition-all shadow-sm" onclick="document.getElementById('modal-escolher-char-entrar').classList.add('show'); if(window.carregarCharsParaConvite) window.carregarCharsParaConvite();">
+            <div id="char-selecionado-display"
+                class="w-full mb-6 p-2 bg-white dark:bg-[#0f172a] border border-gray-400 dark:border-gray-600 rounded flex items-center justify-between cursor-pointer hover:border-rpg-green focus:ring-2 focus:ring-rpg-green transition-all shadow-sm"
+                onclick="document.getElementById('modal-escolher-char-entrar').classList.add('show'); if(window.carregarCharsParaConvite) window.carregarCharsParaConvite();">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded bg-gray-200 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 flex items-center justify-center overflow-hidden shadow-inner flex-shrink-0">
+                    <div
+                        class="w-10 h-10 rounded bg-gray-200 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 flex items-center justify-center overflow-hidden shadow-inner flex-shrink-0">
                         <i data-lucide="user" id="icone-char-default" class="w-5 h-5 text-gray-400"></i>
                         <img id="char-selecionado-img" src="" class="hidden w-full h-full object-cover">
                     </div>
                     <div class="text-left flex flex-col justify-center overflow-hidden">
-                        <p id="char-selecionado-nome" class="font-bold text-gray-800 dark:text-white text-sm uppercase font-rpg m-0 truncate">Selecionar Ficha</p>
-                        <p class="text-[10px] text-rpg-green uppercase font-black m-0 tracking-widest mt-0.5">Clique para abrir o acervo</p>
+                        <p id="char-selecionado-nome"
+                            class="font-bold text-gray-800 dark:text-white text-sm uppercase font-rpg m-0 truncate">
+                            Selecionar Ficha</p>
+                        <p class="text-[10px] text-rpg-green uppercase font-black m-0 tracking-widest mt-0.5">Clique
+                            para abrir o acervo</p>
                     </div>
                 </div>
                 <i data-lucide="chevron-down" class="w-5 h-5 text-gray-500 mr-2 flex-shrink-0"></i>
@@ -1102,10 +1168,12 @@
 
             <!-- 🔥 OS BOTÕES DE CANCELAR E ENTRAR VOLTARAM! 🔥 -->
             <div class="flex gap-4">
-                <button class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded w-1/2 transition-colors uppercase font-rpg"
+                <button
+                    class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded w-1/2 transition-colors uppercase font-rpg"
                     onclick="document.getElementById('modal-entrar-campanha').classList.remove('show')">Cancelar</button>
                 <button id="btn-entrar-campanha"
-                    class="bg-rpg-green hover:bg-green-700 text-white font-bold py-3 px-4 rounded w-1/2 transition-colors uppercase font-rpg flex justify-center items-center gap-2"><i data-lucide="door-open" class="w-5 h-5"></i> Entrar</button>
+                    class="bg-rpg-green hover:bg-green-700 text-white font-bold py-3 px-4 rounded w-1/2 transition-colors uppercase font-rpg flex justify-center items-center gap-2"><i
+                        data-lucide="door-open" class="w-5 h-5"></i> Entrar</button>
             </div>
         </div>
     </div>
@@ -1113,34 +1181,45 @@
     <!-- ==========================================
          SIDEBAR: TERMINAL DE DADOS 
          ========================================== -->
-    <div id="game-log-sidebar" class="fixed right-0 top-[10vh] h-[90vh] w-[380px] max-w-[90vw] bg-[#f4f1ea] dark:bg-[#121212] shadow-2xl transform translate-x-full transition-transform duration-300 z-[999999] flex flex-col border-y border-l border-gray-300 dark:border-gray-800 rounded-l-2xl overflow-hidden">
-        
+    <div id="game-log-sidebar"
+        class="fixed right-0 top-[10vh] h-[90vh] w-[380px] max-w-[90vw] bg-[#f4f1ea] dark:bg-[#121212] shadow-2xl transform translate-x-full transition-transform duration-300 z-[999999] flex flex-col border-y border-l border-gray-300 dark:border-gray-800 rounded-l-2xl overflow-hidden">
+
         <!-- Cabeçalho -->
-        <div class="flex justify-between items-center p-4 border-b border-gray-300 dark:border-gray-800 bg-white dark:bg-[#1a1a1a] shadow-sm shrink-0">
-            <h2 class="font-black font-rpg text-xl uppercase text-rpg-red dark:text-red-500 flex items-center gap-2 m-0">
-                <img src="./assets/rolador-bola.png" alt="circulo de rolagem de dados"
-                                class="w-10 h-10 object-contain"> Terminal de dados <img src="./assets/rolador-bola.png" alt="circulo de rolagem de dados"
-                                class="w-10 h-10 object-contain">
+        <div
+            class="flex justify-between items-center p-4 border-b border-gray-300 dark:border-gray-800 bg-white dark:bg-[#1a1a1a] shadow-sm shrink-0">
+            <h2
+                class="font-black font-rpg text-xl uppercase text-rpg-red dark:text-red-500 flex items-center gap-2 m-0">
+                <img src="./assets/rolador-bola.png" alt="circulo de rolagem de dados" class="w-10 h-10 object-contain">
+                Terminal de dados <img src="./assets/rolador-bola.png" alt="circulo de rolagem de dados"
+                    class="w-10 h-10 object-contain">
             </h2>
-            <button onclick="document.getElementById('game-log-sidebar').classList.add('translate-x-full'); if(window.limparRoladorLocal) window.limparRoladorLocal();" class="text-gray-500 hover:text-rpg-red transition-colors cursor-pointer outline-none">
+            <button
+                onclick="document.getElementById('game-log-sidebar').classList.add('translate-x-full'); if(window.limparRoladorLocal) window.limparRoladorLocal();"
+                class="text-gray-500 hover:text-rpg-red transition-colors cursor-pointer outline-none">
                 <i data-lucide="x" class="w-6 h-6"></i>
             </button>
         </div>
 
         <!-- Controles de Rolagem Manual -->
-        <div class="p-4 border-b border-gray-300 dark:border-gray-800 bg-gray-50 dark:bg-[#1a1a1a] shrink-0 flex flex-col gap-3 shadow-sm z-10">
+        <div
+            class="p-4 border-b border-gray-300 dark:border-gray-800 bg-gray-50 dark:bg-[#1a1a1a] shrink-0 flex flex-col gap-3 shadow-sm z-10">
             <!-- O aviso de Rolagem Assimilada nascerá aqui dentro! -->
-            <div id="aviso-assimilada-container"></div> 
-            
+            <div id="aviso-assimilada-container"></div>
+
             <div class="flex gap-2 w-full">
                 <input type="text" id="rolador-input" placeholder="Ex: 2d6 1d10" autocomplete="off"
                     class="w-full p-2.5 text-center text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-[#242424] text-black dark:text-white outline-none focus:border-rpg-red focus:ring-1 focus:ring-rpg-red font-rpg font-bold uppercase tracking-widest shadow-inner">
-                <button id="rolador-btn-rolar" class="bg-rpg-red hover:bg-red-800 text-white font-bold p-2.5 rounded transition-colors shadow-md outline-none"><i data-lucide="dices" class="w-5 h-5"></i></button>
-                <button id="rolador-btn-limpar" class="bg-gray-600 hover:bg-gray-800 text-white font-bold p-2.5 rounded transition-colors shadow-md outline-none" title="Limpar Histórico Local"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                <button id="rolador-btn-rolar"
+                    class="bg-rpg-red hover:bg-red-800 text-white font-bold p-2.5 rounded transition-colors shadow-md outline-none"><i
+                        data-lucide="dices" class="w-5 h-5"></i></button>
+                <button id="rolador-btn-limpar"
+                    class="bg-gray-600 hover:bg-gray-800 text-white font-bold p-2.5 rounded transition-colors shadow-md outline-none"
+                    title="Limpar Histórico Local"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
             </div>
-            
+
             <div class="relative w-full">
-                <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+                <i data-lucide="search"
+                    class="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
                 <input type="text" id="filtro-historico" placeholder="Filtrar rolagem..." autocomplete="off"
                     class="w-full py-1.5 pl-9 pr-3 text-xs rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#242424] text-gray-800 dark:text-white font-sans outline-none focus:border-rpg-blue focus:ring-1 focus:ring-rpg-blue">
             </div>
@@ -1150,34 +1229,43 @@
         <div id="rolador-resultados-atuais" class="shrink-0 bg-gray-100 dark:bg-[#111] px-4"></div>
 
         <!-- Área Infinita do Histórico -->
-        <div id="rolador-historico" class="flex-grow overflow-y-auto p-4 flex flex-col gap-4 bg-gray-100 dark:bg-[#121212] pb-20 relative">
+        <div id="rolador-historico"
+            class="flex-grow overflow-y-auto p-4 flex flex-col gap-4 bg-gray-100 dark:bg-[#121212] pb-20 relative">
             <p class="text-center text-gray-400 text-xs italic font-bold">O destino aguarda os dados...</p>
         </div>
 
         <!-- O aviso de Rolagem Assimilada nascerá aqui dentro! -->
-            <div id="aviso-assimilada-container"></div> 
-            
-            <!-- 🔥 TOGGLE DE ROLAGEM SECRETA (SÓ APARECE PARA O MESTRE) 🔥 -->
-            <div id="container-rolagem-mestre" class="hidden justify-between items-center bg-gray-200 dark:bg-[#111] p-2 rounded border border-gray-300 dark:border-gray-700 shadow-inner">
-                <span class="text-[10px] uppercase font-bold text-gray-600 dark:text-gray-400 flex items-center gap-1" title="Se ativo, os jogadores não verão esta rolagem.">
-                    <i data-lucide="eye-off" class="w-3 h-3 text-rpg-red"></i> Rolar em Segredo
-                </span>
-                <label class="relative inline-flex items-center cursor-pointer">
-                    <!-- Marcado por padrão: O Mestre rola no escuro até que ele decida se revelar! -->
-                    <input type="checkbox" id="toggle-rolagem-mestre" class="sr-only peer" checked>
-                    <div class="w-9 h-5 bg-gray-400 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rpg-red"></div>
-                </label>
-            </div>
+        <div id="aviso-assimilada-container"></div>
+
+        <!-- 🔥 TOGGLE DE ROLAGEM SECRETA (SÓ APARECE PARA O MESTRE) 🔥 -->
+        <div id="container-rolagem-mestre"
+            class="hidden justify-between items-center bg-gray-200 dark:bg-[#111] p-2 rounded border border-gray-300 dark:border-gray-700 shadow-inner">
+            <span class="text-[10px] uppercase font-bold text-gray-600 dark:text-gray-400 flex items-center gap-1"
+                title="Se ativo, os jogadores não verão esta rolagem.">
+                <i data-lucide="eye-off" class="w-3 h-3 text-rpg-red"></i> Rolar em Segredo
+            </span>
+            <label class="relative inline-flex items-center cursor-pointer">
+                <!-- Marcado por padrão: O Mestre rola no escuro até que ele decida se revelar! -->
+                <input type="checkbox" id="toggle-rolagem-mestre" class="sr-only peer" checked>
+                <div
+                    class="w-9 h-5 bg-gray-400 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rpg-red">
+                </div>
+            </label>
+        </div>
 
     </div>
 
     <!-- ==========================================
          MODAL: ESCOLHER PERSONAGEM PARA ENTRAR NA MESA
          ========================================== -->
-    <div id="modal-escolher-char-entrar" class="modal z-[9999999]"> 
-        <div class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border-2 border-rpg-green rounded-md p-6 max-w-[500px] w-[95%] shadow-2xl relative max-h-[85vh] flex flex-col">
-            <span class="absolute top-4 right-6 text-gray-500 hover:text-rpg-red text-3xl font-bold cursor-pointer transition-colors" onclick="document.getElementById('modal-escolher-char-entrar').classList.remove('show')">&times;</span>
-            <h2 class="text-2xl font-black font-rpg text-rpg-green dark:text-green-500 uppercase mb-4 border-b border-gray-300 dark:border-gray-700 pb-2 flex items-center gap-2">
+    <div id="modal-escolher-char-entrar" class="modal z-[9999999]">
+        <div
+            class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border-2 border-rpg-green rounded-md p-6 max-w-[500px] w-[95%] shadow-2xl relative max-h-[85vh] flex flex-col">
+            <span
+                class="absolute top-4 right-6 text-gray-500 hover:text-rpg-red text-3xl font-bold cursor-pointer transition-colors"
+                onclick="document.getElementById('modal-escolher-char-entrar').classList.remove('show')">&times;</span>
+            <h2
+                class="text-2xl font-black font-rpg text-rpg-green dark:text-green-500 uppercase mb-4 border-b border-gray-300 dark:border-gray-700 pb-2 flex items-center gap-2">
                 <i data-lucide="users" class="w-6 h-6"></i> Quem vai entrar?
             </h2>
 
@@ -1557,6 +1645,28 @@
         </div>
     </div>
 
+    <div id="modal-editar-nome-campanha" class="modal z-[99999]">
+        <div class="modal-content bg-rpg-paper dark:bg-[#1e293b] border-2 border-rpg-blue rounded-md p-6 max-w-[400px] w-[90%] text-center shadow-xl relative">
+            <span class="absolute top-4 right-6 text-gray-500 hover:text-rpg-red text-3xl font-bold cursor-pointer transition-colors"
+                onclick="document.getElementById('modal-editar-nome-campanha').classList.remove('show')">&times;</span>
+            
+            <h3 class="text-2xl font-black font-rpg text-rpg-blue uppercase mb-2 flex justify-center items-center gap-2">
+                <i data-lucide="edit-3" class="w-6 h-6"></i> Renomear Mesa
+            </h3>
+            <p class="text-gray-600 dark:text-gray-400 mb-4 text-sm font-bold">Escolha um novo nome para a sua campanha.</p>
+            
+            <input type="text" id="editar-campanha-nome-input" placeholder="Novo nome da mesa..."
+                class="w-full bg-white dark:bg-[#0f172a] border border-gray-400 dark:border-gray-600 rounded p-2 text-center text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-blue mb-4 font-bold">
+            
+            <div class="flex gap-2">
+                <button type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded w-1/2 transition-colors uppercase font-rpg text-sm cursor-pointer"
+                    onclick="document.getElementById('modal-editar-nome-campanha').classList.remove('show')">Cancelar</button>
+                <button type="button" id="btn-salvar-nome-campanha"
+                    class="bg-rpg-blue hover:bg-[#2c6270] text-white font-bold py-2 px-4 rounded w-1/2 transition-colors uppercase font-rpg text-sm cursor-pointer">Salvar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- ==========================================
          MODAL: DESTRUIR REFÚGIO (SEGURANÇA MÁXIMA)
          ========================================== -->
@@ -1717,44 +1827,55 @@
         </div>
     </div>
 
-    <a href="https://ko-fi.com/naorend" target="_blank" 
-       class="fixed bottom-6 left-6 z-[9999] shadow-lg hover:scale-105 transition-transform duration-200">
-        <img src="./assets/support_me_on_kofi_beige.png" 
-             alt="Support me" 
-             class="h-20 w-auto p-3 rounded-full hidden dark:block">
-        <img src="./assets/support_me_on_kofi_dark.png" 
-             alt="Support me" 
-             class="h-20 w-auto p-3 rounded-full dark:hidden">
+    <a href="https://ko-fi.com/naorend" target="_blank"
+        class="fixed bottom-6 left-6 z-[9999] shadow-lg hover:scale-105 transition-transform duration-200">
+        <img src="./assets/support_me_on_kofi_beige.png" alt="Support me"
+            class="h-20 w-auto p-3 rounded-full hidden dark:block">
+        <img src="./assets/support_me_on_kofi_dark.png" alt="Support me"
+            class="h-20 w-auto p-3 rounded-full dark:hidden">
     </a>
 
-   <footer class="w-full dark:bg-[#121212] bg-[#ffffff] border-t border-gray-800 mt-12 py-8 text-gray-400 dark:text-white transition-colors duration-300 mt-auto">
+    <footer
+        class="w-full dark:bg-[#121212] bg-[#ffffff] border-t border-gray-800 mt-12 py-8 text-gray-400 dark:text-white transition-colors duration-300 mt-auto">
         <div class="max-w-[1100px] mx-auto px-6">
-            
+
             <div class="flex flex-col md:flex-row justify-between mb-8 gap-6 text-sm">
                 <div class="flex flex-col gap-2">
-                    <a href="https://x.com/AssimilacaoRPG" target="_blank" class="hover:text-black transition-colors dark:hover:text-white">Sobre o RPG de Assimilação</a>
-                    <a href="https://newordereditora.com/selo/assimilacao/" target="_blank" class="hover:text-black transition-color dark:hover:text-white">Apoie Assimilação</a>
+                    <a href="https://x.com/AssimilacaoRPG" target="_blank"
+                        class="hover:text-black transition-colors dark:hover:text-white">Sobre o RPG de Assimilação</a>
+                    <a href="https://newordereditora.com/selo/assimilacao/" target="_blank"
+                        class="hover:text-black transition-color dark:hover:text-white">Apoie Assimilação</a>
                 </div>
                 <div class="flex flex-col gap-2">
                     <a href="#" class="hover:text-black transition-colors dark:hover:text-white">Entre em Contato</a>
-                    <a href="#" class="hover:text-black transition-colors dark:hover:text-white">Política de Privacidade</a>
+                    <a href="#" class="hover:text-black transition-colors dark:hover:text-white">Política de
+                        Privacidade</a>
                 </div>
                 <div class="text-gray-500 font-bold">
                     Powered by NaorEnd.
                 </div>
             </div>
 
-            <div class="flex justify-start md:justify-end gap-6 text-xl mb-8 border-b border-gray-800 dark:border-white pb-6 text-gray-400">
-                <a href="https://assimilacao.fandom.com/pt-br/wiki/Assimila%C3%A7%C3%A3o_Wiki" target="_blank" class="hover:text-black transition-colors dark:hover:text-white"><i class="fa fa-book"></i></a>
-                <a href="https://x.com/AssimilacaoRPG" target="_blank" class="hover:text-black transition-colors dark:hover:text-white"><i class="fa fa-twitter"></i></a>
-                <a href="https://www.youtube.com/@AssimilacaoRPG" target="_blank" class="hover:text-black transition-colors dark:hover:text-white"><i class="fa fa-youtube"></i></a>
+            <div
+                class="flex justify-start md:justify-end gap-6 text-xl mb-8 border-b border-gray-800 dark:border-white pb-6 text-gray-400">
+                <a href="https://assimilacao.fandom.com/pt-br/wiki/Assimila%C3%A7%C3%A3o_Wiki" target="_blank"
+                    class="hover:text-black transition-colors dark:hover:text-white"><i class="fa fa-book"></i></a>
+                <a href="https://x.com/AssimilacaoRPG" target="_blank"
+                    class="hover:text-black transition-colors dark:hover:text-white"><i class="fa fa-twitter"></i></a>
+                <a href="https://www.youtube.com/@AssimilacaoRPG" target="_blank"
+                    class="hover:text-black transition-colors dark:hover:text-white"><i class="fa fa-youtube"></i></a>
             </div>
 
             <div class="text-xs text-gray-600 dark:text-white flex flex-col gap-2">
-                <p>Assimilação RPG é um sistema criado por <b><a href="https://x.com/Rakin" class="hover:text-rpg-blue dark:hover:text-rpg-red" target="_blank">@Rakin</a></b> e <b><a href="https://x.com/ViniciusLAUzito" class="hover:text-rpg-blue dark:hover:text-rpg-red" target="_blank">@ViniciusLAUzito</a></b>. © Todos os direitos reservados.</p>
-                <p>Este site é conteúdo de fã não oficial e segue as diretrizes de conteúdo permitido. Não aprovado ou endossado por terceiros.</p>
-                <p class="mt-4 text-gray-500 dark:text-white">Desenvolvido com dedicação por 
-                    <a href="https://www.linkedin.com/in/roannl" target="_blank" class="underline hover:text-rpg-blue dark:hover:text-rpg-red"><b>Roan Lisboa</b></a>
+                <p>Assimilação RPG é um sistema criado por <b><a href="https://x.com/Rakin"
+                            class="hover:text-rpg-blue dark:hover:text-rpg-red" target="_blank">@Rakin</a></b> e <b><a
+                            href="https://x.com/ViniciusLAUzito" class="hover:text-rpg-blue dark:hover:text-rpg-red"
+                            target="_blank">@ViniciusLAUzito</a></b>. © Todos os direitos reservados.</p>
+                <p>Este site é conteúdo de fã não oficial e segue as diretrizes de conteúdo permitido. Não aprovado ou
+                    endossado por terceiros.</p>
+                <p class="mt-4 text-gray-500 dark:text-white">Desenvolvido com dedicação por
+                    <a href="https://www.linkedin.com/in/roannl" target="_blank"
+                        class="underline hover:text-rpg-blue dark:hover:text-rpg-red"><b>Roan Lisboa</b></a>
                 </p>
             </div>
         </div>
