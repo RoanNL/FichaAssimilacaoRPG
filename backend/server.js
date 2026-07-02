@@ -1266,6 +1266,148 @@ app.post('/campanhas/:id/partitura', verificarToken, async (req, res) => {
     }
 });
 
+// =========================================================================
+// 🤝 SISTEMA DE AMIZADES E CONVITES
+// =========================================================================
+
+// 1. Enviar Pedido de Amizade (Por Email ou Username)
+app.post('/amizades/enviar', verificarToken, async (req, res) => {
+    const { alvo } = req.body; 
+    const meuId = req.usuario.id;
+
+    try {
+        const resBusca = await pool.query('SELECT id FROM usuarios WHERE username = $1 OR email = $1', [alvo.toLowerCase()]);
+        if (resBusca.rows.length === 0) return res.status(404).json({ erro: 'Sobrevivente não encontrado na base de dados!' });
+
+        const amigoId = resBusca.rows[0].id;
+        if (meuId === amigoId) return res.status(400).json({ erro: 'Você não pode adicionar a si mesmo, louco!' });
+
+        // Verifica se a amizade já existe em qualquer direção
+        const check = await pool.query('SELECT * FROM amizades WHERE (usuario_id_1 = $1 AND usuario_id_2 = $2) OR (usuario_id_1 = $2 AND usuario_id_2 = $1)', [meuId, amigoId]);
+        if (check.rows.length > 0) return res.status(400).json({ erro: 'Vocês já possuem uma conexão ou solicitação pendente!' });
+
+        await pool.query('INSERT INTO amizades (usuario_id_1, usuario_id_2, status) VALUES ($1, $2, $3)', [meuId, amigoId, 'pendente']);
+
+        // Grito global no socket
+        const io = req.app.get('io');
+        if (io) io.emit('notificacao-pessoal', { usuarioId: amigoId, msg: 'Você recebeu um pedido de amizade!' });
+
+        res.json({ mensagem: 'Pedido de amizade enviado pelos ermos!' });
+    } catch (err) {
+        res.status(500).json({ erro: 'Erro ao enviar pedido.' });
+    }
+});
+
+// 2. Buscar Amizades (Aceitas e Pendentes)
+app.get('/amizades', verificarToken, async (req, res) => {
+    const meuId = req.usuario.id;
+    try {
+        const sql = `
+            SELECT a.id as amizade_id, a.status,
+                   u.id as amigo_id, u.username, u.avatar,
+                   (a.usuario_id_1 = $1) as fui_eu_que_enviei
+            FROM amizades a
+            JOIN usuarios u ON (u.id = a.usuario_id_1 OR u.id = a.usuario_id_2) AND u.id != $1
+            WHERE a.usuario_id_1 = $1 OR a.usuario_id_2 = $1
+        `;
+        const result = await pool.query(sql, [meuId]);
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ erro: 'Erro ao varrer lista de contatos.' });
+    }
+});
+
+// 3. Responder Pedido de Amizade
+app.post('/amizades/responder', verificarToken, async (req, res) => {
+    const { amizade_id, aceito } = req.body;
+    const meuId = req.usuario.id;
+
+    try {
+        if (aceito) {
+            await pool.query('UPDATE amizades SET status = $1 WHERE id = $2 AND usuario_id_2 = $3', ['aceito', amizade_id, meuId]);
+            res.json({ mensagem: 'Amizade forjada com sucesso!' });
+        } else {
+            await pool.query('DELETE FROM amizades WHERE id = $1 AND (usuario_id_1 = $2 OR usuario_id_2 = $2)', [amizade_id, meuId]);
+            res.json({ mensagem: 'Vínculo recusado e cortado.' });
+        }
+    } catch (err) {
+        res.status(500).json({ erro: 'Erro ao responder à solicitação.' });
+    }
+});
+
+// 4. Mestre Convida Amigo para a Mesa
+app.post('/campanhas/:id/convidar-amigo', verificarToken, async (req, res) => {
+    const campanhaId = req.params.id;
+    const { amigo_id } = req.body;
+    const mestreId = req.usuario.id;
+
+    try {
+        const checkMestre = await pool.query('SELECT mestre_id FROM campanhas WHERE id = $1', [campanhaId]);
+        if (checkMestre.rows[0].mestre_id !== mestreId) return res.status(403).json({ erro: 'Apenas o Mestre tem as chaves dos portões!' });
+
+        const checkMembro = await pool.query('SELECT * FROM membros_campanha WHERE campanha_id = $1 AND usuario_id = $2', [campanhaId, amigo_id]);
+        if (checkMembro.rows.length > 0) return res.status(400).json({ erro: 'O jogador já está nas trincheiras dessa mesa!' });
+
+        await pool.query('INSERT INTO convites_mesa (campanha_id, remetente_id, destinatario_id) VALUES ($1, $2, $3)', [campanhaId, mestreId, amigo_id]);
+
+        const io = req.app.get('io');
+        if (io) io.emit('notificacao-pessoal', { usuarioId: amigo_id, msg: 'Uma nova mesa requisita a sua presença!' });
+
+        res.json({ mensagem: 'Sinalizador enviado ao seu amigo!' });
+    } catch (err) {
+        if (err.code === '23505') return res.status(400).json({ erro: 'O convite já foi disparado.' });
+        res.status(500).json({ erro: 'Erro ao enviar convite.' });
+    }
+});
+
+// 5. Jogador Vê Convites de Mesas
+app.get('/convites', verificarToken, async (req, res) => {
+    const meuId = req.usuario.id;
+    try {
+        const sql = `
+            SELECT cv.id as convite_id, c.id as campanha_id, c.nome as nome_campanha, u.username as nome_mestre
+            FROM convites_mesa cv
+            JOIN campanhas c ON c.id = cv.campanha_id
+            JOIN usuarios u ON u.id = cv.remetente_id
+            WHERE cv.destinatario_id = $1 AND cv.status = 'pendente'
+        `;
+        const result = await pool.query(sql, [meuId]);
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ erro: 'Erro de comunicação.' });
+    }
+});
+
+// 6. Jogador Aceita Convite de Mesa
+app.post('/convites/responder', verificarToken, async (req, res) => {
+    const { convite_id, aceito } = req.body;
+    const meuId = req.usuario.id;
+
+    try {
+        const resConvite = await pool.query('SELECT campanha_id FROM convites_mesa WHERE id = $1 AND destinatario_id = $2', [convite_id, meuId]);
+        if (resConvite.rows.length === 0) return res.status(404).json({ erro: 'Convite extraviado.' });
+
+        const campanhaId = resConvite.rows[0].campanha_id;
+
+        if (aceito) {
+            await pool.query('INSERT INTO membros_campanha (campanha_id, usuario_id) VALUES ($1, $2)', [campanhaId, meuId]);
+        }
+
+        await pool.query('DELETE FROM convites_mesa WHERE id = $1', [convite_id]);
+
+        const io = req.app.get('io');
+        if (io) io.to(campanhaId.toString()).emit('atualizar-jogadores'); // Atualiza a mesa caso o mestre esteja lá
+
+        res.json({ mensagem: aceito ? 'Você se juntou à campanha!' : 'Convite rasgado.' });
+    } catch (err) {
+        if (err.code === '23505') {
+            await pool.query('DELETE FROM convites_mesa WHERE id = $1', [convite_id]);
+            return res.status(400).json({ erro: 'Você já tinha entrado nessa mesa de outra forma!' });
+        }
+        res.status(500).json({ erro: 'Erro interno.' });
+    }
+});
+
 server.listen(PORT, () => {
     console.log(`Servidor a correr na porta http://localhost:${PORT}`);
 });

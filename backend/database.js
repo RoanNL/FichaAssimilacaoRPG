@@ -82,6 +82,25 @@ async function criarTabelas() {
                 criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 UNIQUE(campanha_id, usuario_id)
             );
+
+            CREATE TABLE IF NOT EXISTS amizades (
+            id SERIAL PRIMARY KEY,
+            usuario_id_1 UUID REFERENCES usuarios(id) ON DELETE CASCADE,
+            usuario_id_2 UUID REFERENCES usuarios(id) ON DELETE CASCADE,
+            status VARCHAR(20) DEFAULT 'pendente', -- 'pendente' ou 'aceito'
+            criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(usuario_id_1, usuario_id_2)
+        );
+
+        CREATE TABLE IF NOT EXISTS convites_mesa (
+            id SERIAL PRIMARY KEY,
+            campanha_id UUID REFERENCES campanhas(id) ON DELETE CASCADE,
+            remetente_id UUID REFERENCES usuarios(id) ON DELETE CASCADE,
+            destinatario_id UUID REFERENCES usuarios(id) ON DELETE CASCADE,
+            status VARCHAR(20) DEFAULT 'pendente',
+            criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(campanha_id, destinatario_id)
+        );
     `;
 
     try {

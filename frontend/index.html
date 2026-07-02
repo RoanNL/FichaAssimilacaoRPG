@@ -228,6 +228,13 @@
                     class="text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white transition-colors cursor-pointer">
                     <i data-lucide="moon" class="w-5 h-5"></i>
                 </button>
+                <button onclick="window.abrirModalConexoes()" title="Conexões e Amigos"
+                    class="text-gray-500 hover:text-purple-600 dark:text-gray-400 dark:hover:text-purple-400 transition-colors cursor-pointer mr-2 relative">
+                    <i data-lucide="radio" class="w-5 h-5"></i>
+                    <!-- Bolinha vermelha de notificação -->
+                    <span id="badge-notificacao-social"
+                        class="hidden absolute -top-1 -right-1 bg-rpg-red w-2.5 h-2.5 rounded-full border border-white dark:border-gray-800 animate-pulse"></span>
+                </button>
                 <div class="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-rpg-red overflow-hidden cursor-pointer hover:scale-105 transition-transform bg-gray-200"
                     onclick="Router.abrirPerfil()">
                     <img id="nav-avatar-img" src="./assets/icon.jpg" alt="Perfil" class="w-full h-full object-cover">
@@ -305,6 +312,17 @@
                             clicando no nome da aptidão, você perceberá que o campo de nome da aptidão ficará destacado
                             com uma cor diferente, isso significa que aquela aptidão foi escolhida! Lembre, clicar em
                             dois instintos ou duas vezes no mesmo instinto ativará uma rolagem assimilada!</p>
+                    </div>
+                    <div
+                        class="bg-white dark:bg-[#1e293b] p-6 rounded-lg border border-gray-300 dark:border-gray-700 shadow-md">
+                        <h2
+                            class="text-purple-700 dark:text-purple-400 font-rpg font-black text-2xl flex items-center gap-2 mb-4 uppercase border-b border-gray-200 dark:border-gray-600 pb-2">
+                            <i data-lucide="radio"></i> Painel de Amizade
+                        </h2>
+                        <p class="text-gray-700 dark:text-gray-300 text-justify">Vocês podem agora adicionar um
+                            sobrevivente que conheça! Basta clicar no icone indicado ao lado da sua foto de perfil para
+                            abrir o painel! Nele é possivel ver os convites para as Mesas enviados pelos seus Mestres
+                            que os Adicionaram!</p>
                     </div>
                 </div>
             </div>
@@ -430,6 +448,11 @@
                             </div>
 
                             <div id="painel-mestre-botoes" class="hidden flex flex-wrap gap-2 pointer-events-auto">
+                                <button
+                                    onclick="document.getElementById('modal-convidar-amigos').classList.add('show'); window.carregarAmigosParaConvite();"
+                                    class="bg-gray-800 hover:bg-black dark:bg-gray-200 dark:hover:bg-white text-white dark:text-black font-bold py-1.5 md:py-2 px-3 md:px-4 rounded text-xs md:text-sm uppercase font-rpg transition-colors flex items-center gap-1 md:gap-2 shadow-sm">
+                                    <i data-lucide="user-plus" class="w-3.5 h-3.5 md:w-4 md:h-4"></i> Chamar Amigos
+                                </button>
                                 <button
                                     onclick="document.getElementById('modal-pedidos-mesa').classList.add('show'); window.carregarPedidosMesa();"
                                     class="relative bg-gray-800 hover:bg-black dark:bg-gray-200 dark:hover:bg-white text-white dark:text-black font-bold py-1.5 md:py-2 px-3 md:px-4 rounded text-xs md:text-sm uppercase font-rpg transition-colors flex items-center gap-1 md:gap-2 shadow-sm">
@@ -652,7 +675,9 @@
                             </div>
                         </div>
 
-                        <div class="grupo-aptidoes" title="As Práticas regem as Aptidões desenvolvidas e exercitáveis por treino e/ou prática recorrente. Pode estar relacionado ou não com o uso de objetos e outras ferramentas." id="secao-praticas">
+                        <div class="grupo-aptidoes"
+                            title="As Práticas regem as Aptidões desenvolvidas e exercitáveis por treino e/ou prática recorrente. Pode estar relacionado ou não com o uso de objetos e outras ferramentas."
+                            id="secao-praticas">
                             <h3 class="dark:text-rpg-blue">Práticas <i data-lucide="diamond"
                                     class="w-4 h-4 inline-block opacity-100 text-rpg-red dark:text-rpg-blue align-baseline"></i>
                             </h3>
@@ -1646,20 +1671,25 @@
     </div>
 
     <div id="modal-editar-nome-campanha" class="modal z-[99999]">
-        <div class="modal-content bg-rpg-paper dark:bg-[#1e293b] border-2 border-rpg-blue rounded-md p-6 max-w-[400px] w-[90%] text-center shadow-xl relative">
-            <span class="absolute top-4 right-6 text-gray-500 hover:text-rpg-red text-3xl font-bold cursor-pointer transition-colors"
+        <div
+            class="modal-content bg-rpg-paper dark:bg-[#1e293b] border-2 border-rpg-blue rounded-md p-6 max-w-[400px] w-[90%] text-center shadow-xl relative">
+            <span
+                class="absolute top-4 right-6 text-gray-500 hover:text-rpg-red text-3xl font-bold cursor-pointer transition-colors"
                 onclick="document.getElementById('modal-editar-nome-campanha').classList.remove('show')">&times;</span>
-            
-            <h3 class="text-2xl font-black font-rpg text-rpg-blue uppercase mb-2 flex justify-center items-center gap-2">
+
+            <h3
+                class="text-2xl font-black font-rpg text-rpg-blue uppercase mb-2 flex justify-center items-center gap-2">
                 <i data-lucide="edit-3" class="w-6 h-6"></i> Renomear Mesa
             </h3>
-            <p class="text-gray-600 dark:text-gray-400 mb-4 text-sm font-bold">Escolha um novo nome para a sua campanha.</p>
-            
+            <p class="text-gray-600 dark:text-gray-400 mb-4 text-sm font-bold">Escolha um novo nome para a sua campanha.
+            </p>
+
             <input type="text" id="editar-campanha-nome-input" placeholder="Novo nome da mesa..."
                 class="w-full bg-white dark:bg-[#0f172a] border border-gray-400 dark:border-gray-600 rounded p-2 text-center text-black dark:text-white outline-none focus:ring-2 focus:ring-rpg-blue mb-4 font-bold">
-            
+
             <div class="flex gap-2">
-                <button type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded w-1/2 transition-colors uppercase font-rpg text-sm cursor-pointer"
+                <button type="button"
+                    class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded w-1/2 transition-colors uppercase font-rpg text-sm cursor-pointer"
                     onclick="document.getElementById('modal-editar-nome-campanha').classList.remove('show')">Cancelar</button>
                 <button type="button" id="btn-salvar-nome-campanha"
                     class="bg-rpg-blue hover:bg-[#2c6270] text-white font-bold py-2 px-4 rounded w-1/2 transition-colors uppercase font-rpg text-sm cursor-pointer">Salvar</button>
@@ -1823,6 +1853,100 @@
                     onclick="document.getElementById('remover-personagem-mesa-modal').classList.remove('show')">Cancelar</button>
                 <button id="btn-confirmar-recolher-ficha"
                     class="bg-rpg-red hover:bg-red-800 text-white font-bold py-2 px-4 rounded transition-colors w-full uppercase font-rpg tracking-widest flex justify-center items-center gap-2">Retirar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         MODAL: MESTRE CONVIDAR AMIGOS PARA A MESA
+         ========================================== -->
+    <div id="modal-convidar-amigos" class="modal z-[999999]">
+        <div
+            class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border-2 border-rpg-blue rounded-md p-6 max-w-[500px] w-[95%] shadow-2xl relative max-h-[85vh] flex flex-col">
+            <span
+                class="absolute top-4 right-6 text-gray-500 hover:text-rpg-red text-3xl font-bold cursor-pointer transition-colors"
+                onclick="document.getElementById('modal-convidar-amigos').classList.remove('show')">&times;</span>
+
+            <h2
+                class="text-2xl font-black font-rpg text-rpg-blue dark:text-blue-400 uppercase mb-4 border-b border-gray-300 dark:border-gray-700 pb-2 flex items-center gap-2">
+                <i data-lucide="user-plus" class="w-6 h-6"></i> Convidar Amigos
+            </h2>
+
+            <p class="text-gray-600 dark:text-gray-400 mb-4 text-sm font-bold">Selecione um amigo da sua lista para
+                enviar um convite para sua Mesa!</p>
+
+            <div id="lista-amigos-convite" class="flex flex-col gap-2 overflow-y-auto flex-grow pr-2">
+                <!-- Preenchido via JS (campanha.js) -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         MODAL: CENTRAL DE CONEXÕES (AMIZADES E CONVITES)
+         ========================================== -->
+    <div id="modal-conexoes" class="modal z-[999999]">
+        <div
+            class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border-2 border-purple-600 rounded-md p-6 max-w-[600px] w-[95%] shadow-2xl relative max-h-[90vh] flex flex-col">
+            <span
+                class="absolute top-4 right-6 text-gray-500 hover:text-rpg-red text-3xl font-bold cursor-pointer transition-colors"
+                onclick="document.getElementById('modal-conexoes').classList.remove('show')">&times;</span>
+
+            <h2
+                class="text-2xl font-black font-rpg text-purple-700 dark:text-purple-400 uppercase mb-4 border-b border-gray-300 dark:border-gray-700 pb-2 flex items-center gap-2">
+                <i data-lucide="radio" class="w-6 h-6"></i> Painel de Amizade
+            </h2>
+
+            <div class="overflow-y-auto pr-2 flex flex-col gap-6 flex-grow">
+
+                <!-- SESSÃO 1: ADICIONAR NOVO AMIGO -->
+                <div
+                    class="bg-gray-50 dark:bg-[#1a1a1a] p-4 rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm">
+                    <h3 class="font-bold text-gray-800 dark:text-white mb-2 text-sm uppercase flex items-center gap-2">
+                        <i data-lucide="search" class="w-4 h-4 text-rpg-blue"></i> Buscar Sobrevivente
+                    </h3>
+                    <div class="flex gap-2">
+                        <input type="text" id="input-buscar-amigo" placeholder="Nome de usuário ou e-mail..."
+                            class="w-full p-2 bg-white dark:bg-[#242424] border border-gray-300 dark:border-gray-600 rounded text-black dark:text-white outline-none focus:border-rpg-blue text-sm font-bold transition-colors">
+                        <button id="btn-enviar-pedido-amizade"
+                            class="bg-rpg-blue hover:bg-[#2c6270] text-white font-bold py-2 px-4 rounded transition-colors shadow-sm whitespace-nowrap">
+                            Adicionar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- SESSÃO 2: CONVITES PARA MESAS (CHAMADOS) -->
+                <div>
+                    <h3
+                        class="font-bold text-rpg-green mb-2 text-sm uppercase flex items-center gap-2 border-b border-gray-200 dark:border-gray-700 pb-1">
+                        <i data-lucide="map" class="w-4 h-4"></i> Chamados para Mesas
+                    </h3>
+                    <div id="lista-convites-mesas" class="flex flex-col gap-2">
+                        <!-- JS Injeta Aqui -->
+                    </div>
+                </div>
+
+                <!-- SESSÃO 3: PEDIDOS DE AMIZADE PENDENTES -->
+                <div>
+                    <h3
+                        class="font-bold text-orange-600 dark:text-orange-400 mb-2 text-sm uppercase flex items-center gap-2 border-b border-gray-200 dark:border-gray-700 pb-1">
+                        <i data-lucide="user-check" class="w-4 h-4"></i> Pedidos de Amizade
+                    </h3>
+                    <div id="lista-pedidos-amizade" class="flex flex-col gap-2">
+                        <!-- JS Injeta Aqui -->
+                    </div>
+                </div>
+
+                <!-- SESSÃO 4: LISTA DE AMIGOS -->
+                <div>
+                    <h3
+                        class="font-bold text-gray-800 dark:text-gray-300 mb-2 text-sm uppercase flex items-center gap-2 border-b border-gray-200 dark:border-gray-700 pb-1">
+                        <i data-lucide="users" class="w-4 h-4"></i> Meus Amigos
+                    </h3>
+                    <div id="lista-meus-amigos" class="flex flex-col gap-2">
+                        <!-- JS Injeta Aqui -->
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>

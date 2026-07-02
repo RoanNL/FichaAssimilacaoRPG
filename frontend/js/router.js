@@ -1,4 +1,3 @@
-// js/router.js
 const Router = {
     telas: ['tela-landing', 'tela-dashboard', 'tela-campanha', 'tela-ficha'],
     telaAtual: 'landing',

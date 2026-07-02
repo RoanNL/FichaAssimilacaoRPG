@@ -1,5 +1,3 @@
-// js/rolador.js
-
 document.addEventListener('DOMContentLoaded', () => {
 
     // === DICIONÁRIOS DE ÍCONES (TEMA DINÂMICO DOS ASSETS) ===

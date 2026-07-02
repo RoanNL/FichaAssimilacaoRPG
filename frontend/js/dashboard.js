@@ -1,13 +1,31 @@
 // Função global para evitar Injeção de Código (XSS)
-window.escaparHTML = function(texto) {
+window.escaparHTML = function (texto) {
     if (!texto) return '';
     const div = document.createElement('div');
     div.textContent = texto;
     return div.innerHTML;
 };
 
+// Escutador global de notificações!
+if (!window.socket) {
+    window.socket = io(window.API_URL);
+}
+
+window.socket.on('notificacao-pessoal', (dados) => {
+    const meuId = sessionStorage.getItem('usuarioId');
+    // Se a mensagem for pra mim, o balão vermelho de notificação deve pular!
+    if (dados.usuarioId == meuId) {
+        window.mostrarNotificacao(`🔔 ${dados.msg}`, 'aviso');
+
+        // Se a gente estiver no dashboard, recarrega a lista de convites!
+        if (typeof window.carregarMeusConvites === 'function') {
+            window.carregarMeusConvites();
+        }
+    }
+});
+
 document.addEventListener('DOMContentLoaded', () => {
-    
+
     const gridPersonagens = document.getElementById('grid-meus-personagens');
     const gridCampanhas = document.getElementById('grid-minhas-campanhas');
     const charSelectCampanha = document.getElementById('char-select-campanha');
@@ -29,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // 1. CARREGAR E EXIBIR PERSONAGENS
     // ==========================================
-    window.carregarListaPersonagens = async function() {
+    window.carregarListaPersonagens = async function () {
         const usuarioLogadoId = sessionStorage.getItem('usuarioId');
         if (!usuarioLogadoId) return;
 
@@ -48,9 +66,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const resposta = await fetch(`${window.API_URL}/personagens/usuario/${usuarioLogadoId}`, {
                 headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
             });
-            
+
             if (!resposta.ok) throw new Error("Erro ao buscar personagens");
-            
+
             window.personagensCarregados = await resposta.json();
 
             if (charSelectCampanha) {
@@ -65,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (gridPersonagens) {
                 gridPersonagens.innerHTML = '';
-                
+
                 if (window.personagensCarregados.length === 0) {
                     gridPersonagens.innerHTML = '<p class="text-gray-500 italic p-4 w-full text-center border border-dashed border-gray-300 dark:border-gray-600 rounded">Nenhum personagem encontrado. Crie um novo para começar!</p>';
                     return;
@@ -80,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const card = document.createElement('div');
                     card.className = 'flex flex-row h-[130px] w-[300px] min-w-[300px] flex-shrink-0 bg-white dark:bg-[#242424] rounded-lg overflow-hidden border border-gray-300 dark:border-[#333] hover:-translate-y-1 hover:shadow-[0_8px_20px_rgba(0,0,0,0.4)] transition-all cursor-default snap-start relative group';
-                    
+
                     card.innerHTML = `
                         <img src="${imgSrc}" class="w-[110px] h-[130px] min-h-[130px] object-cover flex-shrink-0 border-r border-gray-300 dark:border-[#333] bg-black" alt="Foto">
                         <div class="flex flex-col justify-start p-4 flex-grow overflow-hidden">
@@ -118,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // 2. CARREGAR E EXIBIR CAMPANHAS
     // ==========================================
-    window.carregarMinhasCampanhas = async function() {
+    window.carregarMinhasCampanhas = async function () {
         const usuarioLogadoId = sessionStorage.getItem('usuarioId');
         if (!usuarioLogadoId || !gridCampanhas) return;
 
@@ -129,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p class="text-gray-500 dark:text-gray-400 italic font-bold font-rpg uppercase tracking-widest animate-pulse">Conectando aos servidores...</p>
             </div>
         `;
-        
+
         try {
             const resposta = await fetch(`${window.API_URL}/campanhas/usuario/${usuarioLogadoId}`, {
                 headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
@@ -186,7 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     sessionStorage.setItem('campanhaCodigo', codigoCampanha);
 
                     if (typeof window.carregarLobbyCampanha === 'function') window.carregarLobbyCampanha();
-                    Router.navigate('campanha'); 
+                    Router.navigate('campanha');
                     window.mostrarNotificacao(`Conectado à mesa: ${nomeCampanha}`, 'sucesso');
                 });
             });
@@ -203,7 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     const btnCriarCampanha = document.getElementById('btn-criar-campanha');
     const nomeCampanhaInput = document.getElementById('nova-campanha-nome');
-    
+
     if (btnCriarCampanha) {
         btnCriarCampanha.addEventListener('click', async () => {
             const nome = nomeCampanhaInput.value.trim();
@@ -337,7 +355,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnConfirmDeleteCamp) {
         btnConfirmDeleteCamp.addEventListener('click', async () => {
             if (!campanhaIdParaDeletar) return;
-            
+
             const iconeOriginal = btnConfirmDeleteCamp.innerHTML;
             btnConfirmDeleteCamp.innerHTML = "Destruindo...";
             btnConfirmDeleteCamp.disabled = true;
@@ -363,4 +381,218 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // ==========================================
+    // 🛡️ SISTEMA DE AMIZADES E CONVITES (TRANSMISSOR)
+    // ==========================================
+    window.abrirModalConexoes = function () {
+        const modal = document.getElementById('modal-conexoes');
+        if (modal) {
+            modal.classList.add('show');
+            window.carregarCentralConexoes();
+        }
+    };
+
+    window.carregarCentralConexoes = async function () {
+        const containerMesas = document.getElementById('lista-convites-mesas');
+        const containerPedidos = document.getElementById('lista-pedidos-amizade');
+        const containerAmigos = document.getElementById('lista-meus-amigos');
+        const badge = document.getElementById('badge-notificacao-social');
+
+        let temNotificacao = false;
+
+        // 1. CARREGAR CONVITES DE MESAS
+        try {
+            const resMesas = await fetch(`${window.API_URL}/convites`, {
+                headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
+            });
+            const convitesMesas = await resMesas.json();
+
+            containerMesas.innerHTML = '';
+            if (convitesMesas.length === 0) {
+                containerMesas.innerHTML = '<p class="text-xs italic text-gray-500">Nenhum convite do Assimilador.</p>';
+            } else {
+                temNotificacao = true;
+                convitesMesas.forEach(conv => {
+                    const div = document.createElement('div');
+                    div.className = 'bg-white dark:bg-[#242424] border border-gray-300 dark:border-gray-600 p-3 rounded flex flex-col md:flex-row items-start md:items-center justify-between gap-3 shadow-sm border-l-4 border-l-rpg-green';
+                    div.innerHTML = `
+                    <div>
+                        <h4 class="font-bold text-sm text-gray-800 dark:text-white uppercase truncate">${window.escaparHTML(conv.nome_campanha)}</h4>
+                        <p class="text-[10px] text-gray-500 uppercase font-bold m-0">Convidado por: <span class="text-rpg-blue">${window.escaparHTML(conv.nome_mestre)}</span></p>
+                    </div>
+                    <div class="flex gap-2 w-full md:w-auto">
+                        <button onclick="window.responderConviteMesa(${conv.convite_id}, true)" class="flex-1 md:flex-none bg-rpg-green hover:bg-green-700 text-white p-1.5 px-3 rounded shadow transition-colors text-xs font-bold uppercase"><i data-lucide="check" class="w-4 h-4 inline"></i> Aceitar</button>
+                        <button onclick="window.responderConviteMesa(${conv.convite_id}, false)" class="flex-1 md:flex-none bg-gray-500 hover:bg-rpg-red text-white p-1.5 px-3 rounded shadow transition-colors text-xs font-bold uppercase"><i data-lucide="x" class="w-4 h-4 inline"></i> Recusar</button>
+                    </div>
+                `;
+                    containerMesas.appendChild(div);
+                });
+            }
+        } catch (e) { console.error(e); }
+
+        // 2. CARREGAR AMIZADES E PEDIDOS
+        try {
+            const resAmigos = await fetch(`${window.API_URL}/amizades`, {
+                headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
+            });
+            const amizades = await resAmigos.json();
+
+            const pendentes = amizades.filter(a => a.status === 'pendente' && !a.fui_eu_que_enviei);
+            const aceitos = amizades.filter(a => a.status === 'aceito');
+            const enviados = amizades.filter(a => a.status === 'pendente' && a.fui_eu_que_enviei);
+
+            // Renderizar Pedidos Pendentes
+            containerPedidos.innerHTML = '';
+            if (pendentes.length === 0) {
+                containerPedidos.innerHTML = '<p class="text-xs italic text-gray-500">Nenhum pedido de amizade recebido.</p>';
+            } else {
+                temNotificacao = true;
+                pendentes.forEach(ped => {
+                    const avatar = (ped.avatar && !ped.avatar.includes('R0lGODlhAQAB')) ? ped.avatar : './assets/icon.jpg';
+                    const div = document.createElement('div');
+                    div.className = 'bg-white dark:bg-[#242424] border border-gray-300 dark:border-gray-600 p-3 rounded flex items-center justify-between gap-3 shadow-sm border-l-4 border-l-orange-500';
+                    div.innerHTML = `
+                    <div class="flex items-center gap-3 overflow-hidden">
+                        <img src="${avatar}" class="w-8 h-8 rounded-full object-cover shadow-sm bg-black border border-gray-500 flex-shrink-0">
+                        <h4 class="font-bold text-sm text-gray-800 dark:text-white truncate">${window.escaparHTML(ped.username)}</h4>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="window.responderAmizade(${ped.amizade_id}, true)" class="bg-orange-500 hover:bg-orange-700 text-white p-1.5 rounded shadow transition-colors"><i data-lucide="check" class="w-4 h-4"></i></button>
+                        <button onclick="window.responderAmizade(${ped.amizade_id}, false)" class="bg-gray-500 hover:bg-rpg-red text-white p-1.5 rounded shadow transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
+                    </div>
+                `;
+                    containerPedidos.appendChild(div);
+                });
+            }
+
+            // Renderizar Amigos Aceitos e Enviados
+            containerAmigos.innerHTML = '';
+            if (aceitos.length === 0 && enviados.length === 0) {
+                containerAmigos.innerHTML = '<p class="text-xs italic text-gray-500">Você viaja sozinho por essas terras.</p>';
+            } else {
+                // Amigos normais
+                aceitos.forEach(amigo => {
+                    const avatar = (amigo.avatar && !amigo.avatar.includes('R0lGODlhAQAB')) ? amigo.avatar : './assets/icon.jpg';
+                    const div = document.createElement('div');
+                    div.className = 'bg-white dark:bg-[#242424] border border-gray-200 dark:border-gray-700 p-2 rounded flex items-center justify-between shadow-sm';
+                    div.innerHTML = `
+                    <div class="flex items-center gap-3 overflow-hidden">
+                        <img src="${avatar}" class="w-8 h-8 rounded-full object-cover bg-black border border-gray-400">
+                        <h4 class="font-bold text-sm text-gray-800 dark:text-gray-300 truncate">${window.escaparHTML(amigo.username)}</h4>
+                    </div>
+                    <button onclick="window.responderAmizade(${amigo.amizade_id}, false)" class="text-gray-400 hover:text-rpg-red transition-colors p-1" title="Desfazer vínculo"><i data-lucide="user-minus" class="w-4 h-4"></i></button>
+                `;
+                    containerAmigos.appendChild(div);
+                });
+
+                // Pedidos que EU enviei e estão aguardando
+                enviados.forEach(env => {
+                    const avatar = (env.avatar && !env.avatar.includes('R0lGODlhAQAB')) ? env.avatar : './assets/icon.jpg';
+                    const div = document.createElement('div');
+                    div.className = 'bg-gray-100 dark:bg-[#111] border border-dashed border-gray-300 dark:border-gray-700 p-2 rounded flex items-center justify-between opacity-70';
+                    div.innerHTML = `
+                    <div class="flex items-center gap-3 overflow-hidden">
+                        <img src="${avatar}" class="w-8 h-8 rounded-full object-cover grayscale opacity-50">
+                        <div>
+                            <h4 class="font-bold text-sm text-gray-600 dark:text-gray-400 truncate line-through">${window.escaparHTML(env.username)}</h4>
+                            <p class="text-[9px] uppercase font-bold text-gray-500 m-0">Aguardando resposta...</p>
+                        </div>
+                    </div>
+                    <button onclick="window.responderAmizade(${env.amizade_id}, false)" class="text-gray-400 hover:text-rpg-red transition-colors p-1" title="Cancelar envio"><i data-lucide="x" class="w-4 h-4"></i></button>
+                `;
+                    containerAmigos.appendChild(div);
+                });
+            }
+        } catch (e) { console.error(e); }
+
+        // Controla o pontinho vermelho da nav bar
+        if (badge) {
+            if (temNotificacao) badge.classList.remove('hidden');
+            else badge.classList.add('hidden');
+        }
+
+        if (window.lucide) lucide.createIcons();
+    };
+
+    // --- AÇÕES DO TRANSMISSOR ---
+
+    // Enviar pedido novo
+    const btnAddAmigo = document.getElementById('btn-enviar-pedido-amizade');
+    if (btnAddAmigo) {
+        btnAddAmigo.addEventListener('click', async () => {
+            const inputBusca = document.getElementById('input-buscar-amigo');
+            const alvo = inputBusca.value.trim();
+
+            if (!alvo) return window.mostrarNotificacao('Digite o nome ou email do sobrevivente!', 'aviso');
+
+            const originalHTML = btnAddAmigo.innerHTML;
+            btnAddAmigo.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin inline"></i>';
+            if (window.lucide) lucide.createIcons();
+            btnAddAmigo.disabled = true;
+
+            try {
+                const res = await fetch(`${window.API_URL}/amizades/enviar`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionStorage.getItem('token')}` },
+                    body: JSON.stringify({ alvo })
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    window.mostrarNotificacao(data.mensagem, 'sucesso');
+                    inputBusca.value = '';
+                    window.carregarCentralConexoes(); // Recarrega a lista para mostrar nos "Enviados"
+                } else {
+                    window.mostrarNotificacao(data.erro, 'erro');
+                }
+            } catch (err) {
+                window.mostrarNotificacao('Erro na transmissão.', 'erro');
+            } finally {
+                btnAddAmigo.innerHTML = originalHTML;
+                btnAddAmigo.disabled = false;
+            }
+        });
+    }
+
+    // Aceitar/Recusar Amizade (e Apagar)
+    window.responderAmizade = async function (amizadeId, aceito) {
+        try {
+            const res = await fetch(`${window.API_URL}/amizades/responder`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionStorage.getItem('token')}` },
+                body: JSON.stringify({ amizade_id: amizadeId, aceito })
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                window.mostrarNotificacao(data.mensagem, aceito ? 'sucesso' : 'aviso');
+                window.carregarCentralConexoes();
+            } else {
+                window.mostrarNotificacao(data.erro, 'erro');
+            }
+        } catch (e) { window.mostrarNotificacao('Erro de conexão.', 'erro'); }
+    };
+
+    // Aceitar/Recusar Convite de Mesa
+    window.responderConviteMesa = async function (conviteId, aceito) {
+        try {
+            const res = await fetch(`${window.API_URL}/convites/responder`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionStorage.getItem('token')}` },
+                body: JSON.stringify({ convite_id: conviteId, aceito })
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                window.mostrarNotificacao(data.mensagem, aceito ? 'sucesso' : 'aviso');
+                window.carregarCentralConexoes();
+                if (aceito && typeof window.carregarMinhasCampanhas === 'function') {
+                    window.carregarMinhasCampanhas(); // Atualiza a dashboard com a mesa nova!
+                }
+            } else {
+                window.mostrarNotificacao(data.erro, 'erro');
+            }
+        } catch (e) { window.mostrarNotificacao('Erro de conexão.', 'erro'); }
+    };
 });

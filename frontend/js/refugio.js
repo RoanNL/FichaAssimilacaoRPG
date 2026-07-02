@@ -1,5 +1,3 @@
-// js/refugio.js
-
 document.addEventListener('DOMContentLoaded', () => {
 
     // Referências do DOM

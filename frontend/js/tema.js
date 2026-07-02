@@ -1,5 +1,3 @@
-// js/tema.js
-
 document.addEventListener('DOMContentLoaded', () => {
     const btnToggleTemaApp = document.getElementById('btn-toggle-tema'); 
     const btnToggleTemaAuth = document.getElementById('auth-theme-toggle'); 

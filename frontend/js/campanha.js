@@ -1193,4 +1193,64 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    window.carregarAmigosParaConvite = async function() {
+    const campanhaId = sessionStorage.getItem('campanhaAtiva');
+    const container = document.getElementById('lista-amigos-convite'); // Você vai precisar criar um modal com esse container no HTML!
+    if (!container) return;
+
+    container.innerHTML = '<p class="text-gray-500 italic text-center py-4"><i data-lucide="loader" class="w-5 h-5 animate-spin mx-auto"></i></p>';
+    if (window.lucide) lucide.createIcons();
+
+    try {
+        const res = await fetch(`${window.API_URL}/amizades`, {
+            headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
+        });
+        const amigos = await res.json();
+        
+        // Filtra só as amizades aceitas
+        const amigosAceitos = amigos.filter(a => a.status === 'aceito');
+
+        container.innerHTML = '';
+        if (amigosAceitos.length === 0) {
+            container.innerHTML = '<p class="text-gray-500 italic text-center py-4 text-sm">Você ainda não tem vínculos formados.</p>';
+            return;
+        }
+
+        amigosAceitos.forEach(amigo => {
+            const avatar = (amigo.avatar && !amigo.avatar.includes('R0lGODlhAQAB')) ? amigo.avatar : './assets/icon.jpg';
+            const div = document.createElement('div');
+            div.className = 'bg-gray-100 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 p-3 rounded flex items-center justify-between shadow-sm hover:border-rpg-blue transition-colors mb-2';
+            div.innerHTML = `
+                <div class="flex items-center gap-3 overflow-hidden">
+                    <img src="${avatar}" class="w-8 h-8 rounded-full border border-gray-400 object-cover shadow-sm bg-black">
+                    <h4 class="text-black dark:text-white font-bold text-sm m-0 truncate">${window.escaparHTML(amigo.username)}</h4>
+                </div>
+                <button class="bg-rpg-blue hover:bg-[#2c6270] text-white p-1.5 px-3 rounded shadow transition-colors text-xs font-bold font-rpg uppercase" onclick="window.enviarConviteMesa('${amigo.amigo_id}')">
+                    Convidar
+                </button>
+            `;
+            container.appendChild(div);
+        });
+    } catch(e) {
+        container.innerHTML = '<p class="text-rpg-red text-center py-4">Erro ao buscar rede de contatos.</p>';
+    }
+};
+
+window.enviarConviteMesa = async function(amigoId) {
+    const campanhaId = sessionStorage.getItem('campanhaAtiva');
+    try {
+        const res = await fetch(`${window.API_URL}/campanhas/${campanhaId}/convidar-amigo`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionStorage.getItem('token')}` },
+            body: JSON.stringify({ amigo_id: amigoId })
+        });
+        const data = await res.json();
+
+        if (res.ok) window.mostrarNotificacao(data.mensagem, 'sucesso');
+        else window.mostrarNotificacao(data.erro, 'erro');
+    } catch (err) {
+        window.mostrarNotificacao("Falha no envio de sinalizador.", 'erro');
+    }
+};
+
 });
