@@ -1360,6 +1360,7 @@ app.post('/campanhas/:id/convidar-amigo', verificarToken, async (req, res) => {
     }
 });
 
+
 // 5. Jogador Vê Convites de Mesas
 app.get('/convites', verificarToken, async (req, res) => {
     const meuId = req.usuario.id;
@@ -1405,6 +1406,46 @@ app.post('/convites/responder', verificarToken, async (req, res) => {
             return res.status(400).json({ erro: 'Você já tinha entrado nessa mesa de outra forma!' });
         }
         res.status(500).json({ erro: 'Erro interno.' });
+    }
+});
+
+// =========================================================================
+// 🎥 ROTA PÚBLICA PARA O OBS (SISTEMA DE STREAMING)
+// =========================================================================
+app.get('/personagens/obs/:id', async (req, res) => {
+    const { id } = req.params;
+    if (!regexUUID.test(id)) return res.status(400).json({ erro: 'ID inválido.' });
+
+    try {
+        // Agora o banco puxa o X e o Y separados da ficha!
+        const sql = `SELECT nome_personagem, foto, dados_ficha, obs_pos_x, obs_pos_y FROM personagens WHERE id = $1`;
+        const resultado = await pool.query(sql, [id]);
+
+        if (resultado.rows.length === 0) {
+            return res.status(404).json({ erro: 'Personagem não encontrado.' });
+        }
+        res.json(resultado.rows[0]);
+    } catch (erro) {
+        res.status(500).json({ erro: 'Erro ao buscar dados para o OBS.' });
+    }
+});
+
+// 🔥 ROTA ATUALIZADA: SALVAR ENQUADRAMENTO DA FOTO DO OBS 🔥
+app.put('/personagens/:id/posicao-foto-obs', verificarToken, async (req, res) => {
+    const { posX, posY } = req.body;
+    const personagemId = req.params.id;
+    const usuarioIdSeguro = req.usuario.id;
+
+    try {
+        // Agora salvamos a posição diretamente nas colunas blindadas, o Autosave da Ficha nunca mais vai apagar isso!
+        const sql = 'UPDATE personagens SET obs_pos_x = $1, obs_pos_y = $2 WHERE id = $3 AND usuario_id = $4 RETURNING id';
+        const result = await pool.query(sql, [posX, posY, personagemId, usuarioIdSeguro]);
+        
+        if (result.rowCount === 0) return res.status(403).json({ erro: 'Apenas o dono da ficha pode alterar o enquadramento.' });
+
+        res.json({ mensagem: 'Enquadramento salvo nas estrelas!' });
+    } catch (err) {
+        res.status(500).json({ erro: 'Erro ao salvar enquadramento.' });
     }
 });
 

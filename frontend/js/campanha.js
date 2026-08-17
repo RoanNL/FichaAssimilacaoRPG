@@ -603,97 +603,315 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
-    // 6. FERRAMENTAS DO MESTRE & AUTOSAVE (REFÚGIO RESTAURADO)
+    // 6. FERRAMENTAS DO MESTRE: ACERVO DE PARTITURAS
     // ==========================================
-    function criarAmeaca(nome = '', desc = '') {
+    window.bancoDeConflitos = [];
+    window.conflitoAtivoId = null;
+
+    // --- RENDERS E CRIAÇÃO VISUAL ---
+    window.renderizarListaConflitos = function() {
+        const grid = document.getElementById('grid-meus-conflitos');
+        if(!grid) return;
+        grid.innerHTML = '';
+        
+        if(window.bancoDeConflitos.length === 0) {
+            grid.innerHTML = '<p class="text-gray-500 italic text-center py-4 border border-dashed border-gray-300 dark:border-gray-700 rounded">Nenhuma partitura criada. O mundo está perigosamente calmo...</p>';
+            return;
+        }
+
+        window.bancoDeConflitos.forEach(conf => {
+            const numAmeacas = conf.ameacas ? conf.ameacas.length : 0;
+            const numObj = conf.objetivos ? conf.objetivos.length : 0;
+            
+            grid.innerHTML += `
+                <div class="bg-white dark:bg-[#242424] border border-gray-300 dark:border-gray-700 p-4 rounded-lg flex justify-between items-center shadow-sm hover:border-purple-500 transition-all cursor-pointer group">
+                    <div class="flex flex-col overflow-hidden flex-grow" onclick="window.abrirEditorConflito('${conf.id}')">
+                        <h3 class="font-black font-rpg text-lg text-gray-800 dark:text-white uppercase truncate group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">${window.escaparHTML(conf.nome || 'Conflito Oculto')}</h3>
+                        <p class="text-[10px] text-gray-500 font-bold uppercase mt-1">
+                            <i data-lucide="skull" class="w-3 h-3 inline text-rpg-red"></i> ${numAmeacas} Ameaças &nbsp;|&nbsp; 
+                            <i data-lucide="target" class="w-3 h-3 inline text-rpg-green"></i> ${numObj} Objetivos
+                        </p>
+                    </div>
+                    <button onclick="window.deletarConflito(event, '${conf.id}')" class="text-gray-400 hover:text-white hover:bg-rpg-red p-2 rounded transition-colors" title="Apagar Registro">
+                        <i data-lucide="trash-2" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            `;
+        });
+        if(window.lucide) lucide.createIcons();
+    };
+
+    window.criarNovoConflito = function() {
+        const novoId = Date.now().toString(); 
+        const novoConflito = {
+            id: novoId,
+            nome: "Novo Conflito",
+            condicionantes: "",
+            ativacoesGlobais: [],
+            ameacas: [],
+            objetivos: []
+        };
+        window.bancoDeConflitos.push(novoConflito);
+        window.salvarPartituraNoBanco(true); // Salva no banco instantaneamente
+        window.abrirEditorConflito(novoId);
+    };
+
+    window.conflitoParaDeletarId = null;
+    window.nomeConflitoLimpo = '';
+
+    window.deletarConflito = function(e, id) {
+        e.stopPropagation(); // Evita clicar na caixa e abrir o editor ao mesmo tempo
+        const conflito = window.bancoDeConflitos.find(c => c.id === id);
+        if (!conflito) return;
+
+        window.conflitoParaDeletarId = id;
+        window.nomeConflitoLimpo = (conflito.nome || 'Conflito Desconhecido').trim().toLowerCase();
+
+        const targetName = document.getElementById('delete-conflito-target-name');
+        const inputDel = document.getElementById('delete-conflito-input');
+        const btnConfirm = document.getElementById('btn-confirm-delete-conflito');
+
+        if(targetName) targetName.textContent = window.nomeConflitoLimpo;
+        if(inputDel) inputDel.value = '';
+        if(btnConfirm) {
+            btnConfirm.disabled = true;
+            btnConfirm.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+
+        const modal = document.getElementById('delete-conflito-modal');
+        if(modal) modal.classList.add('show');
+    };
+
+    // Monitores do Modal de Deletar Conflito
+    document.addEventListener('input', (e) => {
+        if(e.target.id === 'delete-conflito-input') {
+            const btnConfirm = document.getElementById('btn-confirm-delete-conflito');
+            if(e.target.value.trim().toLowerCase() === window.nomeConflitoLimpo) {
+                btnConfirm.disabled = false;
+                btnConfirm.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else {
+                btnConfirm.disabled = true;
+                btnConfirm.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        if(e.target.closest('#btn-cancel-delete-conflito')) {
+            document.getElementById('delete-conflito-modal').classList.remove('show');
+        }
+        
+        if(e.target.closest('#btn-confirm-delete-conflito')) {
+            if (!window.conflitoParaDeletarId) return;
+            
+            const btnConfirm = e.target.closest('#btn-confirm-delete-conflito');
+            const iconeOriginal = btnConfirm.innerHTML;
+            btnConfirm.innerHTML = '<i data-lucide="loader" class="w-5 h-5 animate-spin"></i> Destruindo...';
+            btnConfirm.disabled = true;
+
+            setTimeout(() => {
+                window.bancoDeConflitos = window.bancoDeConflitos.filter(c => c.id !== window.conflitoParaDeletarId);
+                window.salvarPartituraNoBanco(true);
+                window.renderizarListaConflitos();
+
+                document.getElementById('delete-conflito-modal').classList.remove('show');
+                window.mostrarNotificacao('Registros de batalha incinerados!', 'sucesso');
+                
+                btnConfirm.innerHTML = iconeOriginal;
+                btnConfirm.disabled = false;
+                if(window.lucide) lucide.createIcons();
+            }, 400); // Charme pra animação não ser instantânea e sem graça
+        }
+    });
+
+    window.fecharEditorConflito = function() {
+        window.conflitoAtivoId = null;
+        document.getElementById('view-lista-conflitos').classList.remove('hidden');
+        document.getElementById('view-lista-conflitos').classList.add('flex');
+        
+        document.getElementById('view-editor-conflito').classList.add('hidden');
+        document.getElementById('view-editor-conflito').classList.remove('flex');
+        
+        window.renderizarListaConflitos(); // Atualiza os números (Quantas ameaças e objetivos)
+    };
+
+    window.abrirEditorConflito = function(id) {
+        const conflito = window.bancoDeConflitos.find(c => c.id === id);
+        if(!conflito) return;
+        
+        window.conflitoAtivoId = id;
+        
+        // Alterna as Telas
+        document.getElementById('view-lista-conflitos').classList.add('hidden');
+        document.getElementById('view-lista-conflitos').classList.remove('flex');
+        
+        document.getElementById('view-editor-conflito').classList.remove('hidden');
+        document.getElementById('view-editor-conflito').classList.add('flex');
+
+        // Povoa os campos do Cabeçalho
+        document.getElementById('partitura-nome-conflito').value = conflito.nome || '';
+        document.getElementById('partitura-condicionantes').value = conflito.condicionantes || '';
+        
+        // Limpa os containers visuais
+        const cAtivacoes = document.getElementById('container-ativacoes-conflito');
+        const cAmeacas = document.getElementById('container-ameacas');
+        const cObjetivos = document.getElementById('container-objetivos');
+        
+        cAtivacoes.innerHTML = '<p class="text-gray-500 italic text-sm text-center" id="empty-ativacoes-conflito">Nenhuma ativação global.</p>';
+        cAmeacas.innerHTML = '<p class="text-gray-500 italic text-sm text-center md:col-span-2" id="empty-ameacas">Nenhuma ameaça ativa.</p>';
+        cObjetivos.innerHTML = '<p class="text-gray-500 italic text-sm text-center" id="empty-objetivos">Nenhum objetivo ativo.</p>';
+        
+        // Povoa as listas
+        if (conflito.ativacoesGlobais && conflito.ativacoesGlobais.length > 0) {
+            document.getElementById('empty-ativacoes-conflito').style.display = 'none';
+            conflito.ativacoesGlobais.forEach(at => window.criarAtivacao(cAtivacoes, at.custo, at.desc));
+        }
+        if (conflito.ameacas && conflito.ameacas.length > 0) {
+            document.getElementById('empty-ameacas').style.display = 'none';
+            conflito.ameacas.forEach(a => window.criarAmeaca(a.nome, a.desc, a.ativacoes || []));
+        }
+        if (conflito.objetivos && conflito.objetivos.length > 0) {
+            document.getElementById('empty-objetivos').style.display = 'none';
+            conflito.objetivos.forEach(o => window.criarObjetivo(o.nome, o.atual, o.max, o.desc));
+        }
+        if(window.lucide) lucide.createIcons();
+    };
+
+    // --- FUNÇÕES DE CONSTRUÇÃO DE BLOCOS DA PARTITURA ---
+    window.criarAtivacao = function(container, custo = '', desc = '') {
+        // Esconde a mensagem de "Vazio" do container pai se ela existir
+        const emptyMsgId = 'empty-' + container.id.replace('container-', '');
+        const emptyMsg = document.getElementById(emptyMsgId);
+        if(emptyMsg) emptyMsg.style.display = 'none';
+
+        const ativ = document.createElement('div');
+        ativ.className = 'ativacao-item flex items-start gap-2 bg-gray-50 dark:bg-[#242424] p-2 rounded border border-gray-200 dark:border-gray-700 shadow-inner relative group';
+        ativ.innerHTML = `
+            <input type="text" class="ativacao-custo w-16 text-center text-xs font-black font-sans p-1.5 bg-gray-200 dark:bg-[#111] border border-gray-300 dark:border-gray-600 rounded text-purple-700 dark:text-purple-400 outline-none focus:border-purple-500 placeholder-gray-400" placeholder="Ex: 2C" value="${window.escaparHTML(custo)}">
+            <input type="text" class="ativacao-desc flex-grow text-xs font-bold p-1.5 bg-transparent text-black dark:text-white outline-none border-b border-transparent focus:border-gray-400 dark:focus:border-gray-600 placeholder-gray-400" placeholder="Efeito da ativação (O que acontece?)..." value="${window.escaparHTML(desc)}">
+            <button type="button" class="btn-del-ativacao text-gray-400 hover:text-rpg-red opacity-0 group-hover:opacity-100 transition-opacity p-1"><i data-lucide="x" class="w-4 h-4"></i></button>
+        `;
+        container.appendChild(ativ);
+
+        ativ.querySelector('.btn-del-ativacao').addEventListener('click', function() {
+            ativ.remove();
+            window.agendarAutosavePartitura();
+            
+            // Traz a mensagem de Vazio de volta se for a última
+            if (container.querySelectorAll('.ativacao-item').length === 0 && emptyMsg) {
+                emptyMsg.style.display = 'block';
+            }
+        });
+        
+        ativ.querySelectorAll('input').forEach(inp => inp.addEventListener('input', window.agendarAutosavePartitura));
+    };
+
+    window.criarAmeaca = function(nome = '', desc = '', ativacoes = []) {
         const containerAmeacas = document.getElementById('container-ameacas');
         if (!containerAmeacas) return;
 
+        const emptyMsg = document.getElementById('empty-ameacas');
+        if(emptyMsg) emptyMsg.style.display = 'none';
+
+        const ameacaId = 'ameaca-' + Date.now() + Math.floor(Math.random() * 1000);
+
         const bloco = document.createElement('div');
-        bloco.className = 'ameaca-item bg-white dark:bg-[#2a2a2a] p-4 rounded-md shadow-inner border border-gray-300 dark:border-gray-600 mb-3 focus-within:ring-2 focus-within:ring-rpg-red transition-all relative';
+        bloco.className = 'ameaca-item bg-gray-50 dark:bg-[#2a2a2a] p-4 rounded-md shadow-inner border border-gray-300 dark:border-gray-600 mb-3 focus-within:ring-2 focus-within:ring-rpg-red transition-all relative flex flex-col gap-2';
         bloco.innerHTML = `
-            <div class="flex justify-between items-center mb-2 border-b-2 border-red-900 pb-1">
-                <input type="text" class="item-nome w-full font-bold p-1 bg-transparent text-black dark:text-white text-base outline-none" placeholder="Nome da Ameaça" value="${window.escaparHTML(nome)}">
+            <div class="flex justify-between items-center border-b-2 border-red-900 pb-1 mb-1">
+                <input type="text" class="item-nome w-full font-black font-rpg p-1 bg-transparent text-rpg-red dark:text-red-400 text-lg outline-none placeholder-gray-400" placeholder="Nome da Ameaça" value="${window.escaparHTML(nome)}">
                 <button type="button" class="btn-del-item ml-2 bg-red-800 hover:bg-red-900 text-white text-xs font-bold py-1 px-2 rounded cursor-pointer transition-colors shadow-sm border-none"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
             </div>
-            <textarea rows="2" class="item-desc w-full p-1 bg-transparent text-black dark:text-gray-300 outline-none resize-y text-sm" placeholder="Descrição e Status da Ameaça...">${window.escaparHTML(desc)}</textarea>
+            
+            <textarea rows="2" class="item-desc w-full p-2 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-700 rounded text-black dark:text-gray-300 outline-none resize-y text-sm mt-1 shadow-inner" placeholder="Estatísticas, vida e anotações da ameaça...">${window.escaparHTML(desc)}</textarea>
+
+            <div class="mt-2 border-t border-red-200 dark:border-red-900/50 pt-2">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-xs font-bold uppercase text-gray-600 dark:text-gray-400"><i data-lucide="zap" class="w-3 h-3 inline"></i> Ativações desta Ameaça</span>
+                    <button type="button" class="btn-add-ativacao-ameaca bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 text-black dark:text-white px-2 py-1 rounded text-[10px] font-bold uppercase transition-colors" data-target="${ameacaId}">+ Ativação</button>
+                </div>
+                <div id="${ameacaId}" class="container-ativacoes-ameaca flex flex-col gap-2"></div>
+            </div>
         `;
         containerAmeacas.appendChild(bloco);
-    }
 
-    function criarObjetivo(nome = '', atual = 0, max = 10, desc = '') {
+        const containerAtiv = bloco.querySelector(`#${ameacaId}`);
+        ativacoes.forEach(at => window.criarAtivacao(containerAtiv, at.custo, at.desc));
+
+        bloco.querySelector('.btn-add-ativacao-ameaca').addEventListener('click', function() {
+            window.criarAtivacao(containerAtiv, '', '');
+            if(window.lucide) lucide.createIcons();
+            window.agendarAutosavePartitura();
+        });
+        
+        bloco.querySelector('.item-nome').addEventListener('input', window.agendarAutosavePartitura);
+        bloco.querySelector('.item-desc').addEventListener('input', window.agendarAutosavePartitura);
+    };
+
+    window.criarObjetivo = function(nome = '', atual = 0, max = 10, desc = '') {
         const containerObjetivos = document.getElementById('container-objetivos');
         if (!containerObjetivos) return;
 
+        const emptyMsg = document.getElementById('empty-objetivos');
+        if(emptyMsg) emptyMsg.style.display = 'none';
+
         const bloco = document.createElement('div');
-        bloco.className = 'objetivo-item bg-white dark:bg-[#2a2a2a] p-4 rounded-md shadow-inner border border-gray-300 dark:border-gray-600 mb-3 focus-within:ring-2 focus-within:ring-rpg-blue transition-all relative';
+        bloco.className = 'objetivo-item bg-gray-50 dark:bg-[#2a2a2a] p-4 rounded-md shadow-inner border border-gray-300 dark:border-gray-600 mb-3 focus-within:ring-2 focus-within:ring-green-600 transition-all relative flex flex-col gap-2';
         const porcentagem = Math.min(100, Math.max(0, (atual / max) * 100)) || 0;
 
         bloco.innerHTML = `
-            <div class="flex justify-between items-center mb-2 border-b-2 border-blue-900 pb-1">
-                <input type="text" class="item-nome w-full font-bold p-1 bg-transparent text-black dark:text-white text-sm md:text-base outline-none" placeholder="Novo Objetivo" value="${window.escaparHTML(nome)}">
+            <div class="flex justify-between items-center mb-1 border-b-2 border-green-700 pb-1">
+                <input type="text" class="item-nome w-full font-black font-rpg p-1 bg-transparent text-green-700 dark:text-green-500 text-lg md:text-base outline-none placeholder-gray-400" placeholder="Nome do Objetivo" value="${window.escaparHTML(nome)}">
                 <button type="button" class="btn-del-item ml-2 bg-red-800 hover:bg-red-900 text-white text-xs font-bold py-1 px-2 rounded cursor-pointer transition-colors shadow-sm border-none"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
             </div>
             
-            <div class="flex flex-wrap md:flex-nowrap items-center gap-2 mb-3 bg-gray-100 dark:bg-[#1a1a1a] p-2 rounded border border-gray-300 dark:border-gray-700">
+            <div class="flex flex-wrap md:flex-nowrap items-center gap-2 mb-1 bg-white dark:bg-[#1a1a1a] p-2 rounded border border-gray-200 dark:border-gray-700 shadow-inner">
                 <div class="flex items-center gap-2 shrink-0">
                     <span class="text-[10px] md:text-xs font-bold text-gray-500 uppercase">Progresso:</span>
-                    <input type="number" class="obj-atual w-10 md:w-16 text-center bg-transparent text-black dark:text-white font-bold outline-none border-b border-gray-400 focus:border-rpg-blue p-0" value="${atual}">
+                    <input type="number" class="obj-atual w-10 md:w-16 text-center bg-transparent text-black dark:text-white font-bold outline-none border-b border-gray-400 focus:border-green-600 p-0" value="${atual}">
                     <span class="text-gray-500 font-bold">/</span>
-                    <input type="number" class="obj-max w-10 md:w-16 text-center bg-transparent text-black dark:text-white font-bold outline-none border-b border-gray-400 focus:border-rpg-blue p-0" value="${max}">
+                    <input type="number" class="obj-max w-10 md:w-16 text-center bg-transparent text-black dark:text-white font-bold outline-none border-b border-gray-400 focus:border-green-600 p-0" value="${max}">
                 </div>
-                <div class="w-full md:flex-grow bg-gray-300 dark:bg-gray-600 rounded-full h-2.5 mt-2 md:mt-0 md:ml-2 overflow-hidden shadow-inner">
-                    <div class="bg-rpg-blue h-2.5 rounded-full obj-bar transition-all duration-300" style="width: ${porcentagem}%"></div>
+                <div class="w-full md:flex-grow bg-gray-200 dark:bg-gray-800 rounded-full h-2.5 mt-2 md:mt-0 md:ml-2 overflow-hidden shadow-inner">
+                    <div class="bg-green-600 h-2.5 rounded-full obj-bar transition-all duration-300" style="width: ${porcentagem}%"></div>
                 </div>
             </div>
             
-            <textarea rows="2" class="item-desc w-full p-1 bg-transparent text-black dark:text-gray-300 outline-none resize-y text-xs md:text-sm" placeholder="Recompensas e Consequências...">${window.escaparHTML(desc)}</textarea>
+            <textarea rows="2" class="item-desc w-full p-2 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-700 rounded text-black dark:text-gray-300 outline-none resize-y text-xs md:text-sm shadow-inner" placeholder="Recompensas e Consequências se falhar...">${window.escaparHTML(desc)}</textarea>
         `;
         containerObjetivos.appendChild(bloco);
-    }
-
-    // 🔥 O REFÚGIO DA PARTITURA VOLTOU! 🔥
-    function criarRefugio(nome = '', seg = '', rec = '', desc = '') {
-        const containerRefugios = document.getElementById('container-refugios');
-        if (!containerRefugios) return;
-
-        const bloco = document.createElement('div');
-        bloco.className = 'refugio-item bg-white dark:bg-[#2a2a2a] p-4 rounded-md shadow-inner border border-gray-300 dark:border-gray-600 mb-3 focus-within:ring-2 focus-within:ring-rpg-green transition-all relative';
-        bloco.innerHTML = `
-            <div class="flex justify-between items-center mb-2 border-b-2 border-green-900 pb-1">
-                <div class="flex items-center gap-2 w-full">
-                    <i data-lucide="tent" class="w-5 h-5 text-rpg-green"></i>
-                    <input type="text" class="item-nome w-full font-bold p-1 bg-transparent text-black dark:text-white text-base outline-none" placeholder="Nome do Refúgio" value="${window.escaparHTML(nome)}">
-                </div>
-                <button type="button" class="btn-del-item ml-2 bg-red-800 hover:bg-red-900 text-white text-xs font-bold py-1 px-2 rounded cursor-pointer transition-colors shadow-sm border-none"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-            </div>
-            <div class="grid grid-cols-2 gap-2 mb-2">
-                <input type="text" class="ref-seguranca p-1 bg-gray-100 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 rounded text-sm text-black dark:text-white outline-none w-full" placeholder="Segurança" value="${window.escaparHTML(seg)}">
-                <input type="text" class="ref-recursos p-1 bg-gray-100 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 rounded text-sm text-black dark:text-white outline-none w-full" placeholder="Recursos" value="${window.escaparHTML(rec)}">
-            </div>
-            <textarea rows="2" class="item-desc w-full p-1 bg-transparent text-black dark:text-gray-300 outline-none resize-y text-sm" placeholder="Anotações do local...">${window.escaparHTML(desc)}</textarea>
-        `;
-        containerRefugios.appendChild(bloco);
-    }
-
-    const ligarBotao = (ids, funcao) => {
-        ids.forEach(id => {
-            const btn = document.getElementById(id);
-            if (btn) btn.addEventListener('click', () => { funcao(); if (window.lucide) lucide.createIcons(); agendarAutosavePartitura(); });
-        });
+        
+        bloco.querySelectorAll('input, textarea').forEach(inp => inp.addEventListener('input', window.agendarAutosavePartitura));
     };
 
-    ligarBotao(['btn-add-ameaca', 'btn-criar-ameaca', 'btn-nova-ameaca'], criarAmeaca);
-    ligarBotao(['btn-add-objetivo', 'btn-criar-objetivo', 'btn-novo-objetivo'], criarObjetivo);
-    ligarBotao(['btn-add-refugio', 'btn-criar-refugio', 'btn-novo-refugio'], criarRefugio); // Ligado de volta!
+    // --- LIGAÇÕES DE BOTÕES DE ADIÇÃO GLOBAIS ---
+    document.getElementById('btn-add-ativacao-conflito')?.addEventListener('click', () => {
+        window.criarAtivacao(document.getElementById('container-ativacoes-conflito'), '', '');
+        if(window.lucide) lucide.createIcons();
+        window.agendarAutosavePartitura();
+    });
 
+    document.getElementById('btn-add-ameaca')?.addEventListener('click', () => {
+        window.criarAmeaca();
+        if(window.lucide) lucide.createIcons();
+        window.agendarAutosavePartitura();
+    });
+
+    document.getElementById('btn-add-objetivo')?.addEventListener('click', () => {
+        window.criarObjetivo();
+        if(window.lucide) lucide.createIcons();
+        window.agendarAutosavePartitura();
+    });
+
+
+    // --- AUTOSAVE E EVENTOS ---
     let timeoutPartitura;
-    function agendarAutosavePartitura() {
+    window.agendarAutosavePartitura = function() {
         clearTimeout(timeoutPartitura);
-        timeoutPartitura = setTimeout(salvarPartituraNoBanco, 1500);
+        timeoutPartitura = setTimeout(() => { window.salvarPartituraNoBanco(); }, 1500);
     }
 
-    function atualizarBarraObjetivo(bloco) {
+    window.atualizarBarraObjetivo = function(bloco) {
         const atual = parseInt(bloco.querySelector('.obj-atual').value) || 0;
         const max = parseInt(bloco.querySelector('.obj-max').value) || 1;
         const porcentagem = Math.min(100, Math.max(0, (atual / max) * 100));
@@ -701,64 +919,114 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     document.addEventListener('input', (e) => {
-        // Agora escuta os 3 containers!
-        if (!e.target.closest('#container-ameacas') && !e.target.closest('#container-objetivos') && !e.target.closest('#container-refugios')) return;
+        // Escuta os campos de toda a partitura
+        if (!e.target.closest('#container-ameacas') && 
+            !e.target.closest('#container-objetivos') && 
+            !e.target.closest('#container-ativacoes-conflito') && 
+            e.target.id !== 'partitura-condicionantes' &&
+            e.target.id !== 'partitura-nome-conflito') return;
 
         if (e.target.classList.contains('obj-atual') || e.target.classList.contains('obj-max')) {
-            atualizarBarraObjetivo(e.target.closest('.objetivo-item'));
+            window.atualizarBarraObjetivo(e.target.closest('.objetivo-item'));
         }
-        agendarAutosavePartitura();
+        window.agendarAutosavePartitura();
     });
 
     document.addEventListener('click', (e) => {
-        if (!e.target.closest('#container-ameacas') && !e.target.closest('#container-objetivos') && !e.target.closest('#container-refugios')) return;
-
         const btnDel = e.target.closest('.btn-del-item');
         if (btnDel) {
-            btnDel.closest('.ameaca-item, .objetivo-item, .refugio-item').remove();
-            agendarAutosavePartitura();
+            btnDel.closest('.ameaca-item, .objetivo-item').remove();
+            
+            // Retorna o texto Vazio se apagar o último bloco
+            if (document.querySelectorAll('.ameaca-item').length === 0) {
+                const emptyAmeacas = document.getElementById('empty-ameacas');
+                if(emptyAmeacas) emptyAmeacas.style.display = 'block';
+            }
+            if (document.querySelectorAll('.objetivo-item').length === 0) {
+                const emptyObjetivos = document.getElementById('empty-objetivos');
+                if(emptyObjetivos) emptyObjetivos.style.display = 'block';
+            }
+            window.agendarAutosavePartitura();
         }
     });
 
-    // --- ENVIAR PARA O BANCO ---
-    async function salvarPartituraNoBanco() {
+    // --- COMUNICAÇÃO COM O BANCO DE DADOS ---
+    window.salvarPartituraNoBanco = async function(silencioso = false) {
         const campanhaId = sessionStorage.getItem('campanhaAtiva');
         if (!campanhaId) return;
 
-        const dados = { ameacas: [], objetivos: [], refugios: [] };
+        // Se tem um conflito aberto, atualiza os dados na memória ANTES de enviar pro banco
+        if (window.conflitoAtivoId) {
+            const index = window.bancoDeConflitos.findIndex(c => c.id === window.conflitoAtivoId);
+            if (index !== -1) {
+                const nomeConflito = document.getElementById('partitura-nome-conflito')?.value || 'Conflito Desconhecido';
+                const condicionantes = document.getElementById('partitura-condicionantes')?.value || '';
+                
+                const ativacoesGlobais = [];
+                document.querySelectorAll('#container-ativacoes-conflito .ativacao-item').forEach(el => {
+                    ativacoesGlobais.push({
+                        custo: el.querySelector('.ativacao-custo').value,
+                        desc: el.querySelector('.ativacao-desc').value
+                    });
+                });
+                
+                const ameacas = [];
+                document.querySelectorAll('#container-ameacas .ameaca-item').forEach(el => {
+                    const ativacoesAmeaca = [];
+                    el.querySelectorAll('.container-ativacoes-ameaca .ativacao-item').forEach(at => {
+                        ativacoesAmeaca.push({
+                            custo: at.querySelector('.ativacao-custo').value,
+                            desc: at.querySelector('.ativacao-desc').value
+                        });
+                    });
 
-        document.querySelectorAll('#container-ameacas .ameaca-item').forEach(el => {
-            dados.ameacas.push({ nome: el.querySelector('.item-nome').value, desc: el.querySelector('.item-desc').value });
-        });
+                    ameacas.push({ 
+                        nome: el.querySelector('.item-nome').value, 
+                        desc: el.querySelector('.item-desc').value,
+                        ativacoes: ativacoesAmeaca
+                    });
+                });
 
-        document.querySelectorAll('#container-objetivos .objetivo-item').forEach(el => {
-            dados.objetivos.push({ nome: el.querySelector('.item-nome').value, atual: el.querySelector('.obj-atual').value, max: el.querySelector('.obj-max').value, desc: el.querySelector('.item-desc').value });
-        });
+                const objetivos = [];
+                document.querySelectorAll('#container-objetivos .objetivo-item').forEach(el => {
+                    objetivos.push({ 
+                        nome: el.querySelector('.item-nome').value, 
+                        atual: el.querySelector('.obj-atual').value, 
+                        max: el.querySelector('.obj-max').value, 
+                        desc: el.querySelector('.item-desc').value 
+                    });
+                });
 
-        document.querySelectorAll('#container-refugios .refugio-item').forEach(el => {
-            dados.refugios.push({ nome: el.querySelector('.item-nome').value, seguranca: el.querySelector('.ref-seguranca').value, recursos: el.querySelector('.ref-recursos').value, desc: el.querySelector('.item-desc').value });
-        });
+                window.bancoDeConflitos[index] = {
+                    id: window.conflitoAtivoId,
+                    nome: nomeConflito,
+                    condicionantes: condicionantes,
+                    ativacoesGlobais: ativacoesGlobais,
+                    ameacas: ameacas,
+                    objetivos: objetivos
+                };
+            }
+        }
 
         try {
+            // Mandamos a Array inteira com os conflitos pro Backend de uma vez
             await fetch(`${window.API_URL}/campanhas/${campanhaId}/partitura`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionStorage.getItem('token')}` },
-                body: JSON.stringify({ dados: JSON.stringify(dados) })
+                body: JSON.stringify({ dados: JSON.stringify(window.bancoDeConflitos) })
             });
         } catch (erro) {
             console.error("Erro no autosave da partitura.");
         }
-    }
+    };
 
-    // --- CARREGAR DO BANCO (BLINDADO) ---
-    async function carregarPartituraDoBanco(campanhaId) {
-        const containerAmeacas = document.getElementById('container-ameacas');
-        const containerObjetivos = document.getElementById('container-objetivos');
-        const containerRefugios = document.getElementById('container-refugios');
-
-        if (containerAmeacas) containerAmeacas.innerHTML = '';
-        if (containerObjetivos) containerObjetivos.innerHTML = '';
-        if (containerRefugios) containerRefugios.innerHTML = '';
+    window.carregarPartituraDoBanco = async function(campanhaId) {
+        // Garante que o modal comece mostrando a Lista, e não um Conflito quebrado
+        document.getElementById('view-lista-conflitos').classList.remove('hidden');
+        document.getElementById('view-lista-conflitos').classList.add('flex');
+        document.getElementById('view-editor-conflito').classList.add('hidden');
+        document.getElementById('view-editor-conflito').classList.remove('flex');
+        window.conflitoAtivoId = null;
 
         try {
             const res = await fetch(`${window.API_URL}/campanhas/${campanhaId}/partitura`, {
@@ -766,18 +1034,44 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             const dadosStr = await res.json();
 
+            window.bancoDeConflitos = [];
+
             if (dadosStr) {
                 const dados = JSON.parse(dadosStr);
-                if (dados.ameacas) dados.ameacas.forEach(a => criarAmeaca(a.nome, a.desc));
-                if (dados.objetivos) dados.objetivos.forEach(o => criarObjetivo(o.nome, o.atual, o.max, o.desc));
-                if (dados.refugios) dados.refugios.forEach(r => criarRefugio(r.nome, r.seguranca, r.recursos, r.desc));
+                
+                // MÁGICA DA RETROCOMPATIBILIDADE:
+                // Se o mestre já tinha uma partitura da versão antiga do VTT (que era só um bloco só),
+                // transformamos ela automaticamente em um Item de Acervo para ele não perder!
+                if (Array.isArray(dados)) {
+                    window.bancoDeConflitos = dados;
+                } else if (dados.ameacas || dados.objetivos) {
+                    
+                    // Transforma o campo "Ativação" de texto único das ameaças antigas no novo formato de lista
+                    const ameacasConvertidas = (dados.ameacas || []).map(a => ({
+                        nome: a.nome,
+                        desc: a.desc,
+                        ativacoes: a.ativacao ? [{ custo: '', desc: a.ativacao }] : []
+                    }));
+
+                    window.bancoDeConflitos.push({
+                        id: Date.now().toString(),
+                        nome: "Partitura Antiga Restituída",
+                        condicionantes: "",
+                        ativacoesGlobais: dados.ativacaoGlobal ? [{ custo: '', desc: dados.ativacaoGlobal }] : [],
+                        ameacas: ameacasConvertidas,
+                        objetivos: dados.objetivos || []
+                    });
+                    window.salvarPartituraNoBanco(true); // Força um Save automático pra atualizar no banco
+                }
             }
-            if (window.lucide) lucide.createIcons();
+            window.renderizarListaConflitos();
 
         } catch (erro) {
             console.error("Erro ao puxar a partitura antiga.");
+            window.bancoDeConflitos = [];
+            window.renderizarListaConflitos();
         }
-    }
+    };
 
     // ==========================================
     // EXTRA: SISTEMA DE PEDIDOS DE ENTRADA (PORTARIA)
@@ -1253,4 +1547,141 @@ window.enviarConviteMesa = async function(amigoId) {
     }
 };
 
+    // ==========================================
+    //  SISTEMA DO ESCUDO DO MESTRE (DM SCREEN)
+    // ==========================================
+    let intervaloEscudoMestre = null;
+
+    // 🔥 O Mestre clicou no botão! Inicia as rolagens contínuas de inspeção 🔥
+    window.iniciarAutoRefreshEscudo = function() {
+        window.carregarEscudoMestre(); // Dá a primeira varrida instantânea
+        
+        clearInterval(intervaloEscudoMestre); // Limpa resquícios
+        intervaloEscudoMestre = setInterval(() => {
+            const modal = document.getElementById('modal-escudo-mestre');
+            // Só atualiza se o Mestre ainda estiver com o escudo levantado (Modal Aberto)
+            if(modal && modal.classList.contains('show')) {
+                window.carregarEscudoMestre(true); // O 'true' silencia o aviso de "Inspecionando..." para não piscar
+            } else {
+                window.pararAutoRefreshEscudo();
+            }
+        }, 5000); // Atualiza os corações a cada 5 segundos de forma invisível!
+    };
+
+    window.pararAutoRefreshEscudo = function() {
+        clearInterval(intervaloEscudoMestre);
+    };
+
+    // A Forja dos Cards do Escudo
+    window.carregarEscudoMestre = async function(silencioso = false) {
+        const gridEscudo = document.getElementById('grid-escudo-mestre');
+        if (!gridEscudo) return;
+
+        if(!silencioso) {
+            gridEscudo.innerHTML = '<p class="text-gray-500 italic col-span-full text-center py-8"><i data-lucide="loader" class="w-6 h-6 animate-spin mx-auto mb-2 text-rpg-red"></i> Inspecionando os registros vitais da mesa...</p>';
+            if(window.lucide) lucide.createIcons();
+        }
+        
+        const campanhaId = sessionStorage.getItem('campanhaAtiva');
+
+        try {
+            const resposta = await fetch(`${window.API_URL}/campanhas/${campanhaId}/fichas-mesa`, {
+                headers: { 'Authorization': `Bearer ${sessionStorage.getItem('token')}` }
+            });
+            const fichas = await resposta.json();
+            
+            gridEscudo.innerHTML = '';
+            
+            if (fichas.length === 0) {
+                gridEscudo.innerHTML = '<p class="text-gray-500 italic col-span-full text-center">Ninguém vivo na mesa.</p>';
+                return;
+            }
+
+            fichas.forEach(char => {
+                if (!char.id) return; // Pula cadeiras vazias
+
+                const ficha = char.dados_ficha || {};
+                const imgSrc = (char.foto && !char.foto.includes('R0lGODlhAQAB')) ? char.foto : './assets/icon.jpg';
+                
+                // --- MATEMÁTICA DA VIDA E STATUS OFICIAL ---
+                let pot = 0, resAttr = 0;
+                for(let i=1; i<=5; i++) {
+                    if(ficha['pot-'+i]) pot++;
+                    if(ficha['res-'+i]) resAttr++;
+                }
+                const dropsPorNivel = 1 + pot + resAttr;
+                const maxVida = dropsPorNivel * 6;
+                const vidaAtual = parseInt(ficha['saude-max']) || 0;
+                const pctVida = Math.min(100, Math.max(0, (vidaAtual / (maxVida||1)) * 100));
+
+                const indiceStatus = Math.ceil(vidaAtual / dropsPorNivel);
+                let nomeStatus = 'Inconsciente', corStatus = 'text-gray-600';
+                if (indiceStatus === 6) { nomeStatus = 'Saudável'; corStatus = 'text-[#6c7a6b] dark:text-[#a3e635]'; }
+                else if (indiceStatus === 5) { nomeStatus = 'Escoriado'; corStatus = 'text-[#6c7a6b] dark:text-[#a3e635]'; }
+                else if (indiceStatus === 4) { nomeStatus = 'Lacerado'; corStatus = 'text-[#a97b53] dark:text-[#fbbf24]'; }
+                else if (indiceStatus === 3) { nomeStatus = 'Ferido'; corStatus = 'text-[#a97b53] dark:text-[#fbbf24]'; }
+                else if (indiceStatus === 2) { nomeStatus = 'Arrebentado'; corStatus = 'text-rpg-red dark:text-red-500'; }
+                else if (indiceStatus === 1) { nomeStatus = 'Incapacitado'; corStatus = 'text-red-600 animate-pulse'; }
+
+                // --- CABO DE GUERRA: OS TRIÂNGULOS VOLTARAM ---
+                let det = parseInt(ficha['det-num']) || 9; 
+                let assim = parseInt(ficha['assim-num']) || 1; 
+
+                let trilhaHtml = '<div class="determinacao-track scale-95 origin-center overflow-visible w-full flex justify-center py-1 mt-1">';
+                for(let i=1; i<=10; i++) {
+                    const detChecked = ficha[`det-${i}`] ? 'checked' : '';
+                    const assimChecked = ficha[`assim-${i}`] ? 'checked' : '';
+                    
+                    // Colocamos o "pointer-events-none" para o mestre não conseguir clicar nos triângulos do jogador
+                    trilhaHtml += `
+                        <input type="checkbox" class="determ-check pointer-events-none" ${detChecked}>
+                        <input type="checkbox" class="assim-check pointer-events-none" ${assimChecked}>
+                    `;
+                }
+                trilhaHtml += '</div>';
+
+                // --- MONTAGEM DO CARD ---
+                const card = document.createElement('div');
+                card.className = 'bg-white dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 rounded-lg p-5 flex flex-col gap-5 shadow-lg hover:-translate-y-1 transition-all duration-300 relative overflow-hidden';
+                
+                // Uma faixinha no topo só de enfeite pra dar um ar "tecnológico"
+                card.innerHTML = `
+                    <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-rpg-red to-rpg-blue"></div>
+                    
+                    <div class="flex items-center gap-3 border-b border-gray-200 dark:border-gray-800 pb-3">
+                        <img src="${imgSrc}" class="w-16 h-16 rounded border border-gray-400 object-cover bg-black flex-shrink-0 shadow-sm">
+                        <div class="overflow-hidden w-full">
+                            <h3 class="font-bold text-lg m-0 truncate text-gray-800 dark:text-white" title="${window.escaparHTML(char.nome_personagem)}">${window.escaparHTML(char.nome_personagem)}</h3>
+                            <p class="text-[10px] text-gray-500 font-bold uppercase m-0 mt-0.5 tracking-widest truncate">${window.escaparHTML(char.ocupacao || 'Desconhecido')}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-col gap-1.5">
+                        <div class="flex justify-between items-end text-xs font-bold uppercase mb-1">
+                            <span class="text-red-600 dark:text-red-500 flex items-center gap-1"><i data-lucide="heart" class="w-3.5 h-3.5"></i> VIDA <span class="text-gray-800 dark:text-gray-400 ml-1 tracking-wider">(${vidaAtual}/${maxVida})</span></span>
+                            <span class="${corStatus} text-[10px] tracking-widest border border-current px-2 py-0.5 rounded shadow-sm">${nomeStatus}</span>
+                        </div>
+                        <div class="w-full bg-gray-200 dark:bg-[#111] h-3 rounded-full overflow-hidden border border-gray-300 dark:border-gray-800 shadow-inner">
+                            <div class="bg-red-600 h-full transition-all duration-500" style="width: ${pctVida}%"></div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-0 border-t border-gray-200 dark:border-gray-800 pt-3 mt-auto">
+                        <div class="flex justify-between text-[10px] font-bold uppercase px-1">
+                            <span class="text-rpg-red">DET (${det})</span>
+                            <span class="text-rpg-blue">ASSIM (${assim})</span>
+                        </div>
+                        ${trilhaHtml}
+                    </div>
+                `;
+                gridEscudo.appendChild(card);
+            });
+
+            if(window.lucide) lucide.createIcons();
+        } catch(e) {
+            if(!silencioso) {
+                gridEscudo.innerHTML = '<p class="text-rpg-red text-center w-full">Falha de conexão com a base de dados.</p>';
+            }
+        }
+    };
 });

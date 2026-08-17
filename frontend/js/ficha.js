@@ -981,18 +981,18 @@ document.addEventListener('DOMContentLoaded', () => {
         btnRolarAssim.addEventListener('click', () => {
             const nivelAssimilacao = parseInt(document.getElementById('assim-num').value) || 1;
             
-            // Abre o painel do Terminal de Dados
             const sidebarLog = document.getElementById('game-log-sidebar');
             if (sidebarLog && sidebarLog.classList.contains('translate-x-full')) {
                 sidebarLog.classList.remove('translate-x-full');
             }
             
-            // 🔥 CORREÇÃO DA REGRA: 1d10 fixo + Xd12 baseado no nível 🔥
             const inputRolador = document.getElementById('rolador-input');
             if (inputRolador) {
                 inputRolador.value = `1d10 ${nivelAssimilacao}d12`; 
                 
-                // Dispara a rolagem depois de um piscar de olhos
+                // 🔥 A CORREÇÃO DO BUG: Marca pro rolador saber que isso é um "Teste de Assimilação" puro!
+                window.isTesteAssimilacaoReal = true;
+                
                 setTimeout(() => {
                     const btnRolar = document.getElementById('rolador-btn-rolar');
                     if (btnRolar) btnRolar.click();
@@ -1000,4 +1000,29 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // Copiar o Link do OBS
+    window.copiarLinkOBS = function() {
+        if (!window.idPersonagemAtual) return window.mostrarNotificacao('Salve a ficha antes de gerar o link!', 'aviso');
+        
+        // Pega a URL atual, ignora parâmetros (como ?id=) e substitui o index.html por obs.html
+        let basePath = window.location.href.split('?')[0].split('#')[0];
+        if (basePath.endsWith('index.html')) {
+            basePath = basePath.replace('index.html', '');
+        } else if (!basePath.endsWith('/')) {
+            basePath += '/';
+        }
+        
+        const obsUrl = `${basePath}obs.html?id=${window.idPersonagemAtual}`;
+        
+        // Abre em uma nova guia para o jogador/mestre ver como ficou!
+        window.open(obsUrl, '_blank');
+        
+        // Copia para a área de transferência
+        navigator.clipboard.writeText(obsUrl).then(() => {
+            window.mostrarNotificacao('Aba aberta! O link também foi copiado para colar no OBS!', 'sucesso');
+        }).catch(err => {
+            window.mostrarNotificacao('Aba aberta! Copie a URL lá em cima para usar no OBS.', 'aviso');
+        });
+    };
 });

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OBS Overlay - Assimilação</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+    <style>
+        /* Fundo transparente obrigatório para o OBS */
+        body { background: transparent !important; margin: 0; padding: 0; font-family: 'Special Elite', monospace; color: white; overflow: hidden; }
+        
+        /* Contorno de texto para facilitar a leitura por cima de qualquer cenário na live */
+        .text-outline { text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 2px 2px 4px rgba(0,0,0,0.9); }
+        
+        /* Triângulos do Cabo de Guerra */
+        .determinacao-track { display: flex; align-items: center; gap: 0; }
+        .determ-check, .assim-check { appearance: none; -webkit-appearance: none; margin: 0; padding: 0; width: 18px; height: 18px; outline: none; }
+        .determ-check { clip-path: polygon(0 0, 100% 50%, 0 100%); background-color: #222; border: 1px solid #444; transform: translateX(1px); z-index: 1; }
+        .determ-check:checked { background-color: #8c3a3a; border-color: #8c3a3a; }
+        .assim-check { clip-path: polygon(100% 0, 0 50%, 100% 100%); background-color: #222; border: 1px solid #444; transform: translateX(-1px); }
+        .assim-check:checked { background-color: #3a7c8c; border-color: #3a7c8c; }
+    </style>
+</head>
+<body>
+    <div id="obs-container" class="relative flex items-center p-40 w-[900px]">
+        
+        <!-- FOTO CIRCULAR -->
+        <div id="obs-foto-container" class="absolute top-2 left-5 z-9 w-[350px] h-[350px] rounded-full border-[3px] border-[#1c1c1c] shadow-[0_0_15px_rgba(0,0,0,0.8)] bg-black overflow-hidden shrink-0">
+            <img id="obs-foto" src="./assets/icon.jpg" class="w-full h-full object-cover relative pointer-events-none" style="object-position: 50% 50%;">
+            
+            <div id="drag-overlay" class="hidden absolute inset-0 bg-black/60 items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                <span class="text-[10px] uppercase font-bold text-white tracking-widest text-outline">Arraste</span>
+            </div>
+        </div>
+        
+        <!-- CAIXA SÓLIDA DE STATUS -->
+        <div class="ml-[150px] pl-[70px] pr-5 py-3.5 bg-[#1c1c1c] rounded-xl border border-[#333333] shadow-[0_5px_20px_rgba(0,0,0,0.7)] w-full flex flex-col gap-1.5">
+            
+            <h2 id="obs-nome" class="font-bold text-[20px] leading-tight m-0 uppercase text-white break-words text-outline tracking-wider border-b border-[#333] pb-1 mb-0.5">CARREGANDO...</h2>
+            
+            <!-- Vida -->
+            <div class="flex flex-col gap-0.5">
+                <div class="flex justify-between items-end text-[150x] font-bold text-gray-400 uppercase">
+                    <span class="text-outline text-white tracking-widest">VIDA <span id="obs-vida-texto" class="text-gray-400 ml-0.5">(0 / 0)</span></span>
+                    <span id="obs-status-saude" class="text-[20px] tracking-widest text-outline animate-pulse">AGUARDANDO...</span>
+                </div>
+                <div class="w-full bg-[#0a0a0a] h-2.5 rounded-full overflow-hidden border border-[#2a2a2a] shadow-inner">
+                    <!-- O background-color agora começa vazio e é injetado pelo Javascript! -->
+                    <div id="obs-vida-barra" class="h-full transition-all duration-500" style="width: 0%; background-color: #ef4444;"></div>
+                </div>
+            </div>
+
+            <!-- Cabo de Guerra -->
+            <div class="flex flex-col gap-0.5 mt-1.5">
+                <div class="flex justify-between text-15px] font-bold uppercase text-outline">
+                    <span class="text-red-500" id="obs-det-txt">DET</span>
+                    <span class="text-blue-400" id="obs-assim-txt">ASSIM</span>
+                </div>
+                <div class="determinacao-track origin-center w-full h-[18px] flex justify-center" id="obs-trilha-guerra">
+                    <!-- Triângulos injetados via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const isLocalhost = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
+        const API_URL = isLocalhost ? 'http://localhost:3000' : 'https://fichaassimilacaorpg.onrender.com';
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const charId = urlParams.get('id');
+        const userToken = sessionStorage.getItem('token');
+
+        // ==========================================
+        // MOTOR DE ARRASTAR, ENQUADRAR E SALVAR!
+        // ==========================================
+        const fotoContainer = document.getElementById('obs-foto-container');
+        const img = document.getElementById('obs-foto');
+        const dragOverlay = document.getElementById('drag-overlay');
+
+        let isDragging = false;
+        let startX = 0, startY = 0;
+        let currentPosX = 50, currentPosY = 50;
+
+        if (userToken) {
+            fotoContainer.classList.add('cursor-move', 'group');
+            dragOverlay.classList.remove('hidden');
+            dragOverlay.classList.add('flex');
+
+            const iniciarArrasto = (e) => {
+                isDragging = true;
+                startX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+                startY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+            };
+
+            const arrastar = (e) => {
+                if (!isDragging) return;
+                const currentClientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+                const currentClientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+                
+                const dx = currentClientX - startX;
+                const dy = currentClientY - startY;
+
+                currentPosX = Math.max(0, Math.min(100, currentPosX - dx * 0.4));
+                currentPosY = Math.max(0, Math.min(100, currentPosY - dy * 0.4));
+
+                img.style.objectPosition = `${currentPosX}% ${currentPosY}%`;
+
+                startX = currentClientX;
+                startY = currentClientY;
+            };
+
+            const pararArrasto = () => {
+                if (isDragging && charId) {
+                    isDragging = false;
+                    fetch(`${API_URL}/personagens/${charId}/posicao-foto-obs`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${userToken}` },
+                        body: JSON.stringify({ posX: currentPosX, posY: currentPosY })
+                    }).catch(err => console.error("Erro ao salvar posição", err));
+                }
+            };
+
+            fotoContainer.addEventListener('mousedown', iniciarArrasto);
+            window.addEventListener('mousemove', arrastar);
+            window.addEventListener('mouseup', pararArrasto);
+
+            fotoContainer.addEventListener('touchstart', iniciarArrasto, { passive: true });
+            window.addEventListener('touchmove', arrastar, { passive: true });
+            window.addEventListener('touchend', pararArrasto);
+        }
+
+        // ==========================================
+        // CARREGAMENTO DOS STATUS DO BANCO
+        // ==========================================
+        async function updateOBS() {
+            if(!charId) return;
+            try {
+                const res = await fetch(`${API_URL}/personagens/obs/${charId}`);
+                
+                if(!res.ok) {
+                    document.getElementById('obs-nome').textContent = "OFFLINE";
+                    document.getElementById('obs-status-saude').textContent = "SEM SINAL";
+                    document.getElementById('obs-status-saude').style.color = "#ef4444"; 
+                    return;
+                }
+                
+                const char = await res.json();
+                
+                img.src = (char.foto && !char.foto.includes('R0lGOD')) ? char.foto : './assets/icon.jpg';
+                document.getElementById('obs-nome').textContent = char.nome_personagem || 'Desconhecido';
+
+                const ficha = char.dados_ficha || {};
+
+                if (!isDragging) {
+                    currentPosX = (char.obs_pos_x !== null && char.obs_pos_x !== undefined) ? parseFloat(char.obs_pos_x) : 50;
+                    currentPosY = (char.obs_pos_y !== null && char.obs_pos_y !== undefined) ? parseFloat(char.obs_pos_y) : 50;
+                    img.style.objectPosition = `${currentPosX}% ${currentPosY}%`;
+                }
+                
+                // --- CÁLCULO DE VIDA ---
+                let pot = 0, resAttr = 0;
+                for(let i=1; i<=5; i++) {
+                    if(ficha['pot-'+i]) pot++;
+                    if(ficha['res-'+i]) resAttr++;
+                }
+                const dropsPorNivel = 1 + pot + resAttr;
+                const maxVida = dropsPorNivel * 6;
+                const vidaAtual = parseInt(ficha['saude-max']) || 0;
+                
+                document.getElementById('obs-vida-texto').textContent = `(${vidaAtual} / ${maxVida})`;
+                const pctVida = Math.min(100, Math.max(0, (vidaAtual / (maxVida||1)) * 100));
+                document.getElementById('obs-vida-barra').style.width = `${pctVida}%`;
+
+                // --- SISTEMA DE CORES DINÂMICAS ---
+                const indiceStatus = Math.ceil(vidaAtual / dropsPorNivel);
+                let nomeStatus = 'INCONSCIENTE', corStatus = '#9ca3af'; // Cinza para quando estiver zerado
+                
+                if (indiceStatus === 6) { nomeStatus = 'SAUDÁVEL'; corStatus = '#84cc16'; } // Verde
+                else if (indiceStatus === 5) { nomeStatus = 'ESCORIADO'; corStatus = '#84cc16'; } // Verde
+                else if (indiceStatus === 4) { nomeStatus = 'LACERADO'; corStatus = '#eab308'; } // Amarelo
+                else if (indiceStatus === 3) { nomeStatus = 'FERIDO'; corStatus = '#eab308'; } // Amarelo
+                else if (indiceStatus === 2) { nomeStatus = 'ARREBENTADO'; corStatus = '#ef4444'; } // Vermelho
+                else if (indiceStatus === 1) { nomeStatus = 'INCAPACITADO'; corStatus = '#dc2626'; } // Vermelho Escuro
+                
+                const statusLabel = document.getElementById('obs-status-saude');
+                statusLabel.textContent = nomeStatus;
+                statusLabel.style.color = corStatus; // Muda a cor do texto
+                
+                // 🔥 A MÁGICA ACONTECE AQUI: Altera a cor da barra de vida junto com o status! 🔥
+                document.getElementById('obs-vida-barra').style.backgroundColor = corStatus;
+
+                if(indiceStatus <= 1) statusLabel.classList.add('animate-pulse');
+                else statusLabel.classList.remove('animate-pulse');
+
+                // --- CABO DE GUERRA ---
+                let detNum = parseInt(ficha['det-num']) || 9;
+                let assimNum = parseInt(ficha['assim-num']) || 1; 
+
+                document.getElementById('obs-det-txt').textContent = `DET (${detNum})`;
+                document.getElementById('obs-assim-txt').textContent = `ASSIM (${assimNum})`;
+
+                let trilhaHtml = '';
+                for(let i=1; i<=10; i++) {
+                    const detChecked = ficha[`det-${i}`] ? 'checked' : '';
+                    const assimChecked = ficha[`assim-${i}`] ? 'checked' : '';
+                    trilhaHtml += `<input type="checkbox" class="determ-check pointer-events-none" ${detChecked}>`;
+                    trilhaHtml += `<input type="checkbox" class="assim-check pointer-events-none" ${assimChecked}>`;
+                }
+                document.getElementById('obs-trilha-guerra').innerHTML = trilhaHtml;
+
+            } catch(e) {
+                document.getElementById('obs-nome').textContent = "ERRO DE CONEXÃO";
+                document.getElementById('obs-status-saude').textContent = "SERVIDOR OFFLINE";
+                document.getElementById('obs-status-saude').style.color = "#ef4444";
+            }
+        }
+
+        if(charId) {
+            updateOBS();
+            setInterval(updateOBS, 3000); 
+        } else {
+            document.getElementById('obs-nome').textContent = "ID INVÁLIDO";
+            document.getElementById('obs-status-saude').textContent = "ERRO";
+        }
+    </script>
+</body>
+</html>

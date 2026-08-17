@@ -366,11 +366,13 @@ document.addEventListener('DOMContentLoaded', () => {
         
         renderizarRolagem(pacoteDeDados);
 
-        if (telaAtual === 'ficha' && pacoteDeDados.totais.pressao > 0 && dieCounter.d12 > 0) {
+        // 🔥 CORREÇÃO DO BUG: Só tira Ego se a janela for a Ficha, rolar pressões, E se for explicitamente um Teste de Assimilação!
+        if (telaAtual === 'ficha' && pacoteDeDados.totais.pressao > 0 && window.isTesteAssimilacaoReal === true) {
             if (typeof window.aplicarPressaoAutomatica === 'function') {
                 window.aplicarPressaoAutomatica(pacoteDeDados.totais.pressao);
             }
         }
+        window.isTesteAssimilacaoReal = false;
 
         // SINCRONIZAÇÃO BLINDADA
         if (campanhaAtiva && window.socket) {

@@ -110,6 +110,8 @@ async function criarTabelas() {
         await pool.query('ALTER TABLE personagens ADD COLUMN IF NOT EXISTS is_privada BOOLEAN DEFAULT false;');
         await pool.query('ALTER TABLE campanhas ADD COLUMN IF NOT EXISTS banner TEXT;');
         await pool.query('ALTER TABLE campanhas ADD COLUMN IF NOT EXISTS banner_pos_y NUMERIC DEFAULT 50;');
+        await pool.query('ALTER TABLE personagens ADD COLUMN IF NOT EXISTS obs_pos_x NUMERIC DEFAULT 50;');
+        await pool.query('ALTER TABLE personagens ADD COLUMN IF NOT EXISTS obs_pos_y NUMERIC DEFAULT 50;');
         console.log('✅ Tabelas do PostgreSQL verificadas/criadas com sucesso (Versão UUID)!');
     } catch (err) {
         console.error('❌ Erro ao criar tabelas:', err);
