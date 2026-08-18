@@ -1,12 +1,6 @@
-document.addEventListener('DOMContentLoaded', () => {
+// js/rolador.js
 
-    // 🔥 ESCUDO DE SEGURANÇA DO HISTÓRICO: Garante que os textos nunca quebrem a tela! 🔥
-    window.escaparHTML = window.escaparHTML || function(text) {
-        if (text == null) return '';
-        return text.toString().replace(/[&<>"']/g, function(m) {
-            return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'}[m];
-        });
-    };
+document.addEventListener('DOMContentLoaded', () => {
 
     const iconesTemaClaro = {
         sucesso: 'assets/sucesso.png',
@@ -63,9 +57,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return diceRequests;
     }
 
-    // ==========================================
-    // 1. FASE DE ROLAGEM UNIVERSAL E CONDICIONAL DE TELA
-    // ==========================================
     function handleRoll() {
         const inputString = inputDados.value;
         const parsedDice = parseInput(inputString);
@@ -74,9 +65,9 @@ document.addEventListener('DOMContentLoaded', () => {
         let dieCounter = { d6: 0, d10: 0, d12: 0 };
         window.rolagemPendente = { input: inputString, dados: [] };
 
+        // 🔥 A SUA REGRA DE OURO APLICADA AQUI 🔥
         const telaAtual = sessionStorage.getItem('telaAtual');
-        // Só auto-seleciona e atira direto na mesa se estiver fisicamente na tela da Campanha!
-        const isNaTelaCampanha = telaAtual === 'campanha';
+        const isNaTelaCampanha = telaAtual !== 'ficha';
 
         parsedDice.forEach(die => {
             const dieType = 'd' + die.size;
@@ -91,14 +82,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     numero: dieCounter[dieType],
                     faceMecanica: rollNumber,
                     icones: icons,
-                    selecionado: isNaTelaCampanha 
+                    selecionado: isNaTelaCampanha // Se estiver na tela de Campanha, TUDO já é selecionado!
                 });
             }
         });
 
         if (isNaTelaCampanha) {
+            // Pula a bandeja e despacha os dados direto pro chat!
             window.confirmarRolagem();
         } else {
+            // Se estiver dentro de uma ficha, abre a bandeja de seleção normalmente!
             window.renderizarRolagemPendente();
         }
     }
@@ -167,7 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ==========================================
-    // 2. CONFIRMAÇÃO E ENVIO 
+    // 2. CONFIRMAÇÃO E ENVIO (COM A IDENTIDADE BLINDADA DO OBS)
     // ==========================================
     window.confirmarRolagem = function() {
         const mantidos = window.rolagemPendente.dados.filter(d => d.selecionado);
@@ -175,14 +168,15 @@ document.addEventListener('DOMContentLoaded', () => {
             return window.mostrarNotificacao("Você deve selecionar pelo menos 1 dado!", "aviso");
         }
 
-        // 🔥 PUXA A MEMÓRIA DA CAMPANHA (MESMO SE TIVER VINDO DO RADAR SECRETO) 🔥
-        const campanhaAtiva = sessionStorage.getItem('campanhaAtiva') || sessionStorage.getItem('campanhaAtivaFallback');
+        const campanhaAtiva = sessionStorage.getItem('campanhaAtiva');
         const telaAtual = sessionStorage.getItem('telaAtual');
         const isMestre = sessionStorage.getItem('isMestreAtivo') === 'true';
         
         let nomeRolador = sessionStorage.getItem('usuarioNome') || 'Operador Misterioso';
         let fotoAvatar = './assets/icon.jpg';
-        let idDaFicha = null; 
+        
+        // 🔥 A BUSCA INTELIGENTE DE ID DO PERSONAGEM 🔥
+        let idDaFicha = null;
 
         if (telaAtual === 'ficha') {
             const urlParams = new URLSearchParams(window.location.search);
@@ -196,10 +190,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 fotoAvatar = imgPersonagem.src;
             }
         } else {
+            // Se NÃO estiver na ficha, verifica se é o mestre ou o jogador!
             if (isMestre) {
-                idDaFicha = null; 
+                idDaFicha = null; // O Mestre rolando na tela de campanha faz um ataque global (não vai pro OBS)
             } else {
-                idDaFicha = sessionStorage.getItem('personagemAtivoId') || null;
+                idDaFicha = sessionStorage.getItem('personagemAtivoId') || null; // Jogador usa o ID dele
             }
 
             const imgPerfil = document.getElementById('nav-avatar-img');
@@ -211,12 +206,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const pacoteDeDados = {
             nome: nomeRolador,
             usuarioId: sessionStorage.getItem('usuarioId'),
-            personagemId: idDaFicha, 
+            personagemId: idDaFicha, // <--- Aqui o OBS decide se pesca o dado no ar!
             avatar: fotoAvatar,
             timestamp: new Date().toISOString(),
             input: window.rolagemPendente.input,
-            campanhaId: campanhaAtiva, // Vai pra campanha certa, seja ele qual for!
-            isRolagemPublica: (isMestre && document.getElementById('toggle-rolagem-mestre')) ? !document.getElementById('toggle-rolagem-mestre').checked : true,
+            campanhaId: campanhaAtiva,
+            isRolagemPublica: true, 
             resultados: mantidos, 
             rolagemCompleta: window.rolagemPendente.dados, 
             totais: { sucesso: 0, pressao: 0, adaptacao: 0, nada: 0 }
@@ -355,50 +350,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const emptyMsg = historicoDiv.querySelector('p.italic');
         if (emptyMsg) emptyMsg.remove();
 
-        try {
-            const { card } = criarCard(pacote, true);
-            historicoDiv.prepend(card);
-        } catch (e) {
-            console.error("Falha ao renderizar card na tela:", e);
-        }
-        
+        const { card } = criarCard(pacote, true);
+        historicoDiv.prepend(card);
         resultsDiv.innerHTML = '';
-    }
-
-    // ==========================================
-    // 4. RADAR DE VÍNCULO SECRETO DA CAMPANHA
-    // ==========================================
-    async function verificarVinculoCampanha() {
-        const telaAtual = sessionStorage.getItem('telaAtual');
-        const charId = window.idPersonagemAtual || sessionStorage.getItem('personagemAtivoId') || new URLSearchParams(window.location.search).get('id');
-        
-        // Se a gente JÁ está na campanha ou no dashboard, a gente ignora.
-        if (telaAtual !== 'ficha' || !charId) return;
-
-        try {
-            const isLocalhost = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
-            const API = isLocalhost ? 'http://localhost:3000' : 'https://fichaassimilacaorpg.onrender.com';
-            
-            const res = await fetch(`${API}/personagens/obs/${charId}`);
-            if (res.ok) {
-                const char = await res.json();
-                if (char.campanha_id) {
-                    // O PERSONAGEM TEM UMA MESA! O sistema memoriza e se conecta nela por debaixo dos panos!
-                    sessionStorage.setItem('campanhaAtivaFallback', char.campanha_id);
-                    if (window.socket) {
-                        window.socket.emit('entrar-na-campanha', {
-                            campanhaId: char.campanha_id,
-                            token: sessionStorage.getItem('token')
-                        });
-                    }
-                } else {
-                    // Ele é um lobo solitário, limpa a memória fantasma
-                    sessionStorage.removeItem('campanhaAtivaFallback');
-                }
-            }
-        } catch (e) {
-            console.error("Erro no radar de vínculo de campanha:", e);
-        }
     }
 
     function iniciarMultiplayer() {
@@ -406,7 +360,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         window.socket.off('nova-rolagem'); 
         window.socket.on('nova-rolagem', (pacoteDeDados) => {
-            const campanhaAtiva = sessionStorage.getItem('campanhaAtiva') || sessionStorage.getItem('campanhaAtivaFallback');
+            const campanhaAtiva = sessionStorage.getItem('campanhaAtiva');
             if (!campanhaAtiva || pacoteDeDados.campanhaId !== campanhaAtiva) return; 
 
             renderizarChat(pacoteDeDados);
@@ -423,9 +377,7 @@ document.addEventListener('DOMContentLoaded', () => {
         window.socket.on('carregar-historico', (historico) => {
             if (!historicoDiv) return;
             
-            // A leitura agora pega a campanha real OU a campanha encontrada pelo radar!
-            const campanhaAtiva = sessionStorage.getItem('campanhaAtiva') || sessionStorage.getItem('campanhaAtivaFallback');
-            
+            const campanhaAtiva = sessionStorage.getItem('campanhaAtiva');
             if (!campanhaAtiva) {
                 historicoDiv.innerHTML = '<p class="text-center text-gray-500 text-xs italic font-bold mt-4">Terminal Local Ativo.<br>Acesse por uma campanha para ativar a rede multiplayer.</p>';
                 return;
@@ -452,9 +404,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const { card } = criarCard(pacote, false);
                     historicoDiv.prepend(card);
-                } catch (err) {
-                    console.error("Erro ao desenhar bloco antigo:", err);
-                }
+                } catch (err) {}
             });
         });
     }
@@ -499,8 +449,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         document.body.classList.remove('terminal-open'); 
                     } else {
                         document.body.classList.add('terminal-open'); 
-                        // 🔥 O SEGREDO DO CHAT! Assim que a barra abre, ele verifica o radar de mesas!
-                        verificarVinculoCampanha(); 
                     }
                 }
             });
