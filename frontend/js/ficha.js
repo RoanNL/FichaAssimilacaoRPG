@@ -1005,7 +1005,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.copiarLinkOBS = function() {
         if (!window.idPersonagemAtual) return window.mostrarNotificacao('Salve a ficha antes de gerar o link!', 'aviso');
         
-        // Pega a URL atual, ignora parâmetros (como ?id=) e substitui o index.html por obs.html
         let basePath = window.location.href.split('?')[0].split('#')[0];
         if (basePath.endsWith('index.html')) {
             basePath = basePath.replace('index.html', '');
@@ -1013,12 +1012,12 @@ document.addEventListener('DOMContentLoaded', () => {
             basePath += '/';
         }
         
-        const obsUrl = `${basePath}obs.html?id=${window.idPersonagemAtual}`;
+        // Agora o link já leva a chave da mesa junto com ele!
+        const campanhaAtiva = sessionStorage.getItem('campanhaAtiva') || '';
+        const obsUrl = `${basePath}obs.html?id=${window.idPersonagemAtual}&campanha=${campanhaAtiva}`;
         
-        // Abre em uma nova guia para o jogador/mestre ver como ficou!
         window.open(obsUrl, '_blank');
         
-        // Copia para a área de transferência
         navigator.clipboard.writeText(obsUrl).then(() => {
             window.mostrarNotificacao('Aba aberta! O link também foi copiado para colar no OBS!', 'sucesso');
         }).catch(err => {

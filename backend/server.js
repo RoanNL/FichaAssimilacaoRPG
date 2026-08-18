@@ -77,7 +77,15 @@ const regexUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}
 io.on('connection', (socket) => {
     console.log('Um jogador conectou! ID:', socket.id);
 
-    // 🛡️ A CATRACA VIP E O HISTÓRICO LIGADO
+    // 🔥 NOVO: O OBS AGORA VIGIA DIRETAMENTE O PERSONAGEM, NÃO A MESA 🔥
+    socket.on('entrar-obs', (personagemId) => {
+        if(personagemId) {
+            socket.join(personagemId.toString());
+            console.log(`🎥 OBS Conectado na escuta da ficha ${personagemId}`);
+        }
+    });
+
+    // 🛡️ A CATRACA VIP E O HISTÓRICO LIGADO (Pode manter o socket.on('entrar-na-campanha' intacto aqui no meio!)
     socket.on('entrar-na-campanha', async (dados) => {
         const { campanhaId, token } = dados; 
         if (!token || !campanhaId) return;
@@ -120,6 +128,7 @@ io.on('connection', (socket) => {
         }
     });
 
+    // 🔥 O NOVO MOTOR DE ROLAGENS (AGORA MANDA PRO OBS MESMO FORA DA MESA!) 🔥
     socket.on('rolar-dados', async (pacoteDeDados) => {
         const { token, ...dadosDaRolagem } = pacoteDeDados;
         if (!token) return;
@@ -130,29 +139,34 @@ io.on('connection', (socket) => {
             const usuarioIdSeguro = usuarioVerificado.id;
 
             const campanhaId = dadosDaRolagem.campanhaId;
-            const sqlCheck = `SELECT * FROM membros_campanha WHERE campanha_id = $1 AND usuario_id = $2`;
-            const resultCheck = await pool.query(sqlCheck, [campanhaId, usuarioIdSeguro]);
-
-            if (resultCheck.rows.length === 0) return; 
-
-            const checkMestre = await pool.query('SELECT mestre_id FROM campanhas WHERE id = $1', [campanhaId]);
-            const isMestre = checkMestre.rows.length > 0 && checkMestre.rows[0].mestre_id === usuarioIdSeguro;
-
             dadosDaRolagem.usuarioId = usuarioIdSeguro;
-            dadosDaRolagem.isMestre = isMestre; 
             dadosDaRolagem.timestamp = new Date().toISOString(); 
+            
+            let isMestre = false;
 
-            const salaStr = campanhaId.toString(); 
-            
-            // 🔥 A ESCOLHA DO MESTRE: Emite para todos se ele escolheu rolar em público! 🔥
-            if (isMestre && !dadosDaRolagem.isRolagemPublica) {
-                // É o mestre e a rolagem é secreta. Fica quieto.
-            } else {
-                // Ou é jogador, ou é o mestre rolando em público!
-                socket.to(salaStr).emit('nova-rolagem', dadosDaRolagem);
+            // Se o jogador estiver numa campanha, salva no histórico da mesa
+            if (campanhaId) {
+                const sqlCheck = `SELECT * FROM membros_campanha WHERE campanha_id = $1 AND usuario_id = $2`;
+                const resultCheck = await pool.query(sqlCheck, [campanhaId, usuarioIdSeguro]);
+
+                if (resultCheck.rows.length > 0) {
+                    const checkMestre = await pool.query('SELECT mestre_id FROM campanhas WHERE id = $1', [campanhaId]);
+                    isMestre = checkMestre.rows.length > 0 && checkMestre.rows[0].mestre_id === usuarioIdSeguro;
+                    dadosDaRolagem.isMestre = isMestre; 
+                    
+                    const salaStr = campanhaId.toString(); 
+                    if (!(isMestre && !dadosDaRolagem.isRolagemPublica)) {
+                        socket.to(salaStr).emit('nova-rolagem', dadosDaRolagem);
+                    }
+                    await pool.query(`INSERT INTO historico_rolagens (campanha_id, pacote) VALUES ($1, $2)`, [campanhaId, dadosDaRolagem]);
+                }
             }
-            
-            await pool.query(`INSERT INTO historico_rolagens (campanha_id, pacote) VALUES ($1, $2)`, [campanhaId, dadosDaRolagem]);
+
+            // O SEGREDO: Emite uma cópia exclusiva da rolagem APENAS para a sala particular do personagem (Onde o OBS está!)
+            if (dadosDaRolagem.personagemId && !(isMestre && !dadosDaRolagem.isRolagemPublica)) {
+                socket.to(dadosDaRolagem.personagemId.toString()).emit('nova-rolagem', dadosDaRolagem);
+            }
+
         } catch (err) {
             console.error("❌ Tentativa de forjar rolagem bloqueada.");
         }
@@ -1417,8 +1431,13 @@ app.get('/personagens/obs/:id', async (req, res) => {
     if (!regexUUID.test(id)) return res.status(400).json({ erro: 'ID inválido.' });
 
     try {
-        // Agora o banco puxa o X e o Y separados da ficha!
-        const sql = `SELECT nome_personagem, foto, dados_ficha, obs_pos_x, obs_pos_y FROM personagens WHERE id = $1`;
+        // 🔥 AGORA PUXAMOS O ID DA CAMPANHA PARA CONECTAR NO SOCKET 🔥
+        const sql = `
+            SELECT p.nome_personagem, p.foto, p.dados_ficha, p.obs_pos_x, p.obs_pos_y, m.campanha_id 
+            FROM personagens p
+            LEFT JOIN membros_campanha m ON p.id = m.personagem_id
+            WHERE p.id = $1
+        `;
         const resultado = await pool.query(sql, [id]);
 
         if (resultado.rows.length === 0) {

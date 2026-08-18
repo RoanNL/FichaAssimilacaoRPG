@@ -189,22 +189,22 @@ document.addEventListener('DOMContentLoaded', () => {
             if (fichas.length === 0) return;
 
             // ==========================================
-            // 🛡️ O ESCUDO ANTI-CLONE (A MÁGICA ESTÁ AQUI!)
+            // 🛡️ O ESCUDO ANTI-CLONE E VÍNCULO DE IDENTIDADE
             // ==========================================
             const fichasRenderizadas = new Set();
 
             fichas.forEach(char => {
-                // Ignora linhas que não tem personagem atrelado (cadeiras vazias)
-                if (!char.id) return;
+                if (!char.id) return; 
 
-                // 🔥 Bloqueia a ficha se o ID dela já tiver passado por aqui! 🔥
                 if (fichasRenderizadas.has(char.id)) {
                     console.log("🛡️ Clone bloqueado pelo Front-end:", char.nome_personagem);
                     return;
                 }
-
-                // Registra que a ficha já está na mesa e não pode ser duplicada
                 fichasRenderizadas.add(char.id);
+
+                const isDonoDaFicha = (char.usuario_id == meuId);
+                const isFichaPrivada = char.is_privada === true;
+                const podeInspecionar = isMestre || isDonoDaFicha || !isFichaPrivada;
 
                 const card = document.createElement('div');
                 card.className = 'flex flex-row h-[130px] w-full min-w-[280px] bg-white dark:bg-[#242424] rounded-lg overflow-hidden border border-gray-300 dark:border-[#333] hover:-translate-y-1 hover:shadow-lg transition-all relative shadow-sm';
@@ -212,18 +212,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const imgSrc = (char.foto && !char.foto.includes('R0lGODlhAQAB')) ? char.foto : './assets/icon.jpg';
                 const ocupacao = char.ocupacao || 'Desconhecido';
 
-                const isDonoDaFicha = (char.usuario_id == meuId);
-                const isFichaPrivada = char.is_privada === true;
-                const podeInspecionar = isMestre || isDonoDaFicha || !isFichaPrivada;
-
                 let controleHtml = '';
                 if (podeInspecionar) {
-                    controleHtml += `<button class="btn-inspecionar-ficha bg-rpg-blue hover:bg-[#2c6270] text-white px-3 py-1.5 rounded text-xs font-bold font-rpg uppercase shadow transition-colors z-10" data-id="${char.id}">Inspecionar</button>`;
+                    // 🔥 O SEGREDO MESTRE: Ao clicar em Inspecionar, SALVE O ID SEJA VOCÊ JOGADOR OU MESTRE! 🔥
+                    controleHtml += `<button class="btn-inspecionar-ficha bg-rpg-blue hover:bg-[#2c6270] text-white px-3 py-1.5 rounded text-xs font-bold font-rpg uppercase shadow transition-colors z-10" data-id="${char.id}" onclick="sessionStorage.setItem('personagemAtivoId', '${char.id}')">Inspecionar</button>`;
                 } else {
                     controleHtml += `<div class="bg-gray-200 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 text-gray-500 px-3 py-1.5 rounded text-[10px] font-bold uppercase shadow-inner z-10 flex items-center gap-1 cursor-not-allowed" title="Oculto"><i data-lucide="lock" class="w-3 h-3 text-rpg-red"></i> Sigilo</div>`;
                 }
 
-                // 🔥 GARANTIA DE POSSE: Apenas o jogador que botou a ficha pode retirá-la! 🔥
                 if (isDonoDaFicha || isMestre) {
                     controleHtml += `
                     <button class="btn-retirar-mesa bg-gray-600 hover:bg-rpg-red text-white p-1.5 rounded text-xs font-bold uppercase shadow transition-colors z-10 ml-2" data-id="${char.id}" data-nome="${window.escaparHTML(char.nome_personagem)}" title="Recolher Ficha">
@@ -248,30 +244,20 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.btn-inspecionar-ficha').forEach(btn => {
                 btn.addEventListener('click', async (e) => {
                     const fichaId = e.target.getAttribute('data-id');
+                    sessionStorage.setItem('personagemAtivoId', fichaId);
+
                     if (typeof window.carregarPersonagem === 'function') {
                         await window.carregarPersonagem(fichaId);
                         Router.navigate('ficha');
                     }
                 });
             });
-
-            // Lógica do botão de retirar (AGORA ABRE O MODAL!)
-            document.querySelectorAll('.btn-retirar-mesa').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const personagemId = e.currentTarget.getAttribute('data-id');
-                    const nomePersonagem = e.currentTarget.getAttribute('data-nome');
-                    window.abrirModalRecolherFicha(personagemId, nomePersonagem, e.currentTarget, campanhaId);
-                });
-            });
-
             // Lógica do botão de retirar
             document.querySelectorAll('.btn-retirar-mesa').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.preventDefault(); 
-                    
                     const personagemId = e.currentTarget.getAttribute('data-id');
                     const nomePersonagem = e.currentTarget.getAttribute('data-nome');
-                    
                     window.abrirModalRecolherFicha(personagemId, nomePersonagem, e.currentTarget, campanhaId);
                 });
             });

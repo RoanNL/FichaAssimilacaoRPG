@@ -1,6 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // === DICIONÁRIOS DE ÍCONES (TEMA DINÂMICO DOS ASSETS) ===
+    // 🔥 ESCUDO DE SEGURANÇA DO HISTÓRICO: Garante que os textos nunca quebrem a tela! 🔥
+    window.escaparHTML = window.escaparHTML || function(text) {
+        if (text == null) return '';
+        return text.toString().replace(/[&<>"']/g, function(m) {
+            return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'}[m];
+        });
+    };
+
     const iconesTemaClaro = {
         sucesso: 'assets/sucesso.png',
         pressao: 'assets/pressao.png',
@@ -25,8 +32,219 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultsDiv = document.getElementById('rolador-resultados-atuais');
     const historicoDiv = document.getElementById('rolador-historico');
 
+    window.rolagemPendente = null;
+
+    const diceTable = {
+        d6: { 1: ['nada'], 2: ['nada'], 3: ['pressao'], 4: ['pressao'], 5: ['adaptacao', 'pressao'], 6: ['sucesso'] },
+        d10: { 1: ['nada'], 2: ['nada'], 3: ['pressao'], 4: ['pressao'], 5: ['adaptacao', 'pressao'], 6: ['sucesso'], 7: ['sucesso', 'sucesso'], 8: ['sucesso', 'adaptacao'], 9: ['sucesso', 'adaptacao', 'pressao'], 10: ['sucesso', 'sucesso', 'pressao'] },
+        d12: { 1: ['nada'], 2: ['nada'], 3: ['pressao'], 4: ['pressao'], 5: ['adaptacao', 'pressao'], 6: ['sucesso'], 7: ['sucesso', 'sucesso'], 8: ['sucesso', 'adaptacao'], 9: ['sucesso', 'adaptacao', 'pressao'], 10: ['sucesso', 'sucesso', 'pressao'], 11: ['sucesso', 'adaptacao', 'adaptacao', 'pressao'], 12: ['pressao', 'pressao'] }
+    };
+
+    function rollDie(max) { return Math.floor(Math.random() * max) + 1; }
+
+    function parseInput(inputString) {
+        const diceRequests = [];
+        const parts = inputString.trim().toLowerCase().split(/\s+/);
+        for (const part of parts) {
+            if (!part) continue;
+            const match = part.match(/^(\d*)d(\d+)$/);
+            if (!match) {
+                if (typeof window.mostrarNotificacao === 'function') window.mostrarNotificacao(`Formato inválido: "${part}"`, 'erro');
+                return null;
+            }
+            const quantity = parseInt(match[1] || '1', 10);
+            const size = parseInt(match[2], 10);
+            if (![6, 10, 12].includes(size)) {
+                if (typeof window.mostrarNotificacao === 'function') window.mostrarNotificacao(`Dado inválido: d${size}. Use d6, d10 ou d12.`, 'aviso');
+                return null;
+            }
+            diceRequests.push({ quantity, size });
+        }
+        return diceRequests;
+    }
+
     // ==========================================
-    // 1. CONSTRUTOR DE CARTÕES 
+    // 1. FASE DE ROLAGEM UNIVERSAL E CONDICIONAL DE TELA
+    // ==========================================
+    function handleRoll() {
+        const inputString = inputDados.value;
+        const parsedDice = parseInput(inputString);
+        if (!parsedDice || parsedDice.length === 0) return;
+
+        let dieCounter = { d6: 0, d10: 0, d12: 0 };
+        window.rolagemPendente = { input: inputString, dados: [] };
+
+        const telaAtual = sessionStorage.getItem('telaAtual');
+        // Só auto-seleciona e atira direto na mesa se estiver fisicamente na tela da Campanha!
+        const isNaTelaCampanha = telaAtual === 'campanha';
+
+        parsedDice.forEach(die => {
+            const dieType = 'd' + die.size;
+            for (let i = 0; i < die.quantity; i++) {
+                dieCounter[dieType]++;
+                const rollNumber = rollDie(die.size);
+                const icons = diceTable[dieType][rollNumber];
+                
+                window.rolagemPendente.dados.push({
+                    id: Math.random().toString(36).substr(2, 9),
+                    tipo: dieType,
+                    numero: dieCounter[dieType],
+                    faceMecanica: rollNumber,
+                    icones: icons,
+                    selecionado: isNaTelaCampanha 
+                });
+            }
+        });
+
+        if (isNaTelaCampanha) {
+            window.confirmarRolagem();
+        } else {
+            window.renderizarRolagemPendente();
+        }
+    }
+
+    window.renderizarRolagemPendente = function() {
+        if (!window.rolagemPendente) return;
+        resultsDiv.innerHTML = '';
+        const iconFilesAtuais = obterIconesAtuais();
+
+        const container = document.createElement('div');
+        container.className = 'bg-gray-100 dark:bg-[#1a1a1a] border-2 border-rpg-red rounded-lg p-4 shadow-lg flex flex-col items-center animate-fade-in my-4 mx-2';
+
+        container.innerHTML = `<h3 class="text-rpg-red dark:text-red-500 font-black font-rpg uppercase text-sm mb-3 text-center border-b border-red-300 dark:border-red-900 pb-1 w-full">Selecione os Dados</h3>`;
+
+        const diceContainer = document.createElement('div');
+        diceContainer.className = 'flex flex-wrap gap-2 justify-center mb-4';
+
+        window.rolagemPendente.dados.forEach(dado => {
+            const isSelected = dado.selecionado 
+                ? 'border-rpg-green bg-green-100 dark:bg-green-900/30 scale-110 shadow-md ring-2 ring-rpg-green' 
+                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-[#242424] opacity-60 hover:opacity-100';
+            
+            const dieDiv = document.createElement('div');
+            dieDiv.className = `cursor-pointer transition-all duration-200 border-2 rounded p-2 text-center min-w-[45px] flex flex-col items-center justify-center ${isSelected}`;
+            dieDiv.onclick = () => window.toggleDadoPendente(dado.id);
+            
+            dieDiv.innerHTML += `<span class="text-[8px] font-bold text-gray-500 uppercase mb-1">${dado.tipo}</span>`;
+
+            const iconsDiv = document.createElement('div');
+            iconsDiv.className = 'flex flex-wrap gap-0.5 justify-center';
+            
+            if (dado.icones.includes('nada')) {
+                const img = document.createElement('img');
+                img.src = iconFilesAtuais['nada'];
+                img.className = 'w-[20px] h-[20px] object-contain';
+                iconsDiv.appendChild(img);
+            } else {
+                dado.icones.forEach(iconName => {
+                    const img = document.createElement('img');
+                    img.src = iconFilesAtuais[iconName];
+                    img.className = 'w-[20px] h-[20px] object-contain';
+                    iconsDiv.appendChild(img);
+                });
+            }
+            
+            dieDiv.appendChild(iconsDiv);
+            diceContainer.appendChild(dieDiv);
+        });
+
+        container.appendChild(diceContainer);
+
+        const btnConfirmar = document.createElement('button');
+        btnConfirmar.className = 'w-full bg-rpg-green hover:bg-green-700 text-white font-bold py-2 rounded uppercase font-rpg text-xs shadow-md transition-colors';
+        btnConfirmar.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4 inline align-text-bottom"></i> Confirmar Mantidos';
+        btnConfirmar.onclick = window.confirmarRolagem;
+
+        container.appendChild(btnConfirmar);
+        resultsDiv.appendChild(container);
+        if(window.lucide) lucide.createIcons();
+    };
+
+    window.toggleDadoPendente = function(id) {
+        const dado = window.rolagemPendente.dados.find(d => d.id === id);
+        if(dado) dado.selecionado = !dado.selecionado;
+        window.renderizarRolagemPendente();
+    };
+
+    // ==========================================
+    // 2. CONFIRMAÇÃO E ENVIO 
+    // ==========================================
+    window.confirmarRolagem = function() {
+        const mantidos = window.rolagemPendente.dados.filter(d => d.selecionado);
+        if (mantidos.length === 0) {
+            return window.mostrarNotificacao("Você deve selecionar pelo menos 1 dado!", "aviso");
+        }
+
+        // 🔥 PUXA A MEMÓRIA DA CAMPANHA (MESMO SE TIVER VINDO DO RADAR SECRETO) 🔥
+        const campanhaAtiva = sessionStorage.getItem('campanhaAtiva') || sessionStorage.getItem('campanhaAtivaFallback');
+        const telaAtual = sessionStorage.getItem('telaAtual');
+        const isMestre = sessionStorage.getItem('isMestreAtivo') === 'true';
+        
+        let nomeRolador = sessionStorage.getItem('usuarioNome') || 'Operador Misterioso';
+        let fotoAvatar = './assets/icon.jpg';
+        let idDaFicha = null; 
+
+        if (telaAtual === 'ficha') {
+            const urlParams = new URLSearchParams(window.location.search);
+            idDaFicha = window.idPersonagemAtual || sessionStorage.getItem('personagemAtivoId') || urlParams.get('id') || null;
+
+            const inputNome = document.getElementById('nome');
+            if (inputNome && inputNome.value.trim() !== '') nomeRolador = inputNome.value.trim();
+
+            const imgPersonagem = document.getElementById('char-photo-preview');
+            if (imgPersonagem && imgPersonagem.src && !imgPersonagem.src.includes('R0lGOD')) {
+                fotoAvatar = imgPersonagem.src;
+            }
+        } else {
+            if (isMestre) {
+                idDaFicha = null; 
+            } else {
+                idDaFicha = sessionStorage.getItem('personagemAtivoId') || null;
+            }
+
+            const imgPerfil = document.getElementById('nav-avatar-img');
+            if (imgPerfil && imgPerfil.src && !imgPerfil.src.includes('R0lGOD')) {
+                fotoAvatar = imgPerfil.src;
+            }
+        }
+
+        const pacoteDeDados = {
+            nome: nomeRolador,
+            usuarioId: sessionStorage.getItem('usuarioId'),
+            personagemId: idDaFicha, 
+            avatar: fotoAvatar,
+            timestamp: new Date().toISOString(),
+            input: window.rolagemPendente.input,
+            campanhaId: campanhaAtiva, // Vai pra campanha certa, seja ele qual for!
+            isRolagemPublica: (isMestre && document.getElementById('toggle-rolagem-mestre')) ? !document.getElementById('toggle-rolagem-mestre').checked : true,
+            resultados: mantidos, 
+            rolagemCompleta: window.rolagemPendente.dados, 
+            totais: { sucesso: 0, pressao: 0, adaptacao: 0, nada: 0 }
+        };
+
+        mantidos.forEach(dado => {
+            dado.icones.forEach(iconName => pacoteDeDados.totais[iconName]++);
+        });
+
+        renderizarChat(pacoteDeDados);
+
+        if (telaAtual === 'ficha' && pacoteDeDados.totais.pressao > 0 && window.isTesteAssimilacaoReal === true) {
+            if (typeof window.aplicarPressaoAutomatica === 'function') {
+                window.aplicarPressaoAutomatica(pacoteDeDados.totais.pressao);
+            }
+        }
+        window.isTesteAssimilacaoReal = false;
+
+        if (window.socket) {
+            pacoteDeDados.token = sessionStorage.getItem('token'); 
+            window.socket.emit('rolar-dados', pacoteDeDados);
+        }
+
+        window.limparRoladorLocal(); 
+    };
+
+    // ==========================================
+    // 3. CONSTRUTOR DE CARTÕES DO CHAT 
     // ==========================================
     function criarCard(pacote, animar = false) {
         const avatar = (pacote.avatar && !pacote.avatar.includes('R0lGODlhAQAB')) ? pacote.avatar : './assets/icon.jpg';
@@ -34,12 +252,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const timestamp = pacote.timestamp || new Date().toISOString();
         const dataFormatada = new Date(timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) + ' - ' + new Date(timestamp).toLocaleDateString('pt-BR');
 
-        // 🔥 NOVIDADE: Mapeando os resultados numéricos para exibir no título 🔥
         let numerosRolados = "";
-        if (pacote.resultados && pacote.resultados.length > 0) {
-            // Pega apenas o número puro (faceMecanica) de cada dado e junta com vírgulas
-            const faces = pacote.resultados.map(dado => dado.faceMecanica).join(', ');
-            numerosRolados = ` - (${faces})`;
+        const dadosParaDesenhar = pacote.rolagemCompleta || pacote.resultados; 
+        
+        if (dadosParaDesenhar && dadosParaDesenhar.length > 0) {
+            const faces = dadosParaDesenhar.map(dado => dado.faceMecanica).join(', ');
+            numerosRolados = ` - ROLOU: (${faces})`;
         }
 
         const rollGroup = document.createElement('div');
@@ -48,12 +266,11 @@ document.addEventListener('DOMContentLoaded', () => {
         let corBorda = 'border-gray-300 dark:border-gray-700';
         let corHover = 'group-hover:border-gray-400 dark:group-hover:border-gray-500';
 
-        // Destaque se for rolagem do usuário atual
         const meuNomeLocal = sessionStorage.getItem('usuarioNome');
         const meuPersonagemLocal = document.getElementById('nome') ? document.getElementById('nome').value.trim() : '';
         if (pacote.nome === meuNomeLocal || pacote.nome === meuPersonagemLocal) {
-            corBorda = 'border-rpg-red/40 dark:border-red-900/50';
-            corHover = 'group-hover:border-rpg-red dark:group-hover:border-red-500';
+            corBorda = 'border-rpg-green/50 dark:border-green-800/50';
+            corHover = 'group-hover:border-rpg-green dark:group-hover:border-green-600';
         }
 
         rollGroup.innerHTML = `
@@ -64,8 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     <div class="bg-white dark:bg-[#1a1a1a] border ${corBorda} rounded-lg p-3 shadow-sm flex flex-col group relative overflow-hidden transition-colors">
                         
-                        <!-- 🔥 TÍTULO COM OS NÚMEROS AQUI 🔥 -->
-                        <span class="text-[12px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest truncate mb-2" title="${window.escaparHTML(pacote.input)}${numerosRolados}">
+                        <span class="text-[12px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest truncate mb-2" title="Rolagem: ${window.escaparHTML(pacote.input)}${numerosRolados}">
                             Rolagem: ${window.escaparHTML(pacote.input)} <span class="text-gray-500 dark:text-gray-600">${numerosRolados}</span>
                         </span>
 
@@ -91,42 +307,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const subRollsContainer = rollGroup.querySelector('.sub-rolls-container');
         const iconFilesAtuais = obterIconesAtuais();
-        const tempoGiroLogo = 1000;
-        const delaySuspense = 300;
-        const tempoTotalAntesDados = tempoGiroLogo + delaySuspense;
-
-        if (pacote.resultados) {
-            pacote.resultados.forEach(dado => {
+        
+        if (dadosParaDesenhar) {
+            dadosParaDesenhar.forEach(dado => {
+                const foiMantido = pacote.rolagemCompleta ? dado.selecionado : true;
                 const subRollDiv = document.createElement('div');
-                subRollDiv.className = 'relative bg-white dark:bg-[#242424] border border-gray-200 dark:border-gray-700 rounded p-1 text-center shadow-sm min-w-[35px] flex flex-col items-center justify-center';
-                subRollDiv.title = `${dado.tipo} rolou ${dado.faceMecanica}`;
+                
+                let estiloBase = 'relative rounded p-1 text-center min-w-[35px] flex flex-col items-center justify-center transition-all duration-300 ';
+                
+                if (foiMantido) {
+                    estiloBase += 'bg-white dark:bg-[#242424] border-2 border-rpg-blue dark:border-rpg-red shadow-md scale-105 opacity-100 z-10';
+                } else {
+                    estiloBase += 'bg-gray-100 dark:bg-[#111111] border border-gray-300 dark:border-gray-700 opacity-50 scale-95 grayscale hover:grayscale-0 hover:opacity-100';
+                }
+
+                subRollDiv.className = estiloBase;
+                subRollDiv.title = `${dado.tipo} rolou ${dado.faceMecanica} ${foiMantido ? '(Mantido)' : '(Descartado)'}`;
 
                 const subRollIcons = document.createElement('div');
                 subRollIcons.className = 'icons-container flex flex-wrap gap-0.5 justify-center items-center';
 
-                if (animar) {
-                    subRollDiv.classList.add('opacity-0');
-                    subRollDiv.style.transition = 'opacity 0.3s ease';
-
-                    const logoImg = document.createElement('img');
-                    logoImg.src = 'assets/icon.jpg';
-                    logoImg.className = 'logo-animado absolute top-1/2 left-1/2 rounded-full w-[25px] h-[25px] object-contain z-10';
-                    subRollDiv.appendChild(logoImg);
-
-                    dado.icones.forEach((iconName, index) => {
-                        const img = document.createElement('img');
-                        img.src = iconFilesAtuais[iconName];
-                        img.className = 'dado-animado w-[20px] h-[20px] object-contain';
-                        const delayDados = tempoTotalAntesDados / 1000;
-                        img.style.animationDelay = `${delayDados + (index * 0.1)}s`;
-                        subRollIcons.appendChild(img);
-                    });
-
-                    setTimeout(() => {
-                        subRollDiv.classList.remove('opacity-0');
-                        subRollIcons.style.opacity = '1';
-                    }, tempoTotalAntesDados);
-
+                if (dado.icones.includes('nada')) {
+                    const img = document.createElement('img');
+                    img.src = iconFilesAtuais['nada'];
+                    img.className = 'w-[20px] h-[20px] object-contain opacity-100 visible';
+                    subRollIcons.appendChild(img);
                 } else {
                     dado.icones.forEach(iconName => {
                         const img = document.createElement('img');
@@ -141,45 +346,70 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        return { card: rollGroup, tempoAnimacao: animar ? tempoTotalAntesDados : 0 };
+        return { card: rollGroup };
     }
 
-    function renderizarRolagem(pacote) {
+    function renderizarChat(pacote) {
         if (!resultsDiv || !historicoDiv) return;
 
         const emptyMsg = historicoDiv.querySelector('p.italic');
         if (emptyMsg) emptyMsg.remove();
 
-        // 1. Renderiza animado no topo
-        const { card, tempoAnimacao } = criarCard(pacote, true);
+        try {
+            const { card } = criarCard(pacote, true);
+            historicoDiv.prepend(card);
+        } catch (e) {
+            console.error("Falha ao renderizar card na tela:", e);
+        }
+        
         resultsDiv.innerHTML = '';
-        resultsDiv.appendChild(card);
-
-        // 2. Move para o histórico infinito após animação
-        setTimeout(() => {
-            const historyCard = criarCard(pacote, false).card;
-            historicoDiv.prepend(historyCard);
-            resultsDiv.innerHTML = '';
-        }, tempoAnimacao + 600);
     }
 
     // ==========================================
-    // 2. CONEXÃO MULTIPLAYER E ISOLAMENTO DE CONTEXTO
+    // 4. RADAR DE VÍNCULO SECRETO DA CAMPANHA
     // ==========================================
-    function iniciarMultiplayer() {
-        // Se a conexão não estiver pronta, tenta de novo em 50ms, evitando atrasos longos!
-        if (!window.socket) {
-            setTimeout(iniciarMultiplayer, 50); 
-            return;
-        }
+    async function verificarVinculoCampanha() {
+        const telaAtual = sessionStorage.getItem('telaAtual');
+        const charId = window.idPersonagemAtual || sessionStorage.getItem('personagemAtivoId') || new URLSearchParams(window.location.search).get('id');
+        
+        // Se a gente JÁ está na campanha ou no dashboard, a gente ignora.
+        if (telaAtual !== 'ficha' || !charId) return;
 
-        // Ouvindo novas rolagens dos aliados
-        window.socket.off('nova-rolagem'); // Previne duplicação de ouvintes
+        try {
+            const isLocalhost = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
+            const API = isLocalhost ? 'http://localhost:3000' : 'https://fichaassimilacaorpg.onrender.com';
+            
+            const res = await fetch(`${API}/personagens/obs/${charId}`);
+            if (res.ok) {
+                const char = await res.json();
+                if (char.campanha_id) {
+                    // O PERSONAGEM TEM UMA MESA! O sistema memoriza e se conecta nela por debaixo dos panos!
+                    sessionStorage.setItem('campanhaAtivaFallback', char.campanha_id);
+                    if (window.socket) {
+                        window.socket.emit('entrar-na-campanha', {
+                            campanhaId: char.campanha_id,
+                            token: sessionStorage.getItem('token')
+                        });
+                    }
+                } else {
+                    // Ele é um lobo solitário, limpa a memória fantasma
+                    sessionStorage.removeItem('campanhaAtivaFallback');
+                }
+            }
+        } catch (e) {
+            console.error("Erro no radar de vínculo de campanha:", e);
+        }
+    }
+
+    function iniciarMultiplayer() {
+        if (!window.socket) { setTimeout(iniciarMultiplayer, 50); return; }
+
+        window.socket.off('nova-rolagem'); 
         window.socket.on('nova-rolagem', (pacoteDeDados) => {
-            const campanhaAtiva = sessionStorage.getItem('campanhaAtiva');
+            const campanhaAtiva = sessionStorage.getItem('campanhaAtiva') || sessionStorage.getItem('campanhaAtivaFallback');
             if (!campanhaAtiva || pacoteDeDados.campanhaId !== campanhaAtiva) return; 
 
-            renderizarRolagem(pacoteDeDados);
+            renderizarChat(pacoteDeDados);
 
             const panel = document.getElementById('game-log-sidebar');
             if (panel && panel.classList.contains('translate-x-full')) {
@@ -189,21 +419,20 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Carregando Histórico Antigo ao entrar na mesa
-        window.socket.off('carregar-historico'); // Previne duplicação
+        window.socket.off('carregar-historico'); 
         window.socket.on('carregar-historico', (historico) => {
             if (!historicoDiv) return;
             
-            const campanhaAtiva = sessionStorage.getItem('campanhaAtiva');
+            // A leitura agora pega a campanha real OU a campanha encontrada pelo radar!
+            const campanhaAtiva = sessionStorage.getItem('campanhaAtiva') || sessionStorage.getItem('campanhaAtivaFallback');
+            
             if (!campanhaAtiva) {
                 historicoDiv.innerHTML = '<p class="text-center text-gray-500 text-xs italic font-bold mt-4">Terminal Local Ativo.<br>Acesse por uma campanha para ativar a rede multiplayer.</p>';
                 return;
             }
 
-            // Limpa a tela
             historicoDiv.innerHTML = '';
             
-            // Se o histórico vier vazio do banco de dados, escreve a mensagem padrão!
             if (!historico || historico.length === 0) {
                 historicoDiv.innerHTML = '<p class="text-center text-gray-400 text-xs italic font-bold mt-4">O destino aguarda os dados...</p>';
                 return;
@@ -217,178 +446,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     const souMestre = sessionStorage.getItem('isMestreAtivo') === 'true';
                     const meuId = sessionStorage.getItem('usuarioId');
-                    const fuiEuQuemRolou = (pacote.usuarioId === meuId) ||
-                        (!pacote.usuarioId && (pacote.nome === meuNomeLocal || pacote.nome === meuPersonagemLocal));
+                    const fuiEuQuemRolou = (pacote.usuarioId === meuId) || (!pacote.usuarioId && (pacote.nome === meuNomeLocal || pacote.nome === meuPersonagemLocal));
 
-                    // Mantém as rolagens do mestre em segredo absoluto
                     if (!souMestre && !fuiEuQuemRolou && pacote.isMestre && !pacote.isRolagemPublica) return; 
 
                     const { card } = criarCard(pacote, false);
                     historicoDiv.prepend(card);
                 } catch (err) {
-                    console.error("❌ Erro ao desenhar rolagem antiga.");
+                    console.error("Erro ao desenhar bloco antigo:", err);
                 }
             });
         });
     }
     
-    // Inicia a vigilância imediatamente!
     iniciarMultiplayer();
-
-    // ==========================================
-    // 3. MATEMÁTICA E LÓGICA DE ROLAGEM
-    // ==========================================
-    const diceTable = {
-        d6: {
-            1: ['nada'],
-            2: ['nada'],
-            3: ['pressao'],
-            4: ['pressao'],
-            5: ['adaptacao', 'pressao'],
-            6: ['sucesso']
-        },
-        d10: {
-            1: ['nada'],
-            2: ['nada'],
-            3: ['pressao'],
-            4: ['pressao'],
-            5: ['adaptacao', 'pressao'],
-            6: ['sucesso'],
-            7: ['sucesso', 'sucesso'],
-            8: ['sucesso', 'adaptacao'],
-            9: ['sucesso', 'adaptacao', 'pressao'],
-            10: ['sucesso', 'sucesso', 'pressao']
-        },
-        d12: {
-            1: ['nada'],
-            2: ['nada'],
-            3: ['pressao'],
-            4: ['pressao'],
-            5: ['adaptacao', 'pressao'],
-            6: ['sucesso'],
-            7: ['sucesso', 'sucesso'],
-            8: ['sucesso', 'adaptacao'],
-            9: ['sucesso', 'adaptacao', 'pressao'],
-            10: ['sucesso', 'sucesso', 'pressao'],
-            11: ['sucesso', 'adaptacao', 'adaptacao', 'pressao'],
-            12: ['pressao', 'pressao']
-        }
-    };
-
-    function rollDie(max) { return Math.floor(Math.random() * max) + 1; }
-
-    function parseInput(inputString) {
-        const diceRequests = [];
-        const parts = inputString.trim().toLowerCase().split(/\s+/);
-        for (const part of parts) {
-            if (!part) continue;
-            const match = part.match(/^(\d*)d(\d+)$/);
-            if (!match) {
-                if (typeof window.mostrarNotificacao === 'function') window.mostrarNotificacao(`Formato inválido: "${part}". Use "2d6", "1d10"`, 'erro');
-                return null;
-            }
-            const quantity = parseInt(match[1] || '1', 10);
-            const size = parseInt(match[2], 10);
-            if (![6, 10, 12].includes(size)) {
-                if (typeof window.mostrarNotificacao === 'function') window.mostrarNotificacao(`Dado inválido: "d${size}". Use d6, d10 ou d12.`, 'aviso');
-                return null;
-            }
-            diceRequests.push({ quantity, size });
-        }
-        return diceRequests;
-    }
-
-    function handleRoll() {
-        const inputString = inputDados.value;
-        const parsedDice = parseInput(inputString);
-        if (!parsedDice || parsedDice.length === 0) return;
-
-        const campanhaAtiva = sessionStorage.getItem('campanhaAtiva');
-        
-        // 🔥 A MÁGICA DA IDENTIDADE: Lendo NOME e FOTO de acordo com a tela! 🔥
-        const telaAtual = sessionStorage.getItem('telaAtual');
-        let nomeRolador = sessionStorage.getItem('usuarioNome') || 'Operador Misterioso';
-        let fotoAvatar = './assets/icon.jpg';
-        
-        if (telaAtual === 'ficha') {
-            // Se estiver na Ficha, a máscara do personagem assume!
-            const inputNome = document.getElementById('nome');
-            if (inputNome && inputNome.value.trim() !== '') {
-                nomeRolador = inputNome.value.trim();
-            }
-            
-            const imgPersonagem = document.getElementById('char-photo-preview');
-            if (imgPersonagem && imgPersonagem.src && !imgPersonagem.src.includes('R0lGODlhAQAB')) {
-                fotoAvatar = imgPersonagem.src;
-            }
-        } else {
-            // Se estiver no Lobby da Campanha, a identidade real do jogador/mestre prevalece!
-            const imgPerfil = document.getElementById('nav-avatar-img');
-            if (imgPerfil && imgPerfil.src && !imgPerfil.src.includes('R0lGODlhAQAB')) {
-                fotoAvatar = imgPerfil.src;
-            }
-        }
-
-        const pacoteDeDados = {
-            nome: nomeRolador,
-            usuarioId: sessionStorage.getItem('usuarioId'),
-            avatar: fotoAvatar,
-            timestamp: new Date().toISOString(),
-            input: inputString,
-            campanhaId: campanhaAtiva,
-            
-            // Lendo se o Mestre quer rolar em público!
-            isRolagemPublica: (sessionStorage.getItem('isMestreAtivo') === 'true' && document.getElementById('toggle-rolagem-mestre')) ? !document.getElementById('toggle-rolagem-mestre').checked : true,
-            
-            resultados: [],
-            totais: { sucesso: 0, pressao: 0, adaptacao: 0, nada: 0 }
-        };
-
-        let dieCounter = { d6: 0, d10: 0, d12: 0 };
-
-        parsedDice.forEach(die => {
-            const dieType = 'd' + die.size;
-            for (let i = 0; i < die.quantity; i++) {
-                dieCounter[dieType]++;
-                const rollNumber = rollDie(die.size);
-                const icons = diceTable[dieType][rollNumber];
-
-                icons.forEach(iconName => pacoteDeDados.totais[iconName]++);
-
-                pacoteDeDados.resultados.push({
-                    tipo: dieType,
-                    numero: dieCounter[dieType],
-                    faceMecanica: rollNumber,
-                    icones: icons
-                });
-            }
-        });
-        
-        renderizarRolagem(pacoteDeDados);
-
-        // 🔥 CORREÇÃO DO BUG: Só tira Ego se a janela for a Ficha, rolar pressões, E se for explicitamente um Teste de Assimilação!
-        if (telaAtual === 'ficha' && pacoteDeDados.totais.pressao > 0 && window.isTesteAssimilacaoReal === true) {
-            if (typeof window.aplicarPressaoAutomatica === 'function') {
-                window.aplicarPressaoAutomatica(pacoteDeDados.totais.pressao);
-            }
-        }
-        window.isTesteAssimilacaoReal = false;
-
-        // SINCRONIZAÇÃO BLINDADA
-        if (campanhaAtiva && window.socket) {
-            pacoteDeDados.token = sessionStorage.getItem('token'); 
-            window.socket.emit('rolar-dados', pacoteDeDados);
-        }
-
-        window.limparRoladorLocal(); 
-    }
 
     if (rollButton) rollButton.addEventListener('click', handleRoll);
     if (inputDados) inputDados.addEventListener('keypress', (event) => { if (event.key === 'Enter') handleRoll(); });
    
-    // ==========================================
-    // 4. ROLADOR INTELIGENTE E VIGIA DO TERMINAL
-    // ==========================================
     const labelsAptidoes = document.querySelectorAll('.aptidao-box label');
     let avisoAssimilada = document.getElementById('aviso-assimilada');
     const containerAviso = document.getElementById('aviso-assimilada-container');
@@ -402,7 +477,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (window.lucide) lucide.createIcons();
     }
 
-    // 🔥 FUNÇÃO GLOBAL PARA APAGAR AS LUZES 🔥
     window.limparRoladorLocal = function() {
         if (inputDados) inputDados.value = '';
         labelsAptidoes.forEach(lbl => {
@@ -410,17 +484,23 @@ document.addEventListener('DOMContentLoaded', () => {
             lbl.removeAttribute('data-clicks');
         });
         if (avisoAssimilada) avisoAssimilada.classList.add('hidden');
+        window.rolagemPendente = null;
+        if(resultsDiv) resultsDiv.innerHTML = '';
     }
 
-    // 👁️ O OLHO QUE TUDO VÊ (Vigia se a gaveta foi fechada de qualquer forma)
     const sidebarLog = document.getElementById('game-log-sidebar');
     if (sidebarLog) {
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
                 if (mutation.attributeName === 'class') {
-                    // Se a gaveta ganhou a classe "translate-x-full", significa que ela fechou!
-                    if (sidebarLog.classList.contains('translate-x-full')) {
-                        window.limparRoladorLocal(); // Limpa as aptidões silenciosamente
+                    const isFechado = sidebarLog.classList.contains('translate-x-full');
+                    if (isFechado) {
+                        window.limparRoladorLocal(); 
+                        document.body.classList.remove('terminal-open'); 
+                    } else {
+                        document.body.classList.add('terminal-open'); 
+                        // 🔥 O SEGREDO DO CHAT! Assim que a barra abre, ele verifica o radar de mesas!
+                        verificarVinculoCampanha(); 
                     }
                 }
             });
@@ -428,7 +508,6 @@ document.addEventListener('DOMContentLoaded', () => {
         observer.observe(sidebarLog, { attributes: true });
     }
 
-    // Função que "Lê" a ficha e monta a rolagem!
     function recalcularRolagemInput() {
         if (!inputDados) return;
 
@@ -482,7 +561,6 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => inputDados.classList.remove('ring-2', 'ring-rpg-red'), 200);
         }
 
-        // Abertura automática a partir de 2 marcações
         if (contadorDeMarcacoes >= 2 && sidebarLog) {
             if (sidebarLog.classList.contains('translate-x-full')) {
                 sidebarLog.classList.remove('translate-x-full');
@@ -490,7 +568,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // O Clique Mágico Inteligente
     labelsAptidoes.forEach(label => {
         label.addEventListener('click', function() {
             const box = this.closest('.aptidao-box');
@@ -500,7 +577,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const isInstinto = box.closest('#secao-instintos') !== null;
 
             if (isInstinto) {
-                // Instintos: Sistema de 3 Estados (1 clique, 2 cliques, desliga)
                 if (!this.classList.contains('label-selecionado')) {
                     this.classList.add('label-selecionado');
                     this.setAttribute('data-clicks', '1');
@@ -515,9 +591,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             } else {
-                // Conhecimento/Prática: Troca Inteligente!
                 if (!this.classList.contains('label-selecionado')) {
-                    // Desliga todos os outros conhecimentos e práticas antes de ligar este
                     document.querySelectorAll('.aptidao-box label.label-selecionado').forEach(lbl => {
                         if (!lbl.closest('#secao-instintos')) {
                             lbl.classList.remove('label-selecionado');
@@ -533,9 +607,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // ==========================================
-    // 5. BOTÃO LIMPAR E FILTRO DE HISTÓRICO
-    // ==========================================
     if (clearButton) {
         clearButton.addEventListener('click', () => {
             if (resultsDiv) resultsDiv.innerHTML = '';
@@ -573,7 +644,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // CSS Dinâmico na memória (Somente Animações)
     const style = document.createElement('style');
     style.textContent = `
         @keyframes logoGiraEntra {
@@ -591,7 +661,7 @@ document.addEventListener('DOMContentLoaded', () => {
         @keyframes rolarAnimado {
             0% { transform: rotate(-540deg) scale(0.1); opacity: 0; }
             50% { transform: rotate(20deg) scale(1.2); opacity: 1; }
-            100% { transform: rotate(0deg) scale(1); opacity: 1; visibility: visible; }
+            100% { transform: rotate(0deg) scale(1); visibility: visible; }
         }
         .dado-animado {
             animation: rolarAnimado 0.6s cubic-bezier(0.17, 0.89, 0.32, 1.28) forwards;
@@ -604,6 +674,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         .dark .label-selecionado {
             box-shadow: inset 0 0 0 2px #f97316, 0 0 10px rgba(249, 115, 22, 0.5) !important;
+        }
+
+        #main-content, .modal-content {
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important; 
+        }
+        
+        @media (min-width: 1400px) {
+            body.terminal-open #main-content {
+                transform: translateX(-190px) !important;
+            }
+            body.terminal-open .modal.show .modal-content {
+                transform: translateX(-190px) scale(1) !important;
+            }
+        }
+
+        @media (min-width: 1024px) and (max-width: 1399px) {
+            body.terminal-open #main-content {
+                transform: translateX(-100px) !important;
+            }
+            body.terminal-open .modal.show .modal-content {
+                transform: translateX(-100px) scale(1) !important;
+            }
         }
     `;
     document.head.appendChild(style);
