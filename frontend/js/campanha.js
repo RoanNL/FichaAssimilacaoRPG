@@ -1540,18 +1540,17 @@ window.enviarConviteMesa = async function(amigoId) {
 
     // 🔥 O Mestre clicou no botão! Inicia as rolagens contínuas de inspeção 🔥
     window.iniciarAutoRefreshEscudo = function() {
-        window.carregarEscudoMestre(); // Dá a primeira varrida instantânea
+        window.carregarEscudoMestre(); 
         
-        clearInterval(intervaloEscudoMestre); // Limpa resquícios
+        clearInterval(intervaloEscudoMestre); 
         intervaloEscudoMestre = setInterval(() => {
             const modal = document.getElementById('modal-escudo-mestre');
-            // Só atualiza se o Mestre ainda estiver com o escudo levantado (Modal Aberto)
             if(modal && modal.classList.contains('show')) {
-                window.carregarEscudoMestre(true); // O 'true' silencia o aviso de "Inspecionando..." para não piscar
+                window.carregarEscudoMestre(true); 
             } else {
                 window.pararAutoRefreshEscudo();
             }
-        }, 5000); // Atualiza os corações a cada 5 segundos de forma invisível!
+        }, 5000); 
     };
 
     window.pararAutoRefreshEscudo = function() {
@@ -1584,7 +1583,7 @@ window.enviarConviteMesa = async function(amigoId) {
             }
 
             fichas.forEach(char => {
-                if (!char.id) return; // Pula cadeiras vazias
+                if (!char.id) return; 
 
                 const ficha = char.dados_ficha || {};
                 const imgSrc = (char.foto && !char.foto.includes('R0lGODlhAQAB')) ? char.foto : './assets/icon.jpg';
@@ -1598,16 +1597,40 @@ window.enviarConviteMesa = async function(amigoId) {
                 const dropsPorNivel = 1 + pot + resAttr;
                 const maxVida = dropsPorNivel * 6;
                 const vidaAtual = parseInt(ficha['saude-max']) || 0;
-                const pctVida = Math.min(100, Math.max(0, (vidaAtual / (maxVida||1)) * 100));
 
                 const indiceStatus = Math.ceil(vidaAtual / dropsPorNivel);
-                let nomeStatus = 'Inconsciente', corStatus = 'text-gray-600';
-                if (indiceStatus === 6) { nomeStatus = 'Saudável'; corStatus = 'text-[#6c7a6b] dark:text-[#a3e635]'; }
-                else if (indiceStatus === 5) { nomeStatus = 'Escoriado'; corStatus = 'text-[#6c7a6b] dark:text-[#a3e635]'; }
-                else if (indiceStatus === 4) { nomeStatus = 'Lacerado'; corStatus = 'text-[#a97b53] dark:text-[#fbbf24]'; }
-                else if (indiceStatus === 3) { nomeStatus = 'Ferido'; corStatus = 'text-[#a97b53] dark:text-[#fbbf24]'; }
-                else if (indiceStatus === 2) { nomeStatus = 'Arrebentado'; corStatus = 'text-rpg-red dark:text-red-500'; }
-                else if (indiceStatus === 1) { nomeStatus = 'Incapacitado'; corStatus = 'text-red-600 animate-pulse'; }
+                
+                // 🔥 AS DUAS CORES: Uma pro Texto (Tailwind) e outra pra Barra (Hexadecimal do OBS) 🔥
+                let nomeStatus = 'Inconsciente', corStatusText = 'text-gray-600 border-gray-600', corStatusBg = '#9ca3af';
+                
+                if (indiceStatus === 6) { nomeStatus = 'Saudável'; corStatusText = 'text-[#6c7a6b] dark:text-[#a3e635] border-current'; corStatusBg = '#84cc16'; }
+                else if (indiceStatus === 5) { nomeStatus = 'Escoriado'; corStatusText = 'text-[#6c7a6b] dark:text-[#a3e635] border-current'; corStatusBg = '#84cc16'; }
+                else if (indiceStatus === 4) { nomeStatus = 'Lacerado'; corStatusText = 'text-[#a97b53] dark:text-[#fbbf24] border-current'; corStatusBg = '#eab308'; }
+                else if (indiceStatus === 3) { nomeStatus = 'Ferido'; corStatusText = 'text-[#a97b53] dark:text-[#fbbf24] border-current'; corStatusBg = '#eab308'; }
+                else if (indiceStatus === 2) { nomeStatus = 'Arrebentado'; corStatusText = 'text-rpg-red dark:text-red-500 border-current'; corStatusBg = '#ef4444'; }
+                else if (indiceStatus === 1) { nomeStatus = 'Incapacitado'; corStatusText = 'text-red-600 border-red-600 animate-pulse'; corStatusBg = '#dc2626'; }
+
+                // 🔥 LÓGICA DA BARRA DIVIDIDA EM 6 BLOCOS COM COR DINÂMICA 🔥
+                let vidaBoxesHtml = '<div class="w-full grid grid-cols-6 gap-1 h-3 mt-1">';
+                for (let i = 1; i <= 6; i++) {
+                    const minVidaCaixa = (i - 1) * dropsPorNivel;
+                    const maxVidaCaixa = i * dropsPorNivel;
+                    let porcentagemCaixa = 0;
+                    
+                    if (vidaAtual >= maxVidaCaixa) {
+                        porcentagemCaixa = 100;
+                    } else if (vidaAtual > minVidaCaixa) {
+                        porcentagemCaixa = ((vidaAtual - minVidaCaixa) / dropsPorNivel) * 100;
+                    }
+
+                    // A cor da barra (background-color) agora muda de acordo com a saúde do personagem!
+                    vidaBoxesHtml += `
+                        <div class="h-full rounded-[2px] border border-gray-300 dark:border-gray-800 bg-gray-200 dark:bg-[#111] overflow-hidden relative shadow-inner">
+                            <div class="absolute left-0 top-0 h-full transition-all duration-500" style="width: ${porcentagemCaixa}%; background-color: ${corStatusBg};"></div>
+                        </div>
+                    `;
+                }
+                vidaBoxesHtml += '</div>';
 
                 // --- CABO DE GUERRA: OS TRIÂNGULOS VOLTARAM ---
                 let det = parseInt(ficha['det-num']) || 9; 
@@ -1618,7 +1641,6 @@ window.enviarConviteMesa = async function(amigoId) {
                     const detChecked = ficha[`det-${i}`] ? 'checked' : '';
                     const assimChecked = ficha[`assim-${i}`] ? 'checked' : '';
                     
-                    // Colocamos o "pointer-events-none" para o mestre não conseguir clicar nos triângulos do jogador
                     trilhaHtml += `
                         <input type="checkbox" class="determ-check pointer-events-none" ${detChecked}>
                         <input type="checkbox" class="assim-check pointer-events-none" ${assimChecked}>
@@ -1630,7 +1652,6 @@ window.enviarConviteMesa = async function(amigoId) {
                 const card = document.createElement('div');
                 card.className = 'bg-white dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 rounded-lg p-5 flex flex-col gap-5 shadow-lg hover:-translate-y-1 transition-all duration-300 relative overflow-hidden';
                 
-                // Uma faixinha no topo só de enfeite pra dar um ar "tecnológico"
                 card.innerHTML = `
                     <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-rpg-red to-rpg-blue"></div>
                     
@@ -1645,11 +1666,12 @@ window.enviarConviteMesa = async function(amigoId) {
                     <div class="flex flex-col gap-1.5">
                         <div class="flex justify-between items-end text-xs font-bold uppercase mb-1">
                             <span class="text-red-600 dark:text-red-500 flex items-center gap-1"><i data-lucide="heart" class="w-3.5 h-3.5"></i> VIDA <span class="text-gray-800 dark:text-gray-400 ml-1 tracking-wider">(${vidaAtual}/${maxVida})</span></span>
-                            <span class="${corStatus} text-[10px] tracking-widest border border-current px-2 py-0.5 rounded shadow-sm">${nomeStatus}</span>
+                            <span class="${corStatusText} text-[10px] tracking-widest border px-2 py-0.5 rounded shadow-sm">${nomeStatus}</span>
                         </div>
-                        <div class="w-full bg-gray-200 dark:bg-[#111] h-3 rounded-full overflow-hidden border border-gray-300 dark:border-gray-800 shadow-inner">
-                            <div class="bg-red-600 h-full transition-all duration-500" style="width: ${pctVida}%"></div>
-                        </div>
+                        
+                        <!-- BARRA DE VIDA MODULAR COLORIDA INJETADA AQUI -->
+                        ${vidaBoxesHtml}
+                        
                     </div>
 
                     <div class="flex flex-col gap-0 border-t border-gray-200 dark:border-gray-800 pt-3 mt-auto">
