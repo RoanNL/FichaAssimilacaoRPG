@@ -50,7 +50,12 @@ const Router = {
         const destino = document.getElementById(`tela-${telaDestino}`);
         if (destino) {
             destino.classList.remove('hidden');
-            destino.classList.add('animate-fade-in'); 
+            destino.classList.add('animate-fade-in');
+
+            // 🔥 SE FOR A TELA DE INÍCIO, DISPARA O RADAR DE SCROLL 🔥
+            if (telaDestino === 'landing' && typeof window.observarCardsLanding === 'function') {
+                window.observarCardsLanding();
+            } 
         }
 
         // 🔥 O CAÇADOR DE FUNÇÕES (Garante que carrega mesmo com F5) 🔥
@@ -148,3 +153,33 @@ style.textContent = `
     .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
 `;
 document.head.appendChild(style);
+
+// --- MOTOR DE ANIMAÇÃO DE SCROLL (INTERSECTION OBSERVER) ---
+document.addEventListener('DOMContentLoaded', () => {
+    const observerOptions = {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.12 // Dispara quando 12% do card aparece na tela
+    };
+
+    const scrollObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                // Entrou na tela: O card surge majestosamente!
+                entry.target.classList.add('is-visible');
+            } else {
+                // 🔥 A MÁGICA DO REPLAY: Saiu da tela? O card se esconde novamente nas sombras! 🔥
+                entry.target.classList.remove('is-visible');
+            }
+        });
+    }, observerOptions);
+
+    // Função global para disparar a varredura dos cards da landing page
+    window.observarCardsLanding = function() {
+        const cards = document.querySelectorAll('#tela-landing .reveal-card');
+        cards.forEach(card => {
+            card.classList.remove('is-visible'); // Reseta para animar de novo se o usuário mudar de aba
+            scrollObserver.observe(card);
+        });
+    };
+});

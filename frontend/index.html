@@ -250,110 +250,110 @@
         <main id="main-content" class="flex-grow p-4 md:p-8 max-w-[1200px] mx-auto w-full">
 
             <!-- 🗺️ TELA 1: LANDING PAGE -->
-            <div id="tela-landing" class="hidden">
-                <div class="text-center mb-10">
-                    <h1
-                        class="text-3xl md:text-5xl font-rpg font-black uppercase text-gray-800 dark:text-white mb-2 border-none">
-                        Bem-vindo ao Colapso</h1>
-                    <p class="text-gray-600 dark:text-gray-400 font-bold max-w-2xl mx-auto ">Explore as mecânicas de
-                        sobrevivência, corrupção e desespero. Conheça as regras antes de montar sua base ou desafiar as
-                        criaturas.</p>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div
-                        class="bg-white dark:bg-[#1e293b] p-6 rounded-lg border border-gray-300 dark:border-gray-700 shadow-md">
-                        <h2
-                            class="text-rpg-red font-rpg font-black text-2xl flex items-center gap-2 mb-4 uppercase border-b border-gray-200 dark:border-gray-600 pb-2">
-                            <i data-lucide="brain-circuit"></i> Perda de Ego
-                        </h2>
-                        <p class="text-gray-700 dark:text-gray-300 text-justify">A perda de Ego é a mecânica central da
-                            corrupção do
-                            seu personagem. Cada vez que a pressão psicológica ou as "Pressões" forem <b
-                                class="text-rpg-red dark:text-rpg-blue">excessivas durante
-                                sua rolagem de assimilação</b>,
-                            uma caixa vermelha irá ser marcada. Ao atingir o limite, o Parasita <b
-                                class="text-rpg-red dark:text-rpg-blue">assume o controle</b>.</p>
+            <div id="tela-landing" class="hidden flex flex-col w-full pb-20">
+                
+                <!-- SEÇÃO 0: HERO / INTRODUÇÃO -->
+                <section class="min-h-[85vh] flex flex-col justify-center items-center text-center snap-start py-12 relative reveal-card">
+                    <h1 class="text-3xl md:text-6xl font-rpg font-black uppercase text-gray-800 dark:text-white mb-4 border-none tracking-wide">
+                        Bem-vindo ao <b class="text-rpg-red dark:text-rpg-blue">Colapso</b>
+                    </h1>
+                    <p class="text-gray-600 dark:text-gray-400 font-bold max-w-2xl mx-auto text-base md:text-xl leading-relaxed">
+                        Explore as mecânicas de sobrevivência, corrupção e desespero. Conheça as regras antes de montar sua base ou desafiar as criaturas.
+                    </p>
+                    <div class="absolute bottom-8 animate-bounce text-gray-400">
+                        <i data-lucide="chevron-down" class="w-8 h-8"></i>
                     </div>
-                    <div
-                        class="bg-white dark:bg-[#1e293b] p-6 rounded-lg border border-gray-300 dark:border-gray-700 shadow-md">
-                        <h2
-                            class="text-gray-700 dark:text-gray-400 font-rpg font-black text-2xl flex items-center gap-2 mb-4 uppercase border-b border-gray-200 dark:border-gray-600 pb-2">
-                            Resultado: Nada <img src="./assets/nada.png" alt="Nada"
-                                class="w-10 h-10 object-contain dark:hidden">
-                            <img src="./assets/nada-branco.png" alt="Nada"
-                                class="w-10 h-10 object-contain hidden dark:block">
-                        </h2>
-                        <p class="text-gray-700 dark:text-gray-300 text-justify">Os dados virtuais (D6, D10 e D12)
-                            possuem faces
-                            vazias, representadas por <b class="text-rpg-red dark:text-rpg-blue">este símbolo no
-                                rolador</b>. Elas significam falhas diretas na ação ou
-                            total ausência de instinto primitivo no momento do teste.</p>
+                </section>
+
+                <!-- SEÇÃO 1: SOBREVIVÊNCIA E CORRUPÇÃO -->
+                <section class="min-h-[85vh] flex flex-col justify-center snap-start py-12 relative">
+                    <div class="border-l-4 border-rpg-red pl-4 mb-8 reveal-card">
+                        <h2 class="text-2xl md:text-3xl font-rpg font-black uppercase text-rpg-red text-left mb-1">Sobrevivência & Corrupção</h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Entenda os limites da mente e os perigos do ambiente.</p>
                     </div>
-                    <div
-                        class="bg-white dark:bg-[#1e293b] p-6 rounded-lg border border-gray-300 dark:border-gray-700 shadow-md">
-                        <h2
-                            class="text-rpg-blue font-rpg font-black text-2xl flex items-center gap-2 mb-4 uppercase border-b border-gray-200 dark:border-gray-600 pb-2">
-                            <span class=" text-2xl leading-none">&spades;</span> Baralho de Assimilações
-                        </h2>
-                        <p class="text-gray-700 dark:text-gray-300 text-justify">O baralho de assimilações já está
-                            disponível de forma resumida vinculado a seção de <b
-                                class="text-rpg-red dark:text-rpg-blue">"perda de EGO"</b> da ficha. Ao clicar em
-                            <b class="text-rpg-red dark:text-rpg-blue">"Sortear Cartas"</b> você abrirá uma tela com 4
-                            locais para colocar seus resultados da rolagem
-                            de assimilação, ao clicar em <b class="text-rpg-red dark:text-rpg-blue">"PUXAR CARTAS"</b>
-                            elas serão sorteadas e apareceram logo abaixo do
-                            botão. O que vai aparecer é apenas o titulo e a descrição da Assimilação, para pegar oque
-                            elas dão de fato, você precisa <b class="text-rpg-red dark:text-rpg-blue">abrir o livro de
-                                regras e ver ; ).</b>
-                        </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Card: Perda de Ego -->
+                        <div class="bg-white dark:bg-[#1e293b] p-8 md:p-10 rounded-xl border border-gray-300 dark:border-gray-700 shadow-xl reveal-card card-interativo flex flex-col justify-center cursor-default">
+                            <h3 class="text-rpg-red font-rpg font-black text-xl md:text-2xl flex items-center gap-3 mb-4 uppercase border-b border-gray-200 dark:border-gray-600 pb-3">
+                                <i data-lucide="brain-circuit" class="w-7 h-7"></i> Perda de Ego
+                            </h3>
+                            <p class="text-gray-700 dark:text-gray-300 text-justify text-base md:text-lg leading-relaxed">A perda de Ego é a mecânica central da corrupção do seu personagem. Cada vez que a pressão psicológica ou as "Pressões" forem <b class="text-rpg-red dark:text-rpg-blue">excessivas durante sua rolagem de assimilação</b>, uma caixa vermelha irá ser marcada. Ao atingir o limite, o Parasita <b class="text-rpg-red dark:text-rpg-blue">assume o controle</b>.</p>
+                        </div>
+                        
+                        <!-- Card: Resultado Nada -->
+                        <div class="bg-white dark:bg-[#1e293b] p-8 md:p-10 rounded-xl border border-gray-300 dark:border-gray-700 shadow-xl reveal-card card-interativo flex flex-col justify-center cursor-default">
+                            <h3 class="text-gray-700 dark:text-gray-400 font-rpg font-black text-xl md:text-2xl flex items-center gap-3 mb-4 uppercase border-b border-gray-200 dark:border-gray-600 pb-3">
+                                Resultado: Nada 
+                                <img src="./assets/nada.png" alt="Nada" class="w-9 h-9 object-contain dark:hidden">
+                                <img src="./assets/nada-branco.png" alt="Nada" class="w-9 h-9 object-contain hidden dark:block">
+                            </h3>
+                            <p class="text-gray-700 dark:text-gray-300 text-justify text-base md:text-lg leading-relaxed">Os dados virtuais (D6, D10 e D12) possuem faces vazias, representadas por <b class="text-rpg-red dark:text-rpg-blue">este símbolo no rolador</b>. Elas significam falhas diretas na ação ou total ausência de instinto primitivo no momento do teste.</p>
+                        </div>
                     </div>
-                    <div
-                        class="bg-white dark:bg-[#1e293b] p-6 rounded-lg border border-gray-300 dark:border-gray-700 shadow-md">
-                        <h2
-                            class="text-rpg-red font-rpg font-black text-2xl flex items-center gap-2 mb-4 uppercase border-b border-gray-200 dark:border-gray-600 pb-2">
-                            Rolagem de Dados <img src="./assets/rolador-bola.png" alt="circulo de rolagem de dados"
-                                class="w-20 h-20 object-contain">
-                        </h2>
-                        <p class="text-gray-700 dark:text-gray-300 text-justify">A rolagem nesse sistema é feito da
-                            seguinte forma: O jogador escolhe um instinto (d6) + conhecimento/pratica (d10) e então faz
-                            a rolagem, Nessa ficha, a atribuição de dados pode ser feita de forma automática apenas
-                            clicando no <b class="text-rpg-red dark:text-rpg-blue">nome da aptidão</b>, você perceberá
-                            que o campo de nome da aptidão ficará <b class="text-rpg-red dark:text-rpg-blue">destacado
-                                com uma cor diferente</b>, isso significa que aquela aptidão foi escolhida! Lembre,
-                            clicar em
-                            <b class="text-rpg-red dark:text-rpg-blue">dois instintos ou duas vezes no mesmo
-                                instinto</b> ativará uma <b class="text-rpg-red dark:text-rpg-blue">rolagem
-                                assimilada</b>!
-                        </p>
+
+                    <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 animate-bounce text-gray-400">
+                        <i data-lucide="chevron-down" class="w-7 h-7"></i>
                     </div>
-                    <div
-                        class="bg-white dark:bg-[#1e293b] p-6 rounded-lg border border-gray-300 dark:border-gray-700 shadow-md">
-                        <h2
-                            class="text-purple-700 dark:text-purple-400 font-rpg font-black text-2xl flex items-center gap-2 mb-4 uppercase border-b border-gray-200 dark:border-gray-600 pb-2">
-                            <i data-lucide="radio"></i> Painel de Amizade
-                        </h2>
-                        <p class="text-gray-700 dark:text-gray-300 text-justify">Vocês podem agora adicionar um
-                            sobrevivente que conheça! Basta clicar no icone indicado ao <b
-                                class="text-rpg-red dark:text-rpg-blue">lado da sua foto de perfil</b> para
-                            abrir o painel! Nele é possivel ver os convites para as Mesas enviados pelos seus Mestres
-                            que os Adicionaram!</p>
+                </section>
+
+                <!-- SEÇÃO 2: SISTEMA DE REGRAS E JOGO -->
+                <section class="min-h-[85vh] flex flex-col justify-center snap-start py-12 relative">
+                    <div class="border-l-4 border-rpg-blue pl-4 mb-8 reveal-card">
+                        <h2 class="text-2xl md:text-3xl font-rpg font-black uppercase text-rpg-blue text-left mb-1">Mecânicas de Jogo</h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Como funcionam as rolagens e o avanço de mutações.</p>
                     </div>
-                    <div
-                        class="bg-white dark:bg-[#1e293b] p-6 rounded-lg border border-gray-300 dark:border-gray-700 shadow-md">
-                        <h2
-                            class="text-gray-700 dark:text-gray-400  font-rpg font-black text-2xl flex items-center gap-2 mb-4 uppercase border-b border-gray-200 dark:border-gray-600 pb-2">
-                            Link do OBS<i data-lucide="link"></i>
-                        </h2>
-                        <p class="text-gray-700 dark:text-gray-300 text-justify">Vocês podem agora pegar um link de
-                            integração com o OBS!! na ficha, bem <b class="text-rpg-red dark:text-rpg-blue">embaixo</b>
-                            do seu nome, tem um botão que ao apertar vocês
-                            serão levados para uma guia, Onde será possivel selecionar a prosição da imagem que deseja
-                            para aparecer no OBS!! Apartir dai é só pegar o link da guia e colocar no seu OBS como uma
-                            <b class="text-rpg-red dark:text-rpg-blue">Fonte de Navegador</b>!! Utilizem as proporções
-                            <b class="text-rpg-red dark:text-rpg-blue">1200 x 400</b>!!
-                        </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Card: Baralho -->
+                        <div class="bg-white dark:bg-[#1e293b] p-8 md:p-10 rounded-xl border border-gray-300 dark:border-gray-700 shadow-xl reveal-card card-interativo flex flex-col justify-center cursor-default">
+                            <h3 class="text-rpg-blue font-rpg font-black text-xl md:text-2xl flex items-center gap-3 mb-4 uppercase border-b border-gray-200 dark:border-gray-600 pb-3">
+                                <span class="text-2xl leading-none">&spades;</span> Baralho de Assimilações
+                            </h3>
+                            <p class="text-gray-700 dark:text-gray-300 text-justify text-base md:text-lg leading-relaxed">O baralho de assimilações já está disponível de forma resumida vinculado à seção de <b class="text-rpg-red dark:text-rpg-blue">"perda de EGO"</b> da ficha. Ao clicar em <b class="text-rpg-red dark:text-rpg-blue">"Sortear Cartas"</b> você abrirá uma tela para inserir seus resultados e puxar as mutações sorteadas de forma dinâmica.</p>
+                        </div>
+                        
+                        <!-- Card: Rolagem de Dados -->
+                        <div class="bg-white dark:bg-[#1e293b] p-8 md:p-10 rounded-xl border border-gray-300 dark:border-gray-700 shadow-xl reveal-card card-interativo flex flex-col justify-center cursor-default">
+                            <h3 class="text-rpg-red font-rpg font-black text-xl md:text-2xl flex items-center gap-3 mb-4 uppercase border-b border-gray-200 dark:border-gray-600 pb-3">
+                                Rolagem de Dados 
+                                <img src="./assets/rolador-bola.png" alt="rolador" class="w-10 h-10 object-contain">
+                            </h3>
+                            <p class="text-gray-700 dark:text-gray-300 text-justify text-base md:text-lg leading-relaxed">O sistema utiliza instintos (d6) somados a conhecimentos/práticas (d10). Na ficha, basta clicar diretamente no <b class="text-rpg-red dark:text-rpg-blue">nome da aptidão</b> para selecioná-la. Selecionar dois instintos ativa instantaneamente uma <b class="text-rpg-red dark:text-rpg-blue">rolagem assimilada (d12)</b>!</p>
+                        </div>
                     </div>
-                </div>
+
+                    <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 animate-bounce text-gray-400">
+                        <i data-lucide="chevron-down" class="w-7 h-7"></i>
+                    </div>
+                </section>
+
+                <!-- SEÇÃO 3: CONECTIVIDADE E TRANSMISSÃO -->
+                <section class="min-h-[85vh] flex flex-col justify-center snap-start py-12 relative">
+                    <div class="border-l-4 border-purple-600 pl-4 mb-8 reveal-card">
+                        <h2 class="text-2xl md:text-3xl font-rpg font-black uppercase text-purple-700 dark:text-purple-400 text-left mb-1">Mesa & Transmissão</h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Integração social e ferramentas visuais para criadores.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Card: Painel de Amizade -->
+                        <div class="bg-white dark:bg-[#1e293b] p-8 md:p-10 rounded-xl border border-gray-300 dark:border-gray-700 shadow-xl reveal-card card-interativo flex flex-col justify-center cursor-default">
+                            <h3 class="text-purple-700 dark:text-purple-400 font-rpg font-black text-xl md:text-2xl flex items-center gap-3 mb-4 uppercase border-b border-gray-200 dark:border-gray-600 pb-3">
+                                <i data-lucide="radio" class="w-7 h-7"></i> Painel de Amizade
+                            </h3>
+                            <p class="text-gray-700 dark:text-gray-300 text-justify text-base md:text-lg leading-relaxed">Adicione sobreviventes conhecidos clicando no ícone ao <b class="text-rpg-red dark:text-rpg-blue">lado da sua foto de perfil</b> para abrir o painel. Nele é possível ver os convites para as Mesas enviados pelos seus Mestres.</p>
+                        </div>
+                        
+                        <!-- Card: Link do OBS -->
+                        <div class="bg-white dark:bg-[#1e293b] p-8 md:p-10 rounded-xl border border-gray-300 dark:border-gray-700 shadow-xl reveal-card card-interativo flex flex-col justify-center cursor-default">
+                            <h3 class="text-gray-700 dark:text-gray-400 font-rpg font-black text-xl md:text-2xl flex items-center gap-3 mb-4 uppercase border-b border-gray-200 dark:border-gray-600 pb-3">
+                                Link do OBS <i data-lucide="link" class="w-6 h-6"></i>
+                            </h3>
+                            <p class="text-gray-700 dark:text-gray-300 text-justify text-base md:text-lg leading-relaxed">Integração nativa com transmissões ao vivo. Logo abaixo do nome na ficha, gere um link exclusivo para usar como <b class="text-rpg-red dark:text-rpg-blue">Fonte de Navegador no OBS</b> (proporção recomendada: 1200x400) com barras de vida modulares e animação de dados em tempo real.</p>
+                        </div>
+                    </div>
+                </section>
+
             </div>
 
             <!-- 🎲 TELA 2: DASHBOARD (JOGAR) -->
@@ -994,21 +994,36 @@
                                 class="font-rpg border border-gray-300 dark:border-gray-600 rounded p-2 w-full text-black dark:text-white bg-white dark:bg-[#2a2a2a] outline-none">
                         </section>
 
+                        <!-- DESCRIÇÃO E HISTÓRIA (AGORA COMO CARDS CLICÁVEIS) -->
                         <section class="col-span-1 md:col-span-2 flex flex-col gap-5">
-                            <div>
-                                <h2
-                                    class="text-left text-rpg-red font-black text-xl border-b-2 border-rpg-red pb-1 mb-3 w-full uppercase font-rpg mt-0">
-                                    Descrição</h2>
-                                <textarea id="char-descricao" rows="4" placeholder="Aparência, personalidade, etc..."
-                                    class="w-full box-border font-rpg text-lg leading-relaxed p-3 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-[#2a2a2a] text-black dark:text-white resize-y outline-none focus:ring-2 focus:ring-rpg-blue transition-colors shadow-inner"></textarea>
+                            <!-- Card Descrição -->
+                            <div class="flex flex-col w-full h-full">
+                                <h2 class="text-left text-rpg-red font-black text-xl border-b-2 border-rpg-red pb-1 mb-3 w-full uppercase font-rpg mt-0">
+                                    Descrição
+                                </h2>
+                                <div id="preview-box-descricao" class="w-full flex-grow min-h-[100px] p-4 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-[#2a2a2a] text-black dark:text-white cursor-pointer hover:ring-2 hover:ring-rpg-blue transition-colors shadow-inner group relative overflow-hidden" onclick="window.abrirModalTextoGeral('descricao')">
+                                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-5 dark:group-hover:bg-opacity-20 transition-all z-10 pointer-events-none"></div>
+                                    <div id="char-descricao-texto-preview" class="font-rpg whitespace-pre-wrap opacity-90 text-sm md:text-base leading-relaxed" style="display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;">
+                                        <span class="font-rpg text-gray-400 dark:text-gray-500 italic font-bold">Clique para adicionar aparência, personalidade, etc...</span>
+                                    </div>
+                                </div>
+                                <!-- Textarea Fantasma (O banco de dados continua lendo ela normalmente) -->
+                                <textarea id="char-descricao" name="char-descricao" class="hidden"></textarea>
                             </div>
-                            <div>
-                                <h2
-                                    class="text-left text-rpg-red font-black text-xl border-b-2 border-rpg-red pb-1 mb-3 w-full uppercase font-rpg mt-0">
-                                    História do Personagem</h2>
-                                <textarea id="char-historia" rows="10"
-                                    placeholder="Escreva o passado do seu personagem..."
-                                    class="w-full box-border font-rpg text-lg leading-relaxed p-3 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-[#2a2a2a] text-black dark:text-white resize-y outline-none focus:ring-2 focus:ring-rpg-blue transition-colors shadow-inner"></textarea>
+
+                            <!-- Card História -->
+                            <div class="flex flex-col w-full h-full">
+                                <h2 class="text-left text-rpg-red font-black text-xl border-b-2 border-rpg-red pb-1 mb-3 w-full uppercase font-rpg mt-0">
+                                    História do Personagem
+                                </h2>
+                                <div id="preview-box-historia" class="w-full flex-grow min-h-[150px] p-4 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-[#2a2a2a] text-black dark:text-white cursor-pointer hover:ring-2 hover:ring-rpg-blue transition-colors shadow-inner group relative overflow-hidden" onclick="window.abrirModalTextoGeral('historia')">
+                                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-5 dark:group-hover:bg-opacity-20 transition-all z-10 pointer-events-none"></div>
+                                    <div id="char-historia-texto-preview" class="font-rpg whitespace-pre-wrap opacity-90 text-sm md:text-base leading-relaxed" style="display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden;">
+                                        <span class="font-rpg text-gray-400 dark:text-gray-500 italic font-bold">Clique para escrever o passado do seu personagem...</span>
+                                    </div>
+                                </div>
+                                <!-- Textarea Fantasma -->
+                                <textarea id="char-historia" name="char-historia" class="hidden"></textarea>
                             </div>
                         </section>
 
@@ -1040,50 +1055,70 @@
                                         Assimilações</h2>
 
                                     <div class="flex flex-col gap-4 w-full">
-                                        <div
-                                            class="flex border-2 border-[#2a5b5e] rounded-md overflow-hidden min-h-[7rem] shadow-sm bg-white dark:bg-[#2a2a2a] focus-within:ring-2 focus-within:ring-rpg-blue transition-all">
-                                            <textarea id="assimilacao-1"
-                                                class="flex-grow p-3 bg-transparent text-black dark:text-white outline-none resize-y text-sm"></textarea>
-                                            <div
-                                                class="bg-[#2a5b5e] flex flex-col justify-evenly items-center w-14 py-2 flex-shrink-0">
-                                                <img src="./assets/sucesso-branco.png"
-                                                    class="w-8 h-8 object-contain mb-1">
+                                        <!-- Assimilação 1 (Copas/Evolutiva) -->
+                                        <div class="flex border-2 border-[#2a5b5e] rounded-md overflow-hidden min-h-[7rem] shadow-sm bg-white dark:bg-[#2a2a2a] hover:ring-2 hover:ring-rpg-blue transition-all cursor-pointer group" onclick="window.abrirModalAssimilacao(1)">
+                                            <div class="flex-grow relative flex flex-col">
+                                                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-5 dark:group-hover:bg-opacity-20 transition-all z-10 pointer-events-none"></div>
+                                                <div class="p-3 w-full h-full flex-grow overflow-hidden">
+                                                    <div id="assimilacao-texto-preview-1" class="font-rpg whitespace-pre-wrap opacity-90 text-sm text-black dark:text-white" style="display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;">
+                                                        <span class="font-rpg text-gray-400 dark:text-gray-500 italic font-bold">Clique para adicionar mutação...</span>
+                                                    </div>
+                                                </div>
+                                                <input type="hidden" id="assimilacao-1" name="assimilacao-1" value="">
+                                            </div>
+                                            <div class="bg-[#2a5b5e] flex flex-col justify-evenly items-center w-14 py-2 flex-shrink-0 z-20 relative border-l border-[#1a3a3c]">
+                                                <img src="./assets/sucesso-branco.png" class="w-8 h-8 object-contain mb-1">
                                                 <span class="text-white text-2xl leading-none">&hearts;</span>
                                             </div>
                                         </div>
 
-                                        <div
-                                            class="flex border-2 border-[#2a5b5e] rounded-md overflow-hidden min-h-[7rem] shadow-sm bg-white dark:bg-[#2a2a2a] focus-within:ring-2 focus-within:ring-rpg-blue transition-all">
-                                            <textarea id="assimilacao-2"
-                                                class="flex-grow p-3 bg-transparent text-black dark:text-white outline-none resize-y text-sm"></textarea>
-                                            <div
-                                                class="bg-[#2a5b5e] flex flex-col justify-evenly items-center w-14 py-2 flex-shrink-0">
-                                                <img src="./assets/adaptacao-branco.png"
-                                                    class="w-8 h-8 object-contain mb-1">
+                                        <!-- Assimilação 2 (Ouros/Adaptativa) -->
+                                        <div class="flex border-2 border-[#2a5b5e] rounded-md overflow-hidden min-h-[7rem] shadow-sm bg-white dark:bg-[#2a2a2a] hover:ring-2 hover:ring-rpg-blue transition-all cursor-pointer group" onclick="window.abrirModalAssimilacao(2)">
+                                            <div class="flex-grow relative flex flex-col">
+                                                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-5 dark:group-hover:bg-opacity-20 transition-all z-10 pointer-events-none"></div>
+                                                <div class="p-3 w-full h-full flex-grow overflow-hidden">
+                                                    <div id="assimilacao-texto-preview-2" class="font-rpg whitespace-pre-wrap opacity-90 text-sm text-black dark:text-white" style="display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;">
+                                                        <span class="font-rpg text-gray-400 dark:text-gray-500 italic font-bold">Clique para adicionar mutação...</span>
+                                                    </div>
+                                                </div>
+                                                <input type="hidden" id="assimilacao-2" name="assimilacao-2" value="">
+                                            </div>
+                                            <div class="bg-[#2a5b5e] flex flex-col justify-evenly items-center w-14 py-2 flex-shrink-0 z-20 relative border-l border-[#1a3a3c]">
+                                                <img src="./assets/adaptacao-branco.png" class="w-8 h-8 object-contain mb-1">
                                                 <span class="text-white text-2xl leading-none">&diams;</span>
                                             </div>
                                         </div>
 
-                                        <div
-                                            class="flex border-2 border-[#2a5b5e] rounded-md overflow-hidden min-h-[7rem] shadow-sm bg-white dark:bg-[#2a2a2a] focus-within:ring-2 focus-within:ring-rpg-blue transition-all">
-                                            <textarea id="assimilacao-3"
-                                                class="flex-grow p-3 bg-transparent text-black dark:text-white outline-none resize-y text-sm"></textarea>
-                                            <div
-                                                class="bg-[#2a5b5e] flex flex-col justify-evenly items-center w-14 py-2 flex-shrink-0">
-                                                <img src="./assets/pressao-branco.png"
-                                                    class="w-8 h-8 object-contain mb-1">
+                                        <!-- Assimilação 3 (Espadas/Inoportuna) -->
+                                        <div class="flex border-2 border-[#2a5b5e] rounded-md overflow-hidden min-h-[7rem] shadow-sm bg-white dark:bg-[#2a2a2a] hover:ring-2 hover:ring-rpg-blue transition-all cursor-pointer group" onclick="window.abrirModalAssimilacao(3)">
+                                            <div class="flex-grow relative flex flex-col">
+                                                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-5 dark:group-hover:bg-opacity-20 transition-all z-10 pointer-events-none"></div>
+                                                <div class="p-3 w-full h-full flex-grow overflow-hidden">
+                                                    <div id="assimilacao-texto-preview-3" class="font-rpg whitespace-pre-wrap opacity-90 text-sm text-black dark:text-white" style="display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;">
+                                                        <span class="font-rpg text-gray-400 dark:text-gray-500 italic font-bold">Clique para adicionar mutação...</span>
+                                                    </div>
+                                                </div>
+                                                <input type="hidden" id="assimilacao-3" name="assimilacao-3" value="">
+                                            </div>
+                                            <div class="bg-[#2a5b5e] flex flex-col justify-evenly items-center w-14 py-2 flex-shrink-0 z-20 relative border-l border-[#1a3a3c]">
+                                                <img src="./assets/pressao-branco.png" class="w-8 h-8 object-contain mb-1">
                                                 <span class="text-white text-2xl leading-none">&spades;</span>
                                             </div>
                                         </div>
 
-                                        <div
-                                            class="flex border-2 border-[#2a5b5e] rounded-md overflow-hidden min-h-[7rem] shadow-sm bg-white dark:bg-[#2a2a2a] focus-within:ring-2 focus-within:ring-rpg-blue transition-all">
-                                            <textarea id="assimilacao-4"
-                                                class="flex-grow p-3 bg-transparent text-black dark:text-white outline-none resize-y text-sm"></textarea>
-                                            <div
-                                                class="bg-[#2a5b5e] flex flex-col justify-evenly items-center w-14 py-2 flex-shrink-0">
-                                                <img src="./assets/singulares-branco.png"
-                                                    class="w-8 h-8 object-contain mb-1">
+                                        <!-- Assimilação 4 (Paus/Singular) -->
+                                        <div class="flex border-2 border-[#2a5b5e] rounded-md overflow-hidden min-h-[7rem] shadow-sm bg-white dark:bg-[#2a2a2a] hover:ring-2 hover:ring-rpg-blue transition-all cursor-pointer group" onclick="window.abrirModalAssimilacao(4)">
+                                            <div class="flex-grow relative flex flex-col">
+                                                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-5 dark:group-hover:bg-opacity-20 transition-all z-10 pointer-events-none"></div>
+                                                <div class="p-3 w-full h-full flex-grow overflow-hidden">
+                                                    <div id="assimilacao-texto-preview-4" class="font-rpg whitespace-pre-wrap opacity-90 text-sm text-black dark:text-white" style="display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;">
+                                                        <span class="font-rpg text-gray-400 dark:text-gray-500 italic font-bold">Clique para adicionar mutação...</span>
+                                                    </div>
+                                                </div>
+                                                <input type="hidden" id="assimilacao-4" name="assimilacao-4" value="">
+                                            </div>
+                                            <div class="bg-[#2a5b5e] flex flex-col justify-evenly items-center w-14 py-2 flex-shrink-0 z-20 relative border-l border-[#1a3a3c]">
+                                                <img src="./assets/singulares-branco.png" class="w-8 h-8 object-contain mb-1">
                                                 <span class="text-white text-2xl leading-none">&clubs;</span>
                                             </div>
                                         </div>
@@ -1152,6 +1187,16 @@
          MODAIS (OCULTOS POR PADRÃO)
          ========================================== -->
 
+         <!-- MODAL: EDITOR DE ASSIMILAÇÃO (MUTAÇÕES) -->
+    <div id="assimilacao-modal" class="modal z-[99999]">
+        <div class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border border-gray-300 dark:border-gray-800 rounded-md p-6 shadow-2xl max-w-[700px] w-[95%] h-[60vh] flex flex-col relative">
+            <span class="modal-close absolute top-4 right-6 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white text-4xl font-bold cursor-pointer transition-colors" onclick="document.getElementById('assimilacao-modal').classList.remove('show')">&times;</span>
+            <h2 id="titulo-modal-assimilacao" class="text-center text-xl md:text-2xl font-rpg font-black text-white bg-[#2a5b5e] px-8 py-2 rounded-sm shadow-md uppercase tracking-widest mb-6 mx-auto w-max">
+                Mutação
+            </h2>
+            <textarea id="assimilacao-editor" placeholder="Descreva como essa mutação afeta o corpo ou a mente..." class="w-full flex-grow p-4 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#1a1a1a] text-black dark:text-white outline-none resize-none font-rpg text-base md:text-lg shadow-inner focus:ring-2 focus:ring-[#2a5b5e] transition-colors leading-relaxed"></textarea>
+        </div>
+    </div>
 
     <!-- MODAL: ANOTAÇÕES GRANDES -->
     <div id="anotacoes-modal" class="modal z-[99999]">
@@ -1863,6 +1908,29 @@
         </div>
     </div>
 
+    <!-- MODAL: EDITOR DE TEXTOS LONGOS (DESCRIÇÃO E HISTÓRIA) -->
+    <div id="texto-geral-modal" class="modal z-[99999]">
+        <div class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border border-gray-300 dark:border-gray-800 rounded-md p-6 shadow-2xl max-w-[900px] w-[95%] h-[80vh] flex flex-col relative">
+            <span class="modal-close absolute top-4 right-6 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white text-4xl font-bold cursor-pointer transition-colors" onclick="document.getElementById('texto-geral-modal').classList.remove('show')">&times;</span>
+            <h2 id="titulo-modal-texto-geral" class="text-center text-xl md:text-3xl font-rpg font-black text-white bg-rpg-blue px-8 py-2 rounded-sm shadow-md uppercase tracking-widest mb-6 mx-auto w-max">
+                Texto
+            </h2>
+            <textarea id="texto-geral-editor" placeholder="Escreva aqui..." class="w-full flex-grow p-4 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#1a1a1a] text-black dark:text-white outline-none resize-none font-rpg text-lg shadow-inner focus:ring-2 focus:ring-rpg-blue transition-colors leading-relaxed"></textarea>
+        </div>
+    </div>
+
+    <!-- MODAL: EDITOR DE CARACTERÍSTICAS -->
+    <div id="carac-modal" class="modal z-[99999]">
+        <div class="modal-content bg-rpg-paper dark:bg-rpg-paper-dark border border-gray-300 dark:border-gray-800 rounded-md p-6 shadow-2xl max-w-[600px] w-[95%] h-[60vh] flex flex-col relative">
+            <span class="modal-close absolute top-4 right-6 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white text-4xl font-bold cursor-pointer transition-colors" onclick="document.getElementById('carac-modal').classList.remove('show')">&times;</span>
+            <h2 class="text-center text-xl md:text-2xl font-rpg font-black text-white bg-[#6b2c2c] px-8 py-2 rounded-sm shadow-md uppercase tracking-widest mb-4 mx-auto w-max">
+                Característica
+            </h2>
+            <input type="text" id="carac-editor-nome" placeholder="Nome da Característica (Ex: Cicatriz)" class="w-full mb-4 p-3 border-b-2 border-[#6b2c2c] bg-transparent text-black dark:text-white font-rpg font-bold text-xl outline-none placeholder-gray-400">
+            <textarea id="carac-editor-desc" placeholder="Descreva os detalhes e efeitos..." class="w-full flex-grow p-4 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#1a1a1a] text-black dark:text-white outline-none resize-none font-rpg text-sm md:text-base shadow-inner focus:ring-2 focus:ring-[#6b2c2c] transition-colors leading-relaxed"></textarea>
+        </div>
+    </div>
+
     <!-- ==========================================
          MODAL: PERFIL DO USUÁRIO
          ========================================== -->
@@ -2085,13 +2153,17 @@
         </div>
     </div>
 
-    <a href="https://ko-fi.com/naorend" target="_blank"
-        class="fixed bottom-6 left-6 z-[9999] shadow-lg hover:scale-105 transition-transform duration-200">
-        <img src="./assets/support_me_on_kofi_beige.png" alt="Support me"
-            class="h-20 w-auto p-3 rounded-full hidden dark:block">
-        <img src="./assets/support_me_on_kofi_dark.png" alt="Support me"
-            class="h-20 w-auto p-3 rounded-full dark:hidden">
-    </a>
+    <!-- Botão Ko-fi Dinâmico (Tema Claro - Vermelho do RPG) -->
+    <div class="fixed bottom-6 left-6 z-[9999] shadow-lg hover:scale-105 transition-transform duration-200 block dark:hidden">
+        <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
+        <script type='text/javascript'>kofiwidget2.init('Ko-fi', '#8c3a3a', 'naorend');kofiwidget2.draw();</script>
+    </div>
+
+    <!-- Botão Ko-fi Dinâmico (Tema Escuro - Azul do RPG) -->
+    <div class="fixed bottom-6 left-6 z-[9999] shadow-lg hover:scale-105 transition-transform duration-200 hidden dark:block">
+        <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
+        <script type='text/javascript'>kofiwidget2.init('Ko-fi', '#3a7c8c', 'naorend');kofiwidget2.draw();</script>
+    </div>
 
     <footer
         class="w-full dark:bg-[#121212] bg-[#ffffff] border-t border-gray-800 mt-12 py-8 text-gray-400 dark:text-white transition-colors duration-300 mt-auto">

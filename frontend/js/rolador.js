@@ -290,7 +290,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="absolute inset-0 border-2 border-transparent ${corHover} rounded-lg pointer-events-none transition-colors duration-300"></div>
                     </div>
 
-                    <span class="text-[13px] font-bold text-white dark:text-gray-600 text-right mt-1 mr-1">${dataFormatada}</span>
+                    <span class="text-[13px] font-bold dark:text-white dark:text-gray-600 text-right mt-1 mr-1">${dataFormatada}</span>
                 </div>
             </div>
         `;

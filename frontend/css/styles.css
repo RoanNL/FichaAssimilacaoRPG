@@ -1281,3 +1281,50 @@ body.dark #instintos-square .dots-track-1 input[type="checkbox"]:checked {
 .dark .label-selecionado {
     box-shadow: inset 0 0 0 2px #f97316, 0 0 10px rgba(249, 115, 22, 0.5) !important;
 }
+
+
+/* ========================================
+   ANIMAÇÃO DE SCROLL (INTERSECTION OBSERVER)
+   ======================================== */
+.reveal-card {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+}
+
+.reveal-card.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ========================================
+   EFEITO HOVER DAS CAIXAS (BALANÇO E BRILHO)
+   ======================================== */
+@keyframes cardBalanco {
+    0%, 100% { transform: translateY(-8px) rotate(0deg) scale(1.01); }
+    25% { transform: translateY(-8px) rotate(-1deg) scale(1.01); }
+    75% { transform: translateY(-8px) rotate(1deg) scale(1.01); }
+}
+
+.card-interativo {
+    /* Prepara as propriedades para uma transição suave ao entrar e sair do hover */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+    will-change: transform, box-shadow, border-color;
+}
+
+/* 🔴 TEMA CLARO: Brilho Vermelho do RPG */
+body:not(.dark) .reveal-card.is-visible.card-interativo:hover {
+    animation: cardBalanco 0.5s ease-in-out infinite;
+    border-color: var(--color-det-red) !important;
+    box-shadow: 0 0 25px rgba(140, 58, 58, 0.4), 0 10px 20px rgba(0,0,0,0.1) !important;
+    z-index: 10;
+}
+
+/* 🔵 TEMA ESCURO: Brilho Azul do RPG */
+body.dark .reveal-card.is-visible.card-interativo:hover {
+    animation: cardBalanco 0.5s ease-in-out infinite;
+    border-color: var(--color-assim-blue) !important;
+    box-shadow: 0 0 25px rgba(58, 124, 140, 0.6), 0 10px 20px rgba(0,0,0,0.5) !important;
+    z-index: 10;
+}

@@ -39,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
             sessionStorage.setItem('personagemAtivoId', id);
 
             if (typeof window.atualizarPreviewAnotacoes === 'function') window.atualizarPreviewAnotacoes();
+            
 
             const spanNomeFicha = document.getElementById('nome-usuario-logado-ficha');
             if (spanNomeFicha) spanNomeFicha.textContent = `Bem-vindo, ${sessionStorage.getItem('usuarioNome')}`;
@@ -79,6 +80,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (typeof window.calcularSaudeMax === 'function') window.calcularSaudeMax(true);
         if (typeof window.atualizarPreviewAnotacoes === 'function') window.atualizarPreviewAnotacoes();
+
+        if (typeof window.atualizarPreviewTextoGeral === 'function') {
+            window.atualizarPreviewTextoGeral('descricao');
+            window.atualizarPreviewTextoGeral('historia');
+        }
+
+        for(let i=1; i<=4; i++) {
+            if (typeof window.atualizarPreviewAssimilacao === 'function') window.atualizarPreviewAssimilacao(i);
+        }
 
         const spanNomeFicha = document.getElementById('nome-usuario-logado-ficha');
         if (spanNomeFicha) spanNomeFicha.textContent = `Nova Ficha`;
@@ -216,6 +226,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (typeof window.calcularSaudeMax === 'function') window.calcularSaudeMax(false);
+
+        if (typeof window.atualizarPreviewTextoGeral === 'function') {
+            window.atualizarPreviewTextoGeral('descricao');
+            window.atualizarPreviewTextoGeral('historia');
+        }
+
+        for(let i=1; i<=4; i++) {
+            if (typeof window.atualizarPreviewAssimilacao === 'function') window.atualizarPreviewAssimilacao(i);
+        }
+
+
+        // Atualiza o visual das Características
+        for(let i=1; i<=window.contadorCarac; i++) {
+            if (typeof window.atualizarPreviewCarac === 'function') window.atualizarPreviewCarac(i);
+        }
 
     }
 
@@ -403,9 +428,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
-    // 6. CARACTERÍSTICAS DINÂMICAS
+    // 6. CARACTERÍSTICAS DINÂMICAS (SISTEMA DE CARDS)
     // ==========================================
     window.contadorCarac = 0;
+    window.caracAtualEdicao = null;
+
     window.adicionarCaracteristicaDOM = function () {
         window.contadorCarac++;
         const indice = window.contadorCarac;
@@ -413,36 +440,114 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!container) return;
 
         const bloco = document.createElement('div');
-        bloco.className = 'carac-item flex flex-col w-full mb-2 bg-white dark:bg-[#2a2a2a] p-3 rounded-md shadow-inner border border-gray-300 dark:border-gray-600 focus-within:ring-2 focus-within:ring-rpg-blue transition-all';
+        // Nova classe interativa e formato de card clicável
+        bloco.className = 'carac-item flex flex-col w-full bg-white dark:bg-[#2a2a2a] rounded-md shadow-inner border border-gray-300 dark:border-gray-600 hover:ring-2 hover:ring-[#6b2c2c] transition-all relative group cursor-pointer overflow-hidden min-h-[5rem]';
+        bloco.setAttribute('onclick', `window.abrirModalCarac(${indice})`);
+        
         bloco.innerHTML = `
-            <div class="flex justify-between items-center mb-2 border-b-2 border-[#6b2c2c] pb-1">
-                <input type="text" id="carac-nome-${indice}" placeholder="Nome da Característica" class="w-full font-bold p-1 bg-transparent text-black dark:text-white text-base outline-none">
-                <button type="button" class="btn-remover-carac ml-2 bg-red-800 hover:bg-red-900 text-white text-xs font-bold py-1 px-2 rounded cursor-pointer transition-colors shadow-sm border-none">
-                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                </button>
+            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-5 dark:group-hover:bg-opacity-20 transition-all z-10 pointer-events-none"></div>
+            
+            <div class="p-3 w-full h-full flex flex-col justify-start relative z-20">
+                <div class="flex justify-between items-start mb-1 border-b border-[#6b2c2c] pb-1">
+                    <h4 id="carac-texto-nome-${indice}" class="font-bold text-black dark:text-white text-base font-rpg truncate pr-2">Nova Característica</h4>
+                    
+                    <!-- O botão de deletar recebe stopPropagation para não abrir o modal ao clicar na lixeira -->
+                    <button type="button" onclick="event.stopPropagation(); window.removerCarac(this)" class="bg-red-800 hover:bg-red-900 text-white text-[10px] font-bold py-1 px-1.5 rounded cursor-pointer transition-colors shadow-sm border-none flex-shrink-0">
+                        <i data-lucide="trash-2" class="w-3 h-3"></i>
+                    </button>
+                </div>
+                <div id="carac-texto-desc-${indice}" class="font-rpg text-gray-500 dark:text-gray-400 text-xs md:text-sm opacity-90 overflow-hidden" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                    <span class="italic font-bold">Clique para adicionar detalhes...</span>
+                </div>
             </div>
-            <textarea id="carac-desc-${indice}" rows="2" placeholder="Descrição..." class="w-full p-1 bg-transparent text-black dark:text-gray-300 outline-none resize-y text-sm"></textarea>
+            
+            <!-- INPUTS FANTASMAS: O Banco de Dados continua achando que é o sistema antigo! -->
+            <input type="hidden" id="carac-nome-${indice}" name="carac-nome-${indice}" value="">
+            <textarea id="carac-desc-${indice}" name="carac-desc-${indice}" class="hidden"></textarea>
         `;
         container.appendChild(bloco);
 
-        bloco.querySelector('input').addEventListener('input', agendarAutosave);
-        bloco.querySelector('textarea').addEventListener('input', agendarAutosave);
         if (window.lucide) lucide.createIcons();
+    };
+
+    window.removerCarac = function(btn) {
+        btn.closest('.carac-item').remove();
+        agendarAutosave();
     };
 
     document.getElementById('btn-add-carac')?.addEventListener('click', (e) => {
         e.preventDefault();
         window.adicionarCaracteristicaDOM();
+        agendarAutosave();
     });
 
-    document.getElementById('caracteristicas-container')?.addEventListener('click', (e) => {
-        const btnRemover = e.target.closest('.btn-remover-carac');
-        if (btnRemover) {
-            e.preventDefault();
-            btnRemover.closest('.carac-item').remove();
-            agendarAutosave();
+    // --- FUNÇÕES DE PREVIEW E EDIÇÃO NO MODAL ---
+    window.atualizarPreviewCarac = function(indice) {
+        const inputNome = document.getElementById(`carac-nome-${indice}`);
+        const inputDesc = document.getElementById(`carac-desc-${indice}`);
+        const previewNome = document.getElementById(`carac-texto-nome-${indice}`);
+        const previewDesc = document.getElementById(`carac-texto-desc-${indice}`);
+        
+        if (!inputNome || !previewNome) return;
+
+        const nomeTxt = inputNome.value.trim();
+        const descTxt = inputDesc.value.trim();
+
+        if (nomeTxt === '') {
+            previewNome.innerHTML = '<span class="italic text-gray-400">Nova Característica</span>';
+        } else {
+            previewNome.textContent = nomeTxt;
         }
-    });
+
+        if (descTxt === '') {
+            previewDesc.innerHTML = '<span class="italic text-gray-400 font-bold">Clique para adicionar detalhes...</span>';
+        } else {
+            previewDesc.textContent = descTxt; 
+        }
+    };
+
+    window.abrirModalCarac = function(indice) {
+        window.caracAtualEdicao = indice;
+        const inputNome = document.getElementById(`carac-nome-${indice}`);
+        const inputDesc = document.getElementById(`carac-desc-${indice}`);
+        const editorNome = document.getElementById('carac-editor-nome');
+        const editorDesc = document.getElementById('carac-editor-desc');
+        
+        if (editorNome && inputNome) editorNome.value = inputNome.value;
+        if (editorDesc && inputDesc) editorDesc.value = inputDesc.value;
+
+        const modal = document.getElementById('carac-modal');
+        if (modal) {
+            modal.classList.add('show');
+            setTimeout(() => editorNome.focus(), 100);
+        }
+    };
+
+    // Escutadores do Modal (Para injetar os dados de volta na ficha em tempo real)
+    const editorCaracNome = document.getElementById('carac-editor-nome');
+    const editorCaracDesc = document.getElementById('carac-editor-desc');
+
+    if (editorCaracNome) {
+        editorCaracNome.addEventListener('input', (e) => {
+            const hiddenNome = document.getElementById(`carac-nome-${window.caracAtualEdicao}`);
+            if (hiddenNome) {
+                hiddenNome.value = e.target.value;
+                window.atualizarPreviewCarac(window.caracAtualEdicao);
+                agendarAutosave();
+            }
+        });
+    }
+
+    if (editorCaracDesc) {
+        editorCaracDesc.addEventListener('input', (e) => {
+            const hiddenDesc = document.getElementById(`carac-desc-${window.caracAtualEdicao}`);
+            if (hiddenDesc) {
+                hiddenDesc.value = e.target.value;
+                window.atualizarPreviewCarac(window.caracAtualEdicao);
+                agendarAutosave();
+            }
+        });
+    }
 
     // ==========================================
     // 7. PREVIEW DE ANOTAÇÕES NO MODAL
@@ -467,6 +572,131 @@ document.addEventListener('DOMContentLoaded', () => {
         textareaAnotacoes.addEventListener('input', () => {
             window.atualizarPreviewAnotacoes();
             agendarAutosave();
+        });
+    }
+
+    // ==========================================
+    // 7.2. PREVIEW DE DESCRIÇÃO E HISTÓRIA NO MODAL
+    // ==========================================
+    window.campoTextoAtualEdicao = null;
+
+    window.atualizarPreviewTextoGeral = function(campo) {
+        const inputHidden = document.getElementById(`char-${campo}`);
+        const previewDiv = document.getElementById(`char-${campo}-texto-preview`);
+        
+        if (!inputHidden || !previewDiv) return;
+
+        const texto = inputHidden.value.trim();
+        const placeholderMsg = campo === 'descricao' ? 'Clique para adicionar aparência, personalidade, etc...' : 'Clique para escrever o passado do seu personagem...';
+
+        if (texto === '') {
+            previewDiv.innerHTML = `<span class="font-rpg text-gray-400 dark:text-gray-500 italic font-bold">${placeholderMsg}</span>`;
+        } else {
+            const divSegura = document.createElement('div');
+            divSegura.textContent = texto;
+            previewDiv.innerHTML = divSegura.innerHTML.replace(/\n/g, '<br>');
+        }
+    };
+
+    window.abrirModalTextoGeral = function(campo) {
+        window.campoTextoAtualEdicao = campo; // Guarda se estamos editando 'descricao' ou 'historia'
+        
+        const inputHidden = document.getElementById(`char-${campo}`);
+        const editor = document.getElementById('texto-geral-editor');
+        const titulo = document.getElementById('titulo-modal-texto-geral');
+        
+        // Ajusta o título dinamicamente
+        if (titulo) {
+            titulo.innerHTML = campo === 'descricao' 
+                ? '<i data-lucide="user" class="w-6 h-6 inline-block align-text-bottom"></i> Descrição' 
+                : '<i data-lucide="book-open" class="w-6 h-6 inline-block align-text-bottom"></i> História do Personagem';
+        }
+        
+        // Joga o texto para dentro do Modal
+        if (editor && inputHidden) {
+            editor.value = inputHidden.value;
+        }
+
+        const modal = document.getElementById('texto-geral-modal');
+        if (modal) {
+            modal.classList.add('show');
+            if (window.lucide) lucide.createIcons();
+            setTimeout(() => editor.focus(), 100);
+        }
+    };
+
+    // Fica vigiando o Modal para atualizar em tempo real a ficha invisível por trás!
+    const editorTextoGeral = document.getElementById('texto-geral-editor');
+    if (editorTextoGeral) {
+        editorTextoGeral.addEventListener('input', (e) => {
+            if (!window.campoTextoAtualEdicao) return;
+            
+            const hiddenInput = document.getElementById(`char-${window.campoTextoAtualEdicao}`);
+            if (hiddenInput) {
+                hiddenInput.value = e.target.value;
+                window.atualizarPreviewTextoGeral(window.campoTextoAtualEdicao);
+                agendarAutosave(); // Aciona o salvamento dinâmico instantâneo!
+            }
+        });
+    }
+
+    // ==========================================
+    // 7.5. PREVIEW DE MUTAÇÕES (ASSIMILAÇÕES) NO MODAL
+    // ==========================================
+    window.assimilacaoAtualEdicao = 1;
+
+    window.atualizarPreviewAssimilacao = function(indice) {
+        const input = document.getElementById(`assimilacao-${indice}`);
+        const preview = document.getElementById(`assimilacao-texto-preview-${indice}`);
+        if (!input || !preview) return;
+
+        const texto = input.value.trim();
+        if (texto === '') {
+            preview.innerHTML = '<span class="font-rpg text-gray-400 dark:text-gray-500 italic font-bold text-sm">Clique para descrever a mutação...</span>';
+        } else {
+            const divSegura = document.createElement('div');
+            divSegura.textContent = texto;
+            preview.innerHTML = divSegura.innerHTML.replace(/\n/g, '<br>');
+        }
+    };
+
+    window.abrirModalAssimilacao = function(indice) {
+        window.assimilacaoAtualEdicao = indice;
+        const input = document.getElementById(`assimilacao-${indice}`);
+        const editor = document.getElementById('assimilacao-editor');
+        const titulo = document.getElementById('titulo-modal-assimilacao');
+        
+        // Pinta o título com a carta correspondente para dar um charme visual
+        const nomesCartas = {
+            1: '<div style="display: flex">Evolutiva <img src="./assets/sucesso-branco.png" class="w-8 h-8 object-contain mb-1"> <div/>', 
+            2: '<div style="display: flex">Adaptativa <img src="./assets/adaptacao-branco.png" class="w-8 h-8 object-contain mb-1"> <div/>', 
+            3: '<div style="display: flex">Inoportuna <img src="./assets/pressao-branco.png" class="w-8 h-8 object-contain mb-1"> <div/>', 
+            4: '<div style="display: flex">Singulares <img src="./assets/singulares-branco.png" class="w-8 h-8 object-contain mb-1"> <div/>'
+        };
+        
+        if (titulo) titulo.innerHTML = nomesCartas[indice] || "Mutação";
+        
+        if (editor && input) {
+            editor.value = input.value;
+        }
+
+        const modal = document.getElementById('assimilacao-modal');
+        if (modal) {
+            modal.classList.add('show');
+            if (window.lucide) lucide.createIcons();
+            setTimeout(() => editor.focus(), 100);
+        }
+    };
+
+    const editorAssim = document.getElementById('assimilacao-editor');
+    if (editorAssim) {
+        editorAssim.addEventListener('input', (e) => {
+            const inputHidden = document.getElementById(`assimilacao-${window.assimilacaoAtualEdicao}`);
+            if (inputHidden) {
+                inputHidden.value = e.target.value;
+                window.atualizarPreviewAssimilacao(window.assimilacaoAtualEdicao);
+                agendarAutosave(); // Aciona o salvamento dinâmico sem que o usuário perceba!
+            }
         });
     }
 
