@@ -383,6 +383,48 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
+    // 6. ESTATÍSTICAS GLOBAIS DA LANDING PAGE
+    // ==========================================
+    window.carregarEstatisticasGlobais = async function() {
+        const token = sessionStorage.getItem('token');
+        if (!token) return;
+
+        const statUsuarios = document.getElementById('stat-usuarios');
+        const statPersonagens = document.getElementById('stat-personagens');
+
+        if (!statUsuarios || !statPersonagens) return;
+
+        try {
+            const res = await fetch(`${window.API_URL}/api/estatisticas`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                animarNumero(statUsuarios, data.usuarios);
+                animarNumero(statPersonagens, data.personagens);
+            }
+        } catch (e) {
+            console.error('Erro ao carregar estatísticas:', e);
+        }
+    };
+
+    function animarNumero(elemento, valorFinal) {
+        let valorAtual = 0;
+        // O incremento baseia-se no valor final para que termine em +/- 1 segundo (30 frames)
+        const incremento = Math.max(1, Math.ceil(valorFinal / 30)); 
+        
+        const intervalo = setInterval(() => {
+            valorAtual += incremento;
+            if (valorAtual >= valorFinal) {
+                valorAtual = valorFinal;
+                clearInterval(intervalo);
+            }
+            elemento.textContent = valorAtual;
+        }, 40); // Roda a cada 40 milissegundos
+    }
+
+    // ==========================================
     // 🛡️ SISTEMA DE AMIZADES E CONVITES (TRANSMISSOR)
     // ==========================================
     window.abrirModalConexoes = function () {

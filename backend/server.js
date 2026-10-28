@@ -475,6 +475,24 @@ app.post('/usuarios/avatar', verificarToken, async (req, res) => {
     }
 });
 
+// =========================================================================
+// ESTATÍSTICAS GLOBAIS DA COMUNIDADE
+// =========================================================================
+app.get('/api/estatisticas', verificarToken, async (req, res) => {
+    try {
+        const usersResult = await pool.query('SELECT COUNT(*) FROM usuarios');
+        const charsResult = await pool.query('SELECT COUNT(*) FROM personagens');
+        
+        res.json({
+            usuarios: parseInt(usersResult.rows[0].count),
+            personagens: parseInt(charsResult.rows[0].count)
+        });
+    } catch (err) {
+        console.error("Erro ao buscar estatísticas:", err);
+        res.status(500).json({ erro: 'Erro ao buscar estatísticas.' });
+    }
+});
+
 app.get('/usuarios/me', verificarToken, async (req, res) => {
     try {
         const result = await pool.query('SELECT avatar FROM usuarios WHERE id = $1', [req.usuario.id]);

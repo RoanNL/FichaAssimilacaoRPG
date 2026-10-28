@@ -265,6 +265,34 @@
                     </div>
                 </section>
 
+                <!-- SEÇÃO 0.5: ESTATÍSTICAS GLOBAIS -->
+                <section class="flex justify-center snap-start pb-12 reveal-card delay-1">
+                    <!-- 🔥 CAIXA FLUTUANTE COM EFEITO GLASSMORPHISM (VIDRO FOSCO) 🔥 -->
+                    <div class="efeito-flutuar bg-white/70 dark:bg-[#1a1a1a]/70 backdrop-blur-md border border-gray-300/50 dark:border-gray-700/50 shadow-xl rounded-2xl p-6 md:p-10 flex flex-col md:flex-row gap-8 md:gap-20 items-center justify-center relative overflow-hidden w-full max-w-4xl mx-auto">
+                        
+                        <!-- Efeito de luz sutil no topo -->
+                        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-full h-1 bg-gradient-to-r from-transparent via-rpg-red to-transparent opacity-70"></div>
+                        
+                        <div class="text-center w-full md:w-1/2">
+                            <h3 class="text-5xl md:text-6xl font-black font-rpg text-gray-800 dark:text-white mb-2" id="stat-usuarios">0</h3>
+                            <p class="text-rpg-red font-bold uppercase tracking-widest text-sm md:text-base mt-1 flex items-center justify-center gap-2">
+                                <i data-lucide="users" class="w-5 h-5"></i> Sobreviventes
+                            </p>
+                        </div>
+                        
+                        <!-- Divisor responsivo (Também transparente) -->
+                        <div class="hidden md:block w-px h-24 bg-gray-400/40 dark:bg-gray-600/40"></div>
+                        <div class="md:hidden w-24 h-px bg-gray-400/40 dark:bg-gray-600/40"></div>
+
+                        <div class="text-center w-full md:w-1/2">
+                            <h3 class="text-5xl md:text-6xl font-black font-rpg text-gray-800 dark:text-white mb-2" id="stat-personagens">0</h3>
+                            <p class="text-rpg-blue font-bold uppercase tracking-widest text-sm md:text-base mt-1 flex items-center justify-center gap-2">
+                                <i data-lucide="user-check" class="w-5 h-5"></i> Fichas Criadas
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
                 <!-- SEÇÃO 1: SOBREVIVÊNCIA E CORRUPÇÃO -->
                 <section class="min-h-[85vh] flex flex-col justify-center snap-start py-12 relative">
                     <div class="border-l-4 border-rpg-red pl-4 mb-8 reveal-card">

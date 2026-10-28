@@ -50,12 +50,16 @@ const Router = {
         const destino = document.getElementById(`tela-${telaDestino}`);
         if (destino) {
             destino.classList.remove('hidden');
-            destino.classList.add('animate-fade-in');
+            destino.classList.add('animate-fade-in'); 
 
-            // 🔥 SE FOR A TELA DE INÍCIO, DISPARA O RADAR DE SCROLL 🔥
-            if (telaDestino === 'landing' && typeof window.observarCardsLanding === 'function') {
-                window.observarCardsLanding();
-            } 
+            if (telaDestino === 'landing') {
+                if (typeof window.observarCardsLanding === 'function') {
+                    window.observarCardsLanding();
+                }
+                if (typeof window.carregarEstatisticasGlobais === 'function') {
+                    window.carregarEstatisticasGlobais();
+                }
+            }
         }
 
         // 🔥 O CAÇADOR DE FUNÇÕES (Garante que carrega mesmo com F5) 🔥
